@@ -92,7 +92,7 @@ public static class GmpNative
     /// <param name="p1" />
     /// <param name="p2">(<see cref="byte*" />) </param>
     [DllImport(Dll)]
-    public static extern int __gmp_snprintf(IntPtr p0, ulong p1, IntPtr p2);
+    public static extern int __gmp_snprintf(IntPtr p0, nint p1, IntPtr p2);
 
     /// <param name="p0">(<see cref="byte*" />) </param>
     /// <param name="p1">(<see cref="byte*" />) </param>
@@ -331,7 +331,7 @@ public static class GmpNative
     /// <param name="p5" />
     /// <param name="p6">(<see cref="mpz_srcptr" />) </param>
     [DllImport(Dll)]
-    public static extern IntPtr __gmpz_export(IntPtr p0, IntPtr p1, int p2, ulong p3, int p4, ulong p5, IntPtr p6);
+    public static extern IntPtr __gmpz_export(IntPtr p0, IntPtr p1, int p2, nint p3, int p4, nint p5, IntPtr p6);
 
     /// <param name="p0">(<see cref="mpz_ptr" />) </param>
     /// <param name="p1" />
@@ -484,7 +484,7 @@ public static class GmpNative
     /// <param name="p5" />
     /// <param name="p6">(<see cref="void*" />) </param>
     [DllImport(Dll)]
-    public static extern void __gmpz_import(IntPtr p0, ulong p1, int p2, ulong p3, int p4, ulong p5, IntPtr p6);
+    public static extern void __gmpz_import(IntPtr p0, nint p1, int p2, nint p3, int p4, nint p5, IntPtr p6);
 
     /// <param name="p0">(<see cref="mpz_ptr" />) </param>
     [DllImport(Dll)]
@@ -750,7 +750,7 @@ public static class GmpNative
     /// <param name="p0">(<see cref="mpz_srcptr" />) </param>
     /// <param name="p1" />
     [DllImport(Dll)]
-    public static extern ulong __gmpz_sizeinbase(IntPtr p0, int p1);
+    public static extern nint __gmpz_sizeinbase(IntPtr p0, int p1);
 
     /// <param name="p0">(<see cref="mpz_ptr" />) </param>
     /// <param name="p1">(<see cref="mpz_srcptr" />) </param>
@@ -1207,7 +1207,7 @@ public static class GmpNative
     /// <param name="p3" />
     /// <param name="p4">(<see cref="mpf_srcptr" />) </param>
     [DllImport(Dll)]
-    public static extern IntPtr __gmpf_get_str(IntPtr p0, IntPtr p1, int p2, ulong p3, IntPtr p4);
+    public static extern IntPtr __gmpf_get_str(IntPtr p0, IntPtr p1, int p2, nint p3, IntPtr p4);
 
     /// <param name="p0">(<see cref="mpf_srcptr" />) </param>
     [DllImport(Dll)]
@@ -1349,7 +1349,7 @@ public static class GmpNative
 
     /// <param name="p0">(<see cref="mpf_srcptr" />) </param>
     [DllImport(Dll)]
-    public static extern ulong __gmpf_size(IntPtr p0);
+    public static extern nint __gmpf_size(IntPtr p0);
 
     /// <param name="p0">(<see cref="mpf_ptr" />) </param>
     /// <param name="p1">(<see cref="mpf_srcptr" />) </param>
@@ -1510,7 +1510,7 @@ public static class GmpNative
     /// <param name="p2">(<see cref="mp_ptr" />) </param>
     /// <param name="p3" />
     [DllImport(Dll)]
-    public static extern ulong __gmpn_get_str(IntPtr p0, int p1, IntPtr p2, long p3);
+    public static extern nint __gmpn_get_str(IntPtr p0, int p1, IntPtr p2, long p3);
 
     /// <param name="p0">(<see cref="mp_srcptr" />) </param>
     /// <param name="p1">(<see cref="mp_srcptr" />) </param>
@@ -1627,13 +1627,13 @@ public static class GmpNative
     /// <param name="p2" />
     /// <param name="p3" />
     [DllImport(Dll)]
-    public static extern long __gmpn_set_str(IntPtr p0, IntPtr p1, ulong p2, int p3);
+    public static extern long __gmpn_set_str(IntPtr p0, IntPtr p1, nint p2, int p3);
 
     /// <param name="p0">(<see cref="mp_srcptr" />) </param>
     /// <param name="p1" />
     /// <param name="p2" />
     [DllImport(Dll)]
-    public static extern ulong __gmpn_sizeinbase(IntPtr p0, long p1, int p2);
+    public static extern nint __gmpn_sizeinbase(IntPtr p0, long p1, int p2);
 
     /// <param name="p0">(<see cref="mp_ptr" />) </param>
     /// <param name="p1">(<see cref="mp_ptr" />) </param>
@@ -1911,7 +1911,7 @@ public static class GmpNative
 
     /// <param name="__gmp_z">(<see cref="mpz_srcptr" />) </param>
     [DllImport(Dll)]
-    public static extern ulong __gmpz_size(IntPtr __gmp_z);
+    public static extern nint __gmpz_size(IntPtr __gmp_z);
 
     /// <param name="__gmp_w">(<see cref="mpq_ptr" />) </param>
     /// <param name="__gmp_u">(<see cref="mpq_srcptr" />) </param>
