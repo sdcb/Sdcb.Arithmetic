@@ -1390,7 +1390,7 @@ public static class GmpNative
     [DllImport(Dll)]
     public static extern void __gmpf_ui_sub(IntPtr p0, ulong p1, IntPtr p2);
 
-    /// <param name="p0">(<see cref="mpf_t" />) </param>
+    /// <param name="p0">(<see cref="Mpf_t" />) </param>
     /// <param name="p1">(<see cref="gmp_randstate_t" />) </param>
     /// <param name="p2" />
     [DllImport(Dll)]
