@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -36,6 +37,9 @@ namespace Sdcb.Math.Gmp
                 GmpNative.__gmpf_init2((IntPtr)ptr, precision);
             }
         }
+        #endregion
+
+        #region Combined Initialization and Assignment Functions
 
         public unsafe static BigFloat From(int val)
         {
@@ -136,6 +140,14 @@ namespace Sdcb.Math.Gmp
                 GmpNative.__gmpf_set_prec_raw((IntPtr)ptr, value);
             }
         }
+
+        private unsafe void Clear()
+        {
+            fixed (Mpf_t* ptr = &Raw)
+            {
+                GmpNative.__gmpf_clear((IntPtr)ptr);
+            }
+        }
         #endregion
 
         #region Assignment functions
@@ -216,13 +228,85 @@ namespace Sdcb.Math.Gmp
         }
         #endregion
 
-        private unsafe void Clear()
+        #region Conversion Functions
+        public unsafe double ToDouble()
+        {
+            fixed(Mpf_t* ptr = &Raw)
+            {
+                return GmpNative.__gmpf_get_d((IntPtr)ptr);
+            }
+        }
+
+        public static explicit operator double(BigFloat op) => op.ToDouble();
+
+        public unsafe ExpDouble ToExpDouble()
         {
             fixed (Mpf_t* ptr = &Raw)
             {
-                GmpNative.__gmpf_clear((IntPtr)ptr);
+                int exp;
+                double val = GmpNative.__gmpf_get_d_2exp((IntPtr)ptr, (IntPtr)(&exp));
+                return new ExpDouble(exp, val);
             }
         }
+
+        public unsafe int ToInt32()
+        {
+            fixed (Mpf_t* ptr = &Raw)
+            {
+                return GmpNative.__gmpf_get_si((IntPtr)ptr);
+            }
+        }
+
+        public static explicit operator int(BigFloat op) => op.ToInt32();
+
+        public unsafe uint ToUInt32()
+        {
+            fixed (Mpf_t* ptr = &Raw)
+            {
+                return GmpNative.__gmpf_get_ui((IntPtr)ptr);
+            }
+        }
+
+        public static explicit operator uint(BigFloat op) => op.ToUInt32();
+
+        public unsafe override string? ToString() => ToString(@base: 10);
+
+        public unsafe string? ToString(int @base = 10)
+        {
+            const nint srcptr = 0;
+            const int digits = 0;
+            fixed (Mpf_t* ptr = &Raw)
+            {
+                int exp;
+                IntPtr ret = default;
+                try
+                {
+                    ret = GmpNative.__gmpf_get_str(srcptr, (IntPtr)(&exp), @base, digits, (IntPtr)ptr);
+                    string? result = Marshal.PtrToStringUTF8(ret);
+                    if (result == null) return null;
+
+                    return (result.Length - exp) switch
+                    {
+                        > 0 => result[..exp] + "." + result[exp..],
+                        0 => result[..exp],
+                        var x => result + new string('0', -x),
+                    };
+                }
+                finally
+                {
+                    if (ret != IntPtr.Zero)
+                    {
+                        GmpMemory.Free(ret);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Arithmetic Functions
+
+        #endregion
 
         protected virtual void Dispose(bool disposing)
         {
@@ -258,4 +342,6 @@ namespace Sdcb.Math.Gmp
         public int Exponent;
         public IntPtr Limbs;
     }
+
+    public record struct ExpDouble(int Exp, double Value);
 }
