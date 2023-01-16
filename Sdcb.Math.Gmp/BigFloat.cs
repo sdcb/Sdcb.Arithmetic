@@ -10,7 +10,7 @@ namespace Sdcb.Math.Gmp
     {
         public static int RawStructSize => Marshal.SizeOf<Mpf_t>();
 
-        public static ulong DefaultPrecision
+        public static uint DefaultPrecision
         {
             get => GmpNative.__gmpf_get_default_prec();
             set => GmpNative.__gmpf_set_default_prec(value);
@@ -29,7 +29,7 @@ namespace Sdcb.Math.Gmp
             }
         }
 
-        public unsafe BigFloat(ulong precision)
+        public unsafe BigFloat(uint precision)
         {
             fixed (Mpf_t* ptr = &Raw)
             {
@@ -37,7 +37,7 @@ namespace Sdcb.Math.Gmp
             }
         }
 
-        public unsafe static BigFloat From(long val)
+        public unsafe static BigFloat From(int val)
         {
             BigFloat r = new();
             fixed (Mpf_t* ptr = &r.Raw)
@@ -47,7 +47,7 @@ namespace Sdcb.Math.Gmp
             return r;
         }
 
-        public unsafe static BigFloat From(ulong val)
+        public unsafe static BigFloat From(uint val)
         {
             BigFloat r = new();
             fixed (Mpf_t* ptr = &r.Raw)
@@ -75,11 +75,11 @@ namespace Sdcb.Math.Gmp
                 byte[] valBytes = Encoding.UTF8.GetBytes(val);
                 fixed (byte* pval = valBytes)
                 {
-                    int rt = GmpNative.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, valBase);
-                    if (rt != 0)
+                    int ret = GmpNative.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, valBase);
+                    if (ret != 0)
                     {
                         r.Clear();
-                        throw new FormatException($"Failed to parse {val}, base={valBase} to BigFloat");
+                        throw new FormatException($"Failed to parse {val}, base={valBase} to BigFloat, __gmpf_init_set_str returns {ret}");
                     }
                 }
             }
@@ -110,7 +110,7 @@ namespace Sdcb.Math.Gmp
             }
         }
 
-        public unsafe ulong Precision
+        public unsafe uint Precision
         {
             get
             {
@@ -129,7 +129,7 @@ namespace Sdcb.Math.Gmp
         }
 
         [Obsolete("use Precision")]
-        public unsafe void SetRawPrecision(ulong value)
+        public unsafe void SetRawPrecision(uint value)
         {
             fixed (Mpf_t* ptr = &Raw)
             {
@@ -148,11 +148,70 @@ namespace Sdcb.Math.Gmp
             }
         }
 
-        public unsafe void Assign(int op)
+        public unsafe void Assign(uint op)
         {
             fixed (Mpf_t* pthis = &Raw)
             {
                 GmpNative.__gmpf_set_ui((IntPtr)pthis, op);
+            }
+        }
+
+        public unsafe void Assign(int op)
+        {
+            fixed (Mpf_t* pthis = &Raw)
+            {
+                GmpNative.__gmpf_set_si((IntPtr)pthis, op);
+            }
+        }
+
+        public unsafe void Assign(double op)
+        {
+            fixed (Mpf_t* pthis = &Raw)
+            {
+                GmpNative.__gmpf_set_d((IntPtr)pthis, op);
+            }
+        }
+
+        public unsafe void Assign(BigInteger op)
+        {
+            fixed (Mpf_t* pthis = &Raw)
+            {
+                // TODO: GmpNative.__gmpf_set_z((IntPtr)pthis, op);
+                throw new NotImplementedException();
+            }
+        }
+
+        public unsafe void Assign(BigRational op)
+        {
+            fixed (Mpf_t* pthis = &Raw)
+            {
+                // TODO: GmpNative.__gmpf_set_q((IntPtr)pthis, op);
+                throw new NotImplementedException();
+            }
+        }
+
+        public unsafe void Assign(string op, int opBase = 10)
+        {
+            fixed (Mpf_t* pthis = &Raw)
+            {
+                byte[] opBytes = Encoding.UTF8.GetBytes(op);
+                fixed(byte* opBytesPtr = opBytes)
+                {
+                    int ret = GmpNative.__gmpf_set_str((IntPtr)pthis, (IntPtr)opBytesPtr, opBase);
+                    if (ret != 0)
+                    {
+                        throw new FormatException($"Failed to parse {op}, base={opBase} to BigFloat, __gmpf_set_str returns {ret}");
+                    }
+                }
+            }
+        }
+
+        public unsafe static void Swap(BigFloat op1, BigFloat op2)
+        {
+            fixed (Mpf_t* pthis = &op1.Raw)
+            fixed (Mpf_t* pthat = &op2.Raw)
+            {
+                GmpNative.__gmpf_swap((IntPtr)pthis, (IntPtr)pthat);
             }
         }
         #endregion
