@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdcb.Math.Gmp", "Sdcb.Math.Gmp\Sdcb.Math.Gmp.csproj", "{C353AA11-EF0D-4F84-B619-8FD120E65082}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Math.Gmp", "Sdcb.Math.Gmp\Sdcb.Math.Gmp.csproj", "{C353AA11-EF0D-4F84-B619-8FD120E65082}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdcb.Math.Gmp.Tests", "Sdcb.Math.Gmp.Tests\Sdcb.Math.Gmp.Tests.csproj", "{E8A47E96-992D-4C50-B288-E70861FD8105}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{C353AA11-EF0D-4F84-B619-8FD120E65082}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C353AA11-EF0D-4F84-B619-8FD120E65082}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C353AA11-EF0D-4F84-B619-8FD120E65082}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8A47E96-992D-4C50-B288-E70861FD8105}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8A47E96-992D-4C50-B288-E70861FD8105}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8A47E96-992D-4C50-B288-E70861FD8105}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8A47E96-992D-4C50-B288-E70861FD8105}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -7,7 +7,7 @@
         <authors>sdcb</authors>
         <license type="expression">LGPL-3.0-only</license>
         <projectUrl>https://github.com/sdcb/Sdcb.Math.Gmp</projectUrl>
-        <icon>images\icon.jpg</icon>
+        <icon>images\icon.png</icon>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <description>Native binding for gmp to work on {titleRid}.</description>
         <summary>Native binding for gmp to work on {titleRid}.</summary>
@@ -21,6 +21,6 @@
         </frameworkAssemblies>
     </metadata>
     <files>
-        <file src="..\icon.jpg" target="images\" />
+        <file src="..\icon.png" target="images\" />
     </files>
 </package>
