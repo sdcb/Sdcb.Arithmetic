@@ -3,17 +3,17 @@ using Xunit.Abstractions;
 
 namespace Sdcb.Math.Gmp.Tests
 {
-    public class UnitTest1
+    public class RawTest
     {
         private readonly ITestOutputHelper _console;
 
-        public UnitTest1(ITestOutputHelper console)
+        public RawTest(ITestOutputHelper console)
         {
             _console = console;
         }
 
         [Fact]
-        public unsafe void Test1()
+        public unsafe void PiMulE()
         {
             IntPtr f1 = Marshal.AllocHGlobal(24);
             IntPtr f2 = Marshal.AllocHGlobal(24);
