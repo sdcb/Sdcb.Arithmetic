@@ -1,17 +1,12 @@
-﻿
-using System;
-using System.Runtime.CompilerServices;
+﻿using System;
 using System.Runtime.InteropServices;
-using Microsoft.Win32.SafeHandles;
-using System.Runtime.ConstrainedExecution;
-using System.Security;
-using Sdcb.Math.Gmp;
 
 namespace Sdcb.Math.Gmp;
 
 public static class GmpNative
 {
-    const string Dll = "gmp";
+    // NOTE: code is all auto generated below
+    internal const string Dll = "gmp";
 
     /// <param name="p0">(<see cref="void*(size_t)" />) </param>
     /// <param name="p1">(<see cref="void*(void*,size_t,size_t)" />) </param>
