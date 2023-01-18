@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Net.NetworkInformation;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -307,33 +305,6 @@ namespace Sdcb.Math.Gmp
         #endregion
 
         #region Arithmetic Functions
-        #region Arithmetic Functions - Operators
-        public static unsafe BigFloat operator +(BigFloat op1, BigFloat op2) => Add(op1, op2);
-
-        public static unsafe BigFloat operator +(BigFloat op1, uint op2) => Add(op1, op2);
-
-        public static unsafe BigFloat operator -(BigFloat op1, BigFloat op2) => Subtract(op1, op2);
-
-        public static unsafe BigFloat operator -(BigFloat op1, uint op2) => Subtract(op1, op2);
-
-        public static unsafe BigFloat operator -(uint op1, BigFloat op2) => Subtract(op1, op2);
-
-        public static unsafe BigFloat operator *(BigFloat op1, BigFloat op2) => Subtract(op1, op2);
-
-        public static unsafe BigFloat operator *(BigFloat op1, uint op2) => Subtract(op1, op2);
-
-        public static unsafe BigFloat operator /(BigFloat op1, BigFloat op2) => Divide(op1, op2);
-
-        public static unsafe BigFloat operator /(BigFloat op1, uint op2) => Divide(op1, op2);
-
-        public static unsafe BigFloat operator /(uint op1, BigFloat op2) => Divide(op1, op2);
-
-        public static unsafe BigFloat operator ^(BigFloat op1, uint op2) => Power(op1, op2);
-
-        public static unsafe BigFloat operator -(BigFloat op1) => Negate(op1);
-
-        #endregion
-
         #region Arithmetic Functions - Raw inplace functions
         public static unsafe void AddInplace(BigFloat rop, BigFloat op1, BigFloat op2)
         {
@@ -625,6 +596,158 @@ namespace Sdcb.Math.Gmp
             return rop;
         }
         #endregion
+
+        #region Arithmetic Functions - Operators
+        public static unsafe BigFloat operator +(BigFloat op1, BigFloat op2) => Add(op1, op2);
+
+        public static unsafe BigFloat operator +(BigFloat op1, uint op2) => Add(op1, op2);
+
+        public static unsafe BigFloat operator -(BigFloat op1, BigFloat op2) => Subtract(op1, op2);
+
+        public static unsafe BigFloat operator -(BigFloat op1, uint op2) => Subtract(op1, op2);
+
+        public static unsafe BigFloat operator -(uint op1, BigFloat op2) => Subtract(op1, op2);
+
+        public static unsafe BigFloat operator *(BigFloat op1, BigFloat op2) => Multiple(op1, op2);
+
+        public static unsafe BigFloat operator *(BigFloat op1, uint op2) => Multiple(op1, op2);
+
+        public static unsafe BigFloat operator /(BigFloat op1, BigFloat op2) => Divide(op1, op2);
+
+        public static unsafe BigFloat operator /(BigFloat op1, uint op2) => Divide(op1, op2);
+
+        public static unsafe BigFloat operator /(uint op1, BigFloat op2) => Divide(op1, op2);
+
+        public static unsafe BigFloat operator ^(BigFloat op1, uint op2) => Power(op1, op2);
+
+        public static unsafe BigFloat operator -(BigFloat op1) => Negate(op1);
+
+        #endregion
+        #endregion
+
+        #region Comparison Functions
+        /// <summary>
+        /// Compare op1 and op2. Return a positive value if op1 > op2, zero if op1 = op2, and a negative value if op1 < op2.
+        /// </summary>
+        public static unsafe int Compare(BigFloat op1, BigFloat op2)
+        {
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            fixed (Mpf_t* pop2 = &op2.Raw)
+            {
+                return GmpNative.__gmpf_cmp((IntPtr)pop1, (IntPtr)pop2);
+            }
+        }
+
+        public override bool Equals(object? obj) => obj switch
+        {
+            null => false,
+            BigFloat bf => Compare(this, bf) == 0,
+            BigInteger bi => Compare(this, bi) == 0,
+            double d => Compare(this, d) == 0,
+            int i => Compare(this, i) == 0,
+            uint ui => Compare(this, ui) == 0,
+            _ => false
+        };
+
+        public static bool operator ==(BigFloat left, BigFloat right) => Compare(left, right) == 0;
+
+        public static bool operator !=(BigFloat left, BigFloat right) => Compare(left, right) != 0;
+
+        public static bool operator >(BigFloat left, BigFloat right) => Compare(left, right) > 0;
+
+        public static bool operator <(BigFloat left, BigFloat right) => Compare(left, right) < 0;
+
+        public static bool operator >=(BigFloat left, BigFloat right) => Compare(left, right) >= 0;
+
+        public static bool operator <=(BigFloat left, BigFloat right) => Compare(left, right) <= 0;
+
+        /// <summary>
+        /// Compare op1 and op2. Return a positive value if op1 > op2, zero if op1 = op2, and a negative value if op1 < op2.
+        /// </summary>
+        public static unsafe int Compare(BigFloat op1, BigInteger op2)
+        {
+            throw new NotImplementedException();
+            //fixed (Mpf_t* pop1 = &op1.Raw)
+            //fixed (Mpf_t* pop2 = &op2.Raw)
+            //{
+            //    return GmpNative.__gmpf_cmp((IntPtr)pop1, (IntPtr)pop2);
+            //}
+        }
+
+        /// <summary>
+        /// Compare op1 and op2. Return a positive value if op1 > op2, zero if op1 = op2, and a negative value if op1 < op2.
+        /// </summary>
+        public static unsafe int Compare(BigFloat op1, double op2)
+        {
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            {
+                return GmpNative.__gmpf_cmp_d((IntPtr)pop1, op2);
+            }
+        }
+
+        /// <summary>
+        /// Compare op1 and op2. Return a positive value if op1 > op2, zero if op1 = op2, and a negative value if op1 < op2.
+        /// </summary>
+        public static unsafe int Compare(BigFloat op1, int op2)
+        {
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            {
+                return GmpNative.__gmpf_cmp_si((IntPtr)pop1, op2);
+            }
+        }
+
+        /// <summary>
+        /// Compare op1 and op2. Return a positive value if op1 > op2, zero if op1 = op2, and a negative value if op1 < op2.
+        /// </summary>
+        public static unsafe int Compare(BigFloat op1, uint op2)
+        {
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            {
+                return GmpNative.__gmpf_cmp_ui((IntPtr)pop1, op2);
+            }
+        }
+
+        /// <summary>
+        /// Return non-zero if the first op3 bits of op1 and op2 are equal, zero otherwise. Note that numbers like e.g., 256 (binary 100000000) and 255 (binary 11111111) will never be equal by this function’s measure, and furthermore that 0 will only be equal to itself.
+        /// </summary>
+        [Obsolete("This function is mathematically ill-defined and should not be used.")]
+        public static unsafe int MpfEquals(BigFloat op1, uint op2)
+        {
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            {
+                return GmpNative.__gmpf_cmp_ui((IntPtr)pop1, op2);
+            }
+        }
+
+        /// <summary>
+        /// rop = abs(op1-op2)/op1
+        /// </summary>
+        public static unsafe void RelDiffInplace(BigFloat rop, BigFloat op1, BigFloat op2)
+        {
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            fixed (Mpf_t* pop2 = &op2.Raw)
+            {
+                GmpNative.__gmpf_reldiff((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
+            }
+        }
+
+        /// <summary>
+        /// abs(op1-op2)/op1
+        /// </summary>
+        public static unsafe BigFloat RelDiff(BigFloat op1, BigFloat op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            RelDiffInplace(rop, op1, op2);
+            return rop;
+        }
+
+        public int Sign => Raw.Size < 0 ? -1 : Raw.Size > 0 ? 1 : 0;
+
+        #endregion
+
+        #region Misc Functions
+        // TODO: https://gmplib.org/manual/Miscellaneous-Float-Functions
         #endregion
 
         protected virtual void Dispose(bool disposing)

@@ -34,11 +34,5 @@ namespace Sdcb.Math.Gmp.Tests
             BigFloat b3 = b1 * b2;
             Assert.Equal("8.53452000000000033796965226429165340960025787353515625", b3.ToString());
         }
-
-        [Fact]
-        public void Sqrt2()
-        {
-            BigFloat sqrt2 = GmpMath.Sqrt(2);
-        }
     }
 }
