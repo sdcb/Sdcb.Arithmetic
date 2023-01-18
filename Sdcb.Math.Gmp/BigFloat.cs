@@ -7,8 +7,6 @@ namespace Sdcb.Math.Gmp
 {
     public class BigFloat : IDisposable
     {
-        public static int RawStructSize => Marshal.SizeOf<Mpf_t>();
-
         public static uint DefaultPrecision
         {
             get => GmpNative.__gmpf_get_default_prec();
@@ -649,6 +647,8 @@ namespace Sdcb.Math.Gmp
             _ => false
         };
 
+        public override int GetHashCode() => Raw.GetHashCode();
+
         public static bool operator ==(BigFloat left, BigFloat right) => Compare(left, right) == 0;
 
         public static bool operator !=(BigFloat left, BigFloat right) => Compare(left, right) != 0;
@@ -777,12 +777,29 @@ namespace Sdcb.Math.Gmp
         }
     }
 
-    public struct Mpf_t
+    public record struct Mpf_t
     {
         public int Precision;
         public int Size;
         public int Exponent;
         public IntPtr Limbs;
+
+        public static int RawSize => Marshal.SizeOf<Mpf_t>();
+
+        private unsafe Span<int> GetLimbData() => new Span<int>((void*)Limbs, Precision - 1);
+
+        public override int GetHashCode()
+        {
+            HashCode c = new();
+            c.Add(Precision);
+            c.Add(Size);
+            c.Add(Exponent);
+            foreach (int i in GetLimbData())
+            {
+                c.Add(i);
+            }
+            return c.ToHashCode();
+        }
     }
 
     public record struct ExpDouble(int Exp, double Value);
