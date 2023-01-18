@@ -36,13 +36,9 @@ namespace Sdcb.Math.Gmp.Tests
         }
 
         [Fact]
-        public void MemoryGC()
+        public void Sqrt2()
         {
-            for (int i = 0; i < 2_000_0000; ++i)
-            {
-                BigFloat b1 = BigFloat.From(3.14);
-            }
-            _console.WriteLine("memory!");
+            BigFloat sqrt2 = GmpMath.Sqrt(2);
         }
     }
 }

@@ -39,7 +39,14 @@ namespace Sdcb.Math.Gmp
         {
             fixed (Mpf_t* ptr = &Raw)
             {
-                GmpNative.__gmpf_init2((IntPtr)ptr, precision);
+                if (precision == 0)
+                {
+                    GmpNative.__gmpf_init((IntPtr)ptr);
+                }
+                else
+                {
+                    GmpNative.__gmpf_init2((IntPtr)ptr, precision);
+                }
             }
         }
         #endregion
@@ -300,120 +307,324 @@ namespace Sdcb.Math.Gmp
         #endregion
 
         #region Arithmetic Functions
-        public static unsafe BigFloat operator +(BigFloat op1, BigFloat op2)
+        #region Arithmetic Functions - Operators
+        public static unsafe BigFloat operator +(BigFloat op1, BigFloat op2) => Add(op1, op2);
+
+        public static unsafe BigFloat operator +(BigFloat op1, uint op2) => Add(op1, op2);
+
+        public static unsafe BigFloat operator -(BigFloat op1, BigFloat op2) => Subtract(op1, op2);
+
+        public static unsafe BigFloat operator -(BigFloat op1, uint op2) => Subtract(op1, op2);
+
+        public static unsafe BigFloat operator -(uint op1, BigFloat op2) => Subtract(op1, op2);
+
+        public static unsafe BigFloat operator *(BigFloat op1, BigFloat op2) => Subtract(op1, op2);
+
+        public static unsafe BigFloat operator *(BigFloat op1, uint op2) => Subtract(op1, op2);
+
+        public static unsafe BigFloat operator /(BigFloat op1, BigFloat op2) => Divide(op1, op2);
+
+        public static unsafe BigFloat operator /(BigFloat op1, uint op2) => Divide(op1, op2);
+
+        public static unsafe BigFloat operator /(uint op1, BigFloat op2) => Divide(op1, op2);
+
+        public static unsafe BigFloat operator ^(BigFloat op1, uint op2) => Power(op1, op2);
+
+        public static unsafe BigFloat operator -(BigFloat op1) => Negate(op1);
+
+        #endregion
+
+        #region Arithmetic Functions - Raw inplace functions
+        public static unsafe void AddInplace(BigFloat rop, BigFloat op1, BigFloat op2)
         {
-            BigFloat rop = new();
             fixed (Mpf_t* prop = &rop.Raw)
             fixed (Mpf_t* pop1 = &op1.Raw)
             fixed (Mpf_t* pop2 = &op2.Raw)
             {
                 GmpNative.__gmpf_add((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
             }
-            return rop;
         }
 
-        public static unsafe BigFloat operator +(BigFloat op1, uint op2)
+        public static unsafe void AddInplace(BigFloat rop, BigFloat op1, uint op2)
         {
-            BigFloat rop = new();
             fixed (Mpf_t* prop = &rop.Raw)
             fixed (Mpf_t* pop1 = &op1.Raw)
             {
                 GmpNative.__gmpf_add_ui((IntPtr)prop, (IntPtr)pop1, op2);
             }
-            return rop;
         }
 
-        public static unsafe BigFloat operator -(BigFloat op1, BigFloat op2)
+        public static unsafe void SubtractInplace(BigFloat rop, BigFloat op1, BigFloat op2)
         {
-            BigFloat rop = new();
             fixed (Mpf_t* prop = &rop.Raw)
             fixed (Mpf_t* pop1 = &op1.Raw)
             fixed (Mpf_t* pop2 = &op2.Raw)
             {
                 GmpNative.__gmpf_sub((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
             }
-            return rop;
         }
 
-        public static unsafe BigFloat operator -(BigFloat op1, uint op2)
+        public static unsafe void SubtractInplace(BigFloat rop, BigFloat op1, uint op2)
         {
-            BigFloat rop = new();
             fixed (Mpf_t* prop = &rop.Raw)
             fixed (Mpf_t* pop1 = &op1.Raw)
             {
                 GmpNative.__gmpf_sub_ui((IntPtr)prop, (IntPtr)pop1, op2);
             }
-            return rop;
         }
 
-        public static unsafe BigFloat operator -(uint op1, BigFloat op2)
+        public static unsafe void SubtractInplace(BigFloat rop, uint op1, BigFloat op2)
         {
-            BigFloat rop = new();
             fixed (Mpf_t* prop = &rop.Raw)
             fixed (Mpf_t* pop2 = &op2.Raw)
             {
                 GmpNative.__gmpf_ui_sub((IntPtr)prop, op1, (IntPtr)pop2);
             }
-            return rop;
         }
 
-        public static unsafe BigFloat operator *(BigFloat op1, BigFloat op2)
+        public static unsafe void MultiplyInplace(BigFloat rop, BigFloat op1, BigFloat op2)
         {
-            BigFloat rop = new();
             fixed (Mpf_t* prop = &rop.Raw)
             fixed (Mpf_t* pop1 = &op1.Raw)
             fixed (Mpf_t* pop2 = &op2.Raw)
             {
                 GmpNative.__gmpf_mul((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
             }
-            return rop;
         }
 
-        public static unsafe BigFloat operator *(BigFloat op1, uint op2)
+        public static unsafe void MultiplyInplace(BigFloat rop, BigFloat op1, uint op2)
         {
-            BigFloat rop = new();
             fixed (Mpf_t* prop = &rop.Raw)
             fixed (Mpf_t* pop1 = &op1.Raw)
             {
                 GmpNative.__gmpf_mul_ui((IntPtr)prop, (IntPtr)pop1, op2);
             }
-            return rop;
         }
 
-        public static unsafe BigFloat operator /(BigFloat op1, BigFloat op2)
+        public static unsafe void DivideInplace(BigFloat rop, BigFloat op1, BigFloat op2)
         {
-            BigFloat rop = new();
             fixed (Mpf_t* prop = &rop.Raw)
             fixed (Mpf_t* pop1 = &op1.Raw)
             fixed (Mpf_t* pop2 = &op2.Raw)
             {
                 GmpNative.__gmpf_div((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
             }
-            return rop;
         }
 
-        public static unsafe BigFloat operator /(BigFloat op1, uint op2)
+        public static unsafe void DivideInplace(BigFloat rop, BigFloat op1, uint op2)
         {
-            BigFloat rop = new();
             fixed (Mpf_t* prop = &rop.Raw)
             fixed (Mpf_t* pop1 = &op1.Raw)
             {
                 GmpNative.__gmpf_div_ui((IntPtr)prop, (IntPtr)pop1, op2);
             }
-            return rop;
         }
 
-        public static unsafe BigFloat operator /(uint op1, BigFloat op2)
+        public static unsafe void DivideInplace(BigFloat rop, uint op1, BigFloat op2)
         {
-            BigFloat rop = new();
             fixed (Mpf_t* prop = &rop.Raw)
             fixed (Mpf_t* pop2 = &op2.Raw)
             {
                 GmpNative.__gmpf_ui_div((IntPtr)prop, op1, (IntPtr)pop2);
             }
+        }
+
+        public static unsafe void PowerInplace(BigFloat rop, BigFloat op1, uint op2)
+        {
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            {
+                GmpNative.__gmpf_pow_ui((IntPtr)prop, (IntPtr)pop1, op2);
+            }
+        }
+
+        public static unsafe void NegateInplace(BigFloat rop, BigFloat op1)
+        {
+            fixed (Mpf_t* prop = &rop.Raw)
+            {
+                GmpNative.__gmpf_neg((IntPtr)prop, (IntPtr)prop);
+            }
+        }
+
+        public static unsafe void SqrtInplace(BigFloat rop, BigFloat op)
+        {
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop = &op.Raw)
+            {
+                GmpNative.__gmpf_sqrt((IntPtr)prop, (IntPtr)pop);
+            }
+        }
+
+        public static unsafe void SqrtInplace(BigFloat rop, uint op, uint precision = 0)
+        {
+            fixed (Mpf_t* prop = &rop.Raw)
+            {
+                GmpNative.__gmpf_sqrt_ui((IntPtr)prop, op);
+            }
+        }
+
+        public static unsafe void AbsInplace(BigFloat rop, BigFloat op, uint precision = 0)
+        {
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop = &op.Raw)
+            {
+                GmpNative.__gmpf_abs((IntPtr)prop, (IntPtr)pop);
+            }
+        }
+
+        /// <summary>
+        /// op1 * Math.Pow(2, op2)
+        /// </summary>
+        public static unsafe void Mul2ExpInplace(BigFloat rop, BigFloat op1, uint op2, uint precision = 0)
+        {
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            {
+                GmpNative.__gmpf_mul_2exp((IntPtr)prop, (IntPtr)pop1, op2);
+            }
+        }
+
+        /// <summary>
+        /// op1 / Math.Pow(2, op2)
+        /// </summary>
+        public static unsafe void Div2ExpInplace(BigFloat rop, BigFloat op1, uint op2, uint precision = 0)
+        {
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            {
+                GmpNative.__gmpf_div_2exp((IntPtr)prop, (IntPtr)pop1, op2);
+            }
+        }
+
+        #endregion
+
+        #region Arithmetic Functions - Easier functions
+
+        public static unsafe BigFloat Add(BigFloat op1, BigFloat op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            AddInplace(rop, op1, op2);
             return rop;
         }
 
+        public static unsafe BigFloat Add(BigFloat op1, uint op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            AddInplace(rop, op1, op2);
+            return rop;
+        }
+
+        public static unsafe BigFloat Subtract(BigFloat op1, BigFloat op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            AddInplace(rop, op1, op2);
+            return rop;
+        }
+
+        public static unsafe BigFloat Subtract(BigFloat op1, uint op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            SubtractInplace(rop, op1, op2);
+            return rop;
+        }
+
+        public static unsafe BigFloat Subtract(uint op1, BigFloat op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            SubtractInplace(rop, op1, op2);
+            return rop;
+        }
+
+        public static unsafe BigFloat Multiple(BigFloat op1, BigFloat op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            MultiplyInplace(rop, op1, op2);
+            return rop;
+        }
+
+        public static unsafe BigFloat Multiple(BigFloat op1, uint op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            MultiplyInplace(rop, op1, op2);
+            return rop;
+        }
+
+        public static unsafe BigFloat Divide(BigFloat op1, BigFloat op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            DivideInplace(rop, op1, op2);
+            return rop;
+        }
+
+        public static unsafe BigFloat Divide(BigFloat op1, uint op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            DivideInplace(rop, op1, op2);
+            return rop;
+        }
+
+        public static unsafe BigFloat Divide(uint op1, BigFloat op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            DivideInplace(rop, op1, op2);
+            return rop;
+        }
+
+        public static unsafe BigFloat Power(BigFloat op1, uint op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            PowerInplace(rop, op1, op2);
+            return rop;
+        }
+
+        public static unsafe BigFloat Negate(BigFloat op1, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            NegateInplace(rop, op1);
+            return rop;
+        }
+
+        public static unsafe BigFloat Sqrt(BigFloat op, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            SqrtInplace(rop, op);
+            return rop;
+        }
+
+        public static unsafe BigFloat Sqrt(uint op, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            SqrtInplace(rop, op);
+            return rop;
+        }
+
+        public static unsafe BigFloat Abs(BigFloat op, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            AbsInplace(rop, op);
+            return rop;
+        }
+
+        /// <summary>
+        /// op1 * Math.Pow(2, op2)
+        /// </summary>
+        public static unsafe BigFloat Mul2Exp(BigFloat op1, uint op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            Mul2ExpInplace(rop, op1, op2);
+            return rop;
+        }
+
+        /// <summary>
+        /// op1 / Math.Pow(2, op2)
+        /// </summary>
+        public static unsafe BigFloat Div2Exp(BigFloat op1, uint op2, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            Div2ExpInplace(rop, op1, op2);
+            return rop;
+        }
+        #endregion
         #endregion
 
         protected virtual void Dispose(bool disposing)
