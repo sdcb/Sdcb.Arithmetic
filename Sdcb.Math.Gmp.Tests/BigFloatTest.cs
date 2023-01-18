@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using Xunit.Abstractions;
 
 namespace Sdcb.Math.Gmp.Tests
@@ -29,8 +28,21 @@ namespace Sdcb.Math.Gmp.Tests
         [Fact]
         public void PiMulE()
         {
+            BigFloat.DefaultPrecision = 2 << 10;
             BigFloat b1 = BigFloat.From(3.14);
             BigFloat b2 = BigFloat.Parse("2.718");
+            BigFloat b3 = b1 * b2;
+            Assert.Equal("8.53452000000000033796965226429165340960025787353515625", b3.ToString());
+        }
+
+        [Fact]
+        public void MemoryGC()
+        {
+            for (int i = 0; i < 2_000_0000; ++i)
+            {
+                BigFloat b1 = BigFloat.From(3.14);
+            }
+            _console.WriteLine("memory!");
         }
     }
 }

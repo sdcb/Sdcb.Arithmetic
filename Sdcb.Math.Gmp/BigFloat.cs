@@ -305,6 +305,119 @@ namespace Sdcb.Math.Gmp
         #endregion
 
         #region Arithmetic Functions
+        public static unsafe BigFloat operator +(BigFloat op1, BigFloat op2)
+        {
+            BigFloat rop = new();
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            fixed (Mpf_t* pop2 = &op2.Raw)
+            {
+                GmpNative.__gmpf_add((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
+            }
+            return rop;
+        }
+
+        public static unsafe BigFloat operator +(BigFloat op1, uint op2)
+        {
+            BigFloat rop = new();
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            {
+                GmpNative.__gmpf_add_ui((IntPtr)prop, (IntPtr)pop1, op2);
+            }
+            return rop;
+        }
+
+        public static unsafe BigFloat operator -(BigFloat op1, BigFloat op2)
+        {
+            BigFloat rop = new();
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            fixed (Mpf_t* pop2 = &op2.Raw)
+            {
+                GmpNative.__gmpf_sub((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
+            }
+            return rop;
+        }
+
+        public static unsafe BigFloat operator -(BigFloat op1, uint op2)
+        {
+            BigFloat rop = new();
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            {
+                GmpNative.__gmpf_sub_ui((IntPtr)prop, (IntPtr)pop1, op2);
+            }
+            return rop;
+        }
+
+        public static unsafe BigFloat operator -(uint op1, BigFloat op2)
+        {
+            BigFloat rop = new();
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop2 = &op2.Raw)
+            {
+                GmpNative.__gmpf_ui_sub((IntPtr)prop, op1, (IntPtr)pop2);
+            }
+            return rop;
+        }
+
+        public static unsafe BigFloat operator *(BigFloat op1, BigFloat op2)
+        {
+            BigFloat rop = new();
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            fixed (Mpf_t* pop2 = &op2.Raw)
+            {
+                GmpNative.__gmpf_mul((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
+            }
+            return rop;
+        }
+
+        public static unsafe BigFloat operator *(BigFloat op1, uint op2)
+        {
+            BigFloat rop = new();
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            {
+                GmpNative.__gmpf_mul_ui((IntPtr)prop, (IntPtr)pop1, op2);
+            }
+            return rop;
+        }
+
+        public static unsafe BigFloat operator /(BigFloat op1, BigFloat op2)
+        {
+            BigFloat rop = new();
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            fixed (Mpf_t* pop2 = &op2.Raw)
+            {
+                GmpNative.__gmpf_div((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
+            }
+            return rop;
+        }
+
+        public static unsafe BigFloat operator /(BigFloat op1, uint op2)
+        {
+            BigFloat rop = new();
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop1 = &op1.Raw)
+            {
+                GmpNative.__gmpf_div_ui((IntPtr)prop, (IntPtr)pop1, op2);
+            }
+            return rop;
+        }
+
+        public static unsafe BigFloat operator /(uint op1, BigFloat op2)
+        {
+            BigFloat rop = new();
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop2 = &op2.Raw)
+            {
+                GmpNative.__gmpf_ui_div((IntPtr)prop, op1, (IntPtr)pop2);
+            }
+            return rop;
+        }
 
         #endregion
 
