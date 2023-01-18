@@ -5,7 +5,18 @@ VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Math.Gmp", "Sdcb.Math.Gmp\Sdcb.Math.Gmp.csproj", "{C353AA11-EF0D-4F84-B619-8FD120E65082}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdcb.Math.Gmp.Tests", "Sdcb.Math.Gmp.Tests\Sdcb.Math.Gmp.Tests.csproj", "{E8A47E96-992D-4C50-B288-E70861FD8105}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Math.Gmp.Tests", "Sdcb.Math.Gmp.Tests\Sdcb.Math.Gmp.Tests.csproj", "{E8A47E96-992D-4C50-B288-E70861FD8105}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{974528A9-2CDE-4BA1-B625-0B2F795E1E9A}"
+	ProjectSection(SolutionItems) = preProject
+		build\00-common.linq = build\00-common.linq
+		build\01-build-native.linq = build\01-build-native.linq
+		build\02-build-packages.linq = build\02-build-packages.linq
+		build\03-publish-proget-nuget.linq = build\03-publish-proget-nuget.linq
+		build\icon.png = build\icon.png
+		build\Sdcb.Math.Gmp.runtime.nuspec = build\Sdcb.Math.Gmp.runtime.nuspec
+		build\Sdcb.Math.Gmp.runtime.props = build\Sdcb.Math.Gmp.runtime.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

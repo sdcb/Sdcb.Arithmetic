@@ -16,8 +16,9 @@ async Task SetupAsync(CancellationToken cancellationToken = default)
 	await EnsureNugetExe(cancellationToken);
 }
 
-static void NuGetRun(string args) => Run(@".\nuget.exe", args, Encoding.GetEncoding("gb2312"));
-static void DotNetRun(string args) => Run("dotnet", args, Encoding.GetEncoding("gb2312"));
+static Encoding encoding = Encoding.UTF8;
+static void NuGetRun(string args) => Run(@".\nuget.exe", args, encoding);
+static void DotNetRun(string args) => Run("dotnet", args, encoding);
 static void Run(string exe, string args, Encoding encoding) => Util.Cmd(exe, args, encoding);
 static ProjectVersion[] Projects = new[]
 {

@@ -33,6 +33,6 @@ object LoadTable()
 void Build(ProjectVersion p)
 {
 	//DotNetRun($@"build ..\src\{project}\{project}.csproj -c Release");
-	DotNetRun($@"pack ..\src\{p.name}\{p.name}.csproj -p:Version={p.version} -c Release -o .\nupkgs".Dump());
+	DotNetRun($@"pack ..\{p.name}\{p.name}.csproj -p:Version={p.version} -c Release -o .\nupkgs".Dump());
 	Refresh();
 }
