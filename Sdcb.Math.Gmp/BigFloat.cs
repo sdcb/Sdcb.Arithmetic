@@ -30,6 +30,11 @@ namespace Sdcb.Math.Gmp
             }
         }
 
+        public BigFloat(Mpf_t raw)
+        {
+            Raw = raw;
+        }
+
         public unsafe BigFloat(uint precision)
         {
             fixed (Mpf_t* ptr = &Raw)
@@ -43,73 +48,63 @@ namespace Sdcb.Math.Gmp
 
         public unsafe static BigFloat From(int val)
         {
-            BigFloat r = new();
-            fixed (Mpf_t* ptr = &r.Raw)
-            {
-                GmpNative.__gmpf_init_set_si((IntPtr)ptr, val);
-            }
-            return r;
+            Mpf_t raw = new();
+            Mpf_t* ptr = &raw;
+            GmpNative.__gmpf_init_set_si((IntPtr)ptr, val);
+            return new BigFloat(raw);
         }
 
         public unsafe static BigFloat From(uint val)
         {
-            BigFloat r = new();
-            fixed (Mpf_t* ptr = &r.Raw)
-            {
-                GmpNative.__gmpf_init_set_ui((IntPtr)ptr, val);
-            }
-            return r;
+            Mpf_t raw = new();
+            Mpf_t* ptr = &raw;
+            GmpNative.__gmpf_init_set_ui((IntPtr)ptr, val);
+            return new BigFloat(raw);
         }
 
         public unsafe static BigFloat From(double val)
         {
-            BigFloat r = new();
-            fixed (Mpf_t* ptr = &r.Raw)
-            {
-                GmpNative.__gmpf_init_set_d((IntPtr)ptr, val);
-            }
-            return r;
+            Mpf_t raw = new();
+            Mpf_t* ptr = &raw;
+            GmpNative.__gmpf_init_set_d((IntPtr)ptr, val);
+            return new BigFloat(raw);
         }
 
         public unsafe static BigFloat Parse(string val, int valBase = 10)
         {
-            BigFloat r = new();
-            fixed (Mpf_t* ptr = &r.Raw)
+            Mpf_t raw = new();
+            Mpf_t* ptr = &raw;
+            byte[] valBytes = Encoding.UTF8.GetBytes(val);
+            fixed (byte* pval = valBytes)
             {
-                byte[] valBytes = Encoding.UTF8.GetBytes(val);
-                fixed (byte* pval = valBytes)
+                int ret = GmpNative.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, valBase);
+                if (ret != 0)
                 {
-                    int ret = GmpNative.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, valBase);
-                    if (ret != 0)
-                    {
-                        r.Clear();
-                        throw new FormatException($"Failed to parse {val}, base={valBase} to BigFloat, __gmpf_init_set_str returns {ret}");
-                    }
+                    GmpNative.__gmpf_clear((IntPtr)ptr);
+                    throw new FormatException($"Failed to parse {val}, base={valBase} to BigFloat, __gmpf_init_set_str returns {ret}");
                 }
             }
-            return r;
+            return new BigFloat(raw);
         }
 
         public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out BigFloat result, int valBase = 10)
         {
-            BigFloat r = new();
-            fixed (Mpf_t* ptr = &r.Raw)
+            Mpf_t raw = new();
+            Mpf_t* ptr = &raw;
+            byte[] valBytes = Encoding.UTF8.GetBytes(val);
+            fixed (byte* pval = valBytes)
             {
-                byte[] valBytes = Encoding.UTF8.GetBytes(val);
-                fixed (byte* pval = valBytes)
+                int rt = GmpNative.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, valBase);
+                if (rt != 0)
                 {
-                    int rt = GmpNative.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, valBase);
-                    if (rt != 0)
-                    {
-                        r.Clear();
-                        result = null;
-                        return false;
-                    }
-                    else
-                    {
-                        result = r;
-                        return true;
-                    }
+                    GmpNative.__gmpf_clear((IntPtr)ptr);
+                    result = null;
+                    return false;
+                }
+                else
+                {
+                    result = new BigFloat(raw);
+                    return true;
                 }
             }
         }
@@ -153,8 +148,8 @@ namespace Sdcb.Math.Gmp
         #region Assignment functions
         public unsafe void Assign(BigFloat op)
         {
-            fixed(Mpf_t* pthis = &Raw)
-            fixed(Mpf_t* pthat = &op.Raw)
+            fixed (Mpf_t* pthis = &Raw)
+            fixed (Mpf_t* pthat = &op.Raw)
             {
                 GmpNative.__gmpf_set((IntPtr)pthis, (IntPtr)pthat);
             }
@@ -207,7 +202,7 @@ namespace Sdcb.Math.Gmp
             fixed (Mpf_t* pthis = &Raw)
             {
                 byte[] opBytes = Encoding.UTF8.GetBytes(op);
-                fixed(byte* opBytesPtr = opBytes)
+                fixed (byte* opBytesPtr = opBytes)
                 {
                     int ret = GmpNative.__gmpf_set_str((IntPtr)pthis, (IntPtr)opBytesPtr, opBase);
                     if (ret != 0)
@@ -231,7 +226,7 @@ namespace Sdcb.Math.Gmp
         #region Conversion Functions
         public unsafe double ToDouble()
         {
-            fixed(Mpf_t* ptr = &Raw)
+            fixed (Mpf_t* ptr = &Raw)
             {
                 return GmpNative.__gmpf_get_d((IntPtr)ptr);
             }
