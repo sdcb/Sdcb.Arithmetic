@@ -139,14 +139,6 @@ public class BigFloat : IDisposable
             GmpNative.__gmpf_set_prec_raw((IntPtr)ptr, value);
         }
     }
-
-    private unsafe void Clear()
-    {
-        fixed (Mpf_t* ptr = &Raw)
-        {
-            GmpNative.__gmpf_clear((IntPtr)ptr);
-        }
-    }
     #endregion
 
     #region Assignment functions
@@ -186,18 +178,18 @@ public class BigFloat : IDisposable
     public unsafe void Assign(BigInteger op)
     {
         fixed (Mpf_t* pthis = &Raw)
+        fixed (Mpz_t* pop = &op.Raw)
         {
-            // TODO: GmpNative.__gmpf_set_z((IntPtr)pthis, op);
-            throw new NotImplementedException();
+            GmpNative.__gmpf_set_z((IntPtr)pthis, (IntPtr)pop);
         }
     }
 
     public unsafe void Assign(BigRational op)
     {
         fixed (Mpf_t* pthis = &Raw)
+        fixed (Mpq_t* pop = &op.Raw)
         {
-            // TODO: GmpNative.__gmpf_set_q((IntPtr)pthis, op);
-            throw new NotImplementedException();
+            GmpNative.__gmpf_set_q((IntPtr)pthis, (IntPtr)pop);
         }
     }
 
@@ -211,7 +203,7 @@ public class BigFloat : IDisposable
                 int ret = GmpNative.__gmpf_set_str((IntPtr)pthis, (IntPtr)opBytesPtr, opBase);
                 if (ret != 0)
                 {
-                    throw new FormatException($"Failed to parse {op}, base={opBase} to BigFloat, __gmpf_set_str returns {ret}");
+                    throw new FormatException($"Failed to parse \"{op}\", base={opBase} to BigFloat, __gmpf_set_str returns {ret}");
                 }
             }
         }
@@ -219,10 +211,10 @@ public class BigFloat : IDisposable
 
     public unsafe static void Swap(BigFloat op1, BigFloat op2)
     {
-        fixed (Mpf_t* pthis = &op1.Raw)
-        fixed (Mpf_t* pthat = &op2.Raw)
+        fixed (Mpf_t* pop1 = &op1.Raw)
+        fixed (Mpf_t* pop2 = &op2.Raw)
         {
-            GmpNative.__gmpf_swap((IntPtr)pthis, (IntPtr)pthat);
+            GmpNative.__gmpf_swap((IntPtr)pop1, (IntPtr)pop2);
         }
     }
     #endregion
@@ -283,7 +275,7 @@ public class BigFloat : IDisposable
                 ret = GmpNative.__gmpf_get_str(srcptr, (IntPtr)(&exp), @base, digits, (IntPtr)ptr);
                 if (ret == IntPtr.Zero)
                 {
-                    throw new ArgumentException($"Unable to format BigFloat.");
+                    throw new ArgumentException($"Unable to convert BigInteger to string.");
                 }
 
                 string s = Marshal.PtrToStringUTF8(ret)!;
@@ -775,12 +767,11 @@ public class BigFloat : IDisposable
     /// </summary>
     public static unsafe int Compare(BigFloat op1, BigInteger op2)
     {
-        throw new NotImplementedException();
-        //fixed (Mpf_t* pop1 = &op1.Raw)
-        //fixed (Mpf_t* pop2 = &op2.Raw)
-        //{
-        //    return GmpNative.__gmpf_cmp((IntPtr)pop1, (IntPtr)pop2);
-        //}
+        fixed (Mpf_t* pop1 = &op1.Raw)
+        fixed (Mpz_t* pop2 = &op2.Raw)
+        {
+            return GmpNative.__gmpf_cmp_z((IntPtr)pop1, (IntPtr)pop2);
+        }
     }
 
     /// <summary>
@@ -954,6 +945,15 @@ public class BigFloat : IDisposable
     }
     #endregion
 
+    #region Dispose and Clear
+    private unsafe void Clear()
+    {
+        fixed (Mpf_t* ptr = &Raw)
+        {
+            GmpNative.__gmpf_clear((IntPtr)ptr);
+        }
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -979,6 +979,7 @@ public class BigFloat : IDisposable
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
+    #endregion
 }
 
 public record struct Mpf_t
