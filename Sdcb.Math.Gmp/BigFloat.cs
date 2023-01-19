@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
+using SysMath = System.Math;
 
 namespace Sdcb.Math.Gmp
 {
@@ -280,15 +281,26 @@ namespace Sdcb.Math.Gmp
                 try
                 {
                     ret = GmpNative.__gmpf_get_str(srcptr, (IntPtr)(&exp), @base, digits, (IntPtr)ptr);
-                    string? result = Marshal.PtrToStringUTF8(ret);
-                    if (result == null) return null;
-
-                    return (result.Length - exp) switch
+                    if (ret == IntPtr.Zero)
                     {
-                        > 0 => result[..exp] + "." + result[exp..],
-                        0 => result[..exp],
-                        var x => result + new string('0', -x),
-                    };
+                        throw new ArgumentException($"Unable to format BigFloat.");
+                    }
+
+                    string s = Marshal.PtrToStringUTF8(ret)!;
+
+                    int sign = Sign;
+                    string pre = sign == -1 ? "-" : "";
+                    s = sign == -1 ? s[1..] : s;
+
+                    return pre + (exp switch
+                    {
+                        > 0 => (s + new string('0', SysMath.Max(0, exp - s.Length + 1))) switch { var ss => ss[..exp] + "." + ss[exp..] },
+                        _ => s switch
+                        {
+                            "" => 0, 
+                            _ => "0." + new string('0', -exp) + s
+                        }
+                    });
                 }
                 finally
                 {
@@ -410,8 +422,9 @@ namespace Sdcb.Math.Gmp
         public static unsafe void NegateInplace(BigFloat rop, BigFloat op1)
         {
             fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop1 = &op1.Raw)
             {
-                GmpNative.__gmpf_neg((IntPtr)prop, (IntPtr)prop);
+                GmpNative.__gmpf_neg((IntPtr)prop, (IntPtr)pop1);
             }
         }
 
@@ -486,7 +499,7 @@ namespace Sdcb.Math.Gmp
         public static unsafe BigFloat Subtract(BigFloat op1, BigFloat op2, uint precision = 0)
         {
             BigFloat rop = new(precision);
-            AddInplace(rop, op1, op2);
+            SubtractInplace(rop, op1, op2);
             return rop;
         }
 
@@ -661,6 +674,102 @@ namespace Sdcb.Math.Gmp
 
         public static bool operator <=(BigFloat left, BigFloat right) => Compare(left, right) <= 0;
 
+        public static bool operator ==(BigFloat left, double right) => Compare(left, right) == 0;
+
+        public static bool operator !=(BigFloat left, double right) => Compare(left, right) != 0;
+
+        public static bool operator >(BigFloat left, double right) => Compare(left, right) > 0;
+
+        public static bool operator <(BigFloat left, double right) => Compare(left, right) < 0;
+
+        public static bool operator >=(BigFloat left, double right) => Compare(left, right) >= 0;
+
+        public static bool operator <=(BigFloat left, double right) => Compare(left, right) <= 0;
+
+        public static bool operator ==(BigFloat left, int right) => Compare(left, right) == 0;
+
+        public static bool operator !=(BigFloat left, int right) => Compare(left, right) != 0;
+
+        public static bool operator >(BigFloat left, int right) => Compare(left, right) > 0;
+
+        public static bool operator <(BigFloat left, int right) => Compare(left, right) < 0;
+
+        public static bool operator >=(BigFloat left, int right) => Compare(left, right) >= 0;
+
+        public static bool operator <=(BigFloat left, int right) => Compare(left, right) <= 0;
+
+        public static bool operator ==(BigFloat left, uint right) => Compare(left, right) == 0;
+
+        public static bool operator !=(BigFloat left, uint right) => Compare(left, right) != 0;
+
+        public static bool operator >(BigFloat left, uint right) => Compare(left, right) > 0;
+
+        public static bool operator <(BigFloat left, uint right) => Compare(left, right) < 0;
+
+        public static bool operator >=(BigFloat left, uint right) => Compare(left, right) >= 0;
+
+        public static bool operator <=(BigFloat left, uint right) => Compare(left, right) <= 0;
+
+        public static bool operator ==(BigFloat left, BigInteger right) => Compare(left, right) == 0;
+
+        public static bool operator !=(BigFloat left, BigInteger right) => Compare(left, right) != 0;
+
+        public static bool operator >(BigFloat left, BigInteger right) => Compare(left, right) > 0;
+
+        public static bool operator <(BigFloat left, BigInteger right) => Compare(left, right) < 0;
+
+        public static bool operator >=(BigFloat left, BigInteger right) => Compare(left, right) >= 0;
+
+        public static bool operator <=(BigFloat left, BigInteger right) => Compare(left, right) <= 0;
+
+        public static bool operator ==(double left, BigFloat right) => right == left;
+
+        public static bool operator !=(double left, BigFloat right) => right != left;
+
+        public static bool operator >(double left, BigFloat right) => right < left;
+
+        public static bool operator <(double left, BigFloat right) => right > left;
+
+        public static bool operator >=(double left, BigFloat right) => right <= left;
+
+        public static bool operator <=(double left, BigFloat right) => right >= left;
+
+        public static bool operator ==(int left, BigFloat right) => right == left;
+
+        public static bool operator !=(int left, BigFloat right) => right != left;
+
+        public static bool operator >(int left, BigFloat right) => right < left;
+
+        public static bool operator <(int left, BigFloat right) => right > left;
+
+        public static bool operator >=(int left, BigFloat right) => right <= left;
+
+        public static bool operator <=(int left, BigFloat right) => right >= left;
+
+        public static bool operator ==(uint left, BigFloat right) => right == left;
+
+        public static bool operator !=(uint left, BigFloat right) => right != left;
+
+        public static bool operator >(uint left, BigFloat right) => right < left;
+
+        public static bool operator <(uint left, BigFloat right) => right > left;
+
+        public static bool operator >=(uint left, BigFloat right) => right <= left;
+
+        public static bool operator <=(uint left, BigFloat right) => right >= left;
+
+        public static bool operator ==(BigInteger left, BigFloat right) => right == left;
+
+        public static bool operator !=(BigInteger left, BigFloat right) => right != left;
+
+        public static bool operator >(BigInteger left, BigFloat right) => right < left;
+
+        public static bool operator <(BigInteger left, BigFloat right) => right > left;
+
+        public static bool operator >=(BigInteger left, BigFloat right) => right <= left;
+
+        public static bool operator <=(BigInteger left, BigFloat right) => right >= left;
+
         /// <summary>
         /// Compare op1 and op2. Return a positive value if op1 > op2, zero if op1 = op2, and a negative value if op1 < op2.
         /// </summary>
@@ -747,7 +856,102 @@ namespace Sdcb.Math.Gmp
         #endregion
 
         #region Misc Functions
-        // TODO: https://gmplib.org/manual/Miscellaneous-Float-Functions
+        public static unsafe void CeilInplace(BigFloat rop, BigFloat op)
+        {
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop = &op.Raw)
+            {
+                GmpNative.__gmpf_ceil((IntPtr)prop, (IntPtr)pop);
+            }
+        }
+
+        public static BigFloat Ceil(BigFloat op, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            CeilInplace(rop, op);
+            return rop;
+        }
+
+        public static unsafe void FloorInplace(BigFloat rop, BigFloat op)
+        {
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop = &op.Raw)
+            {
+                GmpNative.__gmpf_floor((IntPtr)prop, (IntPtr)pop);
+            }
+        }
+
+        public static BigFloat Floor(BigFloat op, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            FloorInplace(rop, op);
+            return rop;
+        }
+
+        /// <summary>
+        /// mpf_trunc, Set rop to op rounded to an integer, to the integer towards zero.
+        /// </summary>
+        public static unsafe void RoundInplace(BigFloat rop, BigFloat op)
+        {
+            fixed (Mpf_t* prop = &rop.Raw)
+            fixed (Mpf_t* pop = &op.Raw)
+            {
+                GmpNative.__gmpf_trunc((IntPtr)prop, (IntPtr)pop);
+            }
+        }
+
+        /// <summary>
+        /// mpf_trunc, Set rop to op rounded to an integer, to the integer towards zero.
+        /// </summary>
+        public static BigFloat Round(BigFloat op, uint precision = 0)
+        {
+            BigFloat rop = new(precision);
+            RoundInplace(rop, op);
+            return rop;
+        }
+
+        public unsafe bool IsInteger
+        {
+            get
+            {
+                fixed (Mpf_t* ptr = &Raw)
+                {
+                    return GmpNative.__gmpf_integer_p((IntPtr)ptr) != 0;
+                }
+            }
+        }
+
+        public unsafe bool FitsInt32()
+        {
+            fixed (Mpf_t* ptr = &Raw)
+            {
+                return GmpNative.__gmpf_fits_sint_p((IntPtr)ptr) != 0;
+            }
+        }
+
+        public unsafe bool FitsUInt32()
+        {
+            fixed (Mpf_t* ptr = &Raw)
+            {
+                return GmpNative.__gmpf_fits_uint_p((IntPtr)ptr) != 0;
+            }
+        }
+
+        public unsafe bool FitsInt16()
+        {
+            fixed (Mpf_t* ptr = &Raw)
+            {
+                return GmpNative.__gmpf_fits_sshort_p((IntPtr)ptr) != 0;
+            }
+        }
+
+        public unsafe bool FitsUInt16()
+        {
+            fixed (Mpf_t* ptr = &Raw)
+            {
+                return GmpNative.__gmpf_fits_ushort_p((IntPtr)ptr) != 0;
+            }
+        }
         #endregion
 
         protected virtual void Dispose(bool disposing)

@@ -1,0 +1,120 @@
+using Xunit.Abstractions;
+
+namespace Sdcb.Math.Gmp.Tests
+{
+    public class BigFloatCompareTest
+    {
+        private readonly ITestOutputHelper _console;
+
+        public BigFloatCompareTest(ITestOutputHelper console)
+        {
+            _console = console;
+        }
+
+        [Theory]
+        [InlineData(3.14, 2.718, 1)]
+        [InlineData(2.718, 3.14, -1)]
+        [InlineData(3.14, 3.14, 0)]
+        public void CompareBigFloat(double op1, double op2, int r)
+        {
+            Assert.Equal(r, BigFloat.Compare(BigFloat.From(op1), BigFloat.From(op2)));
+        }
+
+        [Theory]
+        [InlineData(3.14, 2.718, 1)]
+        [InlineData(2.718, 3.14, -1)]
+        [InlineData(3.14, 3.14, 0)]
+        public void CompareDouble(double op1, double op2, int r)
+        {
+            Assert.Equal(r, BigFloat.Compare(BigFloat.From(op1), op2));
+        }
+
+        [Theory]
+        [InlineData(3.14, 2, 1)]
+        [InlineData(2.718, 4, -1)]
+        [InlineData(-3, -3, 0)]
+        public void CompareInt(double op1, int op2, int r)
+        {
+            Assert.Equal(r, BigFloat.Compare(BigFloat.From(op1), op2));
+        }
+
+        [Theory]
+        [InlineData(3.14, 2, 1)]
+        [InlineData(2.718, 4, -1)]
+        [InlineData(65535, 65535, 0)]
+        public void CompareUInt(double op1, uint op2, int r)
+        {
+            Assert.Equal(r, BigFloat.Compare(BigFloat.From(op1), op2));
+        }
+
+        [Theory]
+        [InlineData(3.14, 2.718, true)]
+        [InlineData(2.718, 3.14, false)]
+        [InlineData(3.14, 3.14, false)]
+        public void GreaterBigFloat(double op1, double op2, bool check)
+        {
+            Assert.Equal(check, BigFloat.From(op1) > BigFloat.From(op2));
+            Assert.Equal(check, BigFloat.From(op2) < BigFloat.From(op1));
+        }
+
+        [Theory]
+        [InlineData(3.14, 2.718, true)]
+        [InlineData(2.718, 3.14, false)]
+        [InlineData(3.14, 3.14, false)]
+        public void GreaterDouble(double op1, double op2, bool check)
+        {
+            Assert.Equal(check, BigFloat.From(op1) > op2);
+            Assert.Equal(check, BigFloat.From(op2) < op1);
+        }
+
+        [Theory]
+        [InlineData(3.14, 2, true)]
+        [InlineData(2.718, 4, false)]
+        [InlineData(-7, -7, false)]
+        public void GreaterInt(double op1, int op2, bool check)
+        {
+            Assert.Equal(check, BigFloat.From(op1) > op2);
+            Assert.Equal(check, BigFloat.From(op2) < op1);
+        }
+
+        [Theory]
+        [InlineData(3.14, 2, true)]
+        [InlineData(2.718, 4, false)]
+        [InlineData(113, 113, false)]
+        public void GreaterUInt(double op1, uint op2, bool check)
+        {
+            Assert.Equal(check, BigFloat.From(op1) > op2);
+            Assert.Equal(check, BigFloat.From(op2) < op1);
+        }
+
+        [Theory]
+        [InlineData(3.14, 2.718, true)]
+        [InlineData(2.718, 3.14, false)]
+        [InlineData(3.14, 3.14, false)]
+        public void GreaterDoubleRev(double op1, double op2, bool check)
+        {
+            Assert.Equal(check, op1 > BigFloat.From(op2));
+            Assert.Equal(!check, op1 <= BigFloat.From(op2));
+        }
+
+        [Theory]
+        [InlineData(3.14, 2, true)]
+        [InlineData(2.718, 4, false)]
+        [InlineData(-7, -7, false)]
+        public void GreaterIntRev(double op1, int op2, bool check)
+        {
+            Assert.Equal(check, op1 > BigFloat.From(op2));
+            Assert.Equal(!check, op1 <= BigFloat.From(op2));
+        }
+
+        [Theory]
+        [InlineData(3.14, 2, true)]
+        [InlineData(2.718, 4, false)]
+        [InlineData(113, 113, false)]
+        public void GreaterUIntRev(double op1, uint op2, bool check)
+        {
+            Assert.Equal(check, op1 > BigFloat.From(op2));
+            Assert.Equal(!check, op1 <= BigFloat.From(op2));
+        }
+    }
+}
