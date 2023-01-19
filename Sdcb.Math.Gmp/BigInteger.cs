@@ -291,11 +291,13 @@ public class BigInteger : IDisposable
         }
     }
 
-    public unsafe override string ToString()
+    public override string ToString() => ToString(10);
+
+    public unsafe string ToString(int opBase)
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            IntPtr ret = GmpNative.__gmpz_get_str(IntPtr.Zero, 10, (IntPtr)ptr);
+            IntPtr ret = GmpNative.__gmpz_get_str(IntPtr.Zero, opBase, (IntPtr)ptr);
             if (ret == IntPtr.Zero)
             {
                 throw new ArgumentException($"Unable to convert BigInteger to string.");

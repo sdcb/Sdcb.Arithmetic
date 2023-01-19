@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Drawing;
+using System.Runtime.InteropServices;
 
 namespace Sdcb.Math.Gmp;
 
@@ -49,6 +49,8 @@ public class BigRational : IDisposable
 public struct Mpq_t
 {
     public Mpz_t Num, Den;
+
+    public static int RawSize => Marshal.SizeOf<Mpq_t>();
 
     public override int GetHashCode() => HashCode.Combine(Num.GetHashCode(), Den.GetHashCode());
 }
