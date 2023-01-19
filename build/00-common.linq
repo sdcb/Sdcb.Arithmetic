@@ -22,7 +22,7 @@ static void DotNetRun(string args) => Run("dotnet", args, encoding);
 static void Run(string exe, string args, Encoding encoding) => Util.Cmd(exe, args, encoding);
 static ProjectVersion[] Projects = new[]
 {
-	new ProjectVersion("Sdcb.Math.Gmp", "1.0.4"), 
+	new ProjectVersion("Sdcb.Math.Gmp", "1.0.5"), 
 };
 
 static async Task DownloadFile(Uri uri, string localFile, CancellationToken cancellationToken = default)
