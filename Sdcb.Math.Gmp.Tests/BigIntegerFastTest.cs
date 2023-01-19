@@ -12,7 +12,8 @@ public class BigIntegerFastTest
     }
 
     [Theory]
-    [InlineData(3, 0, "3")]
+    [InlineData(65535, 0, "65535")]
+    [InlineData(0, 0, "0")]
     [InlineData(-3, 10, "-3")]
     [InlineData(255, 2, "11111111")]
     [InlineData(-255, 16, "-ff")]
