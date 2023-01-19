@@ -286,7 +286,11 @@ public class BigFloat : IDisposable
 
                 return pre + (exp switch
                 {
-                    > 0 => (s + new string('0', SysMath.Max(0, exp - s.Length + 1))) switch { var ss => ss[..exp] + "." + ss[exp..] },
+                    > 0 => (s.Length == exp) switch
+                    {
+                        false => (s + new string('0', SysMath.Max(0, exp - s.Length + 1))) switch { var ss => ss[..exp] + "." + ss[exp..] },
+                        true => s
+                    },
                     _ => s switch
                     {
                         "" => 0, 

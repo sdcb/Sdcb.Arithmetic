@@ -43,24 +43,15 @@ public class BigFloatFastTest
         }
     }
 
-    [Fact]
-    public void NegativeToString()
+    [Theory]
+    [InlineData(-65535.125, 10, "-65535.125")]
+    [InlineData(0.125, 10, "0.125")]
+    [InlineData(0, 10, "0")]
+    [InlineData(42, 10, "42")]
+    [InlineData(-2147483647, 10, "-2147483647")]
+    public void ToStringTest(double val, int opBase, string expected)
     {
-        BigFloat b = BigFloat.Parse("-65535.125");
-        Assert.Equal("-65535.125", b.ToString());
-    }
-
-    [Fact]
-    public void DecimalToString()
-    {
-        BigFloat b = BigFloat.Parse("0.125");
-        Assert.Equal("0.125", b.ToString());
-    }
-
-    [Fact]
-    public void ZeroToString()
-    {
-        BigFloat b = BigFloat.Parse("0");
-        Assert.Equal("0", b.ToString());
+        BigFloat f = BigFloat.From(val);
+        Assert.Equal(expected, f.ToString(opBase));
     }
 }
