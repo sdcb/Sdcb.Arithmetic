@@ -8,6 +8,24 @@ public class BigRational : IDisposable
     public Mpq_t Raw = new();
     private bool _disposed = false;
 
+    public unsafe BigRational()
+    {
+        fixed (Mpq_t* ptr = &Raw)
+        {
+            GmpNative.__gmpq_init((IntPtr)ptr);
+        }
+    }
+
+    public static unsafe BigRational From(int num, uint den)
+    {
+        BigRational r = new();
+        fixed (Mpq_t* pr = &r.Raw)
+        {
+            GmpNative.__gmpq_set_si((IntPtr)pr, num, den);
+        }
+        return r;
+    }
+
     #region Dispose & Clear
     private unsafe void Clear()
     {

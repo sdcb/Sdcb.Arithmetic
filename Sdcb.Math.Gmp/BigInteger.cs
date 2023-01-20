@@ -2,6 +2,7 @@
 using System;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Sdcb.Math.Gmp;
 
@@ -1036,6 +1037,204 @@ public class BigInteger : IDisposable
     #endregion
     #endregion
 
+    #region Exponentiation Functions
+    /// <summary>
+    /// r = (@base ^ exp) % mod
+    /// </summary>
+    public static unsafe void PowerModInplace(BigInteger r, BigInteger @base, BigInteger exp, BigInteger mod)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pbase = &@base.Raw)
+        fixed (Mpz_t* pexp = &exp.Raw)
+        fixed (Mpz_t* pmod = &mod.Raw)
+        {
+            GmpNative.__gmpz_powm((IntPtr)pr, (IntPtr)pbase, (IntPtr)pexp, (IntPtr)pmod);
+        }
+    }
+
+    /// <returns>(@base ^ exp) % mod</returns>
+    public static BigInteger PowerMod(BigInteger @base, BigInteger exp, BigInteger mod)
+    {
+        BigInteger r = new();
+        PowerModInplace(r, @base, exp, mod);
+        return r;
+    }
+
+    /// <summary>
+    /// r = (@base ^ exp) % mod
+    /// </summary>
+    public static unsafe void PowerModInplace(BigInteger r, BigInteger @base, uint exp, BigInteger mod)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pbase = &@base.Raw)
+        fixed (Mpz_t* pmod = &mod.Raw)
+        {
+            GmpNative.__gmpz_powm_ui((IntPtr)pr, (IntPtr)pbase, exp, (IntPtr)pmod);
+        }
+    }
+
+    /// <returns>(@base ^ exp) % mod</returns>
+    public static BigInteger PowerMod(BigInteger @base, uint exp, BigInteger mod)
+    {
+        BigInteger r = new();
+        PowerModInplace(r, @base, exp, mod);
+        return r;
+    }
+
+    /// <summary>
+    /// r = (@base ^ exp) % mod
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This function is designed to take the same time and have the same cache access patterns for any two same-size arguments,
+    /// assuming that function arguments are placed at the same position and that the machine state is identical upon function entry. 
+    /// </para>
+    /// <para>This function is intended for cryptographic purposes, where resilience to side-channel attacks is desired.</para>
+    /// </remarks>
+    public static unsafe void PowerModSecureInplace(BigInteger r, BigInteger @base, BigInteger exp, BigInteger mod)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pbase = &@base.Raw)
+        fixed (Mpz_t* pexp = &exp.Raw)
+        fixed (Mpz_t* pmod = &mod.Raw)
+        {
+            GmpNative.__gmpz_powm_sec((IntPtr)pr, (IntPtr)pbase, (IntPtr)pexp, (IntPtr)pmod);
+        }
+    }
+
+    /// <returns>(@base ^ exp) % mod</returns>
+    /// <remarks>
+    /// <para>
+    /// This function is designed to take the same time and have the same cache access patterns for any two same-size arguments,
+    /// assuming that function arguments are placed at the same position and that the machine state is identical upon function entry. 
+    /// </para>
+    /// <para>This function is intended for cryptographic purposes, where resilience to side-channel attacks is desired.</para>
+    /// </remarks>
+    public static BigInteger PowerModSecure(BigInteger @base, BigInteger exp, BigInteger mod)
+    {
+        BigInteger r = new();
+        PowerModSecureInplace(r, @base, exp, mod);
+        return r;
+    }
+
+    /// <summary>
+    /// r = base ^ exp
+    /// </summary>
+    /// <remarks>The case 0^0 yields 1</remarks>
+    public static unsafe void PowerInplace(BigInteger r, BigInteger @base, uint exp)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pbase = &@base.Raw)
+        {
+            GmpNative.__gmpz_pow_ui((IntPtr)pr, (IntPtr)pbase, exp);
+        }
+    }
+
+    /// <returns>base ^ exp</returns>
+    /// <remarks>The case 0^0 yields 1</remarks>
+    public static BigInteger Power(BigInteger @base, uint exp)
+    {
+        BigInteger r = new();
+        PowerInplace(r, @base, exp);
+        return r;
+    }
+
+    /// <summary>
+    /// r = base ^ exp
+    /// </summary>
+    /// <remarks>The case 0^0 yields 1</remarks>
+    public static unsafe void PowerInplace(BigInteger r, uint @base, uint exp)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        {
+            GmpNative.__gmpz_ui_pow_ui((IntPtr)pr, @base, exp);
+        }
+    }
+
+    /// <returns>base ^ exp</returns>
+    /// <remarks>The case 0^0 yields 1</remarks>
+    public static BigInteger Power(uint @base, uint exp)
+    {
+        BigInteger r = new();
+        PowerInplace(r, @base, exp);
+        return r;
+    }
+
+    public static BigInteger operator ^(BigInteger @base, uint exp) => Power(@base, exp);
+    #endregion
+
+    #region Root Extraction Functions
+    /// <summary>
+    /// r = sqrt(op, n)
+    /// </summary>
+    /// <returns>true if computation was exact</returns>
+    public static unsafe bool RootInplace(BigInteger r, BigInteger op, uint n)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop = &op.Raw)
+        {
+            return GmpNative.__gmpz_root((IntPtr)pr, (IntPtr)pop, n) != 0;
+        }
+    }
+
+    /// <returns>sqsrt(op, n)</returns>
+    public static BigInteger Root(BigInteger op, uint n)
+    {
+        BigInteger r = new();
+        RootInplace(r, op, n);
+        return r;
+    }
+
+    /// <summary>
+    /// r = sqrt(op, n) + reminder
+    /// </summary>\
+    public static unsafe void RootReminderInplace(BigInteger r, BigInteger reminder, BigInteger op, uint n)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* preminder = &reminder.Raw)
+        fixed (Mpz_t* pop = &op.Raw)
+        {
+            GmpNative.__gmpz_rootrem((IntPtr)pr, (IntPtr)preminder, (IntPtr)pop, n);
+        }
+    }
+
+    /// <returns>(root, reminder)</returns>
+    public static (BigInteger root, BigInteger reminder) RootReminder(BigInteger op, uint n)
+    {
+        BigInteger root = new(), reminder = new();
+        RootReminderInplace(root, reminder, op, n);
+        return (root, reminder);
+    }
+
+    /// <returns>true if op is a perfect power, i.e., if there exist integers a and b, with b>1, such that op equals a raised to the power b.</returns>
+    /// <remarks>
+    /// <para>Under this definition both 0 and 1 are considered to be perfect powers.</para>
+    /// <para>Negative values of op are accepted, but of course can only be odd perfect powers.</para>
+    /// </remarks>
+    public unsafe bool HasPerfectPower()
+    {
+        fixed (Mpz_t* pop = &Raw)
+        {
+            return GmpNative.__gmpz_perfect_power_p((IntPtr)pop) != 0;
+        }
+    }
+
+    /// <returns>
+    /// <para>true if op is a perfect square, i.e., if the square root of op is an integer.</para>
+    /// <para>Under this definition both 0 and 1 are considered to be perfect squares.</para>
+    /// </returns>
+    public unsafe bool HasPerfectSquare()
+    {
+        fixed (Mpz_t* pop = &Raw)
+        {
+            return GmpNative.__gmpz_perfect_square_p((IntPtr)pop) != 0;
+        }
+    }
+    #endregion
+
+    #region Number Theoretic Functions
+
+    #endregion
 }
 
 public record struct Mpz_t
