@@ -3,6 +3,7 @@ using System;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Reflection;
 
 namespace Sdcb.Math.Gmp;
 
@@ -254,6 +255,262 @@ public class BigInteger : IDisposable
         // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+    #endregion
+
+    #region Arithmetic Functions
+    public static unsafe void AddInplace(BigInteger r, BigInteger op1, BigInteger op2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        fixed (Mpz_t* pop2 = &op2.Raw)
+        {
+            GmpNative.__gmpz_add((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
+        }
+    }
+
+    public static BigInteger Add(BigInteger op1, BigInteger op2)
+    {
+        BigInteger r = new();
+        AddInplace(r, op1, op2);
+        return r;
+    }
+
+    public static BigInteger operator +(BigInteger a, BigInteger b) => Add(a, b);
+
+    public static unsafe void AddInplace(BigInteger r, BigInteger op1, uint op2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        {
+            GmpNative.__gmpz_add_ui((IntPtr)pr, (IntPtr)pop1, op2);
+        }
+    }
+
+    public static BigInteger Add(BigInteger op1, uint op2)
+    {
+        BigInteger r = new();
+        AddInplace(r, op1, op2);
+        return r;
+    }
+
+    public static BigInteger operator +(BigInteger a, uint b) => Add(a, b);
+    public static BigInteger operator +(uint a, BigInteger b) => Add(b, a);
+
+    public static unsafe void SubtractInplace(BigInteger r, BigInteger op1, BigInteger op2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        fixed (Mpz_t* pop2 = &op2.Raw)
+        {
+            GmpNative.__gmpz_sub((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
+        }
+    }
+
+    public static BigInteger Subtract(BigInteger op1, BigInteger op2)
+    {
+        BigInteger r = new();
+        SubtractInplace(r, op1, op2);
+        return r;
+    }
+
+    public static BigInteger operator -(BigInteger op1, BigInteger op2) => Subtract(op1, op2);
+
+    public static unsafe void SubtractInplace(BigInteger r, BigInteger op1, uint op2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        {
+            GmpNative.__gmpz_sub_ui((IntPtr)pr, (IntPtr)pop1, op2);
+        }
+    }
+
+    public static BigInteger Subtract(BigInteger op1, uint op2)
+    {
+        BigInteger r = new();
+        SubtractInplace(r, op1, op2);
+        return r;
+    }
+
+    public static BigInteger operator -(BigInteger op1, uint op2) => Subtract(op1, op2);
+
+    public static unsafe void SubtractInplace(BigInteger r, uint op1, BigInteger op2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop2 = &op2.Raw)
+        {
+            GmpNative.__gmpz_ui_sub((IntPtr)pr, op1, (IntPtr)pop2);
+        }
+    }
+
+    public static BigInteger Subtract(uint op1, BigInteger op2)
+    {
+        BigInteger r = new();
+        SubtractInplace(r, op1, op2);
+        return r;
+    }
+
+    public static BigInteger operator -(uint op1, BigInteger op2) => Subtract(op1, op2);
+
+    public static unsafe void MultipleInplace(BigInteger r, BigInteger op1, BigInteger op2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        fixed (Mpz_t* pop2 = &op2.Raw)
+        {
+            GmpNative.__gmpz_mul((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
+        }
+    }
+
+    public static BigInteger Multiple(BigInteger op1, BigInteger op2)
+    {
+        BigInteger r = new();
+        MultipleInplace(r, op1, op2);
+        return r;
+    }
+
+    public static BigInteger operator *(BigInteger op1, BigInteger op2) => Multiple(op1, op2);
+
+    public static unsafe void MultipleInplace(BigInteger r, BigInteger op1, int op2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        {
+            GmpNative.__gmpz_mul_si((IntPtr)pr, (IntPtr)pop1, op2);
+        }
+    }
+
+    public static BigInteger Multiple(BigInteger op1, int op2)
+    {
+        BigInteger r = new();
+        MultipleInplace(r, op1, op2);
+        return r;
+    }
+
+    public static BigInteger operator *(BigInteger op1, int op2) => Multiple(op1, op2);
+    public static BigInteger operator *(int op1, BigInteger op2) => Multiple(op2, op1);
+
+    public static unsafe void MultipleInplace(BigInteger r, BigInteger op1, uint op2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        {
+            GmpNative.__gmpz_mul_ui((IntPtr)pr, (IntPtr)pop1, op2);
+        }
+    }
+
+    public static BigInteger Multiple(BigInteger op1, uint op2)
+    {
+        BigInteger r = new();
+        MultipleInplace(r, op1, op2);
+        return r;
+    }
+
+    public static BigInteger operator *(BigInteger op1, uint op2) => Multiple(op1, op2);
+    public static BigInteger operator *(uint op1, BigInteger op2) => Multiple(op2, op1);
+
+    /// <summary>
+    /// r += op1 * op2
+    /// </summary>
+    public static unsafe void AddMultiply(BigInteger r, BigInteger op1, BigInteger op2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        fixed (Mpz_t* pop2 = &op2.Raw)
+        {
+            GmpNative.__gmpz_addmul((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
+        }
+    }
+
+    /// <summary>
+    /// r += op1 * op2
+    /// </summary>
+    public static unsafe void AddMultiply(BigInteger r, BigInteger op1, uint op2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        {
+            GmpNative.__gmpz_addmul_ui((IntPtr)pr, (IntPtr)pop1, op2);
+        }
+    }
+
+    /// <summary>
+    /// r -= op1 * op2
+    /// </summary>
+    public static unsafe void SubtractMultiply(BigInteger r, BigInteger op1, BigInteger op2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        fixed (Mpz_t* pop2 = &op2.Raw)
+        {
+            GmpNative.__gmpz_submul((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
+        }
+    }
+
+    /// <summary>
+    /// r -= op1 * op2
+    /// </summary>
+    public static unsafe void SubtractMultiply(BigInteger r, BigInteger op1, uint op2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        {
+            GmpNative.__gmpz_submul_ui((IntPtr)pr, (IntPtr)pop1, op2);
+        }
+    }
+
+    public static unsafe void Multiple2ExpInplace(BigInteger r, BigInteger op1, uint exp2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        {
+            GmpNative.__gmpz_mul_2exp((IntPtr)pr, (IntPtr)pop1, exp2);
+        }
+    }
+
+    public static unsafe BigInteger Multiple2Exp(BigInteger op1, uint exp2)
+    {
+        BigInteger r = new();
+        Multiple2ExpInplace(r, op1, exp2);
+        return r;
+    }
+
+    public void LeftShiftInplace(uint bits) => Multiple2ExpInplace(this, this, bits);
+
+    public static BigInteger operator <<(BigInteger op1, uint exp2) => Multiple2Exp(op1, exp2);
+
+    public static unsafe void NegateInplace(BigInteger r, BigInteger op1)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        {
+            GmpNative.__gmpz_neg((IntPtr)pr, (IntPtr)pop1);
+        }
+    }
+
+    public static BigInteger Negate(BigInteger op1)
+    {
+        BigInteger r = new();
+        NegateInplace(r, op1);
+        return r;
+    }
+
+    public static BigInteger operator -(BigInteger op1) => Negate(op1);
+
+    public static unsafe void AbsInplace(BigInteger r, BigInteger op1)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pop1 = &op1.Raw)
+        {
+            GmpNative.__gmpz_abs((IntPtr)pr, (IntPtr)pop1);
+        }
+    }
+
+    public static BigInteger Abs(BigInteger op1)
+    {
+        BigInteger r = new();
+        AbsInplace(r, op1);
+        return r;
     }
     #endregion
 
