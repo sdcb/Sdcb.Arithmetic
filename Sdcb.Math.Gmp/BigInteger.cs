@@ -907,6 +907,133 @@ public class BigInteger : IDisposable
 
     public static BigInteger operator %(BigInteger op1, uint op2) => Reminder(op1, op2);
     #endregion
+
+    #region Others
+    /// <summary>
+    /// Set r to n mod d. The sign of the divisor is ignored; the result is always non-negative.
+    /// </summary>
+    public static unsafe void ModInplace(BigInteger r, BigInteger n, BigInteger d)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pd = &d.Raw)
+        {
+            GmpNative.__gmpz_mod((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+        }
+    }
+
+    /// <summary>
+    /// return n mod d. The sign of the divisor is ignored; the result is always non-negative.
+    /// </summary>
+    public static unsafe BigInteger Mod(BigInteger n, BigInteger d)
+    {
+        BigInteger r = new();
+        ModInplace(r, n, d);
+        return r;
+    }
+
+    /// <summary>
+    /// <para>Set r to n mod d. The sign of the divisor is ignored; the result is always non-negative.</para>
+    /// <para>is identical to mpz_fdiv_r_ui above, returning the remainder as well as setting r</para>
+    /// </summary>
+    public static unsafe uint ModInplace(BigInteger r, BigInteger n, uint d) => FloorReminderInplace(r, n, d);
+
+    /// <summary>
+    /// <para>return n mod d. The sign of the divisor is ignored; the result is always non-negative.</para>
+    /// <para>is identical to mpz_fdiv_r_ui above, returning the remainder as well as setting r</para>
+    /// </summary>
+    public static unsafe BigInteger Mod(BigInteger n, uint d) => FloorReminder(n, d);
+
+    /// <summary>
+    /// <para>Set q to n/d. These functions produce correct results only when it is known in advance that d divides n.</para>
+    /// <para>Much faster than the other division functions, and are the best choice when exact division is known to occur, for example reducing a rational to lowest terms.</para>
+    /// </summary>
+    public static unsafe void DivExactInplace(BigInteger q, BigInteger n, BigInteger d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pd = &d.Raw)
+        {
+            GmpNative.__gmpz_divexact((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
+        }
+    }
+
+    /// <summary>
+    /// <para>return n/d. These functions produce correct results only when it is known in advance that d divides n.</para>
+    /// <para>Much faster than the other division functions, and are the best choice when exact division is known to occur, for example reducing a rational to lowest terms.</para>
+    /// </summary>
+    public static unsafe BigInteger DivExact(BigInteger n, BigInteger d)
+    {
+        BigInteger q = new();
+        DivExactInplace(q, n, d);
+        return q;
+    }
+
+    /// <summary>
+    /// <para>Set q to n/d. These functions produce correct results only when it is known in advance that d divides n.</para>
+    /// <para>Much faster than the other division functions, and are the best choice when exact division is known to occur, for example reducing a rational to lowest terms.</para>
+    /// </summary>
+    public static unsafe void DivExactInplace(BigInteger q, BigInteger n, uint d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            GmpNative.__gmpz_divexact_ui((IntPtr)pq, (IntPtr)pn, d);
+        }
+    }
+
+    /// <summary>
+    /// <para>return n/d. These functions produce correct results only when it is known in advance that d divides n.</para>
+    /// <para>Much faster than the other division functions, and are the best choice when exact division is known to occur, for example reducing a rational to lowest terms.</para>
+    /// </summary>
+    public static unsafe BigInteger DivExact(BigInteger n, uint d)
+    {
+        BigInteger q = new();
+        DivExactInplace(q, n, d);
+        return q;
+    }
+
+    /// <summary>
+    /// <para>n is congruent to c mod d if there exists an integer q satisfying n = c + q*d.</para>
+    /// <para>Unlike the other division functions, d=0 is accepted and following the rule it can be seen that n and c are considered congruent mod 0 only when exactly equal.</para>
+    /// </summary>
+    /// <returns>true if n = c mod d</returns>
+    public static unsafe bool Congruent(BigInteger n, BigInteger c, BigInteger d)
+    {
+        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pc = &c.Raw)
+        fixed (Mpz_t* pd = &d.Raw)
+        {
+            return GmpNative.__gmpz_congruent_p((IntPtr)pn, (IntPtr)pc, (IntPtr)pd) != 0;
+        }
+    }
+
+    /// <summary>
+    /// <para>n is congruent to c mod d if there exists an integer q satisfying n = c + q*d.</para>
+    /// <para>Unlike the other division functions, d=0 is accepted and following the rule it can be seen that n and c are considered congruent mod 0 only when exactly equal.</para>
+    /// </summary>
+    /// <returns>true if n = c mod d</returns>
+    public static unsafe bool Congruent(BigInteger n, uint c, uint d)
+    {
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            return GmpNative.__gmpz_congruent_ui_p((IntPtr)pn, c, d) != 0;
+        }
+    }
+
+    /// <summary>
+    /// <para>n is congruent to c mod (2^b) if there exists an integer q satisfying n = c + q*(2^b).</para>
+    /// </summary>
+    /// <returns>true if n = c mod (2^b)</returns>
+    public static unsafe bool Congruent2Exp(BigInteger n, BigInteger c, uint b)
+    {
+        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pc = &c.Raw)
+        {
+            return GmpNative.__gmpz_congruent_2exp_p((IntPtr)pn, (IntPtr)pc, b) != 0;
+        }
+    }
+    #endregion
     #endregion
 
 }
