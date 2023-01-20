@@ -281,6 +281,10 @@ public class BigInteger : IDisposable
         }
     }
 
+    public static explicit operator uint(BigInteger op) => op.ToUInt32();
+    public static explicit operator int(BigInteger op) => op.ToInt32();
+    public static explicit operator double(BigInteger op) => op.ToDouble();
+
     public unsafe ExpDouble ToExpDouble()
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -307,22 +311,620 @@ public class BigInteger : IDisposable
         }
     }
     #endregion
+
+    #region Division Functions
+    #region Ceililng
+    /// <summary>
+    /// q = n / d (ceiling)
+    /// </summary>
+    public static unsafe void CeilingDivideInplace(BigInteger q, BigInteger n, BigInteger d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pd = &d.Raw)
+        {
+            GmpNative.__gmpz_cdiv_q((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
+        }
+    }
+
+    /// <summary>
+    /// return n / d (ceiling)
+    /// </summary>
+    public static unsafe BigInteger CeilingDivide(BigInteger n, BigInteger d)
+    {
+        BigInteger q = new();
+        CeilingDivideInplace(q, n, d);
+        return q;
+    }
+
+    /// <summary>
+    /// r = n mod d (ceiling)
+    /// </summary>
+    public static unsafe void CeilingReminderInplace(BigInteger r, BigInteger n, BigInteger d)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pd = &d.Raw)
+        {
+            GmpNative.__gmpz_cdiv_r((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+        }
+    }
+
+    /// <summary>
+    /// return n mod d (ceiling)
+    /// </summary>
+    public static unsafe BigInteger CeilingReminder(BigInteger n, BigInteger d)
+    {
+        BigInteger q = new();
+        CeilingReminderInplace(q, n, d);
+        return q;
+    }
+
+    /// <summary>
+    /// q = n / d + r (ceiling)
+    /// </summary>
+    public static unsafe void CeilingDivRemInplace(BigInteger q, BigInteger r, BigInteger n, BigInteger d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pd = &d.Raw)
+        {
+            GmpNative.__gmpz_cdiv_qr((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+        }
+    }
+
+    /// <summary>
+    /// return (n / d, n mod d) (ceiling)
+    /// </summary>
+    public static unsafe (BigInteger q, BigInteger r) CeilingDivRem(BigInteger n, BigInteger d)
+    {
+        BigInteger q = new(), r = new();
+        CeilingDivRemInplace(q, r, n, d);
+        return (q, r);
+    }
+
+    /// <summary>
+    /// q = n / d (ceiling)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe uint CeilingDivideInplace(BigInteger q, BigInteger n, uint d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            return GmpNative.__gmpz_cdiv_q_ui((IntPtr)pq, (IntPtr)pn, d);
+        }
+    }
+
+    /// <summary>
+    /// return n mod d (ceiling)
+    /// </summary>
+    public static unsafe BigInteger CeilingDivide(BigInteger n, uint d)
+    {
+        BigInteger q = new();
+        CeilingDivideInplace(q, n, d);
+        return q;
+    }
+
+    /// <summary>
+    /// r = n mod d (ceiling)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe uint CeilingReminderInplace(BigInteger r, BigInteger n, uint d)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            return GmpNative.__gmpz_cdiv_r_ui((IntPtr)pr, (IntPtr)pn, d);
+        }
+    }
+
+    /// <summary>
+    /// q = n / d + r (ceiling)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe uint CeilingDivRemInplace(BigInteger q, BigInteger r, BigInteger n, uint d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            return GmpNative.__gmpz_cdiv_qr_ui((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, d);
+        }
+    }
+
+    /// <summary>
+    /// return (n / d, n mod d) (ceiling)
+    /// </summary>
+    public static unsafe (BigInteger q, BigInteger r) CeilingDivRem(BigInteger n, uint d)
+    {
+        BigInteger q = new(), r = new();
+        CeilingDivRemInplace(q, r, n, d);
+        return (q, r);
+    }
+
+    /// <returns>n mod d (ceiling)</returns>
+    public static unsafe uint CeilingReminderToUInt32(BigInteger n, uint d)
+    {
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            return GmpNative.__gmpz_cdiv_ui((IntPtr)pn, d);
+        }
+    }
+
+    /// <returns>n mod d (ceiling)</returns>
+    public static BigInteger CeilingReminder(BigInteger n, uint d)
+    {
+        BigInteger r = new();
+        CeilingReminderInplace(r, n, d);
+        return r;
+    }
+
+    /// <summary>
+    /// q = n / (2 ^ d) (ceiling)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe void CeilingDivide2ExpInplace(BigInteger q, BigInteger n, uint exp2)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            GmpNative.__gmpz_cdiv_q_2exp((IntPtr)pq, (IntPtr)pn, exp2);
+        }
+    }
+
+    /// <summary>
+    /// return n / (2 ^ d) (ceiling)
+    /// </summary>
+    public static unsafe BigInteger CeilingDivide2Exp(BigInteger n, uint exp2)
+    {
+        BigInteger q = new();
+        CeilingDivide2ExpInplace(q, n, exp2);
+        return q;
+    }
+
+    /// <summary>
+    /// r = n mod (2 ^ d) (ceiling)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe void CeilingReminder2ExpInplace(BigInteger r, BigInteger n, uint exp2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            GmpNative.__gmpz_cdiv_r_2exp((IntPtr)pr, (IntPtr)pn, exp2);
+        }
+    }
+
+    /// <summary>
+    /// return n mod (2 ^ d) (ceiling)
+    /// </summary>
+    public static unsafe BigInteger CeilingReminder2Exp(BigInteger n, uint exp2)
+    {
+        BigInteger q = new();
+        CeilingReminder2ExpInplace(q, n, exp2);
+        return q;
+    }
+    #endregion
+
+    #region Floor
+    /// <summary>
+    /// q = n / d (Floor)
+    /// </summary>
+    public static unsafe void FloorDivideInplace(BigInteger q, BigInteger n, BigInteger d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pd = &d.Raw)
+        {
+            GmpNative.__gmpz_fdiv_q((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
+        }
+    }
+
+    /// <summary>
+    /// return n / d (Floor)
+    /// </summary>
+    public static unsafe BigInteger FloorDivide(BigInteger n, BigInteger d)
+    {
+        BigInteger q = new();
+        FloorDivideInplace(q, n, d);
+        return q;
+    }
+
+    /// <summary>
+    /// r = n mod d (Floor)
+    /// </summary>
+    public static unsafe void FloorReminderInplace(BigInteger r, BigInteger n, BigInteger d)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pd = &d.Raw)
+        {
+            GmpNative.__gmpz_fdiv_r((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+        }
+    }
+
+    /// <summary>
+    /// return n mod d (Floor)
+    /// </summary>
+    public static unsafe BigInteger FloorReminder(BigInteger n, BigInteger d)
+    {
+        BigInteger q = new();
+        FloorReminderInplace(q, n, d);
+        return q;
+    }
+
+    /// <summary>
+    /// q = n / d + r (Floor)
+    /// </summary>
+    public static unsafe void FloorDivRemInplace(BigInteger q, BigInteger r, BigInteger n, BigInteger d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pd = &d.Raw)
+        {
+            GmpNative.__gmpz_fdiv_qr((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+        }
+    }
+
+    /// <summary>
+    /// return (n / d, n mod d) (Floor)
+    /// </summary>
+    public static unsafe (BigInteger q, BigInteger r) FloorDivRem(BigInteger n, BigInteger d)
+    {
+        BigInteger q = new(), r = new();
+        FloorDivRemInplace(q, r, n, d);
+        return (q, r);
+    }
+
+    /// <summary>
+    /// q = n / d (Floor)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe uint FloorDivideInplace(BigInteger q, BigInteger n, uint d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            return GmpNative.__gmpz_fdiv_q_ui((IntPtr)pq, (IntPtr)pn, d);
+        }
+    }
+
+    /// <summary>
+    /// return n mod d (Floor)
+    /// </summary>
+    public static unsafe BigInteger FloorDivide(BigInteger n, uint d)
+    {
+        BigInteger q = new();
+        FloorDivideInplace(q, n, d);
+        return q;
+    }
+
+    /// <summary>
+    /// r = n mod d (Floor)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe uint FloorReminderInplace(BigInteger r, BigInteger n, uint d)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            return GmpNative.__gmpz_fdiv_r_ui((IntPtr)pr, (IntPtr)pn, d);
+        }
+    }
+
+    /// <summary>
+    /// q = n / d + r (Floor)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe uint FloorDivRemInplace(BigInteger q, BigInteger r, BigInteger n, uint d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            return GmpNative.__gmpz_fdiv_qr_ui((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, d);
+        }
+    }
+
+    /// <summary>
+    /// return (n / d, n mod d) (Floor)
+    /// </summary>
+    public static unsafe (BigInteger q, BigInteger r) FloorDivRem(BigInteger n, uint d)
+    {
+        BigInteger q = new(), r = new();
+        FloorDivRemInplace(q, r, n, d);
+        return (q, r);
+    }
+
+    /// <returns>n mod d (Floor)</returns>
+    public static unsafe uint FloorReminderToUInt32(BigInteger n, uint d)
+    {
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            return GmpNative.__gmpz_fdiv_ui((IntPtr)pn, d);
+        }
+    }
+
+    /// <returns>n mod d (Floor)</returns>
+    public static unsafe BigInteger FloorReminder(BigInteger n, uint d)
+    {
+        BigInteger r = new();
+        FloorReminderInplace(r, n, d);
+        return r;
+    }
+
+    /// <summary>
+    /// q = n / (2 ^ d) (Floor)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe void FloorDivide2ExpInplace(BigInteger q, BigInteger n, uint exp2)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            GmpNative.__gmpz_fdiv_q_2exp((IntPtr)pq, (IntPtr)pn, exp2);
+        }
+    }
+
+    /// <summary>
+    /// return n / (2 ^ d) (Floor)
+    /// </summary>
+    public static unsafe BigInteger FloorDivide2Exp(BigInteger n, uint exp2)
+    {
+        BigInteger q = new();
+        FloorDivide2ExpInplace(q, n, exp2);
+        return q;
+    }
+
+    /// <summary>
+    /// r = n mod (2 ^ d) (Floor)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe void FloorReminder2ExpInplace(BigInteger r, BigInteger n, uint exp2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            GmpNative.__gmpz_fdiv_r_2exp((IntPtr)pr, (IntPtr)pn, exp2);
+        }
+    }
+
+    /// <summary>
+    /// return n mod (2 ^ d) (Floor)
+    /// </summary>
+    public static unsafe BigInteger FloorReminder2Exp(BigInteger n, uint exp2)
+    {
+        BigInteger q = new();
+        FloorReminder2ExpInplace(q, n, exp2);
+        return q;
+    }
+    #endregion
+
+    #region Truncate
+    /// <summary>
+    /// q = n / d (Truncate)
+    /// </summary>
+    public static unsafe void DivideInplace(BigInteger q, BigInteger n, BigInteger d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pd = &d.Raw)
+        {
+            GmpNative.__gmpz_tdiv_q((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
+        }
+    }
+
+    /// <summary>
+    /// return n / d (Truncate)
+    /// </summary>
+    public static unsafe BigInteger Divide(BigInteger n, BigInteger d)
+    {
+        BigInteger q = new();
+        DivideInplace(q, n, d);
+        return q;
+    }
+
+    /// <summary>
+    /// r = n mod d (Truncate)
+    /// </summary>
+    public static unsafe void ReminderInplace(BigInteger r, BigInteger n, BigInteger d)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pd = &d.Raw)
+        {
+            GmpNative.__gmpz_tdiv_r((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+        }
+    }
+
+    /// <summary>
+    /// return n mod d (Truncate)
+    /// </summary>
+    public static unsafe BigInteger Reminder(BigInteger n, BigInteger d)
+    {
+        BigInteger q = new();
+        ReminderInplace(q, n, d);
+        return q;
+    }
+
+    /// <summary>
+    /// q = n / d + r (Truncate)
+    /// </summary>
+    public static unsafe void DivRemInplace(BigInteger q, BigInteger r, BigInteger n, BigInteger d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pd = &d.Raw)
+        {
+            GmpNative.__gmpz_tdiv_qr((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+        }
+    }
+
+    /// <summary>
+    /// return (n / d, n mod d) (Truncate)
+    /// </summary>
+    public static unsafe (BigInteger q, BigInteger r) DivRem(BigInteger n, BigInteger d)
+    {
+        BigInteger q = new(), r = new();
+        DivRemInplace(q, r, n, d);
+        return (q, r);
+    }
+
+    /// <summary>
+    /// q = n / d (Truncate)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe uint DivideInplace(BigInteger q, BigInteger n, uint d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            return GmpNative.__gmpz_tdiv_q_ui((IntPtr)pq, (IntPtr)pn, d);
+        }
+    }
+
+    /// <summary>
+    /// return n mod d (Truncate)
+    /// </summary>
+    public static unsafe BigInteger Divide(BigInteger n, uint d)
+    {
+        BigInteger q = new();
+        DivideInplace(q, n, d);
+        return q;
+    }
+
+    /// <summary>
+    /// r = n mod d (Truncate)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe uint ReminderInplace(BigInteger r, BigInteger n, uint d)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            return GmpNative.__gmpz_tdiv_r_ui((IntPtr)pr, (IntPtr)pn, d);
+        }
+    }
+
+    /// <summary>
+    /// q = n / d + r (Truncate)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe uint DivRemInplace(BigInteger q, BigInteger r, BigInteger n, uint d)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            return GmpNative.__gmpz_tdiv_qr_ui((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, d);
+        }
+    }
+
+    /// <summary>
+    /// return (n / d, n mod d) (Truncate)
+    /// </summary>
+    public static unsafe (BigInteger q, BigInteger r) DivRem(BigInteger n, uint d)
+    {
+        BigInteger q = new(), r = new();
+        DivRemInplace(q, r, n, d);
+        return (q, r);
+    }
+
+    /// <returns>n mod d (Truncate)</returns>
+    public static unsafe uint ReminderToUInt32(BigInteger n, uint d)
+    {
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            return GmpNative.__gmpz_tdiv_ui((IntPtr)pn, d);
+        }
+    }
+
+    /// <returns>n mod d (Truncate)</returns>
+    public static unsafe BigInteger Reminder(BigInteger n, uint d)
+    {
+        BigInteger r = new();
+        ReminderInplace(r, n, d);
+        return r;
+    }
+
+    /// <summary>
+    /// q = n / (2 ^ d) (Truncate)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe void Divide2ExpInplace(BigInteger q, BigInteger n, uint exp2)
+    {
+        fixed (Mpz_t* pq = &q.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            GmpNative.__gmpz_tdiv_q_2exp((IntPtr)pq, (IntPtr)pn, exp2);
+        }
+    }
+
+    /// <summary>
+    /// return n / (2 ^ d) (Truncate)
+    /// </summary>
+    public static unsafe BigInteger Divide2Exp(BigInteger n, uint exp2)
+    {
+        BigInteger q = new();
+        Divide2ExpInplace(q, n, exp2);
+        return q;
+    }
+
+    /// <summary>
+    /// r = n mod (2 ^ d) (Truncate)
+    /// </summary>
+    /// <returns>the remainder</returns>
+    public static unsafe void Reminder2ExpInplace(BigInteger r, BigInteger n, uint exp2)
+    {
+        fixed (Mpz_t* pr = &r.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            GmpNative.__gmpz_tdiv_r_2exp((IntPtr)pr, (IntPtr)pn, exp2);
+        }
+    }
+
+    /// <summary>
+    /// return n mod (2 ^ d) (Truncate)
+    /// </summary>
+    public static unsafe BigInteger Reminder2Exp(BigInteger n, uint exp2)
+    {
+        BigInteger q = new();
+        Reminder2ExpInplace(q, n, exp2);
+        return q;
+    }
+    #endregion
+
+    #region operators
+    public static BigInteger operator /(BigInteger op1, BigInteger op2) => Divide(op1, op2);
+
+    public static BigInteger operator %(BigInteger op1, BigInteger op2) => Reminder(op1, op2);
+
+    public static BigInteger operator /(BigInteger op1, uint op2) => Divide(op1, op2);
+
+    public static BigInteger operator %(BigInteger op1, uint op2) => Reminder(op1, op2);
+    #endregion
+    #endregion
+
 }
 
 public record struct Mpz_t
 {
-    public int AllocatedCount;
+    public int Allocated;
     public int Size;
     public IntPtr Limbs;
 
     public static int RawSize => Marshal.SizeOf<Mpz_t>();
 
-    private unsafe Span<nint> GetLimbData() => new Span<nint>((void*)Limbs, AllocatedCount);
+    private unsafe Span<nint> GetLimbData() => new Span<nint>((void*)Limbs, Allocated);
 
     public override int GetHashCode()
     {
         HashCode c = new();
-        c.Add(AllocatedCount);
+        c.Add(Allocated);
         c.Add(Size);
         foreach (nint i in GetLimbData())
         {
