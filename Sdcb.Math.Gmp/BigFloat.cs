@@ -58,12 +58,26 @@ public class BigFloat : IDisposable
         return new BigFloat(raw);
     }
 
+    public unsafe static BigFloat From(int val, uint precision)
+    {
+        BigFloat f = new(precision);
+        f.Assign(val);
+        return f;
+    }
+
     public unsafe static BigFloat From(uint val)
     {
         Mpf_t raw = new();
         Mpf_t* ptr = &raw;
         GmpNative.__gmpf_init_set_ui((IntPtr)ptr, val);
         return new BigFloat(raw);
+    }
+
+    public unsafe static BigFloat From(uint val, uint precision)
+    {
+        BigFloat f = new(precision);
+        f.Assign(val);
+        return f;
     }
 
     public unsafe static BigFloat From(double val)
@@ -74,31 +88,52 @@ public class BigFloat : IDisposable
         return new BigFloat(raw);
     }
 
-    public unsafe static BigFloat Parse(string val, int valBase = 10)
+    public unsafe static BigFloat From(double val, uint precision)
+    {
+        BigFloat f = new(precision);
+        f.Assign(val);
+        return f;
+    }
+
+    public unsafe static BigFloat From(BigInteger val, uint precision)
+    {
+        BigFloat f = new(precision);
+        f.Assign(val);
+        return f;
+    }
+
+    public unsafe static BigFloat Parse(string val, int @base = 10)
     {
         Mpf_t raw = new();
         Mpf_t* ptr = &raw;
         byte[] valBytes = Encoding.UTF8.GetBytes(val);
         fixed (byte* pval = valBytes)
         {
-            int ret = GmpNative.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, valBase);
+            int ret = GmpNative.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, @base);
             if (ret != 0)
             {
                 GmpNative.__gmpf_clear((IntPtr)ptr);
-                throw new FormatException($"Failed to parse {val}, base={valBase} to BigFloat, __gmpf_init_set_str returns {ret}");
+                throw new FormatException($"Failed to parse {val}, base={@base} to BigFloat, __gmpf_init_set_str returns {ret}");
             }
         }
         return new BigFloat(raw);
     }
 
-    public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out BigFloat result, int valBase = 10)
+    public static BigFloat Parse(string val, uint precision, int @base = 10)
+    {
+        BigFloat f = new(precision);
+        f.Assign(val, @base);
+        return f;
+    }
+
+    public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out BigFloat result, int @base = 10)
     {
         Mpf_t raw = new();
         Mpf_t* ptr = &raw;
         byte[] valBytes = Encoding.UTF8.GetBytes(val);
         fixed (byte* pval = valBytes)
         {
-            int rt = GmpNative.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, valBase);
+            int rt = GmpNative.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, @base);
             if (rt != 0)
             {
                 GmpNative.__gmpf_clear((IntPtr)ptr);
@@ -109,6 +144,30 @@ public class BigFloat : IDisposable
             {
                 result = new BigFloat(raw);
                 return true;
+            }
+        }
+    }
+
+    public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out BigFloat result, uint precision, int @base = 10)
+    {
+        BigFloat f = new(precision);
+        fixed (Mpf_t* pf = &f.Raw)
+        {
+            byte[] opBytes = Encoding.UTF8.GetBytes(val);
+            fixed (byte* opBytesPtr = opBytes)
+            {
+                int ret = GmpNative.__gmpf_set_str((IntPtr)pf, (IntPtr)opBytesPtr, @base);
+                if (ret != 0)
+                {
+                    result = null;
+                    f.Dispose();
+                    return false;
+                }
+                else
+                {
+                    result = f;
+                    return true;
+                }
             }
         }
     }
@@ -193,17 +252,17 @@ public class BigFloat : IDisposable
         }
     }
 
-    public unsafe void Assign(string op, int opBase = 10)
+    public unsafe void Assign(string op, int @base = 10)
     {
         fixed (Mpf_t* pthis = &Raw)
         {
             byte[] opBytes = Encoding.UTF8.GetBytes(op);
             fixed (byte* opBytesPtr = opBytes)
             {
-                int ret = GmpNative.__gmpf_set_str((IntPtr)pthis, (IntPtr)opBytesPtr, opBase);
+                int ret = GmpNative.__gmpf_set_str((IntPtr)pthis, (IntPtr)opBytesPtr, @base);
                 if (ret != 0)
                 {
-                    throw new FormatException($"Failed to parse \"{op}\", base={opBase} to BigFloat, __gmpf_set_str returns {ret}");
+                    throw new FormatException($"Failed to parse \"{op}\", base={@base} to BigFloat, __gmpf_set_str returns {ret}");
                 }
             }
         }
@@ -513,14 +572,14 @@ public class BigFloat : IDisposable
         return rop;
     }
 
-    public static unsafe BigFloat Multiple(BigFloat op1, BigFloat op2, uint precision = 0)
+    public static unsafe BigFloat Multiply(BigFloat op1, BigFloat op2, uint precision = 0)
     {
         BigFloat rop = new(precision);
         MultiplyInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe BigFloat Multiple(BigFloat op1, uint op2, uint precision = 0)
+    public static unsafe BigFloat Multiply(BigFloat op1, uint op2, uint precision = 0)
     {
         BigFloat rop = new(precision);
         MultiplyInplace(rop, op1, op2);
@@ -605,29 +664,29 @@ public class BigFloat : IDisposable
     #endregion
 
     #region Arithmetic Functions - Operators
-    public static unsafe BigFloat operator +(BigFloat op1, BigFloat op2) => Add(op1, op2);
+    public static unsafe BigFloat operator +(BigFloat op1, BigFloat op2) => Add(op1, op2, op1.Precision);
 
-    public static unsafe BigFloat operator +(BigFloat op1, uint op2) => Add(op1, op2);
+    public static unsafe BigFloat operator +(BigFloat op1, uint op2) => Add(op1, op2, op1.Precision);
 
-    public static unsafe BigFloat operator -(BigFloat op1, BigFloat op2) => Subtract(op1, op2);
+    public static unsafe BigFloat operator -(BigFloat op1, BigFloat op2) => Subtract(op1, op2, op1.Precision);
 
-    public static unsafe BigFloat operator -(BigFloat op1, uint op2) => Subtract(op1, op2);
+    public static unsafe BigFloat operator -(BigFloat op1, uint op2) => Subtract(op1, op2, op1.Precision);
 
-    public static unsafe BigFloat operator -(uint op1, BigFloat op2) => Subtract(op1, op2);
+    public static unsafe BigFloat operator -(uint op1, BigFloat op2) => Subtract(op1, op2, op2.Precision);
 
-    public static unsafe BigFloat operator *(BigFloat op1, BigFloat op2) => Multiple(op1, op2);
+    public static unsafe BigFloat operator *(BigFloat op1, BigFloat op2) => Multiply(op1, op2, op1.Precision);
 
-    public static unsafe BigFloat operator *(BigFloat op1, uint op2) => Multiple(op1, op2);
+    public static unsafe BigFloat operator *(BigFloat op1, uint op2) => Multiply(op1, op2, op1.Precision);
 
-    public static unsafe BigFloat operator /(BigFloat op1, BigFloat op2) => Divide(op1, op2);
+    public static unsafe BigFloat operator /(BigFloat op1, BigFloat op2) => Divide(op1, op2, op1.Precision);
 
-    public static unsafe BigFloat operator /(BigFloat op1, uint op2) => Divide(op1, op2);
+    public static unsafe BigFloat operator /(BigFloat op1, uint op2) => Divide(op1, op2, op1.Precision);
 
-    public static unsafe BigFloat operator /(uint op1, BigFloat op2) => Divide(op1, op2);
+    public static unsafe BigFloat operator /(uint op1, BigFloat op2) => Divide(op1, op2, op2.Precision);
 
-    public static unsafe BigFloat operator ^(BigFloat op1, uint op2) => Power(op1, op2);
+    public static unsafe BigFloat operator ^(BigFloat op1, uint op2) => Power(op1, op2, op1.Precision);
 
-    public static unsafe BigFloat operator -(BigFloat op1) => Negate(op1);
+    public static unsafe BigFloat operator -(BigFloat op1) => Negate(op1, op1.Precision);
 
     #endregion
     #endregion
