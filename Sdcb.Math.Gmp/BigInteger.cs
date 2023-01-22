@@ -1493,8 +1493,61 @@ public class BigInteger : IDisposable
     #endregion
 
     #region Number Theoretic Functions
+    /// <summary>
+    /// This function performs some trial divisions, a Baillie-PSW probable prime test, then reps-24 Miller-Rabin probabilistic primality tests. A higher reps value will reduce the chances of a non-prime being identified as “probably prime”. A composite number will be identified as a prime with an asymptotic probability of less than 4^(-reps).
+    /// </summary>
+    /// <param name="reps">Reasonable values of reps are between 15 and 50.</param>
+    /// <returns></returns>
+    public unsafe PrimePossibility ProbablePrime(int reps = 15)
+    {
+        fixed (Mpz_t* ptr = &Raw)
+        {
+            return (PrimePossibility)GmpNative.__gmpz_probab_prime_p((IntPtr)ptr, reps);
+        }
+    }
 
+    /// <summary>
+    /// Set rop to the next prime greater than op.
+    /// </summary>
+    /// <remarks>This function uses a probabilistic algorithm to identify primes. For practical purposes it’s adequate, the chance of a composite passing will be extremely small.</remarks>
+    public static unsafe void NextPrime(BigInteger rop, BigInteger op)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        fixed (Mpz_t* pop = &op.Raw)
+        {
+            GmpNative.__gmpz_nextprime((IntPtr)pr, (IntPtr)pop);
+        }
+    }
+
+    /// <summary>
+    /// Set rop to the next prime greater than op.
+    /// </summary>
+    /// <remarks>This function uses a probabilistic algorithm to identify primes. For practical purposes it’s adequate, the chance of a composite passing will be extremely small.</remarks>
+    public static BigInteger NextPrime(BigInteger op)
+    {
+        BigInteger r = new();
+        NextPrime(r, op);
+        return r;
+    }
     #endregion
+}
+
+public enum PrimePossibility
+{
+    /// <summary>
+    /// definitely non-prime
+    /// </summary>
+    No = 0,
+
+    /// <summary>
+    /// probably prime (without being certain)
+    /// </summary>
+    Probably = 1,
+
+    /// <summary>
+    /// definitely prime
+    /// </summary>
+    Yes = 2, 
 }
 
 public record struct Mpz_t
