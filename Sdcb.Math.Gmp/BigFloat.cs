@@ -107,7 +107,7 @@ public class BigFloat : IDisposable
     /// </summary>
     public unsafe static BigFloat From(BigInteger val)
     {
-        BigFloat f = new((uint)SysMath.Abs(val.Raw.Size) * Mpz_t.LimbUnitSize);
+        BigFloat f = new((uint)SysMath.Abs(val.Raw.Size) * Mpz_t.LimbBitSize);
         f.Assign(val);
         return f;
     }

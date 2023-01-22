@@ -1506,7 +1506,7 @@ public record struct Mpz_t
     /// </summary>
     public IntPtr Limbs;
 
-    public static uint LimbUnitSize => (uint)IntPtr.Size;
+    public static uint LimbBitSize => (uint)IntPtr.Size * 8;
 
     public static int RawSize => Marshal.SizeOf<Mpz_t>();
 
