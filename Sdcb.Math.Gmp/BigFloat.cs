@@ -102,6 +102,16 @@ public class BigFloat : IDisposable
         return f;
     }
 
+    /// <summary>
+    /// Convert BigInteger to BigFloat, precision default to abs(BigInteger.Raw.Size)
+    /// </summary>
+    public unsafe static BigFloat From(BigInteger val)
+    {
+        BigFloat f = new((uint)SysMath.Abs(val.Raw.Size) * Mpz_t.LimbUnitSize);
+        f.Assign(val);
+        return f;
+    }
+
     public unsafe static BigFloat Parse(string val, int @base = 10)
     {
         Mpf_t raw = new();

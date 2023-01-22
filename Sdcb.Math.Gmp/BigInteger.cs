@@ -61,6 +61,8 @@ public class BigInteger : IDisposable
             GmpNative.__gmpz_realloc2((IntPtr)ptr, bits);
         }
     }
+
+    public unsafe void ReallocToFit() => ReallocByLimbs(System.Math.Abs(Raw.Size));
     #endregion
 
     #region Assignment Functions
@@ -542,6 +544,7 @@ public class BigInteger : IDisposable
     public static explicit operator uint(BigInteger op) => op.ToUInt32();
     public static explicit operator int(BigInteger op) => op.ToInt32();
     public static explicit operator double(BigInteger op) => op.ToDouble();
+    public static explicit operator BigFloat(BigInteger op) => BigFloat.From(op);
 
     public unsafe ExpDouble ToExpDouble()
     {
@@ -1498,7 +1501,12 @@ public record struct Mpz_t
 {
     public int Allocated;
     public int Size;
+    /// <summary>
+    /// nint*
+    /// </summary>
     public IntPtr Limbs;
+
+    public static uint LimbUnitSize => (uint)IntPtr.Size;
 
     public static int RawSize => Marshal.SizeOf<Mpz_t>();
 
