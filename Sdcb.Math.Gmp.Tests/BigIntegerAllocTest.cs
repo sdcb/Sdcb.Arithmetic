@@ -22,7 +22,7 @@ public class BigIntegerAllocTest
         using BigInteger n = new BigInteger(bitCount: 65536);
         n.Assign(num);
         n.ReallocToFit();
-        Assert.True(n.Raw.Allocated * Mpz_t.LimbBitSize < 65536);
+        Assert.True(n.Raw.Allocated * GmpNative.LimbBitSize < 65536);
         Assert.Equal(num, n.ToString());
     }
 }

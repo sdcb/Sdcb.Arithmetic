@@ -5,8 +5,11 @@ namespace Sdcb.Math.Gmp;
 
 public static class GmpNative
 {
-    // NOTE: code is all auto generated below
+    public static uint LimbBitSize => (uint)IntPtr.Size * 8;
+
     internal const string Dll = "gmp";
+
+    // NOTE: code is all auto generated below
 
     /// <param name="p0">(<see cref="void*(size_t)" />) </param>
     /// <param name="p1">(<see cref="void*(void*,size_t,size_t)" />) </param>

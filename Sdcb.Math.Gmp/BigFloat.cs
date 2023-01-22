@@ -107,7 +107,7 @@ public class BigFloat : IDisposable
     /// </summary>
     public unsafe static BigFloat From(BigInteger val)
     {
-        BigFloat f = new((uint)SysMath.Abs(val.Raw.Size) * Mpz_t.LimbBitSize);
+        BigFloat f = new(precision: (uint)SysMath.Abs(val.Raw.Size) * GmpNative.LimbBitSize);
         f.Assign(val);
         return f;
     }
@@ -1063,6 +1063,7 @@ public record struct Mpf_t
     public IntPtr Limbs;
 
     public static int RawSize => Marshal.SizeOf<Mpf_t>();
+
 
     private unsafe Span<int> GetLimbData() => new Span<int>((void*)Limbs, Precision - 1);
 

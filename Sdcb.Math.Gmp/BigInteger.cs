@@ -1506,8 +1506,6 @@ public record struct Mpz_t
     /// </summary>
     public IntPtr Limbs;
 
-    public static uint LimbBitSize => (uint)IntPtr.Size * 8;
-
     public static int RawSize => Marshal.SizeOf<Mpz_t>();
 
     private unsafe Span<nint> GetLimbData() => new Span<nint>((void*)Limbs, Allocated);
