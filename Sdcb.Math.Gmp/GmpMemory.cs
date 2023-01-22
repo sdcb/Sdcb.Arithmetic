@@ -13,15 +13,15 @@ namespace Sdcb.Math.Gmp
 
         static GmpMemory()
         {
-            __gmp_get_memory_functions(out MallocFp, out RellocFp, out FreeFp);
+            __gmp_get_memory_functions(out MallocFp, out ReallocFp, out FreeFp);
         }
 
         private static delegate*<nint, IntPtr> MallocFp;
-        private static delegate*<IntPtr, nint, nint, IntPtr> RellocFp;
+        private static delegate*<IntPtr, nint, nint, IntPtr> ReallocFp;
         private static delegate*<IntPtr, nint, void> FreeFp;
 
         public static IntPtr Malloc(nint size) => MallocFp(size);
-        public static IntPtr Relloc(IntPtr ptr, nint oldSize, nint newSize) => RellocFp(ptr, oldSize, newSize);
+        public static IntPtr Realloc(IntPtr ptr, nint oldSize, nint newSize) => ReallocFp(ptr, oldSize, newSize);
         public static void Free(IntPtr ptr, nint size = 0) => FreeFp(ptr, size);
     }
 }
