@@ -1529,6 +1529,39 @@ public class BigInteger : IDisposable
         NextPrime(r, op);
         return r;
     }
+
+    public static unsafe void Gcd(BigInteger rop, BigInteger op1, BigInteger op2)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        fixed (Mpz_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            GmpNative.__gmpz_gcd((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static unsafe BigInteger Gcd(BigInteger op1, BigInteger op2)
+    {
+        BigInteger rop = new();
+        Gcd(rop, op1, op2);
+        return rop;
+    }
+
+    public static unsafe void Gcd(BigInteger rop, BigInteger op1, uint op2)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        fixed (Mpz_t* p1 = &op1.Raw)
+        {
+            GmpNative.__gmpz_gcd_ui((IntPtr)pr, (IntPtr)p1, op2);
+        }
+    }
+
+    public static unsafe BigInteger Gcd(BigInteger op1, uint op2)
+    {
+        BigInteger rop = new();
+        Gcd(rop, op1, op2);
+        return rop;
+    }
     #endregion
 }
 
