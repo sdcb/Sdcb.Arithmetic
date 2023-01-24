@@ -1587,6 +1587,18 @@ public class BigInteger : IDisposable
         }
     }
 
+    /// <summary>
+    /// <para>Set g to the greatest common divisor of a and b, and in addition set s and t to coefficients satisfying a*s + b*t = g.</para>
+    /// <para>The value in g is always positive, even if one or both of a and b are negative (or zero if both inputs are zero).</para>
+    /// <para>The values in s and t are chosen such that normally, abs(s) &lt; abs(b) / (2 g) and abs(t) &lt; abs(a) / (2 g), and these relations define s and t uniquely.</para>
+    /// <para>There are a few exceptional cases:</para>
+    /// <list type="bullet">
+    /// <item>If abs(a) = abs(b), then s = 0, t = sgn(b).</item>
+    /// <item>Otherwise, s = sgn(a) if b = 0 or abs(b) = 2 g, and t = sgn(b) if a = 0 or abs(a) = 2 g.</item>
+    /// <item>In all cases, s = 0 if and only if g = abs(b), i.e., if b divides a or a = b = 0.</item>
+    /// <item>If t or g is NULL then that value is not computed.</item>
+    /// </list>
+    /// </summary>
     public static unsafe (BigInteger g, BigInteger s, BigInteger t) Gcd2(BigInteger a, BigInteger b)
     {
         BigInteger g = new();
@@ -1594,6 +1606,39 @@ public class BigInteger : IDisposable
         BigInteger t = new();
         Gcd2(g, s, t, a, b);
         return (g, s, t);
+    }
+
+    public static unsafe void Lcm(BigInteger rop, BigInteger op1, BigInteger op2)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        fixed (Mpz_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            GmpNative.__gmpz_lcm((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static unsafe BigInteger Lcm(BigInteger op1, BigInteger op2)
+    {
+        BigInteger rop = new();
+        Lcm(rop, op1, op2);
+        return rop;
+    }
+
+    public static unsafe void Lcm(BigInteger rop, BigInteger op1, uint op2)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        fixed (Mpz_t* p1 = &op1.Raw)
+        {
+            GmpNative.__gmpz_lcm_ui((IntPtr)pr, (IntPtr)p1, op2);
+        }
+    }
+
+    public static unsafe BigInteger Lcm(BigInteger op1, uint op2)
+    {
+        BigInteger rop = new();
+        Lcm(rop, op1, op2);
+        return rop;
     }
     #endregion
 }
