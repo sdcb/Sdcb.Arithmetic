@@ -1638,6 +1638,36 @@ public class GmpInteger : IDisposable
         Lcm(rop, op1, op2);
         return rop;
     }
+
+    /// <summary>
+    /// Set rop to the modular inverse of op1 mod op2, i.e. b, where op1 * b mod op1 = 1
+    /// </summary>
+    /// <param name="rop"></param>
+    /// <param name="op1"></param>
+    /// <param name="op2"></param>
+    /// <returns></returns>
+    public static unsafe bool Invert(GmpInteger rop, GmpInteger op1, GmpInteger op2)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        fixed (Mpz_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            return GmpLib.__gmpz_invert((IntPtr)pr, (IntPtr)p1, (IntPtr)p2) != 0;
+        }
+    }
+
+    /// <summary>
+    /// Set rop to the modular inverse of op1 mod op2, i.e. b, where op1 * b mod op1 = 1
+    /// </summary>
+    public static unsafe GmpInteger Invert(GmpInteger op1, GmpInteger op2)
+    {
+        GmpInteger rop = new();
+        if (!Invert(rop, op1, op2))
+        {
+            throw new ArgumentException($"Unable to find inverse of op1 and op2.\n op1: {op1}\n op2: {op2}");
+        }
+        return rop;
+    }
     #endregion
 }
 
@@ -1670,7 +1700,7 @@ public record struct Mpz_t
 
     public static int RawSize => Marshal.SizeOf<Mpz_t>();
 
-    private unsafe Span<nint> GetLimbData() => new Span<nint>((void*)Limbs, Allocated);
+    private unsafe Span<nint> GetLimbData() => new((void*)Limbs, Allocated);
 
     public override int GetHashCode()
     {
