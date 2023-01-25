@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Sdcb.Math.Gmp;
 
-public static class GmpNative
+public static class GmpLib
 {
     public static uint LimbBitSize => (uint)IntPtr.Size * 8;
 

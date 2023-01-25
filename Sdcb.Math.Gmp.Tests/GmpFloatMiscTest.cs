@@ -2,11 +2,11 @@ using Xunit.Abstractions;
 
 namespace Sdcb.Math.Gmp.Tests;
 
-public class BigFloatMiscTest
+public class GmpFloatMiscTest
 {
     private readonly ITestOutputHelper _console;
 
-    public BigFloatMiscTest(ITestOutputHelper console)
+    public GmpFloatMiscTest(ITestOutputHelper console)
     {
         _console = console;
     }

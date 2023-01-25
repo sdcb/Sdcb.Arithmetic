@@ -2,11 +2,11 @@ using Xunit.Abstractions;
 
 namespace Sdcb.Math.Gmp.Tests;
 
-public class BigIntegerAllocTest
+public class GmpIntegerAllocTest
 {
     private readonly ITestOutputHelper _console;
 
-    public BigIntegerAllocTest(ITestOutputHelper console)
+    public GmpIntegerAllocTest(ITestOutputHelper console)
     {
         _console = console;
     }
@@ -19,10 +19,10 @@ public class BigIntegerAllocTest
         "12345678901234567890123456789012345678901234567890123456")]
     public void RellocToFitShouldOk(string num)
     {
-        using BigInteger n = new BigInteger(bitCount: 65536);
+        using GmpInteger n = new GmpInteger(bitCount: 65536);
         n.Assign(num);
         n.ReallocToFit();
-        Assert.True(n.Raw.Allocated * GmpNative.LimbBitSize < 65536);
+        Assert.True(n.Raw.Allocated * GmpLib.LimbBitSize < 65536);
         Assert.Equal(num, n.ToString());
     }
 }

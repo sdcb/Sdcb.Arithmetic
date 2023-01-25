@@ -2,41 +2,39 @@
 using System;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
-using System.Reflection;
 
 namespace Sdcb.Math.Gmp;
 
-public class BigInteger : IDisposable
+public class GmpInteger : IDisposable
 {
     public static uint DefaultPrecision
     {
-        get => GmpNative.__gmpf_get_default_prec();
-        set => GmpNative.__gmpf_set_default_prec(value);
+        get => GmpLib.__gmpf_get_default_prec();
+        set => GmpLib.__gmpf_set_default_prec(value);
     }
 
     public Mpz_t Raw = new();
     private bool _disposed = false;
 
     #region Initializing Integers
-    public unsafe BigInteger()
+    public unsafe GmpInteger()
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            GmpNative.__gmpz_init((IntPtr)ptr);
+            GmpLib.__gmpz_init((IntPtr)ptr);
         }
     }
 
-    public unsafe BigInteger(Mpz_t raw)
+    public unsafe GmpInteger(Mpz_t raw)
     {
         Raw = raw;
     }
 
-    public unsafe BigInteger(uint bitCount)
+    public unsafe GmpInteger(uint bitCount)
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            GmpNative.__gmpz_init2((IntPtr)ptr, bitCount);
+            GmpLib.__gmpz_init2((IntPtr)ptr, bitCount);
         }
     }
 
@@ -47,7 +45,7 @@ public class BigInteger : IDisposable
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            GmpNative.__gmpz_realloc((IntPtr)ptr, limbs);
+            GmpLib.__gmpz_realloc((IntPtr)ptr, limbs);
         }
     }
 
@@ -58,7 +56,7 @@ public class BigInteger : IDisposable
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            GmpNative.__gmpz_realloc2((IntPtr)ptr, bits);
+            GmpLib.__gmpz_realloc2((IntPtr)ptr, bits);
         }
     }
 
@@ -66,12 +64,12 @@ public class BigInteger : IDisposable
     #endregion
 
     #region Assignment Functions
-    public unsafe void Assign(BigInteger op)
+    public unsafe void Assign(GmpInteger op)
     {
         fixed (Mpz_t* ptr = &Raw)
         fixed (Mpz_t* pop = &op.Raw)
         {
-            GmpNative.__gmpz_set((IntPtr)ptr, (IntPtr)pop);
+            GmpLib.__gmpz_set((IntPtr)ptr, (IntPtr)pop);
         }
     }
 
@@ -79,7 +77,7 @@ public class BigInteger : IDisposable
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            GmpNative.__gmpz_set_ui((IntPtr)ptr, op);
+            GmpLib.__gmpz_set_ui((IntPtr)ptr, op);
         }
     }
 
@@ -87,7 +85,7 @@ public class BigInteger : IDisposable
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            GmpNative.__gmpz_set_si((IntPtr)ptr, op);
+            GmpLib.__gmpz_set_si((IntPtr)ptr, op);
         }
     }
 
@@ -95,25 +93,25 @@ public class BigInteger : IDisposable
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            GmpNative.__gmpz_set_d((IntPtr)ptr, op);
+            GmpLib.__gmpz_set_d((IntPtr)ptr, op);
         }
     }
 
-    public unsafe void Assign(BigRational op)
+    public unsafe void Assign(GmpRational op)
     {
         fixed (Mpz_t* ptr = &Raw)
         fixed (Mpq_t* pop = &op.Raw)
         {
-            GmpNative.__gmpz_set_q((IntPtr)ptr, (IntPtr)pop);
+            GmpLib.__gmpz_set_q((IntPtr)ptr, (IntPtr)pop);
         }
     }
 
-    public unsafe void Assign(BigFloat op)
+    public unsafe void Assign(GmpFloat op)
     {
         fixed (Mpz_t* ptr = &Raw)
         fixed (Mpf_t* pop = &op.Raw)
         {
-            GmpNative.__gmpz_set_f((IntPtr)ptr, (IntPtr)pop);
+            GmpLib.__gmpz_set_f((IntPtr)ptr, (IntPtr)pop);
         }
     }
 
@@ -127,7 +125,7 @@ public class BigInteger : IDisposable
             byte[] opBytes = Encoding.UTF8.GetBytes(op);
             fixed (byte* opPtr = opBytes)
             {
-                int ret = GmpNative.__gmpz_set_str((IntPtr)ptr, (IntPtr)opPtr, opBase);
+                int ret = GmpLib.__gmpz_set_str((IntPtr)ptr, (IntPtr)opPtr, opBase);
                 if (ret != 0)
                 {
                     throw new FormatException($"Failed to parse \"{op}\", base={opBase} to BigInteger, __gmpz_set_str returns {ret}");
@@ -136,87 +134,87 @@ public class BigInteger : IDisposable
         }
     }
 
-    public static unsafe void Swap(BigInteger op1, BigInteger op2)
+    public static unsafe void Swap(GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pop1 = &op1.Raw)
         fixed (Mpz_t* pop2 = &op2.Raw)
         {
-            GmpNative.__gmpz_swap((IntPtr)pop1, (IntPtr)pop2);
+            GmpLib.__gmpz_swap((IntPtr)pop1, (IntPtr)pop2);
         }
     }
     #endregion
 
     #region Combined Initialization and Assignment Functions
-    public static unsafe BigInteger From(BigInteger op)
+    public static unsafe GmpInteger From(GmpInteger op)
     {
         Mpz_t raw = new();
         fixed (Mpz_t* pop = &op.Raw)
         {
-            GmpNative.__gmpz_init_set((IntPtr)(&raw), (IntPtr)pop);
+            GmpLib.__gmpz_init_set((IntPtr)(&raw), (IntPtr)pop);
         }
-        return new BigInteger(raw);
+        return new GmpInteger(raw);
     }
 
-    public static unsafe BigInteger From(uint op)
+    public static unsafe GmpInteger From(uint op)
     {
         Mpz_t raw = new();
-        GmpNative.__gmpz_init_set_ui((IntPtr)(&raw), op);
-        return new BigInteger(raw);
+        GmpLib.__gmpz_init_set_ui((IntPtr)(&raw), op);
+        return new GmpInteger(raw);
     }
 
-    public static unsafe BigInteger From(int op)
+    public static unsafe GmpInteger From(int op)
     {
         Mpz_t raw = new();
-        GmpNative.__gmpz_init_set_si((IntPtr)(&raw), op);
-        return new BigInteger(raw);
+        GmpLib.__gmpz_init_set_si((IntPtr)(&raw), op);
+        return new GmpInteger(raw);
     }
 
-    public static unsafe BigInteger From(double op)
+    public static unsafe GmpInteger From(double op)
     {
         Mpz_t raw = new();
-        GmpNative.__gmpz_init_set_d((IntPtr)(&raw), op);
-        return new BigInteger(raw);
+        GmpLib.__gmpz_init_set_d((IntPtr)(&raw), op);
+        return new GmpInteger(raw);
     }
 
     /// <summary>
     /// The base may vary from 2 to 62, or if base is 0, then the leading characters are used: 0x and 0X for hexadecimal, 0b and 0B for binary, 0 for octal, or decimal otherwise.
     /// </summary>
-    public unsafe static BigInteger Parse(string val, int valBase = 0)
+    public unsafe static GmpInteger Parse(string val, int valBase = 0)
     {
         Mpz_t raw = new();
         byte[] valBytes = Encoding.UTF8.GetBytes(val);
         fixed (byte* pval = valBytes)
         {
-            int ret = GmpNative.__gmpz_init_set_str((IntPtr)(&raw), (IntPtr)pval, valBase);
+            int ret = GmpLib.__gmpz_init_set_str((IntPtr)(&raw), (IntPtr)pval, valBase);
             if (ret != 0)
             {
-                GmpNative.__gmpz_clear((IntPtr)(&raw));
+                GmpLib.__gmpz_clear((IntPtr)(&raw));
                 throw new FormatException($"Failed to parse {val}, base={valBase} to BigInteger, __gmpf_init_set_str returns {ret}");
             }
         }
-        return new BigInteger(raw);
+        return new GmpInteger(raw);
     }
 
     /// <summary>
     /// The base may vary from 2 to 62, or if base is 0, then the leading characters are used: 0x and 0X for hexadecimal, 0b and 0B for binary, 0 for octal, or decimal otherwise.
     /// </summary>
-    public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out BigInteger result, int valBase = 10)
+    public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out GmpInteger result, int valBase = 10)
     {
         Mpz_t raw = new();
         Mpz_t* ptr = &raw;
         byte[] valBytes = Encoding.UTF8.GetBytes(val);
         fixed (byte* pval = valBytes)
         {
-            int rt = GmpNative.__gmpz_init_set_str((IntPtr)ptr, (IntPtr)pval, valBase);
+            int rt = GmpLib.__gmpz_init_set_str((IntPtr)ptr, (IntPtr)pval, valBase);
             if (rt != 0)
             {
-                GmpNative.__gmpz_clear((IntPtr)ptr);
+                GmpLib.__gmpz_clear((IntPtr)ptr);
                 result = null;
                 return false;
             }
             else
             {
-                result = new BigInteger(raw);
+                result = new GmpInteger(raw);
                 return true;
             }
         }
@@ -229,7 +227,7 @@ public class BigInteger : IDisposable
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            GmpNative.__gmpz_clear((IntPtr)ptr);
+            GmpLib.__gmpz_clear((IntPtr)ptr);
         }
     }
 
@@ -246,7 +244,7 @@ public class BigInteger : IDisposable
         }
     }
 
-    ~BigInteger()
+    ~GmpInteger()
     {
         // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
         Dispose(disposing: false);
@@ -261,256 +259,256 @@ public class BigInteger : IDisposable
     #endregion
 
     #region Arithmetic Functions
-    public static unsafe void AddInplace(BigInteger r, BigInteger op1, BigInteger op2)
+    public static unsafe void AddInplace(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         fixed (Mpz_t* pop2 = &op2.Raw)
         {
-            GmpNative.__gmpz_add((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
+            GmpLib.__gmpz_add((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
         }
     }
 
-    public static BigInteger Add(BigInteger op1, BigInteger op2)
+    public static GmpInteger Add(GmpInteger op1, GmpInteger op2)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         AddInplace(r, op1, op2);
         return r;
     }
 
-    public static BigInteger operator +(BigInteger a, BigInteger b) => Add(a, b);
+    public static GmpInteger operator +(GmpInteger a, GmpInteger b) => Add(a, b);
 
-    public static unsafe void AddInplace(BigInteger r, BigInteger op1, uint op2)
+    public static unsafe void AddInplace(GmpInteger r, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         {
-            GmpNative.__gmpz_add_ui((IntPtr)pr, (IntPtr)pop1, op2);
+            GmpLib.__gmpz_add_ui((IntPtr)pr, (IntPtr)pop1, op2);
         }
     }
 
-    public static BigInteger Add(BigInteger op1, uint op2)
+    public static GmpInteger Add(GmpInteger op1, uint op2)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         AddInplace(r, op1, op2);
         return r;
     }
 
-    public static BigInteger operator +(BigInteger a, uint b) => Add(a, b);
-    public static BigInteger operator +(uint a, BigInteger b) => Add(b, a);
+    public static GmpInteger operator +(GmpInteger a, uint b) => Add(a, b);
+    public static GmpInteger operator +(uint a, GmpInteger b) => Add(b, a);
 
-    public static unsafe void SubtractInplace(BigInteger r, BigInteger op1, BigInteger op2)
+    public static unsafe void SubtractInplace(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         fixed (Mpz_t* pop2 = &op2.Raw)
         {
-            GmpNative.__gmpz_sub((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
+            GmpLib.__gmpz_sub((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
         }
     }
 
-    public static BigInteger Subtract(BigInteger op1, BigInteger op2)
+    public static GmpInteger Subtract(GmpInteger op1, GmpInteger op2)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         SubtractInplace(r, op1, op2);
         return r;
     }
 
-    public static BigInteger operator -(BigInteger op1, BigInteger op2) => Subtract(op1, op2);
+    public static GmpInteger operator -(GmpInteger op1, GmpInteger op2) => Subtract(op1, op2);
 
-    public static unsafe void SubtractInplace(BigInteger r, BigInteger op1, uint op2)
+    public static unsafe void SubtractInplace(GmpInteger r, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         {
-            GmpNative.__gmpz_sub_ui((IntPtr)pr, (IntPtr)pop1, op2);
+            GmpLib.__gmpz_sub_ui((IntPtr)pr, (IntPtr)pop1, op2);
         }
     }
 
-    public static BigInteger Subtract(BigInteger op1, uint op2)
+    public static GmpInteger Subtract(GmpInteger op1, uint op2)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         SubtractInplace(r, op1, op2);
         return r;
     }
 
-    public static BigInteger operator -(BigInteger op1, uint op2) => Subtract(op1, op2);
+    public static GmpInteger operator -(GmpInteger op1, uint op2) => Subtract(op1, op2);
 
-    public static unsafe void SubtractInplace(BigInteger r, uint op1, BigInteger op2)
+    public static unsafe void SubtractInplace(GmpInteger r, uint op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop2 = &op2.Raw)
         {
-            GmpNative.__gmpz_ui_sub((IntPtr)pr, op1, (IntPtr)pop2);
+            GmpLib.__gmpz_ui_sub((IntPtr)pr, op1, (IntPtr)pop2);
         }
     }
 
-    public static BigInteger Subtract(uint op1, BigInteger op2)
+    public static GmpInteger Subtract(uint op1, GmpInteger op2)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         SubtractInplace(r, op1, op2);
         return r;
     }
 
-    public static BigInteger operator -(uint op1, BigInteger op2) => Subtract(op1, op2);
+    public static GmpInteger operator -(uint op1, GmpInteger op2) => Subtract(op1, op2);
 
-    public static unsafe void MultipleInplace(BigInteger r, BigInteger op1, BigInteger op2)
+    public static unsafe void MultipleInplace(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         fixed (Mpz_t* pop2 = &op2.Raw)
         {
-            GmpNative.__gmpz_mul((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
+            GmpLib.__gmpz_mul((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
         }
     }
 
-    public static BigInteger Multiple(BigInteger op1, BigInteger op2)
+    public static GmpInteger Multiple(GmpInteger op1, GmpInteger op2)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         MultipleInplace(r, op1, op2);
         return r;
     }
 
-    public static BigInteger operator *(BigInteger op1, BigInteger op2) => Multiple(op1, op2);
+    public static GmpInteger operator *(GmpInteger op1, GmpInteger op2) => Multiple(op1, op2);
 
-    public static unsafe void MultipleInplace(BigInteger r, BigInteger op1, int op2)
+    public static unsafe void MultipleInplace(GmpInteger r, GmpInteger op1, int op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         {
-            GmpNative.__gmpz_mul_si((IntPtr)pr, (IntPtr)pop1, op2);
+            GmpLib.__gmpz_mul_si((IntPtr)pr, (IntPtr)pop1, op2);
         }
     }
 
-    public static BigInteger Multiple(BigInteger op1, int op2)
+    public static GmpInteger Multiple(GmpInteger op1, int op2)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         MultipleInplace(r, op1, op2);
         return r;
     }
 
-    public static BigInteger operator *(BigInteger op1, int op2) => Multiple(op1, op2);
-    public static BigInteger operator *(int op1, BigInteger op2) => Multiple(op2, op1);
+    public static GmpInteger operator *(GmpInteger op1, int op2) => Multiple(op1, op2);
+    public static GmpInteger operator *(int op1, GmpInteger op2) => Multiple(op2, op1);
 
-    public static unsafe void MultipleInplace(BigInteger r, BigInteger op1, uint op2)
+    public static unsafe void MultipleInplace(GmpInteger r, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         {
-            GmpNative.__gmpz_mul_ui((IntPtr)pr, (IntPtr)pop1, op2);
+            GmpLib.__gmpz_mul_ui((IntPtr)pr, (IntPtr)pop1, op2);
         }
     }
 
-    public static BigInteger Multiple(BigInteger op1, uint op2)
+    public static GmpInteger Multiple(GmpInteger op1, uint op2)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         MultipleInplace(r, op1, op2);
         return r;
     }
 
-    public static BigInteger operator *(BigInteger op1, uint op2) => Multiple(op1, op2);
-    public static BigInteger operator *(uint op1, BigInteger op2) => Multiple(op2, op1);
+    public static GmpInteger operator *(GmpInteger op1, uint op2) => Multiple(op1, op2);
+    public static GmpInteger operator *(uint op1, GmpInteger op2) => Multiple(op2, op1);
 
     /// <summary>
     /// r += op1 * op2
     /// </summary>
-    public static unsafe void AddMultiply(BigInteger r, BigInteger op1, BigInteger op2)
+    public static unsafe void AddMultiply(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         fixed (Mpz_t* pop2 = &op2.Raw)
         {
-            GmpNative.__gmpz_addmul((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
+            GmpLib.__gmpz_addmul((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
         }
     }
 
     /// <summary>
     /// r += op1 * op2
     /// </summary>
-    public static unsafe void AddMultiply(BigInteger r, BigInteger op1, uint op2)
+    public static unsafe void AddMultiply(GmpInteger r, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         {
-            GmpNative.__gmpz_addmul_ui((IntPtr)pr, (IntPtr)pop1, op2);
+            GmpLib.__gmpz_addmul_ui((IntPtr)pr, (IntPtr)pop1, op2);
         }
     }
 
     /// <summary>
     /// r -= op1 * op2
     /// </summary>
-    public static unsafe void SubtractMultiply(BigInteger r, BigInteger op1, BigInteger op2)
+    public static unsafe void SubtractMultiply(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         fixed (Mpz_t* pop2 = &op2.Raw)
         {
-            GmpNative.__gmpz_submul((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
+            GmpLib.__gmpz_submul((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
         }
     }
 
     /// <summary>
     /// r -= op1 * op2
     /// </summary>
-    public static unsafe void SubtractMultiply(BigInteger r, BigInteger op1, uint op2)
+    public static unsafe void SubtractMultiply(GmpInteger r, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         {
-            GmpNative.__gmpz_submul_ui((IntPtr)pr, (IntPtr)pop1, op2);
+            GmpLib.__gmpz_submul_ui((IntPtr)pr, (IntPtr)pop1, op2);
         }
     }
 
-    public static unsafe void Multiple2ExpInplace(BigInteger r, BigInteger op1, uint exp2)
+    public static unsafe void Multiple2ExpInplace(GmpInteger r, GmpInteger op1, uint exp2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         {
-            GmpNative.__gmpz_mul_2exp((IntPtr)pr, (IntPtr)pop1, exp2);
+            GmpLib.__gmpz_mul_2exp((IntPtr)pr, (IntPtr)pop1, exp2);
         }
     }
 
-    public static unsafe BigInteger Multiple2Exp(BigInteger op1, uint exp2)
+    public static unsafe GmpInteger Multiple2Exp(GmpInteger op1, uint exp2)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         Multiple2ExpInplace(r, op1, exp2);
         return r;
     }
 
     public void LeftShiftInplace(uint bits) => Multiple2ExpInplace(this, this, bits);
 
-    public static BigInteger operator <<(BigInteger op1, uint exp2) => Multiple2Exp(op1, exp2);
+    public static GmpInteger operator <<(GmpInteger op1, uint exp2) => Multiple2Exp(op1, exp2);
 
-    public static unsafe void NegateInplace(BigInteger r, BigInteger op1)
+    public static unsafe void NegateInplace(GmpInteger r, GmpInteger op1)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         {
-            GmpNative.__gmpz_neg((IntPtr)pr, (IntPtr)pop1);
+            GmpLib.__gmpz_neg((IntPtr)pr, (IntPtr)pop1);
         }
     }
 
-    public static BigInteger Negate(BigInteger op1)
+    public static GmpInteger Negate(GmpInteger op1)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         NegateInplace(r, op1);
         return r;
     }
 
-    public static BigInteger operator -(BigInteger op1) => Negate(op1);
+    public static GmpInteger operator -(GmpInteger op1) => Negate(op1);
 
-    public static unsafe void AbsInplace(BigInteger r, BigInteger op1)
+    public static unsafe void AbsInplace(GmpInteger r, GmpInteger op1)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
         {
-            GmpNative.__gmpz_abs((IntPtr)pr, (IntPtr)pop1);
+            GmpLib.__gmpz_abs((IntPtr)pr, (IntPtr)pop1);
         }
     }
 
-    public static BigInteger Abs(BigInteger op1)
+    public static GmpInteger Abs(GmpInteger op1)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         AbsInplace(r, op1);
         return r;
     }
@@ -521,7 +519,7 @@ public class BigInteger : IDisposable
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            return GmpNative.__gmpz_get_ui((IntPtr)ptr);
+            return GmpLib.__gmpz_get_ui((IntPtr)ptr);
         }
     }
 
@@ -529,7 +527,7 @@ public class BigInteger : IDisposable
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            return GmpNative.__gmpz_get_si((IntPtr)ptr);
+            return GmpLib.__gmpz_get_si((IntPtr)ptr);
         }
     }
 
@@ -537,21 +535,21 @@ public class BigInteger : IDisposable
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            return GmpNative.__gmpz_get_d((IntPtr)ptr);
+            return GmpLib.__gmpz_get_d((IntPtr)ptr);
         }
     }
 
-    public static explicit operator uint(BigInteger op) => op.ToUInt32();
-    public static explicit operator int(BigInteger op) => op.ToInt32();
-    public static explicit operator double(BigInteger op) => op.ToDouble();
-    public static explicit operator BigFloat(BigInteger op) => BigFloat.From(op);
+    public static explicit operator uint(GmpInteger op) => op.ToUInt32();
+    public static explicit operator int(GmpInteger op) => op.ToInt32();
+    public static explicit operator double(GmpInteger op) => op.ToDouble();
+    public static explicit operator GmpFloat(GmpInteger op) => GmpFloat.From(op);
 
     public unsafe ExpDouble ToExpDouble()
     {
         fixed (Mpz_t* ptr = &Raw)
         {
             int exp = default;
-            double val = GmpNative.__gmpz_get_d_2exp((IntPtr)(&exp), (IntPtr)ptr);
+            double val = GmpLib.__gmpz_get_d_2exp((IntPtr)(&exp), (IntPtr)ptr);
             return new ExpDouble(exp, val);
         }
     }
@@ -562,7 +560,7 @@ public class BigInteger : IDisposable
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            IntPtr ret = GmpNative.__gmpz_get_str(IntPtr.Zero, opBase, (IntPtr)ptr);
+            IntPtr ret = GmpLib.__gmpz_get_str(IntPtr.Zero, opBase, (IntPtr)ptr);
             if (ret == IntPtr.Zero)
             {
                 throw new ArgumentException($"Unable to convert BigInteger to string.");
@@ -578,22 +576,22 @@ public class BigInteger : IDisposable
     /// <summary>
     /// q = n / d (ceiling)
     /// </summary>
-    public static unsafe void CeilingDivideInplace(BigInteger q, BigInteger n, BigInteger d)
+    public static unsafe void CeilingDivideInplace(GmpInteger q, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pd = &d.Raw)
         {
-            GmpNative.__gmpz_cdiv_q((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
+            GmpLib.__gmpz_cdiv_q((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
         }
     }
 
     /// <summary>
     /// return n / d (ceiling)
     /// </summary>
-    public static unsafe BigInteger CeilingDivide(BigInteger n, BigInteger d)
+    public static unsafe GmpInteger CeilingDivide(GmpInteger n, GmpInteger d)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         CeilingDivideInplace(q, n, d);
         return q;
     }
@@ -601,22 +599,22 @@ public class BigInteger : IDisposable
     /// <summary>
     /// r = n mod d (ceiling)
     /// </summary>
-    public static unsafe void CeilingReminderInplace(BigInteger r, BigInteger n, BigInteger d)
+    public static unsafe void CeilingReminderInplace(GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pd = &d.Raw)
         {
-            GmpNative.__gmpz_cdiv_r((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+            GmpLib.__gmpz_cdiv_r((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
         }
     }
 
     /// <summary>
     /// return n mod d (ceiling)
     /// </summary>
-    public static unsafe BigInteger CeilingReminder(BigInteger n, BigInteger d)
+    public static unsafe GmpInteger CeilingReminder(GmpInteger n, GmpInteger d)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         CeilingReminderInplace(q, n, d);
         return q;
     }
@@ -624,23 +622,23 @@ public class BigInteger : IDisposable
     /// <summary>
     /// q = n / d + r (ceiling)
     /// </summary>
-    public static unsafe void CeilingDivRemInplace(BigInteger q, BigInteger r, BigInteger n, BigInteger d)
+    public static unsafe void CeilingDivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pd = &d.Raw)
         {
-            GmpNative.__gmpz_cdiv_qr((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+            GmpLib.__gmpz_cdiv_qr((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
         }
     }
 
     /// <summary>
     /// return (n / d, n mod d) (ceiling)
     /// </summary>
-    public static unsafe (BigInteger q, BigInteger r) CeilingDivRem(BigInteger n, BigInteger d)
+    public static unsafe (GmpInteger q, GmpInteger r) CeilingDivRem(GmpInteger n, GmpInteger d)
     {
-        BigInteger q = new(), r = new();
+        GmpInteger q = new(), r = new();
         CeilingDivRemInplace(q, r, n, d);
         return (q, r);
     }
@@ -649,21 +647,21 @@ public class BigInteger : IDisposable
     /// q = n / d (ceiling)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe uint CeilingDivideInplace(BigInteger q, BigInteger n, uint d)
+    public static unsafe uint CeilingDivideInplace(GmpInteger q, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpNative.__gmpz_cdiv_q_ui((IntPtr)pq, (IntPtr)pn, d);
+            return GmpLib.__gmpz_cdiv_q_ui((IntPtr)pq, (IntPtr)pn, d);
         }
     }
 
     /// <summary>
     /// return n mod d (ceiling)
     /// </summary>
-    public static unsafe BigInteger CeilingDivide(BigInteger n, uint d)
+    public static unsafe GmpInteger CeilingDivide(GmpInteger n, uint d)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         CeilingDivideInplace(q, n, d);
         return q;
     }
@@ -672,12 +670,12 @@ public class BigInteger : IDisposable
     /// r = n mod d (ceiling)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe uint CeilingReminderInplace(BigInteger r, BigInteger n, uint d)
+    public static unsafe uint CeilingReminderInplace(GmpInteger r, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpNative.__gmpz_cdiv_r_ui((IntPtr)pr, (IntPtr)pn, d);
+            return GmpLib.__gmpz_cdiv_r_ui((IntPtr)pr, (IntPtr)pn, d);
         }
     }
 
@@ -685,39 +683,39 @@ public class BigInteger : IDisposable
     /// q = n / d + r (ceiling)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe uint CeilingDivRemInplace(BigInteger q, BigInteger r, BigInteger n, uint d)
+    public static unsafe uint CeilingDivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpNative.__gmpz_cdiv_qr_ui((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, d);
+            return GmpLib.__gmpz_cdiv_qr_ui((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, d);
         }
     }
 
     /// <summary>
     /// return (n / d, n mod d) (ceiling)
     /// </summary>
-    public static unsafe (BigInteger q, BigInteger r) CeilingDivRem(BigInteger n, uint d)
+    public static unsafe (GmpInteger q, GmpInteger r) CeilingDivRem(GmpInteger n, uint d)
     {
-        BigInteger q = new(), r = new();
+        GmpInteger q = new(), r = new();
         CeilingDivRemInplace(q, r, n, d);
         return (q, r);
     }
 
     /// <returns>n mod d (ceiling)</returns>
-    public static unsafe uint CeilingReminderToUInt32(BigInteger n, uint d)
+    public static unsafe uint CeilingReminderToUInt32(GmpInteger n, uint d)
     {
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpNative.__gmpz_cdiv_ui((IntPtr)pn, d);
+            return GmpLib.__gmpz_cdiv_ui((IntPtr)pn, d);
         }
     }
 
     /// <returns>n mod d (ceiling)</returns>
-    public static BigInteger CeilingReminder(BigInteger n, uint d)
+    public static GmpInteger CeilingReminder(GmpInteger n, uint d)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         CeilingReminderInplace(r, n, d);
         return r;
     }
@@ -726,21 +724,21 @@ public class BigInteger : IDisposable
     /// q = n / (2 ^ d) (ceiling)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe void CeilingDivide2ExpInplace(BigInteger q, BigInteger n, uint exp2)
+    public static unsafe void CeilingDivide2ExpInplace(GmpInteger q, GmpInteger n, uint exp2)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            GmpNative.__gmpz_cdiv_q_2exp((IntPtr)pq, (IntPtr)pn, exp2);
+            GmpLib.__gmpz_cdiv_q_2exp((IntPtr)pq, (IntPtr)pn, exp2);
         }
     }
 
     /// <summary>
     /// return n / (2 ^ d) (ceiling)
     /// </summary>
-    public static unsafe BigInteger CeilingDivide2Exp(BigInteger n, uint exp2)
+    public static unsafe GmpInteger CeilingDivide2Exp(GmpInteger n, uint exp2)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         CeilingDivide2ExpInplace(q, n, exp2);
         return q;
     }
@@ -749,21 +747,21 @@ public class BigInteger : IDisposable
     /// r = n mod (2 ^ d) (ceiling)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe void CeilingReminder2ExpInplace(BigInteger r, BigInteger n, uint exp2)
+    public static unsafe void CeilingReminder2ExpInplace(GmpInteger r, GmpInteger n, uint exp2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            GmpNative.__gmpz_cdiv_r_2exp((IntPtr)pr, (IntPtr)pn, exp2);
+            GmpLib.__gmpz_cdiv_r_2exp((IntPtr)pr, (IntPtr)pn, exp2);
         }
     }
 
     /// <summary>
     /// return n mod (2 ^ d) (ceiling)
     /// </summary>
-    public static unsafe BigInteger CeilingReminder2Exp(BigInteger n, uint exp2)
+    public static unsafe GmpInteger CeilingReminder2Exp(GmpInteger n, uint exp2)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         CeilingReminder2ExpInplace(q, n, exp2);
         return q;
     }
@@ -773,22 +771,22 @@ public class BigInteger : IDisposable
     /// <summary>
     /// q = n / d (Floor)
     /// </summary>
-    public static unsafe void FloorDivideInplace(BigInteger q, BigInteger n, BigInteger d)
+    public static unsafe void FloorDivideInplace(GmpInteger q, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pd = &d.Raw)
         {
-            GmpNative.__gmpz_fdiv_q((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
+            GmpLib.__gmpz_fdiv_q((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
         }
     }
 
     /// <summary>
     /// return n / d (Floor)
     /// </summary>
-    public static unsafe BigInteger FloorDivide(BigInteger n, BigInteger d)
+    public static unsafe GmpInteger FloorDivide(GmpInteger n, GmpInteger d)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         FloorDivideInplace(q, n, d);
         return q;
     }
@@ -796,22 +794,22 @@ public class BigInteger : IDisposable
     /// <summary>
     /// r = n mod d (Floor)
     /// </summary>
-    public static unsafe void FloorReminderInplace(BigInteger r, BigInteger n, BigInteger d)
+    public static unsafe void FloorReminderInplace(GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pd = &d.Raw)
         {
-            GmpNative.__gmpz_fdiv_r((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+            GmpLib.__gmpz_fdiv_r((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
         }
     }
 
     /// <summary>
     /// return n mod d (Floor)
     /// </summary>
-    public static unsafe BigInteger FloorReminder(BigInteger n, BigInteger d)
+    public static unsafe GmpInteger FloorReminder(GmpInteger n, GmpInteger d)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         FloorReminderInplace(q, n, d);
         return q;
     }
@@ -819,23 +817,23 @@ public class BigInteger : IDisposable
     /// <summary>
     /// q = n / d + r (Floor)
     /// </summary>
-    public static unsafe void FloorDivRemInplace(BigInteger q, BigInteger r, BigInteger n, BigInteger d)
+    public static unsafe void FloorDivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pd = &d.Raw)
         {
-            GmpNative.__gmpz_fdiv_qr((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+            GmpLib.__gmpz_fdiv_qr((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
         }
     }
 
     /// <summary>
     /// return (n / d, n mod d) (Floor)
     /// </summary>
-    public static unsafe (BigInteger q, BigInteger r) FloorDivRem(BigInteger n, BigInteger d)
+    public static unsafe (GmpInteger q, GmpInteger r) FloorDivRem(GmpInteger n, GmpInteger d)
     {
-        BigInteger q = new(), r = new();
+        GmpInteger q = new(), r = new();
         FloorDivRemInplace(q, r, n, d);
         return (q, r);
     }
@@ -844,21 +842,21 @@ public class BigInteger : IDisposable
     /// q = n / d (Floor)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe uint FloorDivideInplace(BigInteger q, BigInteger n, uint d)
+    public static unsafe uint FloorDivideInplace(GmpInteger q, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpNative.__gmpz_fdiv_q_ui((IntPtr)pq, (IntPtr)pn, d);
+            return GmpLib.__gmpz_fdiv_q_ui((IntPtr)pq, (IntPtr)pn, d);
         }
     }
 
     /// <summary>
     /// return n mod d (Floor)
     /// </summary>
-    public static unsafe BigInteger FloorDivide(BigInteger n, uint d)
+    public static unsafe GmpInteger FloorDivide(GmpInteger n, uint d)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         FloorDivideInplace(q, n, d);
         return q;
     }
@@ -867,12 +865,12 @@ public class BigInteger : IDisposable
     /// r = n mod d (Floor)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe uint FloorReminderInplace(BigInteger r, BigInteger n, uint d)
+    public static unsafe uint FloorReminderInplace(GmpInteger r, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpNative.__gmpz_fdiv_r_ui((IntPtr)pr, (IntPtr)pn, d);
+            return GmpLib.__gmpz_fdiv_r_ui((IntPtr)pr, (IntPtr)pn, d);
         }
     }
 
@@ -880,39 +878,39 @@ public class BigInteger : IDisposable
     /// q = n / d + r (Floor)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe uint FloorDivRemInplace(BigInteger q, BigInteger r, BigInteger n, uint d)
+    public static unsafe uint FloorDivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpNative.__gmpz_fdiv_qr_ui((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, d);
+            return GmpLib.__gmpz_fdiv_qr_ui((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, d);
         }
     }
 
     /// <summary>
     /// return (n / d, n mod d) (Floor)
     /// </summary>
-    public static unsafe (BigInteger q, BigInteger r) FloorDivRem(BigInteger n, uint d)
+    public static unsafe (GmpInteger q, GmpInteger r) FloorDivRem(GmpInteger n, uint d)
     {
-        BigInteger q = new(), r = new();
+        GmpInteger q = new(), r = new();
         FloorDivRemInplace(q, r, n, d);
         return (q, r);
     }
 
     /// <returns>n mod d (Floor)</returns>
-    public static unsafe uint FloorReminderToUInt32(BigInteger n, uint d)
+    public static unsafe uint FloorReminderToUInt32(GmpInteger n, uint d)
     {
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpNative.__gmpz_fdiv_ui((IntPtr)pn, d);
+            return GmpLib.__gmpz_fdiv_ui((IntPtr)pn, d);
         }
     }
 
     /// <returns>n mod d (Floor)</returns>
-    public static unsafe BigInteger FloorReminder(BigInteger n, uint d)
+    public static unsafe GmpInteger FloorReminder(GmpInteger n, uint d)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         FloorReminderInplace(r, n, d);
         return r;
     }
@@ -921,21 +919,21 @@ public class BigInteger : IDisposable
     /// q = n / (2 ^ d) (Floor)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe void FloorDivide2ExpInplace(BigInteger q, BigInteger n, uint exp2)
+    public static unsafe void FloorDivide2ExpInplace(GmpInteger q, GmpInteger n, uint exp2)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            GmpNative.__gmpz_fdiv_q_2exp((IntPtr)pq, (IntPtr)pn, exp2);
+            GmpLib.__gmpz_fdiv_q_2exp((IntPtr)pq, (IntPtr)pn, exp2);
         }
     }
 
     /// <summary>
     /// return n / (2 ^ d) (Floor)
     /// </summary>
-    public static unsafe BigInteger FloorDivide2Exp(BigInteger n, uint exp2)
+    public static unsafe GmpInteger FloorDivide2Exp(GmpInteger n, uint exp2)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         FloorDivide2ExpInplace(q, n, exp2);
         return q;
     }
@@ -944,21 +942,21 @@ public class BigInteger : IDisposable
     /// r = n mod (2 ^ d) (Floor)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe void FloorReminder2ExpInplace(BigInteger r, BigInteger n, uint exp2)
+    public static unsafe void FloorReminder2ExpInplace(GmpInteger r, GmpInteger n, uint exp2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            GmpNative.__gmpz_fdiv_r_2exp((IntPtr)pr, (IntPtr)pn, exp2);
+            GmpLib.__gmpz_fdiv_r_2exp((IntPtr)pr, (IntPtr)pn, exp2);
         }
     }
 
     /// <summary>
     /// return n mod (2 ^ d) (Floor)
     /// </summary>
-    public static unsafe BigInteger FloorReminder2Exp(BigInteger n, uint exp2)
+    public static unsafe GmpInteger FloorReminder2Exp(GmpInteger n, uint exp2)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         FloorReminder2ExpInplace(q, n, exp2);
         return q;
     }
@@ -968,22 +966,22 @@ public class BigInteger : IDisposable
     /// <summary>
     /// q = n / d (Truncate)
     /// </summary>
-    public static unsafe void DivideInplace(BigInteger q, BigInteger n, BigInteger d)
+    public static unsafe void DivideInplace(GmpInteger q, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pd = &d.Raw)
         {
-            GmpNative.__gmpz_tdiv_q((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
+            GmpLib.__gmpz_tdiv_q((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
         }
     }
 
     /// <summary>
     /// return n / d (Truncate)
     /// </summary>
-    public static unsafe BigInteger Divide(BigInteger n, BigInteger d)
+    public static unsafe GmpInteger Divide(GmpInteger n, GmpInteger d)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         DivideInplace(q, n, d);
         return q;
     }
@@ -991,22 +989,22 @@ public class BigInteger : IDisposable
     /// <summary>
     /// r = n mod d (Truncate)
     /// </summary>
-    public static unsafe void ReminderInplace(BigInteger r, BigInteger n, BigInteger d)
+    public static unsafe void ReminderInplace(GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pd = &d.Raw)
         {
-            GmpNative.__gmpz_tdiv_r((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+            GmpLib.__gmpz_tdiv_r((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
         }
     }
 
     /// <summary>
     /// return n mod d (Truncate)
     /// </summary>
-    public static unsafe BigInteger Reminder(BigInteger n, BigInteger d)
+    public static unsafe GmpInteger Reminder(GmpInteger n, GmpInteger d)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         ReminderInplace(q, n, d);
         return q;
     }
@@ -1014,23 +1012,23 @@ public class BigInteger : IDisposable
     /// <summary>
     /// q = n / d + r (Truncate)
     /// </summary>
-    public static unsafe void DivRemInplace(BigInteger q, BigInteger r, BigInteger n, BigInteger d)
+    public static unsafe void DivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pd = &d.Raw)
         {
-            GmpNative.__gmpz_tdiv_qr((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+            GmpLib.__gmpz_tdiv_qr((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
         }
     }
 
     /// <summary>
     /// return (n / d, n mod d) (Truncate)
     /// </summary>
-    public static unsafe (BigInteger q, BigInteger r) DivRem(BigInteger n, BigInteger d)
+    public static unsafe (GmpInteger q, GmpInteger r) DivRem(GmpInteger n, GmpInteger d)
     {
-        BigInteger q = new(), r = new();
+        GmpInteger q = new(), r = new();
         DivRemInplace(q, r, n, d);
         return (q, r);
     }
@@ -1039,21 +1037,21 @@ public class BigInteger : IDisposable
     /// q = n / d (Truncate)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe uint DivideInplace(BigInteger q, BigInteger n, uint d)
+    public static unsafe uint DivideInplace(GmpInteger q, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpNative.__gmpz_tdiv_q_ui((IntPtr)pq, (IntPtr)pn, d);
+            return GmpLib.__gmpz_tdiv_q_ui((IntPtr)pq, (IntPtr)pn, d);
         }
     }
 
     /// <summary>
     /// return n mod d (Truncate)
     /// </summary>
-    public static unsafe BigInteger Divide(BigInteger n, uint d)
+    public static unsafe GmpInteger Divide(GmpInteger n, uint d)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         DivideInplace(q, n, d);
         return q;
     }
@@ -1062,12 +1060,12 @@ public class BigInteger : IDisposable
     /// r = n mod d (Truncate)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe uint ReminderInplace(BigInteger r, BigInteger n, uint d)
+    public static unsafe uint ReminderInplace(GmpInteger r, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpNative.__gmpz_tdiv_r_ui((IntPtr)pr, (IntPtr)pn, d);
+            return GmpLib.__gmpz_tdiv_r_ui((IntPtr)pr, (IntPtr)pn, d);
         }
     }
 
@@ -1075,39 +1073,39 @@ public class BigInteger : IDisposable
     /// q = n / d + r (Truncate)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe uint DivRemInplace(BigInteger q, BigInteger r, BigInteger n, uint d)
+    public static unsafe uint DivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpNative.__gmpz_tdiv_qr_ui((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, d);
+            return GmpLib.__gmpz_tdiv_qr_ui((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, d);
         }
     }
 
     /// <summary>
     /// return (n / d, n mod d) (Truncate)
     /// </summary>
-    public static unsafe (BigInteger q, BigInteger r) DivRem(BigInteger n, uint d)
+    public static unsafe (GmpInteger q, GmpInteger r) DivRem(GmpInteger n, uint d)
     {
-        BigInteger q = new(), r = new();
+        GmpInteger q = new(), r = new();
         DivRemInplace(q, r, n, d);
         return (q, r);
     }
 
     /// <returns>n mod d (Truncate)</returns>
-    public static unsafe uint ReminderToUInt32(BigInteger n, uint d)
+    public static unsafe uint ReminderToUInt32(GmpInteger n, uint d)
     {
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpNative.__gmpz_tdiv_ui((IntPtr)pn, d);
+            return GmpLib.__gmpz_tdiv_ui((IntPtr)pn, d);
         }
     }
 
     /// <returns>n mod d (Truncate)</returns>
-    public static unsafe BigInteger Reminder(BigInteger n, uint d)
+    public static unsafe GmpInteger Reminder(GmpInteger n, uint d)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         ReminderInplace(r, n, d);
         return r;
     }
@@ -1116,21 +1114,21 @@ public class BigInteger : IDisposable
     /// q = n / (2 ^ d) (Truncate)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe void Divide2ExpInplace(BigInteger q, BigInteger n, uint exp2)
+    public static unsafe void Divide2ExpInplace(GmpInteger q, GmpInteger n, uint exp2)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            GmpNative.__gmpz_tdiv_q_2exp((IntPtr)pq, (IntPtr)pn, exp2);
+            GmpLib.__gmpz_tdiv_q_2exp((IntPtr)pq, (IntPtr)pn, exp2);
         }
     }
 
     /// <summary>
     /// return n / (2 ^ d) (Truncate)
     /// </summary>
-    public static unsafe BigInteger Divide2Exp(BigInteger n, uint exp2)
+    public static unsafe GmpInteger Divide2Exp(GmpInteger n, uint exp2)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         Divide2ExpInplace(q, n, exp2);
         return q;
     }
@@ -1139,56 +1137,56 @@ public class BigInteger : IDisposable
     /// r = n mod (2 ^ d) (Truncate)
     /// </summary>
     /// <returns>the remainder</returns>
-    public static unsafe void Reminder2ExpInplace(BigInteger r, BigInteger n, uint exp2)
+    public static unsafe void Reminder2ExpInplace(GmpInteger r, GmpInteger n, uint exp2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            GmpNative.__gmpz_tdiv_r_2exp((IntPtr)pr, (IntPtr)pn, exp2);
+            GmpLib.__gmpz_tdiv_r_2exp((IntPtr)pr, (IntPtr)pn, exp2);
         }
     }
 
     /// <summary>
     /// return n mod (2 ^ d) (Truncate)
     /// </summary>
-    public static unsafe BigInteger Reminder2Exp(BigInteger n, uint exp2)
+    public static unsafe GmpInteger Reminder2Exp(GmpInteger n, uint exp2)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         Reminder2ExpInplace(q, n, exp2);
         return q;
     }
     #endregion
 
     #region operators
-    public static BigInteger operator /(BigInteger op1, BigInteger op2) => Divide(op1, op2);
+    public static GmpInteger operator /(GmpInteger op1, GmpInteger op2) => Divide(op1, op2);
 
-    public static BigInteger operator %(BigInteger op1, BigInteger op2) => Reminder(op1, op2);
+    public static GmpInteger operator %(GmpInteger op1, GmpInteger op2) => Reminder(op1, op2);
 
-    public static BigInteger operator /(BigInteger op1, uint op2) => Divide(op1, op2);
+    public static GmpInteger operator /(GmpInteger op1, uint op2) => Divide(op1, op2);
 
-    public static BigInteger operator %(BigInteger op1, uint op2) => Reminder(op1, op2);
+    public static GmpInteger operator %(GmpInteger op1, uint op2) => Reminder(op1, op2);
     #endregion
 
     #region Others
     /// <summary>
     /// Set r to n mod d. The sign of the divisor is ignored; the result is always non-negative.
     /// </summary>
-    public static unsafe void ModInplace(BigInteger r, BigInteger n, BigInteger d)
+    public static unsafe void ModInplace(GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pd = &d.Raw)
         {
-            GmpNative.__gmpz_mod((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
+            GmpLib.__gmpz_mod((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
         }
     }
 
     /// <summary>
     /// return n mod d. The sign of the divisor is ignored; the result is always non-negative.
     /// </summary>
-    public static unsafe BigInteger Mod(BigInteger n, BigInteger d)
+    public static unsafe GmpInteger Mod(GmpInteger n, GmpInteger d)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         ModInplace(r, n, d);
         return r;
     }
@@ -1197,25 +1195,25 @@ public class BigInteger : IDisposable
     /// <para>Set r to n mod d. The sign of the divisor is ignored; the result is always non-negative.</para>
     /// <para>is identical to mpz_fdiv_r_ui above, returning the remainder as well as setting r</para>
     /// </summary>
-    public static unsafe uint ModInplace(BigInteger r, BigInteger n, uint d) => FloorReminderInplace(r, n, d);
+    public static unsafe uint ModInplace(GmpInteger r, GmpInteger n, uint d) => FloorReminderInplace(r, n, d);
 
     /// <summary>
     /// <para>return n mod d. The sign of the divisor is ignored; the result is always non-negative.</para>
     /// <para>is identical to mpz_fdiv_r_ui above, returning the remainder as well as setting r</para>
     /// </summary>
-    public static unsafe BigInteger Mod(BigInteger n, uint d) => FloorReminder(n, d);
+    public static unsafe GmpInteger Mod(GmpInteger n, uint d) => FloorReminder(n, d);
 
     /// <summary>
     /// <para>Set q to n/d. These functions produce correct results only when it is known in advance that d divides n.</para>
     /// <para>Much faster than the other division functions, and are the best choice when exact division is known to occur, for example reducing a rational to lowest terms.</para>
     /// </summary>
-    public static unsafe void DivExactInplace(BigInteger q, BigInteger n, BigInteger d)
+    public static unsafe void DivExactInplace(GmpInteger q, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pd = &d.Raw)
         {
-            GmpNative.__gmpz_divexact((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
+            GmpLib.__gmpz_divexact((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
         }
     }
 
@@ -1223,9 +1221,9 @@ public class BigInteger : IDisposable
     /// <para>return n/d. These functions produce correct results only when it is known in advance that d divides n.</para>
     /// <para>Much faster than the other division functions, and are the best choice when exact division is known to occur, for example reducing a rational to lowest terms.</para>
     /// </summary>
-    public static unsafe BigInteger DivExact(BigInteger n, BigInteger d)
+    public static unsafe GmpInteger DivExact(GmpInteger n, GmpInteger d)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         DivExactInplace(q, n, d);
         return q;
     }
@@ -1234,12 +1232,12 @@ public class BigInteger : IDisposable
     /// <para>Set q to n/d. These functions produce correct results only when it is known in advance that d divides n.</para>
     /// <para>Much faster than the other division functions, and are the best choice when exact division is known to occur, for example reducing a rational to lowest terms.</para>
     /// </summary>
-    public static unsafe void DivExactInplace(BigInteger q, BigInteger n, uint d)
+    public static unsafe void DivExactInplace(GmpInteger q, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            GmpNative.__gmpz_divexact_ui((IntPtr)pq, (IntPtr)pn, d);
+            GmpLib.__gmpz_divexact_ui((IntPtr)pq, (IntPtr)pn, d);
         }
     }
 
@@ -1247,9 +1245,9 @@ public class BigInteger : IDisposable
     /// <para>return n/d. These functions produce correct results only when it is known in advance that d divides n.</para>
     /// <para>Much faster than the other division functions, and are the best choice when exact division is known to occur, for example reducing a rational to lowest terms.</para>
     /// </summary>
-    public static unsafe BigInteger DivExact(BigInteger n, uint d)
+    public static unsafe GmpInteger DivExact(GmpInteger n, uint d)
     {
-        BigInteger q = new();
+        GmpInteger q = new();
         DivExactInplace(q, n, d);
         return q;
     }
@@ -1259,13 +1257,13 @@ public class BigInteger : IDisposable
     /// <para>Unlike the other division functions, d=0 is accepted and following the rule it can be seen that n and c are considered congruent mod 0 only when exactly equal.</para>
     /// </summary>
     /// <returns>true if n = c mod d</returns>
-    public static unsafe bool Congruent(BigInteger n, BigInteger c, BigInteger d)
+    public static unsafe bool Congruent(GmpInteger n, GmpInteger c, GmpInteger d)
     {
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pc = &c.Raw)
         fixed (Mpz_t* pd = &d.Raw)
         {
-            return GmpNative.__gmpz_congruent_p((IntPtr)pn, (IntPtr)pc, (IntPtr)pd) != 0;
+            return GmpLib.__gmpz_congruent_p((IntPtr)pn, (IntPtr)pc, (IntPtr)pd) != 0;
         }
     }
 
@@ -1274,11 +1272,11 @@ public class BigInteger : IDisposable
     /// <para>Unlike the other division functions, d=0 is accepted and following the rule it can be seen that n and c are considered congruent mod 0 only when exactly equal.</para>
     /// </summary>
     /// <returns>true if n = c mod d</returns>
-    public static unsafe bool Congruent(BigInteger n, uint c, uint d)
+    public static unsafe bool Congruent(GmpInteger n, uint c, uint d)
     {
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpNative.__gmpz_congruent_ui_p((IntPtr)pn, c, d) != 0;
+            return GmpLib.__gmpz_congruent_ui_p((IntPtr)pn, c, d) != 0;
         }
     }
 
@@ -1286,12 +1284,12 @@ public class BigInteger : IDisposable
     /// <para>n is congruent to c mod (2^b) if there exists an integer q satisfying n = c + q*(2^b).</para>
     /// </summary>
     /// <returns>true if n = c mod (2^b)</returns>
-    public static unsafe bool Congruent2Exp(BigInteger n, BigInteger c, uint b)
+    public static unsafe bool Congruent2Exp(GmpInteger n, GmpInteger c, uint b)
     {
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pc = &c.Raw)
         {
-            return GmpNative.__gmpz_congruent_2exp_p((IntPtr)pn, (IntPtr)pc, b) != 0;
+            return GmpLib.__gmpz_congruent_2exp_p((IntPtr)pn, (IntPtr)pc, b) != 0;
         }
     }
     #endregion
@@ -1301,21 +1299,21 @@ public class BigInteger : IDisposable
     /// <summary>
     /// r = (@base ^ exp) % mod
     /// </summary>
-    public static unsafe void PowerModInplace(BigInteger r, BigInteger @base, BigInteger exp, BigInteger mod)
+    public static unsafe void PowerModInplace(GmpInteger r, GmpInteger @base, GmpInteger exp, GmpInteger mod)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pbase = &@base.Raw)
         fixed (Mpz_t* pexp = &exp.Raw)
         fixed (Mpz_t* pmod = &mod.Raw)
         {
-            GmpNative.__gmpz_powm((IntPtr)pr, (IntPtr)pbase, (IntPtr)pexp, (IntPtr)pmod);
+            GmpLib.__gmpz_powm((IntPtr)pr, (IntPtr)pbase, (IntPtr)pexp, (IntPtr)pmod);
         }
     }
 
     /// <returns>(@base ^ exp) % mod</returns>
-    public static BigInteger PowerMod(BigInteger @base, BigInteger exp, BigInteger mod)
+    public static GmpInteger PowerMod(GmpInteger @base, GmpInteger exp, GmpInteger mod)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         PowerModInplace(r, @base, exp, mod);
         return r;
     }
@@ -1323,20 +1321,20 @@ public class BigInteger : IDisposable
     /// <summary>
     /// r = (@base ^ exp) % mod
     /// </summary>
-    public static unsafe void PowerModInplace(BigInteger r, BigInteger @base, uint exp, BigInteger mod)
+    public static unsafe void PowerModInplace(GmpInteger r, GmpInteger @base, uint exp, GmpInteger mod)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pbase = &@base.Raw)
         fixed (Mpz_t* pmod = &mod.Raw)
         {
-            GmpNative.__gmpz_powm_ui((IntPtr)pr, (IntPtr)pbase, exp, (IntPtr)pmod);
+            GmpLib.__gmpz_powm_ui((IntPtr)pr, (IntPtr)pbase, exp, (IntPtr)pmod);
         }
     }
 
     /// <returns>(@base ^ exp) % mod</returns>
-    public static BigInteger PowerMod(BigInteger @base, uint exp, BigInteger mod)
+    public static GmpInteger PowerMod(GmpInteger @base, uint exp, GmpInteger mod)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         PowerModInplace(r, @base, exp, mod);
         return r;
     }
@@ -1351,14 +1349,14 @@ public class BigInteger : IDisposable
     /// </para>
     /// <para>This function is intended for cryptographic purposes, where resilience to side-channel attacks is desired.</para>
     /// </remarks>
-    public static unsafe void PowerModSecureInplace(BigInteger r, BigInteger @base, BigInteger exp, BigInteger mod)
+    public static unsafe void PowerModSecureInplace(GmpInteger r, GmpInteger @base, GmpInteger exp, GmpInteger mod)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pbase = &@base.Raw)
         fixed (Mpz_t* pexp = &exp.Raw)
         fixed (Mpz_t* pmod = &mod.Raw)
         {
-            GmpNative.__gmpz_powm_sec((IntPtr)pr, (IntPtr)pbase, (IntPtr)pexp, (IntPtr)pmod);
+            GmpLib.__gmpz_powm_sec((IntPtr)pr, (IntPtr)pbase, (IntPtr)pexp, (IntPtr)pmod);
         }
     }
 
@@ -1370,9 +1368,9 @@ public class BigInteger : IDisposable
     /// </para>
     /// <para>This function is intended for cryptographic purposes, where resilience to side-channel attacks is desired.</para>
     /// </remarks>
-    public static BigInteger PowerModSecure(BigInteger @base, BigInteger exp, BigInteger mod)
+    public static GmpInteger PowerModSecure(GmpInteger @base, GmpInteger exp, GmpInteger mod)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         PowerModSecureInplace(r, @base, exp, mod);
         return r;
     }
@@ -1381,20 +1379,20 @@ public class BigInteger : IDisposable
     /// r = base ^ exp
     /// </summary>
     /// <remarks>The case 0^0 yields 1</remarks>
-    public static unsafe void PowerInplace(BigInteger r, BigInteger @base, uint exp)
+    public static unsafe void PowerInplace(GmpInteger r, GmpInteger @base, uint exp)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pbase = &@base.Raw)
         {
-            GmpNative.__gmpz_pow_ui((IntPtr)pr, (IntPtr)pbase, exp);
+            GmpLib.__gmpz_pow_ui((IntPtr)pr, (IntPtr)pbase, exp);
         }
     }
 
     /// <returns>base ^ exp</returns>
     /// <remarks>The case 0^0 yields 1</remarks>
-    public static BigInteger Power(BigInteger @base, uint exp)
+    public static GmpInteger Power(GmpInteger @base, uint exp)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         PowerInplace(r, @base, exp);
         return r;
     }
@@ -1403,24 +1401,24 @@ public class BigInteger : IDisposable
     /// r = base ^ exp
     /// </summary>
     /// <remarks>The case 0^0 yields 1</remarks>
-    public static unsafe void PowerInplace(BigInteger r, uint @base, uint exp)
+    public static unsafe void PowerInplace(GmpInteger r, uint @base, uint exp)
     {
         fixed (Mpz_t* pr = &r.Raw)
         {
-            GmpNative.__gmpz_ui_pow_ui((IntPtr)pr, @base, exp);
+            GmpLib.__gmpz_ui_pow_ui((IntPtr)pr, @base, exp);
         }
     }
 
     /// <returns>base ^ exp</returns>
     /// <remarks>The case 0^0 yields 1</remarks>
-    public static BigInteger Power(uint @base, uint exp)
+    public static GmpInteger Power(uint @base, uint exp)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         PowerInplace(r, @base, exp);
         return r;
     }
 
-    public static BigInteger operator ^(BigInteger @base, uint exp) => Power(@base, exp);
+    public static GmpInteger operator ^(GmpInteger @base, uint exp) => Power(@base, exp);
     #endregion
 
     #region Root Extraction Functions
@@ -1428,19 +1426,19 @@ public class BigInteger : IDisposable
     /// r = sqrt(op, n)
     /// </summary>
     /// <returns>true if computation was exact</returns>
-    public static unsafe bool RootInplace(BigInteger r, BigInteger op, uint n)
+    public static unsafe bool RootInplace(GmpInteger r, GmpInteger op, uint n)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop = &op.Raw)
         {
-            return GmpNative.__gmpz_root((IntPtr)pr, (IntPtr)pop, n) != 0;
+            return GmpLib.__gmpz_root((IntPtr)pr, (IntPtr)pop, n) != 0;
         }
     }
 
     /// <returns>sqsrt(op, n)</returns>
-    public static BigInteger Root(BigInteger op, uint n)
+    public static GmpInteger Root(GmpInteger op, uint n)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         RootInplace(r, op, n);
         return r;
     }
@@ -1448,20 +1446,20 @@ public class BigInteger : IDisposable
     /// <summary>
     /// r = sqrt(op, n) + reminder
     /// </summary>\
-    public static unsafe void RootReminderInplace(BigInteger r, BigInteger reminder, BigInteger op, uint n)
+    public static unsafe void RootReminderInplace(GmpInteger r, GmpInteger reminder, GmpInteger op, uint n)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* preminder = &reminder.Raw)
         fixed (Mpz_t* pop = &op.Raw)
         {
-            GmpNative.__gmpz_rootrem((IntPtr)pr, (IntPtr)preminder, (IntPtr)pop, n);
+            GmpLib.__gmpz_rootrem((IntPtr)pr, (IntPtr)preminder, (IntPtr)pop, n);
         }
     }
 
     /// <returns>(root, reminder)</returns>
-    public static (BigInteger root, BigInteger reminder) RootReminder(BigInteger op, uint n)
+    public static (GmpInteger root, GmpInteger reminder) RootReminder(GmpInteger op, uint n)
     {
-        BigInteger root = new(), reminder = new();
+        GmpInteger root = new(), reminder = new();
         RootReminderInplace(root, reminder, op, n);
         return (root, reminder);
     }
@@ -1475,7 +1473,7 @@ public class BigInteger : IDisposable
     {
         fixed (Mpz_t* pop = &Raw)
         {
-            return GmpNative.__gmpz_perfect_power_p((IntPtr)pop) != 0;
+            return GmpLib.__gmpz_perfect_power_p((IntPtr)pop) != 0;
         }
     }
 
@@ -1487,7 +1485,7 @@ public class BigInteger : IDisposable
     {
         fixed (Mpz_t* pop = &Raw)
         {
-            return GmpNative.__gmpz_perfect_square_p((IntPtr)pop) != 0;
+            return GmpLib.__gmpz_perfect_square_p((IntPtr)pop) != 0;
         }
     }
     #endregion
@@ -1502,7 +1500,7 @@ public class BigInteger : IDisposable
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            return (PrimePossibility)GmpNative.__gmpz_probab_prime_p((IntPtr)ptr, reps);
+            return (PrimePossibility)GmpLib.__gmpz_probab_prime_p((IntPtr)ptr, reps);
         }
     }
 
@@ -1510,12 +1508,12 @@ public class BigInteger : IDisposable
     /// Set rop to the next prime greater than op.
     /// </summary>
     /// <remarks>This function uses a probabilistic algorithm to identify primes. For practical purposes it’s adequate, the chance of a composite passing will be extremely small.</remarks>
-    public static unsafe void NextPrime(BigInteger rop, BigInteger op)
+    public static unsafe void NextPrime(GmpInteger rop, GmpInteger op)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* pop = &op.Raw)
         {
-            GmpNative.__gmpz_nextprime((IntPtr)pr, (IntPtr)pop);
+            GmpLib.__gmpz_nextprime((IntPtr)pr, (IntPtr)pop);
         }
     }
 
@@ -1523,42 +1521,42 @@ public class BigInteger : IDisposable
     /// Set rop to the next prime greater than op.
     /// </summary>
     /// <remarks>This function uses a probabilistic algorithm to identify primes. For practical purposes it’s adequate, the chance of a composite passing will be extremely small.</remarks>
-    public static BigInteger NextPrime(BigInteger op)
+    public static GmpInteger NextPrime(GmpInteger op)
     {
-        BigInteger r = new();
+        GmpInteger r = new();
         NextPrime(r, op);
         return r;
     }
 
-    public static unsafe void Gcd(BigInteger rop, BigInteger op1, BigInteger op2)
+    public static unsafe void Gcd(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
         fixed (Mpz_t* p2 = &op2.Raw)
         {
-            GmpNative.__gmpz_gcd((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
+            GmpLib.__gmpz_gcd((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
         }
     }
 
-    public static unsafe BigInteger Gcd(BigInteger op1, BigInteger op2)
+    public static unsafe GmpInteger Gcd(GmpInteger op1, GmpInteger op2)
     {
-        BigInteger rop = new();
+        GmpInteger rop = new();
         Gcd(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe void Gcd(BigInteger rop, BigInteger op1, uint op2)
+    public static unsafe void Gcd(GmpInteger rop, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
         {
-            GmpNative.__gmpz_gcd_ui((IntPtr)pr, (IntPtr)p1, op2);
+            GmpLib.__gmpz_gcd_ui((IntPtr)pr, (IntPtr)p1, op2);
         }
     }
 
-    public static unsafe BigInteger Gcd(BigInteger op1, uint op2)
+    public static unsafe GmpInteger Gcd(GmpInteger op1, uint op2)
     {
-        BigInteger rop = new();
+        GmpInteger rop = new();
         Gcd(rop, op1, op2);
         return rop;
     }
@@ -1575,7 +1573,7 @@ public class BigInteger : IDisposable
     /// <item>If t or g is NULL then that value is not computed.</item>
     /// </list>
     /// </summary>
-    public static unsafe void Gcd2(BigInteger g, BigInteger s, BigInteger t, BigInteger a, BigInteger b)
+    public static unsafe void Gcd2(GmpInteger g, GmpInteger s, GmpInteger t, GmpInteger a, GmpInteger b)
     {
         fixed (Mpz_t* pg = &g.Raw)
         fixed (Mpz_t* ps = &s.Raw)
@@ -1583,7 +1581,7 @@ public class BigInteger : IDisposable
         fixed (Mpz_t* pa = &a.Raw)
         fixed (Mpz_t* pb = &b.Raw)
         {
-            GmpNative.__gmpz_gcdext((IntPtr)pg, (IntPtr)ps, (IntPtr)pt, (IntPtr)pa, (IntPtr)pb);
+            GmpLib.__gmpz_gcdext((IntPtr)pg, (IntPtr)ps, (IntPtr)pt, (IntPtr)pa, (IntPtr)pb);
         }
     }
 
@@ -1599,44 +1597,44 @@ public class BigInteger : IDisposable
     /// <item>If t or g is NULL then that value is not computed.</item>
     /// </list>
     /// </summary>
-    public static unsafe (BigInteger g, BigInteger s, BigInteger t) Gcd2(BigInteger a, BigInteger b)
+    public static unsafe (GmpInteger g, GmpInteger s, GmpInteger t) Gcd2(GmpInteger a, GmpInteger b)
     {
-        BigInteger g = new();
-        BigInteger s = new();
-        BigInteger t = new();
+        GmpInteger g = new();
+        GmpInteger s = new();
+        GmpInteger t = new();
         Gcd2(g, s, t, a, b);
         return (g, s, t);
     }
 
-    public static unsafe void Lcm(BigInteger rop, BigInteger op1, BigInteger op2)
+    public static unsafe void Lcm(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
         fixed (Mpz_t* p2 = &op2.Raw)
         {
-            GmpNative.__gmpz_lcm((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
+            GmpLib.__gmpz_lcm((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
         }
     }
 
-    public static unsafe BigInteger Lcm(BigInteger op1, BigInteger op2)
+    public static unsafe GmpInteger Lcm(GmpInteger op1, GmpInteger op2)
     {
-        BigInteger rop = new();
+        GmpInteger rop = new();
         Lcm(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe void Lcm(BigInteger rop, BigInteger op1, uint op2)
+    public static unsafe void Lcm(GmpInteger rop, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
         {
-            GmpNative.__gmpz_lcm_ui((IntPtr)pr, (IntPtr)p1, op2);
+            GmpLib.__gmpz_lcm_ui((IntPtr)pr, (IntPtr)p1, op2);
         }
     }
 
-    public static unsafe BigInteger Lcm(BigInteger op1, uint op2)
+    public static unsafe GmpInteger Lcm(GmpInteger op1, uint op2)
     {
-        BigInteger rop = new();
+        GmpInteger rop = new();
         Lcm(rop, op1, op2);
         return rop;
     }

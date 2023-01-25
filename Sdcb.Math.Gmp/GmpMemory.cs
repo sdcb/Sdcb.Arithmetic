@@ -5,10 +5,10 @@ namespace Sdcb.Math.Gmp
 {
     public static unsafe class GmpMemory
     {
-        [DllImport(GmpNative.Dll, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(GmpLib.Dll, CallingConvention = CallingConvention.Cdecl)]
         public static extern void __gmp_get_memory_functions(out delegate*<nint, IntPtr> malloc, out delegate*<IntPtr, nint, nint, IntPtr> realloc, out delegate*<IntPtr, nint, void> free);
 
-        [DllImport(GmpNative.Dll, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(GmpLib.Dll, CallingConvention = CallingConvention.Cdecl)]
         public static extern void __gmp_set_memory_functions(out delegate*<nint, IntPtr> malloc, out delegate*<IntPtr, nint, nint, IntPtr> realloc, out delegate*<IntPtr, nint, void> free);
 
         static GmpMemory()

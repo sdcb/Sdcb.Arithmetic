@@ -2,11 +2,11 @@ using Xunit.Abstractions;
 
 namespace Sdcb.Math.Gmp.Tests;
 
-public class BigIntegerFastTest
+public class GmpIntegerFastTest
 {
     private readonly ITestOutputHelper _console;
 
-    public BigIntegerFastTest(ITestOutputHelper console)
+    public GmpIntegerFastTest(ITestOutputHelper console)
     {
         _console = console;
     }
@@ -19,7 +19,7 @@ public class BigIntegerFastTest
     [InlineData(-255, 16, "-ff")]
     public void ToStringTest(double val, int opBase, string expected)
     {
-        BigInteger z = BigInteger.From(val);
+        GmpInteger z = GmpInteger.From(val);
         Assert.Equal(expected, z.ToString(opBase));
     }
 }

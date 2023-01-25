@@ -3,25 +3,25 @@ using System.Runtime.InteropServices;
 
 namespace Sdcb.Math.Gmp;
 
-public class BigRational : IDisposable
+public class GmpRational : IDisposable
 {
     public Mpq_t Raw = new();
     private bool _disposed = false;
 
-    public unsafe BigRational()
+    public unsafe GmpRational()
     {
         fixed (Mpq_t* ptr = &Raw)
         {
-            GmpNative.__gmpq_init((IntPtr)ptr);
+            GmpLib.__gmpq_init((IntPtr)ptr);
         }
     }
 
-    public static unsafe BigRational From(int num, uint den)
+    public static unsafe GmpRational From(int num, uint den)
     {
-        BigRational r = new();
+        GmpRational r = new();
         fixed (Mpq_t* pr = &r.Raw)
         {
-            GmpNative.__gmpq_set_si((IntPtr)pr, num, den);
+            GmpLib.__gmpq_set_si((IntPtr)pr, num, den);
         }
         return r;
     }
@@ -31,7 +31,7 @@ public class BigRational : IDisposable
     {
         fixed (Mpq_t* ptr = &Raw)
         {
-            GmpNative.__gmpq_clear((IntPtr)ptr);
+            GmpLib.__gmpq_clear((IntPtr)ptr);
         }
     }
 
@@ -49,7 +49,7 @@ public class BigRational : IDisposable
         }
     }
 
-    ~BigRational()
+    ~GmpRational()
     {
         // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
         Dispose(disposing: false);

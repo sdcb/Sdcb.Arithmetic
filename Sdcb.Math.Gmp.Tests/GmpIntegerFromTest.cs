@@ -2,11 +2,11 @@ using Xunit.Abstractions;
 
 namespace Sdcb.Math.Gmp.Tests;
 
-public class BigIntegerFromTest
+public class GmpIntegerFromTest
 {
     private readonly ITestOutputHelper _console;
 
-    public BigIntegerFromTest(ITestOutputHelper console)
+    public GmpIntegerFromTest(ITestOutputHelper console)
     {
         _console = console;
     }
@@ -15,8 +15,8 @@ public class BigIntegerFromTest
     public void FromBigInteger()
     {
         string num = "1234567890123456789012345678901234567890";
-        using BigInteger a = BigInteger.Parse(num);
-        using BigInteger b = BigInteger.From(a);
+        using GmpInteger a = GmpInteger.Parse(num);
+        using GmpInteger b = GmpInteger.From(a);
         Assert.Equal(num, b.ToString());
     }
 
@@ -24,7 +24,7 @@ public class BigIntegerFromTest
     public void FromInt()
     {
         int num = -2147483647;
-        using BigInteger b = BigInteger.From(num);
+        using GmpInteger b = GmpInteger.From(num);
         Assert.Equal(num, b.ToInt32());
     }
 
@@ -32,7 +32,7 @@ public class BigIntegerFromTest
     public void FromUInt()
     {
         uint num = 2147483647;
-        using BigInteger b = BigInteger.From(num);
+        using GmpInteger b = GmpInteger.From(num);
         Assert.Equal(num, b.ToUInt32());
     }
 
@@ -40,7 +40,7 @@ public class BigIntegerFromTest
     public void FromDouble()
     {
         double num = 3.14;
-        using BigInteger b = BigInteger.From(num);
+        using GmpInteger b = GmpInteger.From(num);
         Assert.Equal((int)num, b.ToDouble());
     }
 
@@ -53,7 +53,7 @@ public class BigIntegerFromTest
     [InlineData("What's the f**k?", 62, false)]
     public void TryParse(string num, int @base, bool good)
     {
-        if (BigInteger.TryParse(num, out BigInteger? result, @base))
+        if (GmpInteger.TryParse(num, out GmpInteger? result, @base))
         {
             Assert.True(good);
             Assert.Equal(num, result.ToString(@base));
@@ -75,7 +75,7 @@ public class BigIntegerFromTest
     {
         try
         {
-            BigInteger r = BigInteger.Parse(num, @base);
+            GmpInteger r = GmpInteger.Parse(num, @base);
             Assert.True(good);
             Assert.Equal(num, r.ToString(@base));
         }
@@ -88,8 +88,8 @@ public class BigIntegerFromTest
     [Fact]
     public void AssignBigInteger()
     {
-        BigInteger a = BigInteger.From(42);
-        BigInteger b = new();
+        GmpInteger a = GmpInteger.From(42);
+        GmpInteger b = new();
         b.Assign(a);
         Assert.Equal(42, b.ToInt32());
     }
@@ -97,7 +97,7 @@ public class BigIntegerFromTest
     [Fact]
     public void AssignUInt()
     {
-        BigInteger b = new();
+        GmpInteger b = new();
         b.Assign(42u);
         Assert.Equal(42u, b.ToUInt32());
     }
@@ -105,7 +105,7 @@ public class BigIntegerFromTest
     [Fact]
     public void AssignInt()
     {
-        BigInteger b = new();
+        GmpInteger b = new();
         b.Assign(-2147483647);
         Assert.Equal(-2147483647, b.ToInt32());
     }
@@ -113,7 +113,7 @@ public class BigIntegerFromTest
     [Fact]
     public void AssignDouble()
     {
-        BigInteger b = new();
+        GmpInteger b = new();
         b.Assign(3.14);
         Assert.Equal(3, b.ToInt32());
     }
@@ -121,8 +121,8 @@ public class BigIntegerFromTest
     [Fact]
     public void AssignBigRaltional()
     {
-        BigRational a = BigRational.From(12, 4);
-        BigInteger b = new();
+        GmpRational a = GmpRational.From(12, 4);
+        GmpInteger b = new();
         b.Assign(a);
         Assert.Equal(3, b.ToInt32());
     }
@@ -130,8 +130,8 @@ public class BigIntegerFromTest
     [Fact]
     public void AssignBigFloat()
     {
-        BigFloat a = BigFloat.From(65535.125);
-        BigInteger b = new();
+        GmpFloat a = GmpFloat.From(65535.125);
+        GmpInteger b = new();
         b.Assign(a);
         Assert.Equal(65535, a.ToInt32());
     }
@@ -140,7 +140,7 @@ public class BigIntegerFromTest
     public void AssignString()
     {
         string num = "1234567890123456789012345678901234567890";
-        BigInteger b = new();
+        GmpInteger b = new();
         b.Assign(num);
         Assert.Equal(num, b.ToString());
     }
