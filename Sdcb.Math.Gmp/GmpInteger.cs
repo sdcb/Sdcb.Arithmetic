@@ -1640,12 +1640,12 @@ public class GmpInteger : IDisposable
     }
 
     /// <summary>
-    /// Set rop to the modular inverse of op1 mod op2, i.e. b, where op1 * b mod op1 = 1
+    /// Set rop to the modular inverse of op1 mod op2, i.e. b, where op1 * b mod op2 = 1
     /// </summary>
     /// <param name="rop"></param>
     /// <param name="op1"></param>
     /// <param name="op2"></param>
-    /// <returns></returns>
+    /// <returns>true if find the inverse.</returns>
     public static unsafe bool Invert(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -1657,7 +1657,7 @@ public class GmpInteger : IDisposable
     }
 
     /// <summary>
-    /// Set rop to the modular inverse of op1 mod op2, i.e. b, where op1 * b mod op1 = 1
+    /// Set rop to the modular inverse of op1 mod op2, i.e. b, where op1 * b mod op2 = 1
     /// </summary>
     public static unsafe GmpInteger Invert(GmpInteger op1, GmpInteger op2)
     {
