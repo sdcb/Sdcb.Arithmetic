@@ -49,6 +49,8 @@ public class GmpFloatFastTest
     [InlineData(0, 10, "0")]
     [InlineData(42, 10, "42")]
     [InlineData(-2147483647, 10, "-2147483647")]
+    [InlineData(7000, 10, "7000")]
+    [InlineData(-90000, 10, "-90000")]
     public void ToStringTest(double val, int opBase, string expected)
     {
         GmpFloat f = GmpFloat.From(val);

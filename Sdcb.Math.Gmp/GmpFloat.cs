@@ -355,10 +355,11 @@ public class GmpFloat : IDisposable
 
                 return pre + (exp switch
                 {
-                    > 0 => (s.Length == exp) switch
+                    > 0 => s.Length.CompareTo(exp) switch
                     {
-                        false => (s + new string('0', SysMath.Max(0, exp - s.Length + 1))) switch { var ss => ss[..exp] + "." + ss[exp..] },
-                        true => s
+                        > 0 => (s + new string('0', SysMath.Max(0, exp - s.Length + 1))) switch { var ss => ss[..exp] + "." + ss[exp..] },
+                        < 0 => (s + new string('0', SysMath.Max(0, exp - s.Length))),
+                        0 => s
                     },
                     _ => s switch
                     {
