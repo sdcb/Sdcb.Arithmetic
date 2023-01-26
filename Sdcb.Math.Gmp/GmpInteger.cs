@@ -2271,6 +2271,66 @@ public class GmpInteger : IDisposable
         }
     }
     #endregion
+
+    #region Obsoleted Random
+    /// <summary>
+    /// Generate a random integer of at most max_size limbs.
+    /// The generated random number doesn’t satisfy any particular requirements of randomness.
+    /// Negative random numbers are generated when max_size is negative.
+    /// </summary>
+    [Obsolete("use GmpRandom")]
+    public static unsafe void Random(GmpInteger rop, int maxLimbCount)
+    {
+        fixed (Mpz_t* ptr = &rop.Raw)
+        {
+            GmpLib.__gmpz_random((IntPtr)ptr, maxLimbCount);
+        }
+    }
+
+    /// <summary>
+    /// Generate a random integer of at most max_size limbs.
+    /// The generated random number doesn’t satisfy any particular requirements of randomness.
+    /// Negative random numbers are generated when max_size is negative.
+    /// </summary>
+    [Obsolete("use GmpRandom")]
+    public static unsafe GmpInteger Random(int maxLimbCount)
+    {
+        GmpInteger rop = new();
+        Random(rop, maxLimbCount);
+        return rop;
+    }
+
+    /// <summary>
+    /// Generate a random integer of at most max_size limbs, 
+    /// with long strings of zeros and ones in the binary representation. 
+    /// Useful for testing functions and algorithms, 
+    /// since this kind of random numbers have proven to be more likely to trigger corner-case bugs. 
+    /// Negative random numbers are generated when max_size is negative.
+    /// </summary>
+    [Obsolete("use GmpRandom")]
+    public static unsafe void Random2(GmpInteger rop, int maxLimbCount)
+    {
+        fixed (Mpz_t* ptr = &rop.Raw)
+        {
+            GmpLib.__gmpz_random((IntPtr)ptr, maxLimbCount);
+        }
+    }
+
+    /// <summary>
+    /// Generate a random integer of at most max_size limbs, 
+    /// with long strings of zeros and ones in the binary representation. 
+    /// Useful for testing functions and algorithms, 
+    /// since this kind of random numbers have proven to be more likely to trigger corner-case bugs. 
+    /// Negative random numbers are generated when max_size is negative.
+    /// </summary>
+    [Obsolete("use GmpRandom")]
+    public static unsafe GmpInteger Random2(int maxLimbCount)
+    {
+        GmpInteger rop = new();
+        Random(rop, maxLimbCount);
+        return rop;
+    }
+    #endregion
 }
 
 public enum PrimePossibility

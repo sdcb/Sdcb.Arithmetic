@@ -24,9 +24,9 @@ public static class GmpLib
     public static extern void __gmp_get_memory_functions(IntPtr p0, IntPtr p1, IntPtr p2);
 
     /// <param name="p0">(<see cref="gmp_randstate_t" />) </param>
-    /// <param name="p1">(<see cref="gmp_randalg_t" />) </param>
+    /// <param name="p1">(<see cref="GmpRandomAlgorithm" />) </param>
     [DllImport(Dll)]
-    public static extern void __gmp_randinit(IntPtr p0, gmp_randalg_t p1);
+    public static extern void __gmp_randinit(IntPtr p0, GmpRandomAlgorithm p1);
 
     /// <param name="p0">(<see cref="gmp_randstate_t" />) </param>
     [DllImport(Dll)]
