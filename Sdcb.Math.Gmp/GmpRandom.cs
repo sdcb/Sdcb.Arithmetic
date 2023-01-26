@@ -390,6 +390,30 @@ public class GmpRandom : IDisposable
         Next(rop, n);
         return rop;
     }
+
+    /// <summary>
+    /// Generate a uniformly distributed random float in rop, such that 0 &lt;= rop &lt; 1, 
+    /// with nbits significant bits in the mantissa or less if the precision of rop is smaller.
+    /// </summary>
+    public unsafe void Next(GmpFloat rop, uint nbits)
+    {
+        fixed (Mpf_t* pr = &rop.Raw)
+        fixed (GmpRandomState* prandom = &Raw)
+        {
+            GmpLib.__gmpf_urandomb((IntPtr)pr, (IntPtr)prandom, nbits);
+        }
+    }
+
+    /// <summary>
+    /// Generate a uniformly distributed random float in rop, such that 0 &lt;= rop &lt; 1, 
+    /// with nbits significant bits in the mantissa or less if the precision of rop is smaller.
+    /// </summary>
+    public unsafe GmpFloat NextGmpFloat(uint precision, uint nbits)
+    {
+        GmpFloat rop = new(precision);
+        Next(rop, nbits);
+        return rop;
+    }
     #endregion
 
     #region Dispose pattern

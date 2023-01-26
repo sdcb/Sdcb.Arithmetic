@@ -1053,6 +1053,41 @@ public class GmpFloat : IDisposable
         GC.SuppressFinalize(this);
     }
     #endregion
+
+    #region Obsoleted Random
+    /// <summary>
+    /// Generate a random float of at most max_size limbs, 
+    /// with long strings of zeros and ones in the binary representation. 
+    /// The exponent of the number is in the interval -exp to exp (in limbs). 
+    /// This function is useful for testing functions and algorithms, 
+    /// since these kind of random numbers have proven to be more likely to trigger corner-case bugs. 
+    /// Negative random numbers are generated when max_size is negative.
+    /// </summary>
+    [Obsolete("use GmpRandom")]
+    public static unsafe void Random2(GmpFloat rop, int maxLimbCount, int maxExp)
+    {
+        fixed (Mpf_t* ptr = &rop.Raw)
+        {
+            GmpLib.__gmpf_random2((IntPtr)ptr, maxLimbCount, maxExp);
+        }
+    }
+
+    /// <summary>
+    /// Generate a random float of at most max_size limbs, 
+    /// with long strings of zeros and ones in the binary representation. 
+    /// The exponent of the number is in the interval -exp to exp (in limbs). 
+    /// This function is useful for testing functions and algorithms, 
+    /// since these kind of random numbers have proven to be more likely to trigger corner-case bugs. 
+    /// Negative random numbers are generated when max_size is negative.
+    /// </summary>
+    [Obsolete("use GmpRandom")]
+    public static unsafe GmpFloat Random2(uint precision, int maxLimbCount, int maxExp)
+    {
+        GmpFloat rop = new(precision);
+        Random2(rop, maxLimbCount, maxExp);
+        return rop;
+    }
+    #endregion
 }
 
 public record struct Mpf_t
