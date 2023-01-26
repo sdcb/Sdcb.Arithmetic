@@ -2,6 +2,8 @@
 using System;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
+using System.Globalization;
 
 namespace Sdcb.Math.Gmp;
 
@@ -1418,6 +1420,9 @@ public class GmpInteger : IDisposable
         return r;
     }
 
+    /// <summary>
+    /// power
+    /// </summary>
     public static GmpInteger operator ^(GmpInteger @base, uint exp) => Power(@base, exp);
     #endregion
 
@@ -1668,6 +1673,603 @@ public class GmpInteger : IDisposable
         }
         return rop;
     }
+
+    /// <summary>
+    /// Calculate the Jacobi symbol (a/b). This is defined only for b odd.
+    /// </summary>
+    public static unsafe int Jacobi(GmpInteger a, GmpInteger b)
+    {
+        fixed (Mpz_t* p1 = &a.Raw)
+        fixed (Mpz_t* p2 = &b.Raw)
+        {
+            return GmpLib.__gmpz_jacobi((IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    /// <summary>
+    /// <para>Calculate the Legendre symbol (a/p). </para>
+    /// <para>This is defined only for p an odd positive prime, and for such p it’s identical to the Jacobi symbol.</para>
+    /// </summary>
+    public static unsafe int Legendre(GmpInteger a, GmpInteger p) => Jacobi(a, p);
+
+    /// <summary>
+    /// <para>Calculate the Jacobi symbol (a/b) with the Kronecker extension (a/2)=(2/a) when a odd, or (a/2)=0 when a even.</para>
+    /// <para>When b is odd the Jacobi symbol and Kronecker symbol are identical, so mpz_kronecker_ui etc can be used for mixed precision Jacobi symbols too.</para>
+    /// </summary>
+    public static unsafe int Kronecker(GmpInteger a, GmpInteger b) => Jacobi(a, b);
+
+    /// <summary>
+    /// <para>Calculate the Jacobi symbol (a/b) with the Kronecker extension (a/2)=(2/a) when a odd, or (a/2)=0 when a even.</para>
+    /// <para>When b is odd the Jacobi symbol and Kronecker symbol are identical, so mpz_kronecker_ui etc can be used for mixed precision Jacobi symbols too.</para>
+    /// </summary>
+    public static unsafe int Kronecker(GmpInteger a, int b)
+    {
+        fixed (Mpz_t* p1 = &a.Raw)
+        {
+            return GmpLib.__gmpz_kronecker_si((IntPtr)p1, b);
+        }
+    }
+
+    /// <summary>
+    /// <para>Calculate the Jacobi symbol (a/b) with the Kronecker extension (a/2)=(2/a) when a odd, or (a/2)=0 when a even.</para>
+    /// <para>When b is odd the Jacobi symbol and Kronecker symbol are identical, so mpz_kronecker_ui etc can be used for mixed precision Jacobi symbols too.</para>
+    /// </summary>
+    public static unsafe int Kronecker(GmpInteger a, uint b)
+    {
+        fixed (Mpz_t* p1 = &a.Raw)
+        {
+            return GmpLib.__gmpz_kronecker_ui((IntPtr)p1, b);
+        }
+    }
+
+    /// <summary>
+    /// <para>Calculate the Jacobi symbol (a/b) with the Kronecker extension (a/2)=(2/a) when a odd, or (a/2)=0 when a even.</para>
+    /// <para>When b is odd the Jacobi symbol and Kronecker symbol are identical, so mpz_kronecker_ui etc can be used for mixed precision Jacobi symbols too.</para>
+    /// </summary>
+    public static unsafe int Kronecker(int a, GmpInteger b)
+    {
+        fixed (Mpz_t* p2 = &b.Raw)
+        {
+            return GmpLib.__gmpz_si_kronecker(a, (IntPtr)p2);
+        }
+    }
+
+    /// <summary>
+    /// <para>Calculate the Jacobi symbol (a/b) with the Kronecker extension (a/2)=(2/a) when a odd, or (a/2)=0 when a even.</para>
+    /// <para>When b is odd the Jacobi symbol and Kronecker symbol are identical, so mpz_kronecker_ui etc can be used for mixed precision Jacobi symbols too.</para>
+    /// </summary>
+    public static unsafe int Kronecker(uint a, GmpInteger b)
+    {
+        fixed (Mpz_t* p2 = &b.Raw)
+        {
+            return GmpLib.__gmpz_ui_kronecker(a, (IntPtr)p2);
+        }
+    }
+
+    /// <summary>
+    /// Remove all occurrences of the factor f from op and store the result in rop.
+    /// </summary>
+    /// <returns>The return value is how many such occurrences were removed.</returns>
+    public static unsafe uint RemoveFactor(GmpInteger rop, GmpInteger op, GmpInteger f)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        fixed (Mpz_t* pop = &op.Raw)
+        fixed (Mpz_t* pf = &f.Raw)
+        {
+            return GmpLib.__gmpz_remove((IntPtr)pr, (IntPtr)pop, (IntPtr)pf);
+        }
+    }
+
+    /// <summary>
+    /// Remove all occurrences of the factor f from op and store the result in rop.
+    /// </summary>
+    public static unsafe GmpInteger RemoveFactor(GmpInteger op, GmpInteger f)
+    {
+        GmpInteger rop = new();
+        RemoveFactor(rop, op, f);
+        return rop;
+    }
+
+    /// <summary>
+    /// computes the plain factorial n!
+    /// </summary>
+    public static unsafe void Factorial(GmpInteger rop, uint n)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        {
+            GmpLib.__gmpz_fac_ui((IntPtr)pr, n);
+        }
+    }
+
+    /// <summary>
+    /// computes the plain factorial n!
+    /// </summary>
+    public static unsafe GmpInteger Factorial(uint n)
+    {
+        GmpInteger rop = new();
+        Factorial(rop, n);
+        return rop;
+    }
+
+    /// <summary>
+    /// computes the double-factorial n!!
+    /// </summary>
+    public static unsafe void Factorial2(GmpInteger rop, uint n)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        {
+            GmpLib.__gmpz_2fac_ui((IntPtr)pr, n);
+        }
+    }
+
+    /// <summary>
+    /// computes the double-factorial n!!
+    /// </summary>
+    public static unsafe GmpInteger Factorial2(uint n)
+    {
+        GmpInteger rop = new();
+        Factorial2(rop, n);
+        return rop;
+    }
+
+    /// <summary>
+    /// computes the m-multi-factorial n!^(m)
+    /// </summary>
+    public static unsafe void FactorialM(GmpInteger rop, uint n, uint m)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        {
+            GmpLib.__gmpz_mfac_uiui((IntPtr)pr, n, m);
+        }
+    }
+
+    /// <summary>
+    /// computes the m-multi-factorial n!^(m)
+    /// </summary>
+    public static unsafe GmpInteger FactorialM(uint n, uint m)
+    {
+        GmpInteger rop = new();
+        FactorialM(rop, n, m);
+        return rop;
+    }
+
+    /// <summary>
+    /// Compute the binomial coefficient n over k and store the result in rop.
+    /// </summary>
+    public static unsafe void BinomialCoefficient(GmpInteger rop, GmpInteger n, uint k)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        fixed (Mpz_t* pn = &n.Raw)
+        {
+            GmpLib.__gmpz_bin_ui((IntPtr)pr, (IntPtr)pn, k);
+        }
+    }
+
+    /// <summary>
+    /// Compute the binomial coefficient n over k and store the result in rop.
+    /// </summary>
+    public static unsafe GmpInteger BinomialCoefficient(GmpInteger n, uint k)
+    {
+        GmpInteger rop = new();
+        BinomialCoefficient(rop, n, k);
+        return rop;
+    }
+
+    /// <summary>
+    /// Compute the binomial coefficient n over k and store the result in rop.
+    /// </summary>
+    public static unsafe void BinomialCoefficient(GmpInteger rop, uint n, uint k)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        {
+            GmpLib.__gmpz_bin_uiui((IntPtr)pr, n, k);
+        }
+    }
+
+    /// <summary>
+    /// Compute the binomial coefficient n over k and store the result in rop.
+    /// </summary>
+    public static unsafe GmpInteger BinomialCoefficient(uint n, uint k)
+    {
+        GmpInteger rop = new();
+        BinomialCoefficient(rop, n, k);
+        return rop;
+    }
+
+    /// <summary>
+    /// 1,1,2,3,5,8,13,21,34,55
+    /// </summary>
+    public static unsafe void Fibonacci(GmpInteger fn, uint n)
+    {
+        fixed (Mpz_t* pr = &fn.Raw)
+        {
+            GmpLib.__gmpz_fib_ui((IntPtr)pr, n);
+        }
+    }
+
+    /// <summary>
+    /// 1,1,2,3,5,8,13,21,34,55
+    /// </summary>
+    public static unsafe GmpInteger Fibonacci(uint n)
+    {
+        GmpInteger fn = new();
+        Fibonacci(fn, n);
+        return fn;
+    }
+
+    /// <summary>
+    /// 1,1,2,3,5,8,13,21,34,55
+    /// </summary>
+    public static unsafe void Fibonacci2(GmpInteger fn, GmpInteger fnsub1, uint n)
+    {
+        fixed (Mpz_t* pr = &fn.Raw)
+        fixed (Mpz_t* pr1 = &fnsub1.Raw)
+        {
+            GmpLib.__gmpz_fib2_ui((IntPtr)pr, (IntPtr)pr1, n);
+        }
+    }
+
+    /// <summary>
+    /// 1,1,2,3,5,8,13,21,34,55
+    /// </summary>
+    public static unsafe (GmpInteger fn, GmpInteger fnsub1) Fibonacci2(uint n)
+    {
+        GmpInteger fn = new();
+        GmpInteger fnsub1 = new();
+        Fibonacci2(fn, fnsub1, n);
+        return (fn, fnsub1);
+    }
+
+    /// <summary>
+    /// 1,3,4,7,11,18,29,47,76,123
+    /// </summary>
+    public static unsafe void LucasNum(GmpInteger fn, uint n)
+    {
+        fixed (Mpz_t* pr = &fn.Raw)
+        {
+            GmpLib.__gmpz_lucnum_ui((IntPtr)pr, n);
+        }
+    }
+
+    /// <summary>
+    /// 1,3,4,7,11,18,29,47,76,123
+    /// </summary>
+    public static unsafe GmpInteger LucasNum(uint n)
+    {
+        GmpInteger fn = new();
+        LucasNum(fn, n);
+        return fn;
+    }
+
+    /// <summary>
+    /// 1,3,4,7,11,18,29,47,76,123
+    /// </summary>
+    public static unsafe void LucasNum2(GmpInteger fn, GmpInteger fnsub1, uint n)
+    {
+        fixed (Mpz_t* pr = &fn.Raw)
+        fixed (Mpz_t* pr1 = &fnsub1.Raw)
+        {
+            GmpLib.__gmpz_lucnum2_ui((IntPtr)pr, (IntPtr)pr1, n);
+        }
+    }
+
+    /// <summary>
+    /// 1,3,4,7,11,18,29,47,76,123
+    /// </summary>
+    public static unsafe (GmpInteger fn, GmpInteger fnsub1) LucasNum2(uint n)
+    {
+        GmpInteger fn = new();
+        GmpInteger fnsub1 = new();
+        LucasNum2(fn, fnsub1, n);
+        return (fn, fnsub1);
+    }
+    #endregion
+
+    #region Comparison Functions
+    public static unsafe int Compare(GmpInteger op1, GmpInteger op2)
+    {
+        fixed (Mpz_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            return GmpLib.__gmpz_cmp((IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static bool operator ==(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) == 0;
+    public static bool operator !=(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) != 0;
+    public static bool operator >(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) > 0;
+    public static bool operator <(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) < 0;
+    public static bool operator >=(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) >= 0;
+    public static bool operator <=(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) <= 0;
+
+    public static unsafe int Compare(GmpInteger op1, double op2)
+    {
+        fixed (Mpz_t* p1 = &op1.Raw)
+        {
+            return GmpLib.__gmpz_cmp_d((IntPtr)p1, op2);
+        }
+    }
+
+    public static bool operator ==(GmpInteger op1, double op2) => Compare(op1, op2) == 0;
+    public static bool operator !=(GmpInteger op1, double op2) => Compare(op1, op2) != 0;
+    public static bool operator >(GmpInteger op1, double op2) => Compare(op1, op2) > 0;
+    public static bool operator <(GmpInteger op1, double op2) => Compare(op1, op2) < 0;
+    public static bool operator >=(GmpInteger op1, double op2) => Compare(op1, op2) >= 0;
+    public static bool operator <=(GmpInteger op1, double op2) => Compare(op1, op2) <= 0;
+    public static bool operator ==(double op1, GmpInteger op2) => Compare(op2, op1) == 0;
+    public static bool operator !=(double op1, GmpInteger op2) => Compare(op2, op1) != 0;
+    public static bool operator >(double op1, GmpInteger op2) => Compare(op2, op1) < 0;
+    public static bool operator <(double op1, GmpInteger op2) => Compare(op2, op1) > 0;
+    public static bool operator >=(double op1, GmpInteger op2) => Compare(op2, op1) <= 0;
+    public static bool operator <=(double op1, GmpInteger op2) => Compare(op2, op1) >= 0;
+
+    public static unsafe int Compare(GmpInteger op1, int op2)
+    {
+        fixed (Mpz_t* p1 = &op1.Raw)
+        {
+            return GmpLib.__gmpz_cmp_si((IntPtr)p1, op2);
+        }
+    }
+
+    public static bool operator ==(GmpInteger op1, int op2) => Compare(op1, op2) == 0;
+    public static bool operator !=(GmpInteger op1, int op2) => Compare(op1, op2) != 0;
+    public static bool operator >(GmpInteger op1, int op2) => Compare(op1, op2) > 0;
+    public static bool operator <(GmpInteger op1, int op2) => Compare(op1, op2) < 0;
+    public static bool operator >=(GmpInteger op1, int op2) => Compare(op1, op2) >= 0;
+    public static bool operator <=(GmpInteger op1, int op2) => Compare(op1, op2) <= 0;
+    public static bool operator ==(int op1, GmpInteger op2) => Compare(op2, op1) == 0;
+    public static bool operator !=(int op1, GmpInteger op2) => Compare(op2, op1) != 0;
+    public static bool operator >(int op1, GmpInteger op2) => Compare(op2, op1) < 0;
+    public static bool operator <(int op1, GmpInteger op2) => Compare(op2, op1) > 0;
+    public static bool operator >=(int op1, GmpInteger op2) => Compare(op2, op1) <= 0;
+    public static bool operator <=(int op1, GmpInteger op2) => Compare(op2, op1) >= 0;
+
+    public static unsafe int Compare(GmpInteger op1, uint op2)
+    {
+        fixed (Mpz_t* p1 = &op1.Raw)
+        {
+            return GmpLib.__gmpz_cmp_ui((IntPtr)p1, op2);
+        }
+    }
+
+    public static bool operator ==(GmpInteger op1, uint op2) => Compare(op1, op2) == 0;
+    public static bool operator !=(GmpInteger op1, uint op2) => Compare(op1, op2) != 0;
+    public static bool operator >(GmpInteger op1, uint op2) => Compare(op1, op2) > 0;
+    public static bool operator <(GmpInteger op1, uint op2) => Compare(op1, op2) < 0;
+    public static bool operator >=(GmpInteger op1, uint op2) => Compare(op1, op2) >= 0;
+    public static bool operator <=(GmpInteger op1, uint op2) => Compare(op1, op2) <= 0;
+    public static bool operator ==(uint op1, GmpInteger op2) => Compare(op2, op1) == 0;
+    public static bool operator !=(uint op1, GmpInteger op2) => Compare(op2, op1) != 0;
+    public static bool operator >(uint op1, GmpInteger op2) => Compare(op2, op1) < 0;
+    public static bool operator <(uint op1, GmpInteger op2) => Compare(op2, op1) > 0;
+    public static bool operator >=(uint op1, GmpInteger op2) => Compare(op2, op1) <= 0;
+    public static bool operator <=(uint op1, GmpInteger op2) => Compare(op2, op1) >= 0;
+
+    public override bool Equals(object? obj)
+    {
+        return obj switch
+        {
+            null => false,
+            GmpInteger gi => this == gi,
+            double dbl => this == dbl,
+            int si => this == si, 
+            uint ui => this == ui, 
+            _ => false, 
+        };
+    }
+
+    public override int GetHashCode() => Raw.GetHashCode();
+
+    public static unsafe int CompareAbs(GmpInteger op1, GmpInteger op2)
+    {
+        fixed (Mpz_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            return GmpLib.__gmpz_cmpabs((IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static unsafe int CompareAbs(GmpInteger op1, double op2)
+    {
+        fixed (Mpz_t* p1 = &op1.Raw)
+        {
+            return GmpLib.__gmpz_cmpabs_d((IntPtr)p1, op2);
+        }
+    }
+
+    public static unsafe int CompareAbs(GmpInteger op1, uint op2)
+    {
+        fixed (Mpz_t* p1 = &op1.Raw)
+        {
+            return GmpLib.__gmpz_cmpabs_ui((IntPtr)p1, op2);
+        }
+    }
+
+    public int Sign => Raw.Size < 0 ? -1 : Raw.Size > 0 ? 1 : 0;
+    #endregion
+
+    #region Logical and Bit Manipulation Functions
+    public static unsafe void BitwiseAnd(GmpInteger rop, GmpInteger op1, GmpInteger op2)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        fixed (Mpz_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            GmpLib.__gmpz_and((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static unsafe GmpInteger BitwiseAnd(GmpInteger op1, GmpInteger op2)
+    {
+        GmpInteger rop = new();
+        BitwiseAnd(rop, op1, op2);
+        return rop;
+    }
+
+    public static GmpInteger operator &(GmpInteger op1, GmpInteger op2) => BitwiseAnd(op1, op2);
+
+    public static unsafe void BitwiseOr(GmpInteger rop, GmpInteger op1, GmpInteger op2)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        fixed (Mpz_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            GmpLib.__gmpz_ior((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static unsafe GmpInteger BitwiseOr(GmpInteger op1, GmpInteger op2)
+    {
+        GmpInteger rop = new();
+        BitwiseOr(rop, op1, op2);
+        return rop;
+    }
+
+    public static GmpInteger operator |(GmpInteger op1, GmpInteger op2) => BitwiseOr(op1, op2);
+
+    public static unsafe void BitwiseXor(GmpInteger rop, GmpInteger op1, GmpInteger op2)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        fixed (Mpz_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            GmpLib.__gmpz_xor((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static unsafe GmpInteger BitwiseXor(GmpInteger op1, GmpInteger op2)
+    {
+        GmpInteger rop = new();
+        BitwiseXor(rop, op1, op2);
+        return rop;
+    }
+
+    /// <summary>
+    /// bitwise xor
+    /// </summary>
+    public static GmpInteger operator ^(GmpInteger op1, GmpInteger op2) => BitwiseXor(op1, op2);
+
+    /// <summary>
+    /// 1001 -> 0110
+    /// </summary>
+    public static unsafe void Complement(GmpInteger rop, GmpInteger op)
+    {
+        fixed (Mpz_t* pr = &rop.Raw)
+        fixed (Mpz_t* p = &op.Raw)
+        {
+            GmpLib.__gmpz_com((IntPtr)pr, (IntPtr)p);
+        }
+    }
+
+    /// <summary>
+    /// 1001 -> 0110
+    /// </summary>
+    public static GmpInteger Complement(GmpInteger op)
+    {
+        GmpInteger rop = new();
+        Complement(rop, op);
+        return rop;
+    }
+
+    /// <summary>
+    /// <para>If op &gt;= 0, return the population count of op, which is the number of 1 bits in the binary representation.</para>
+    /// <para>If op &lt; 0, the number of 1s is infinite, and the return value is the largest possible mp_bitcnt_t.</para>
+    /// </summary>
+    /// <returns></returns>
+    public unsafe uint PopulationCount()
+    {
+        fixed (Mpz_t* ptr = &Raw)
+        {
+            return GmpLib.__gmpz_popcount((IntPtr)ptr);
+        }
+    }
+
+    /// <summary>
+    /// <para>
+    /// If op1 and op2 are both &gt;= 0 or both &lt; 0, return the hamming distance between the two operands, 
+    /// which is the number of bit positions where op1 and op2 have different bit values. 
+    /// </para>
+    /// <para>
+    /// If one operand is &gt;=0 and the other &lt; 0 then the number of bits different is infinite, 
+    /// and the return value is the largest possible mp_bitcnt_t.
+    /// </para>
+    /// </summary>
+    public static unsafe uint HammingDistance(GmpInteger op1, GmpInteger op2)
+    {
+        fixed (Mpz_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            return GmpLib.__gmpz_hamdist((IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    /// <summary>
+    /// <para><see cref="GmpLib.__gmpz_scan0"/></para>
+    /// <para>Scan op, starting from bit starting_bit, towards more significant bits, until the first 0 is found.</para>
+    /// <para>If the bit at starting_bit is already what’s sought, then starting_bit is returned.</para>
+    /// <para>
+    /// If there’s no bit found, then the largest possible mp_bitcnt_t is returned. 
+    /// This will happen in past the end of a negative number.
+    /// </para>
+    /// </summary>
+    /// <returns>The index of the found bit.</returns>
+    public unsafe uint FirstIndexOf0(uint startingBit = 0)
+    {
+        fixed (Mpz_t* ptr = &Raw)
+        {
+            return GmpLib.__gmpz_scan0((IntPtr)ptr, startingBit);
+        }
+    }
+
+    /// <summary>
+    /// <para><see cref="GmpLib.__gmpz_scan1"/></para>
+    /// <para>Scan op, starting from bit starting_bit, towards more significant bits, until the first 1 is found.</para>
+    /// <para>If the bit at starting_bit is already what’s sought, then starting_bit is returned.</para>
+    /// <para>
+    /// If there’s no bit found, then the largest possible mp_bitcnt_t is returned. 
+    /// This will happen in past the end of a nonnegative number.
+    /// </para>
+    /// </summary>
+    /// <returns>The index of the found bit.</returns>
+    public unsafe uint FirstIndexOf1(uint startingBit = 0)
+    {
+        fixed (Mpz_t* ptr = &Raw)
+        {
+            return GmpLib.__gmpz_scan1((IntPtr)ptr, startingBit);
+        }
+    }
+
+    public unsafe void SetBit(uint bitIndex)
+    {
+        fixed(Mpz_t* ptr = &Raw)
+        {
+            GmpLib.__gmpz_setbit((IntPtr)ptr, bitIndex);
+        }
+    }
+
+    public unsafe void ClearBit(uint bitIndex)
+    {
+        fixed (Mpz_t* ptr = &Raw)
+        {
+            GmpLib.__gmpz_clrbit((IntPtr)ptr, bitIndex);
+        }
+    }
+
+    public unsafe void ComplementBit(uint bitIndex)
+    {
+        fixed (Mpz_t* ptr = &Raw)
+        {
+            GmpLib.__gmpz_combit((IntPtr)ptr, bitIndex);
+        }
+    }
+
+    public unsafe int TestBit(uint bitIndex)
+    {
+        fixed (Mpz_t* ptr = &Raw)
+        {
+            return GmpLib.__gmpz_tstbit((IntPtr)ptr, bitIndex);
+        }
+    }
     #endregion
 }
 
@@ -1686,7 +2288,7 @@ public enum PrimePossibility
     /// <summary>
     /// definitely prime
     /// </summary>
-    Yes = 2, 
+    Yes = 2,
 }
 
 public record struct Mpz_t
