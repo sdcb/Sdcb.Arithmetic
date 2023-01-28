@@ -354,7 +354,7 @@ public class GmpInteger : IDisposable
 
     public static GmpInteger operator -(uint op1, GmpInteger op2) => Subtract(op1, op2);
 
-    public static unsafe void MultipleInplace(GmpInteger r, GmpInteger op1, GmpInteger op2)
+    public static unsafe void MultiplyInplace(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
@@ -364,16 +364,16 @@ public class GmpInteger : IDisposable
         }
     }
 
-    public static GmpInteger Multiple(GmpInteger op1, GmpInteger op2)
+    public static GmpInteger Multiply(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger r = new();
-        MultipleInplace(r, op1, op2);
+        MultiplyInplace(r, op1, op2);
         return r;
     }
 
-    public static GmpInteger operator *(GmpInteger op1, GmpInteger op2) => Multiple(op1, op2);
+    public static GmpInteger operator *(GmpInteger op1, GmpInteger op2) => Multiply(op1, op2);
 
-    public static unsafe void MultipleInplace(GmpInteger r, GmpInteger op1, int op2)
+    public static unsafe void MultiplyInplace(GmpInteger r, GmpInteger op1, int op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
@@ -382,17 +382,17 @@ public class GmpInteger : IDisposable
         }
     }
 
-    public static GmpInteger Multiple(GmpInteger op1, int op2)
+    public static GmpInteger Multiply(GmpInteger op1, int op2)
     {
         GmpInteger r = new();
-        MultipleInplace(r, op1, op2);
+        MultiplyInplace(r, op1, op2);
         return r;
     }
 
-    public static GmpInteger operator *(GmpInteger op1, int op2) => Multiple(op1, op2);
-    public static GmpInteger operator *(int op1, GmpInteger op2) => Multiple(op2, op1);
+    public static GmpInteger operator *(GmpInteger op1, int op2) => Multiply(op1, op2);
+    public static GmpInteger operator *(int op1, GmpInteger op2) => Multiply(op2, op1);
 
-    public static unsafe void MultipleInplace(GmpInteger r, GmpInteger op1, uint op2)
+    public static unsafe void MultiplyInplace(GmpInteger r, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
@@ -401,15 +401,15 @@ public class GmpInteger : IDisposable
         }
     }
 
-    public static GmpInteger Multiple(GmpInteger op1, uint op2)
+    public static GmpInteger Multiply(GmpInteger op1, uint op2)
     {
         GmpInteger r = new();
-        MultipleInplace(r, op1, op2);
+        MultiplyInplace(r, op1, op2);
         return r;
     }
 
-    public static GmpInteger operator *(GmpInteger op1, uint op2) => Multiple(op1, op2);
-    public static GmpInteger operator *(uint op1, GmpInteger op2) => Multiple(op2, op1);
+    public static GmpInteger operator *(GmpInteger op1, uint op2) => Multiply(op1, op2);
+    public static GmpInteger operator *(uint op1, GmpInteger op2) => Multiply(op2, op1);
 
     /// <summary>
     /// r += op1 * op2
@@ -461,7 +461,7 @@ public class GmpInteger : IDisposable
         }
     }
 
-    public static unsafe void Multiple2ExpInplace(GmpInteger r, GmpInteger op1, uint exp2)
+    public static unsafe void Multiply2ExpInplace(GmpInteger r, GmpInteger op1, uint exp2)
     {
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop1 = &op1.Raw)
@@ -470,16 +470,16 @@ public class GmpInteger : IDisposable
         }
     }
 
-    public static unsafe GmpInteger Multiple2Exp(GmpInteger op1, uint exp2)
+    public static unsafe GmpInteger Multiply2Exp(GmpInteger op1, uint exp2)
     {
         GmpInteger r = new();
-        Multiple2ExpInplace(r, op1, exp2);
+        Multiply2ExpInplace(r, op1, exp2);
         return r;
     }
 
-    public void LeftShift(uint bits) => Multiple2ExpInplace(this, this, bits);
+    public void LeftShift(uint bits) => Multiply2ExpInplace(this, this, bits);
 
-    public static GmpInteger operator <<(GmpInteger op1, uint exp2) => Multiple2Exp(op1, exp2);
+    public static GmpInteger operator <<(GmpInteger op1, uint exp2) => Multiply2Exp(op1, exp2);
 
     public static unsafe void NegateInplace(GmpInteger r, GmpInteger op1)
     {

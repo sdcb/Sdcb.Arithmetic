@@ -47,14 +47,14 @@ public class GmpFloatOpTest
     }
 
     [Fact]
-    public void Multiple()
+    public void Multiply()
     {
         GmpFloat r = GmpFloat.From(2.5) * GmpFloat.From(2.5);
         Assert.Equal(6.25, r.ToDouble());
     }
 
     [Fact]
-    public void MultipleInt32()
+    public void MultiplyInt32()
     {
         GmpFloat r = GmpFloat.From(2.5) * 2147483647;
         Assert.Equal(5368709117.5, r.ToDouble());
