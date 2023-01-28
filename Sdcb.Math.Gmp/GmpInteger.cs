@@ -568,7 +568,14 @@ public class GmpInteger : IDisposable
                 throw new ArgumentException($"Unable to convert BigInteger to string.");
             }
 
-            return Marshal.PtrToStringUTF8(ret)!;
+            try
+            {
+                return Marshal.PtrToStringUTF8(ret)!;
+            }
+            finally
+            {
+                GmpMemory.Free(ret);
+            }
         }
     }
     #endregion

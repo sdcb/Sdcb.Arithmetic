@@ -327,6 +327,11 @@ public class GmpFloat : IDisposable
         }
     }
 
+    /// <summary>
+    /// Set rop to the value of op. There is no rounding, this conversion is exact.
+    /// </summary>
+    public GmpRational ToGmpRational() => GmpRational.From(this);
+
     public static explicit operator uint(GmpFloat op) => op.ToUInt32();
 
     public unsafe override string? ToString() => ToString(@base: 10);
