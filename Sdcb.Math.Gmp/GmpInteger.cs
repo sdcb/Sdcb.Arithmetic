@@ -477,7 +477,7 @@ public class GmpInteger : IDisposable
         return r;
     }
 
-    public void LeftShiftInplace(uint bits) => Multiple2ExpInplace(this, this, bits);
+    public void LeftShift(uint bits) => Multiple2ExpInplace(this, this, bits);
 
     public static GmpInteger operator <<(GmpInteger op1, uint exp2) => Multiple2Exp(op1, exp2);
 
@@ -1513,7 +1513,7 @@ public class GmpInteger : IDisposable
     /// Set rop to the next prime greater than op.
     /// </summary>
     /// <remarks>This function uses a probabilistic algorithm to identify primes. For practical purposes it’s adequate, the chance of a composite passing will be extremely small.</remarks>
-    public static unsafe void NextPrime(GmpInteger rop, GmpInteger op)
+    public static unsafe void NextPrimeInplace(GmpInteger rop, GmpInteger op)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* pop = &op.Raw)
@@ -1529,11 +1529,22 @@ public class GmpInteger : IDisposable
     public static GmpInteger NextPrime(GmpInteger op)
     {
         GmpInteger r = new();
-        NextPrime(r, op);
+        NextPrimeInplace(r, op);
         return r;
     }
 
-    public static unsafe void Gcd(GmpInteger rop, GmpInteger op1, GmpInteger op2)
+    /// <summary>
+    /// Set rop to the next prime greater than op.
+    /// </summary>
+    /// <remarks>This function uses a probabilistic algorithm to identify primes. For practical purposes it’s adequate, the chance of a composite passing will be extremely small.</remarks>
+    public GmpInteger NextPrime()
+    {
+        GmpInteger r = new();
+        NextPrimeInplace(r, this);
+        return r;
+    }
+
+    public static unsafe void GcdInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -1546,11 +1557,11 @@ public class GmpInteger : IDisposable
     public static unsafe GmpInteger Gcd(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger rop = new();
-        Gcd(rop, op1, op2);
+        GcdInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe void Gcd(GmpInteger rop, GmpInteger op1, uint op2)
+    public static unsafe void GcdInplace(GmpInteger rop, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -1562,7 +1573,7 @@ public class GmpInteger : IDisposable
     public static unsafe GmpInteger Gcd(GmpInteger op1, uint op2)
     {
         GmpInteger rop = new();
-        Gcd(rop, op1, op2);
+        GcdInplace(rop, op1, op2);
         return rop;
     }
 
@@ -1578,7 +1589,7 @@ public class GmpInteger : IDisposable
     /// <item>If t or g is NULL then that value is not computed.</item>
     /// </list>
     /// </summary>
-    public static unsafe void Gcd2(GmpInteger g, GmpInteger s, GmpInteger t, GmpInteger a, GmpInteger b)
+    public static unsafe void Gcd2Inplace(GmpInteger g, GmpInteger s, GmpInteger t, GmpInteger a, GmpInteger b)
     {
         fixed (Mpz_t* pg = &g.Raw)
         fixed (Mpz_t* ps = &s.Raw)
@@ -1607,11 +1618,11 @@ public class GmpInteger : IDisposable
         GmpInteger g = new();
         GmpInteger s = new();
         GmpInteger t = new();
-        Gcd2(g, s, t, a, b);
+        Gcd2Inplace(g, s, t, a, b);
         return (g, s, t);
     }
 
-    public static unsafe void Lcm(GmpInteger rop, GmpInteger op1, GmpInteger op2)
+    public static unsafe void LcmInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -1624,11 +1635,11 @@ public class GmpInteger : IDisposable
     public static unsafe GmpInteger Lcm(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger rop = new();
-        Lcm(rop, op1, op2);
+        LcmInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe void Lcm(GmpInteger rop, GmpInteger op1, uint op2)
+    public static unsafe void LcmInplace(GmpInteger rop, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -1640,7 +1651,7 @@ public class GmpInteger : IDisposable
     public static unsafe GmpInteger Lcm(GmpInteger op1, uint op2)
     {
         GmpInteger rop = new();
-        Lcm(rop, op1, op2);
+        LcmInplace(rop, op1, op2);
         return rop;
     }
 
@@ -1651,7 +1662,7 @@ public class GmpInteger : IDisposable
     /// <param name="op1"></param>
     /// <param name="op2"></param>
     /// <returns>true if find the inverse.</returns>
-    public static unsafe bool Invert(GmpInteger rop, GmpInteger op1, GmpInteger op2)
+    public static unsafe bool InvertInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -1667,7 +1678,7 @@ public class GmpInteger : IDisposable
     public static unsafe GmpInteger Invert(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger rop = new();
-        if (!Invert(rop, op1, op2))
+        if (!InvertInplace(rop, op1, op2))
         {
             throw new ArgumentException($"Unable to find inverse of op1 and op2.\n op1: {op1}\n op2: {op2}");
         }
@@ -1750,7 +1761,7 @@ public class GmpInteger : IDisposable
     /// Remove all occurrences of the factor f from op and store the result in rop.
     /// </summary>
     /// <returns>The return value is how many such occurrences were removed.</returns>
-    public static unsafe uint RemoveFactor(GmpInteger rop, GmpInteger op, GmpInteger f)
+    public static unsafe uint RemoveFactorInplace(GmpInteger rop, GmpInteger op, GmpInteger f)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* pop = &op.Raw)
@@ -1763,17 +1774,22 @@ public class GmpInteger : IDisposable
     /// <summary>
     /// Remove all occurrences of the factor f from op and store the result in rop.
     /// </summary>
-    public static unsafe GmpInteger RemoveFactor(GmpInteger op, GmpInteger f)
+    public static GmpInteger RemoveFactor(GmpInteger op, GmpInteger f)
     {
         GmpInteger rop = new();
-        RemoveFactor(rop, op, f);
+        RemoveFactorInplace(rop, op, f);
         return rop;
     }
 
     /// <summary>
+    /// Remove all occurrences of the factor f from op and store the result in rop.
+    /// </summary>
+    public GmpInteger RemoveFactor(GmpInteger f) => RemoveFactor(this, f);
+
+    /// <summary>
     /// computes the plain factorial n!
     /// </summary>
-    public static unsafe void Factorial(GmpInteger rop, uint n)
+    public static unsafe void FactorialInplace(GmpInteger rop, uint n)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         {
@@ -1784,17 +1800,17 @@ public class GmpInteger : IDisposable
     /// <summary>
     /// computes the plain factorial n!
     /// </summary>
-    public static unsafe GmpInteger Factorial(uint n)
+    public static GmpInteger Factorial(uint n)
     {
         GmpInteger rop = new();
-        Factorial(rop, n);
+        FactorialInplace(rop, n);
         return rop;
     }
 
     /// <summary>
     /// computes the double-factorial n!!
     /// </summary>
-    public static unsafe void Factorial2(GmpInteger rop, uint n)
+    public static unsafe void Factorial2Inplace(GmpInteger rop, uint n)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         {
@@ -1808,14 +1824,14 @@ public class GmpInteger : IDisposable
     public static unsafe GmpInteger Factorial2(uint n)
     {
         GmpInteger rop = new();
-        Factorial2(rop, n);
+        Factorial2Inplace(rop, n);
         return rop;
     }
 
     /// <summary>
     /// computes the m-multi-factorial n!^(m)
     /// </summary>
-    public static unsafe void FactorialM(GmpInteger rop, uint n, uint m)
+    public static unsafe void FactorialMInplace(GmpInteger rop, uint n, uint m)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         {
@@ -1829,14 +1845,14 @@ public class GmpInteger : IDisposable
     public static unsafe GmpInteger FactorialM(uint n, uint m)
     {
         GmpInteger rop = new();
-        FactorialM(rop, n, m);
+        FactorialMInplace(rop, n, m);
         return rop;
     }
 
     /// <summary>
     /// Compute the binomial coefficient n over k and store the result in rop.
     /// </summary>
-    public static unsafe void BinomialCoefficient(GmpInteger rop, GmpInteger n, uint k)
+    public static unsafe void BinomialCoefficientInplace(GmpInteger rop, GmpInteger n, uint k)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* pn = &n.Raw)
@@ -1851,14 +1867,14 @@ public class GmpInteger : IDisposable
     public static unsafe GmpInteger BinomialCoefficient(GmpInteger n, uint k)
     {
         GmpInteger rop = new();
-        BinomialCoefficient(rop, n, k);
+        BinomialCoefficientInplace(rop, n, k);
         return rop;
     }
 
     /// <summary>
     /// Compute the binomial coefficient n over k and store the result in rop.
     /// </summary>
-    public static unsafe void BinomialCoefficient(GmpInteger rop, uint n, uint k)
+    public static unsafe void BinomialCoefficientInplace(GmpInteger rop, uint n, uint k)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         {
@@ -1872,14 +1888,14 @@ public class GmpInteger : IDisposable
     public static unsafe GmpInteger BinomialCoefficient(uint n, uint k)
     {
         GmpInteger rop = new();
-        BinomialCoefficient(rop, n, k);
+        BinomialCoefficientInplace(rop, n, k);
         return rop;
     }
 
     /// <summary>
     /// 1,1,2,3,5,8,13,21,34,55
     /// </summary>
-    public static unsafe void Fibonacci(GmpInteger fn, uint n)
+    public static unsafe void FibonacciInplace(GmpInteger fn, uint n)
     {
         fixed (Mpz_t* pr = &fn.Raw)
         {
@@ -1893,14 +1909,14 @@ public class GmpInteger : IDisposable
     public static unsafe GmpInteger Fibonacci(uint n)
     {
         GmpInteger fn = new();
-        Fibonacci(fn, n);
+        FibonacciInplace(fn, n);
         return fn;
     }
 
     /// <summary>
     /// 1,1,2,3,5,8,13,21,34,55
     /// </summary>
-    public static unsafe void Fibonacci2(GmpInteger fn, GmpInteger fnsub1, uint n)
+    public static unsafe void Fibonacci2Inplace(GmpInteger fn, GmpInteger fnsub1, uint n)
     {
         fixed (Mpz_t* pr = &fn.Raw)
         fixed (Mpz_t* pr1 = &fnsub1.Raw)
@@ -1916,14 +1932,14 @@ public class GmpInteger : IDisposable
     {
         GmpInteger fn = new();
         GmpInteger fnsub1 = new();
-        Fibonacci2(fn, fnsub1, n);
+        Fibonacci2Inplace(fn, fnsub1, n);
         return (fn, fnsub1);
     }
 
     /// <summary>
     /// 1,3,4,7,11,18,29,47,76,123
     /// </summary>
-    public static unsafe void LucasNum(GmpInteger fn, uint n)
+    public static unsafe void LucasNumInplace(GmpInteger fn, uint n)
     {
         fixed (Mpz_t* pr = &fn.Raw)
         {
@@ -1937,14 +1953,14 @@ public class GmpInteger : IDisposable
     public static unsafe GmpInteger LucasNum(uint n)
     {
         GmpInteger fn = new();
-        LucasNum(fn, n);
+        LucasNumInplace(fn, n);
         return fn;
     }
 
     /// <summary>
     /// 1,3,4,7,11,18,29,47,76,123
     /// </summary>
-    public static unsafe void LucasNum2(GmpInteger fn, GmpInteger fnsub1, uint n)
+    public static unsafe void LucasNum2Inplace(GmpInteger fn, GmpInteger fnsub1, uint n)
     {
         fixed (Mpz_t* pr = &fn.Raw)
         fixed (Mpz_t* pr1 = &fnsub1.Raw)
@@ -1960,7 +1976,7 @@ public class GmpInteger : IDisposable
     {
         GmpInteger fn = new();
         GmpInteger fnsub1 = new();
-        LucasNum2(fn, fnsub1, n);
+        LucasNum2Inplace(fn, fnsub1, n);
         return (fn, fnsub1);
     }
     #endregion
@@ -2089,7 +2105,7 @@ public class GmpInteger : IDisposable
     #endregion
 
     #region Logical and Bit Manipulation Functions
-    public static unsafe void BitwiseAnd(GmpInteger rop, GmpInteger op1, GmpInteger op2)
+    public static unsafe void BitwiseAndInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -2099,16 +2115,16 @@ public class GmpInteger : IDisposable
         }
     }
 
-    public static unsafe GmpInteger BitwiseAnd(GmpInteger op1, GmpInteger op2)
+    public static GmpInteger BitwiseAnd(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger rop = new();
-        BitwiseAnd(rop, op1, op2);
+        BitwiseAndInplace(rop, op1, op2);
         return rop;
     }
 
     public static GmpInteger operator &(GmpInteger op1, GmpInteger op2) => BitwiseAnd(op1, op2);
 
-    public static unsafe void BitwiseOr(GmpInteger rop, GmpInteger op1, GmpInteger op2)
+    public static unsafe void BitwiseOrInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -2118,16 +2134,16 @@ public class GmpInteger : IDisposable
         }
     }
 
-    public static unsafe GmpInteger BitwiseOr(GmpInteger op1, GmpInteger op2)
+    public static GmpInteger BitwiseOr(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger rop = new();
-        BitwiseOr(rop, op1, op2);
+        BitwiseOrInplace(rop, op1, op2);
         return rop;
     }
 
     public static GmpInteger operator |(GmpInteger op1, GmpInteger op2) => BitwiseOr(op1, op2);
 
-    public static unsafe void BitwiseXor(GmpInteger rop, GmpInteger op1, GmpInteger op2)
+    public static unsafe void BitwiseXorInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -2137,10 +2153,10 @@ public class GmpInteger : IDisposable
         }
     }
 
-    public static unsafe GmpInteger BitwiseXor(GmpInteger op1, GmpInteger op2)
+    public static GmpInteger BitwiseXor(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger rop = new();
-        BitwiseXor(rop, op1, op2);
+        BitwiseXorInplace(rop, op1, op2);
         return rop;
     }
 
@@ -2152,7 +2168,7 @@ public class GmpInteger : IDisposable
     /// <summary>
     /// 1001 -> 0110
     /// </summary>
-    public static unsafe void Complement(GmpInteger rop, GmpInteger op)
+    public static unsafe void ComplementInplace(GmpInteger rop, GmpInteger op)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p = &op.Raw)
@@ -2167,7 +2183,7 @@ public class GmpInteger : IDisposable
     public static GmpInteger Complement(GmpInteger op)
     {
         GmpInteger rop = new();
-        Complement(rop, op);
+        ComplementInplace(rop, op);
         return rop;
     }
 
@@ -2279,7 +2295,7 @@ public class GmpInteger : IDisposable
     /// Negative random numbers are generated when max_size is negative.
     /// </summary>
     [Obsolete("use GmpRandom")]
-    public static unsafe void Random(GmpInteger rop, int maxLimbCount)
+    public static unsafe void RandomInplace(GmpInteger rop, int maxLimbCount)
     {
         fixed (Mpz_t* ptr = &rop.Raw)
         {
@@ -2296,7 +2312,7 @@ public class GmpInteger : IDisposable
     public static unsafe GmpInteger Random(int maxLimbCount)
     {
         GmpInteger rop = new();
-        Random(rop, maxLimbCount);
+        RandomInplace(rop, maxLimbCount);
         return rop;
     }
 
@@ -2308,7 +2324,7 @@ public class GmpInteger : IDisposable
     /// Negative random numbers are generated when max_size is negative.
     /// </summary>
     [Obsolete("use GmpRandom")]
-    public static unsafe void Random2(GmpInteger rop, int maxLimbCount)
+    public static unsafe void Random2Inplace(GmpInteger rop, int maxLimbCount)
     {
         fixed (Mpz_t* ptr = &rop.Raw)
         {
@@ -2327,7 +2343,7 @@ public class GmpInteger : IDisposable
     public static unsafe GmpInteger Random2(int maxLimbCount)
     {
         GmpInteger rop = new();
-        Random(rop, maxLimbCount);
+        RandomInplace(rop, maxLimbCount);
         return rop;
     }
     #endregion
