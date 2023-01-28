@@ -508,7 +508,7 @@ public class GmpFloat : IDisposable
         }
     }
 
-    public static unsafe void SqrtInplace(GmpFloat rop, uint op, uint precision = 0)
+    public static unsafe void SqrtInplace(GmpFloat rop, uint op)
     {
         fixed (Mpf_t* prop = &rop.Raw)
         {
@@ -516,7 +516,7 @@ public class GmpFloat : IDisposable
         }
     }
 
-    public static unsafe void AbsInplace(GmpFloat rop, GmpFloat op, uint precision = 0)
+    public static unsafe void AbsInplace(GmpFloat rop, GmpFloat op)
     {
         fixed (Mpf_t* prop = &rop.Raw)
         fixed (Mpf_t* pop = &op.Raw)
@@ -528,7 +528,7 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// op1 * Math.Pow(2, op2)
     /// </summary>
-    public static unsafe void Mul2ExpInplace(GmpFloat rop, GmpFloat op1, uint op2, uint precision = 0)
+    public static unsafe void Mul2ExpInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
         fixed (Mpf_t* pop1 = &op1.Raw)
@@ -540,7 +540,7 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// op1 / Math.Pow(2, op2)
     /// </summary>
-    public static unsafe void Div2ExpInplace(GmpFloat rop, GmpFloat op1, uint op2, uint precision = 0)
+    public static unsafe void Div2ExpInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
         fixed (Mpf_t* pop1 = &op1.Raw)
@@ -1070,7 +1070,7 @@ public class GmpFloat : IDisposable
     /// Negative random numbers are generated when max_size is negative.
     /// </summary>
     [Obsolete("use GmpRandom")]
-    public static unsafe void Random2(GmpFloat rop, int maxLimbCount, int maxExp)
+    public static unsafe void Random2Inplace(GmpFloat rop, int maxLimbCount, int maxExp)
     {
         fixed (Mpf_t* ptr = &rop.Raw)
         {
@@ -1087,10 +1087,10 @@ public class GmpFloat : IDisposable
     /// Negative random numbers are generated when max_size is negative.
     /// </summary>
     [Obsolete("use GmpRandom")]
-    public static unsafe GmpFloat Random2(uint precision, int maxLimbCount, int maxExp)
+    public static GmpFloat Random2(uint precision, int maxLimbCount, int maxExp)
     {
         GmpFloat rop = new(precision);
-        Random2(rop, maxLimbCount, maxExp);
+        Random2Inplace(rop, maxLimbCount, maxExp);
         return rop;
     }
     #endregion
