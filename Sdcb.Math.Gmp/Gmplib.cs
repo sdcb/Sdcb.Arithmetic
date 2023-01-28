@@ -10,10 +10,10 @@ public static class GmpLib
 
     static GmpLib()
     {
-        NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), ImportResolver);
+        NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), GmpImportResolver);
     }
 
-    public static IntPtr ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+    private static IntPtr GmpImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
     {
         if (libraryName == Dll)
         {
