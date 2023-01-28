@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace Sdcb.Math.Gmp;
@@ -6,6 +7,36 @@ namespace Sdcb.Math.Gmp;
 public static class GmpLib
 {
     public static uint LimbBitSize => (uint)IntPtr.Size * 8;
+
+    static GmpLib()
+    {
+        NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), ImportResolver);
+    }
+
+    public static IntPtr ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+    {
+        if (libraryName == Dll)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return NativeLibrary.Load("gmp.dll", assembly, searchPath);
+                //return NativeLibrary.Load("gmp-10.dll");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return NativeLibrary.Load("libgmp.so.10", assembly, searchPath);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return NativeLibrary.Load("libgmp.10.dylib", assembly, searchPath);
+            }
+            else
+            {
+                return NativeLibrary.Load("gmp.10", assembly, searchPath);
+            }
+        }
+        return IntPtr.Zero;
+    }
 
     internal const string Dll = "gmp";
 
