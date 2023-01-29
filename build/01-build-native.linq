@@ -10,12 +10,14 @@
 
 #load ".\00-common"
 
-static string NativeVersion => Projects.First(x => x.name == "Sdcb.Math.Gmp").version;
+static string NativeVersion => Projects.First(x => x.name == "Sdcb.Arithmetic.Gmp").version;
 
 async Task Main()
 {
 	await SetupAsync(QueryCancelToken);
 	await new WindowsNugetSource("win-x64", "win64", "gmp-10.dll", @"C:\_\3rd\vcpkg\packages\gmp_x64-windows\bin")
+		.Process(QueryCancelToken);
+	await new WindowsNugetSource("win-x86", "win32", "gmp-10.dll", @"C:\_\3rd\vcpkg\packages\gmp_x86-windows\bin")
 		.Process(QueryCancelToken);
 }
 
@@ -24,7 +26,7 @@ static string BuildNuspec(string[] libs, string rid, string titleRid)
 	// props
 	{
 		XDocument props = XDocument.Parse(File
-			.ReadAllText("./Sdcb.Math.Gmp.runtime.props"));
+			.ReadAllText("./Sdcb.Arithmetic.Gmp.runtime.props"));
 		string ns = props.Root.GetDefaultNamespace().NamespaceName;
 		XmlNamespaceManager nsr = new(new NameTable());
 		nsr.AddNamespace("p", ns);
@@ -39,13 +41,13 @@ static string BuildNuspec(string[] libs, string rid, string titleRid)
 				new XElement(XName.Get("Link", ns), @$"dll\{platform}\{x}"),
 				new XElement(XName.Get("CopyToOutputDirectory", ns), "PreserveNewest")))
 				);
-		props.Save(@$"./{titleRid}/Sdcb.Math.Gmp.runtime.{titleRid}.props");
+		props.Save(@$"./{titleRid}/Sdcb.Arithmetic.Gmp.runtime.{titleRid}.props");
 	}
 
 	// nuspec
 	{
 		XDocument nuspec = XDocument.Parse(File
-			.ReadAllText("./Sdcb.Math.Gmp.runtime.nuspec")
+			.ReadAllText("./Sdcb.Arithmetic.Gmp.runtime.nuspec")
 			.Replace("{rid}", rid)
 			.Replace("{titleRid}", titleRid));
 
@@ -60,8 +62,8 @@ static string BuildNuspec(string[] libs, string rid, string titleRid)
 			new XAttribute("target", @$"runtimes\{rid}\native"))));
 		files.Add(new[] { "net", "netstandard", "netcoreapp" }.Select(x => new XElement(
 			XName.Get("file", ns),
-			new XAttribute("src", $"Sdcb.Math.Gmp.runtime.{titleRid}.props"),
-			new XAttribute("target", @$"build\{x}\Sdcb.Math.Gmp.runtime.{titleRid}.props"))));
+			new XAttribute("src", $"Sdcb.Arithmetic.Gmp.runtime.{titleRid}.props"),
+			new XAttribute("target", @$"build\{x}\Sdcb.Arithmetic.Gmp.runtime.{titleRid}.props"))));
 
 		string destinationFile = @$"./{titleRid}/{rid}.nuspec";
 		nuspec.Save(destinationFile);
@@ -73,6 +75,7 @@ public record WindowsNugetSource(string rid, string titleRid, string libName, st
 {
 	protected override async Task Decompress(string folder, CancellationToken cancellationToken)
 	{
+		Directory.CreateDirectory(PlatformDir);
 		foreach (string entry in Directory.EnumerateFiles(folder).Where(x => Path.GetFileName(x) == libName))
 		{
 			string localEntryDest = Path.Combine(PlatformDir, Path.GetFileName(entry));
@@ -99,7 +102,7 @@ public abstract record NupkgBuildSource(string rid, string titleRid, string libN
 {
 	public string CLibFilePath => $@"./{titleRid}/bin/{libName}";
 	public string PlatformDir => Path.GetDirectoryName(CLibFilePath);
-	public string NuGetPath => $@".\nupkgs\Sdcb.Math.Gmp.runtime.{titleRid}.{NativeVersion}.nupkg";
+	public string NuGetPath => $@".\nupkgs\Sdcb.Arithmetic.Gmp.runtime.{titleRid}.{NativeVersion}.nupkg";
 
 	protected abstract Task Decompress(string localZipFile, CancellationToken cancellationToken);
 	protected abstract string[] GetDlls();
@@ -123,8 +126,8 @@ public abstract record NupkgBuildSource(string rid, string titleRid, string libN
 			Console.WriteLine($"{NuGetPath} exists, override!");
 		}
 		
-		string iconDestPath = @$".\{titleRid}\icon.jpg";
-		if (!File.Exists(iconDestPath)) File.Copy(@$".\icon.jpg", iconDestPath);
+		string iconDestPath = @$".\{titleRid}\icon.png";
+		if (!File.Exists(iconDestPath)) File.Copy(@$".\icon.png", iconDestPath);
 		NuGetRun($@"pack {nuspecPath} -Version {NativeVersion} -OutputDirectory .\nupkgs".Dump());
 	}
 }
