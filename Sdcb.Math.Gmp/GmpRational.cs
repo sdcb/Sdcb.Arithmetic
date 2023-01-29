@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Runtime.CompilerServices;
+
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -32,7 +31,7 @@ public class GmpRational : IDisposable
     /// </summary>
     public unsafe void Canonicalize()
     {
-        fixed(Mpq_t* pthis = &Raw)
+        fixed (Mpq_t* pthis = &Raw)
         {
             GmpLib.__gmpq_canonicalize((IntPtr)pthis);
         }
@@ -476,8 +475,96 @@ public class GmpRational : IDisposable
         return rop;
     }
     #endregion
+
+    #region Comparison Functions
+    /// <summary>
+    /// <para>Compare op1 and op2. Return a positive value if op1 &gt; op2, zero if op1 = op2, and a negative value if op1 &lt; op2.</para>
+    /// <para>To determine if two rationals are equal, mpq_equal is faster than mpq_cmp.</para>
+    /// </summary>
+    public static unsafe int Compare(GmpRational op1, GmpRational op2)
+    {
+        fixed (Mpq_t* p1 = &op1.Raw)
+        fixed (Mpq_t* p2 = &op2.Raw)
+        {
+            return GmpLib.__gmpq_cmp((IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static bool operator >(GmpRational op1, GmpRational op2) => Compare(op1, op2) > 0;
+    public static bool operator >=(GmpRational op1, GmpRational op2) => Compare(op1, op2) >= 0;
+    public static bool operator <(GmpRational op1, GmpRational op2) => Compare(op1, op2) < 0;
+    public static bool operator <=(GmpRational op1, GmpRational op2) => Compare(op1, op2) <= 0;
+    public static bool operator ==(GmpRational op1, GmpRational op2) => Compare(op1, op2) == 0;
+    public static bool operator !=(GmpRational op1, GmpRational op2) => Compare(op1, op2) != 0;
+
+    /// <summary>
+    /// <para>Compare op1 and op2. Return a positive value if op1 &gt; op2, zero if op1 = op2, and a negative value if op1 &lt; op2.</para>
+    /// <para>To determine if two rationals are equal, mpq_equal is faster than mpq_cmp.</para>
+    /// </summary>
+    public static unsafe int Compare(GmpRational op1, GmpInteger op2)
+    {
+        fixed (Mpq_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            return GmpLib.__gmpq_cmp_z((IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static bool operator >(GmpRational op1, GmpInteger op2) => Compare(op1, op2) > 0;
+    public static bool operator >=(GmpRational op1, GmpInteger op2) => Compare(op1, op2) >= 0;
+    public static bool operator <(GmpRational op1, GmpInteger op2) => Compare(op1, op2) < 0;
+    public static bool operator <=(GmpRational op1, GmpInteger op2) => Compare(op1, op2) <= 0;
+    public static bool operator ==(GmpRational op1, GmpInteger op2) => Compare(op1, op2) == 0;
+    public static bool operator !=(GmpRational op1, GmpInteger op2) => Compare(op1, op2) != 0;
+
+    public static bool operator >(GmpInteger op1, GmpRational op2) => Compare(op2, op1) < 0;
+    public static bool operator >=(GmpInteger op1, GmpRational op2) => Compare(op2, op1) <= 0;
+    public static bool operator <(GmpInteger op1, GmpRational op2) => Compare(op2, op1) > 0;
+    public static bool operator <=(GmpInteger op1, GmpRational op2) => Compare(op2, op1) <= 0;
+    public static bool operator ==(GmpInteger op1, GmpRational op2) => Compare(op2, op1) == 0;
+    public static bool operator !=(GmpInteger op1, GmpRational op2) => Compare(op2, op1) != 0;
+
+    public static unsafe int Compare(GmpRational op1, uint num, uint den)
+    {
+        fixed (Mpq_t* p1 = &op1.Raw)
+        {
+            return GmpLib.__gmpq_cmp_ui((IntPtr)p1, num, den);
+        }
+    }
+
+    public static unsafe int Compare(GmpRational op1, int num, uint den)
+    {
+        fixed (Mpq_t* p1 = &op1.Raw)
+        {
+            return GmpLib.__gmpq_cmp_si((IntPtr)p1, num, den);
+        }
+    }
+
+    public static unsafe bool Equals(GmpRational op1, GmpRational op2)
+    {
+        fixed (Mpq_t* p1 = &op1.Raw)
+        fixed (Mpq_t* p2 = &op2.Raw)
+        {
+            return GmpLib.__gmpq_equal((IntPtr)p1, (IntPtr)p2) != 0;
+        }
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj switch
+        {
+            null => false,
+            GmpRational r => Equals(this, r), 
+            GmpInteger bi => Compare(this, bi) == 0,
+            _ => false
+        };
+    }
+
+    public override int GetHashCode() => Raw.GetHashCode();
+    #endregion
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public struct Mpq_t
 {
     public Mpz_t Num, Den;
