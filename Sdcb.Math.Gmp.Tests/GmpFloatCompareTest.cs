@@ -91,6 +91,16 @@ public class GmpFloatCompareTest
         Assert.False(equals.Equals(val));
     }
 
+    [Theory]
+    [InlineData(3.14, 3.14, true)]
+    [InlineData(3.14, 4.29, false)]
+    public void GetHashCodeTest(double op1, double op2, bool check)
+    {
+        int hashCodeOp1 = GmpFloat.From(op1).GetHashCode();
+        int hashCodeOp2 = GmpFloat.From(op2).GetHashCode();
+        Assert.Equal(check, hashCodeOp1 == hashCodeOp2);
+    }
+
 
     [Theory]
     [InlineData(3.14, 2.718, true)]
