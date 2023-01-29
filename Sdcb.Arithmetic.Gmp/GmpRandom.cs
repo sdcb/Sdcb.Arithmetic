@@ -3,7 +3,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
-namespace Sdcb.Math.Gmp;
+namespace Sdcb.Arithmetic.Gmp;
 
 public class GmpRandom : IDisposable
 {

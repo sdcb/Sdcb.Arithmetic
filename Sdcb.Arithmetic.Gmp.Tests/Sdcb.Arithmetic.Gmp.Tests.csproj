@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sdcb.Math.Gmp\Sdcb.Math.Gmp.csproj" />
+    <ProjectReference Include="..\Sdcb.Arithmetic.Gmp\Sdcb.Arithmetic.Gmp.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using Xunit.Abstractions;
 
-namespace Sdcb.Math.Gmp.Tests;
+namespace Sdcb.Arithmetic.Gmp.Tests;
 
 public class RawTest
 {

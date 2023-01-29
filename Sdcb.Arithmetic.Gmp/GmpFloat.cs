@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using SysMath = System.Math;
 
-namespace Sdcb.Math.Gmp;
+namespace Sdcb.Arithmetic.Gmp;
 
 public class GmpFloat : IDisposable
 {

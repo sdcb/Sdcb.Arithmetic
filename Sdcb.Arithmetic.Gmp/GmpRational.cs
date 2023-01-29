@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Sdcb.Math.Gmp;
+namespace Sdcb.Arithmetic.Gmp;
 
 public class GmpRational : IDisposable
 {

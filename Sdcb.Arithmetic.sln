@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Math.Gmp", "Sdcb.Math.Gmp\Sdcb.Math.Gmp.csproj", "{C353AA11-EF0D-4F84-B619-8FD120E65082}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Math.Gmp.Tests", "Sdcb.Math.Gmp.Tests\Sdcb.Math.Gmp.Tests.csproj", "{E8A47E96-992D-4C50-B288-E70861FD8105}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{974528A9-2CDE-4BA1-B625-0B2F795E1E9A}"
 	ProjectSection(SolutionItems) = preProject
 		build\00-common.linq = build\00-common.linq
@@ -18,20 +14,24 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{974528A9
 		build\Sdcb.Math.Gmp.runtime.props = build\Sdcb.Math.Gmp.runtime.props
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Arithmetic.Gmp", "Sdcb.Arithmetic.Gmp\Sdcb.Arithmetic.Gmp.csproj", "{3A6347EB-FDBF-4DAD-B561-D4233E26F693}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Arithmetic.Gmp.Tests", "Sdcb.Arithmetic.Gmp.Tests\Sdcb.Arithmetic.Gmp.Tests.csproj", "{515B07FA-525D-4722-A5BC-9A44B0C69475}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C353AA11-EF0D-4F84-B619-8FD120E65082}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C353AA11-EF0D-4F84-B619-8FD120E65082}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C353AA11-EF0D-4F84-B619-8FD120E65082}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C353AA11-EF0D-4F84-B619-8FD120E65082}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E8A47E96-992D-4C50-B288-E70861FD8105}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E8A47E96-992D-4C50-B288-E70861FD8105}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E8A47E96-992D-4C50-B288-E70861FD8105}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E8A47E96-992D-4C50-B288-E70861FD8105}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A6347EB-FDBF-4DAD-B561-D4233E26F693}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A6347EB-FDBF-4DAD-B561-D4233E26F693}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A6347EB-FDBF-4DAD-B561-D4233E26F693}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A6347EB-FDBF-4DAD-B561-D4233E26F693}.Release|Any CPU.Build.0 = Release|Any CPU
+		{515B07FA-525D-4722-A5BC-9A44B0C69475}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{515B07FA-525D-4722-A5BC-9A44B0C69475}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{515B07FA-525D-4722-A5BC-9A44B0C69475}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{515B07FA-525D-4722-A5BC-9A44B0C69475}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

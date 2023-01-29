@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Globalization;
 
-namespace Sdcb.Math.Gmp;
+namespace Sdcb.Arithmetic.Gmp;
 
 public class GmpInteger : IDisposable
 {

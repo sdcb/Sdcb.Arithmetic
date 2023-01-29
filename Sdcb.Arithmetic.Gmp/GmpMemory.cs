@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Sdcb.Math.Gmp
+namespace Sdcb.Arithmetic.Gmp
 {
     public static unsafe class GmpMemory
     {

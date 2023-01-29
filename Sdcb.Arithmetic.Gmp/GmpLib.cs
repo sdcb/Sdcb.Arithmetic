@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace Sdcb.Math.Gmp;
+namespace Sdcb.Arithmetic.Gmp;
 
 public static class GmpLib
 {
