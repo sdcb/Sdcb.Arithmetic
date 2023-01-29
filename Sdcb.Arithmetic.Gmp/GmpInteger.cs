@@ -2,8 +2,6 @@
 using System;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
-using System.Globalization;
 
 namespace Sdcb.Arithmetic.Gmp;
 
@@ -16,28 +14,32 @@ public class GmpInteger : IDisposable
     }
 
     public Mpz_t Raw = new();
-    private bool _disposed = false;
+    private bool _disposed;
+    private bool _isOwner;
 
     #region Initializing Integers
-    public unsafe GmpInteger()
+    public unsafe GmpInteger(bool isOwner = true)
     {
         fixed (Mpz_t* ptr = &Raw)
         {
             GmpLib.__gmpz_init((IntPtr)ptr);
         }
+        _isOwner = isOwner;
     }
 
-    public unsafe GmpInteger(Mpz_t raw)
+    public unsafe GmpInteger(Mpz_t raw, bool isOwner = true)
     {
         Raw = raw;
+        _isOwner = isOwner;
     }
 
-    public unsafe GmpInteger(uint bitCount)
+    public unsafe GmpInteger(uint bitCount, bool isOwner = true)
     {
         fixed (Mpz_t* ptr = &Raw)
         {
             GmpLib.__gmpz_init2((IntPtr)ptr, bitCount);
         }
+        _isOwner = isOwner;
     }
 
     /// <summary>
@@ -241,7 +243,7 @@ public class GmpInteger : IDisposable
             {
             }
 
-            Clear();
+            if (_isOwner) Clear();
             _disposed = true;
         }
     }
@@ -2075,9 +2077,9 @@ public class GmpInteger : IDisposable
             null => false,
             GmpInteger gi => this == gi,
             double dbl => this == dbl,
-            int si => this == si, 
-            uint ui => this == ui, 
-            _ => false, 
+            int si => this == si,
+            uint ui => this == ui,
+            _ => false,
         };
     }
 
@@ -2264,7 +2266,7 @@ public class GmpInteger : IDisposable
 
     public unsafe void SetBit(uint bitIndex)
     {
-        fixed(Mpz_t* ptr = &Raw)
+        fixed (Mpz_t* ptr = &Raw)
         {
             GmpLib.__gmpz_setbit((IntPtr)ptr, bitIndex);
         }

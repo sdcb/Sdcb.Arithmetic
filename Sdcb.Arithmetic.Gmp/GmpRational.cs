@@ -10,19 +10,22 @@ public class GmpRational : IDisposable
 {
     public Mpq_t Raw = new();
     private bool _disposed = false;
+    private bool _isOwner;
 
     #region Initialization and Assignment Functions
-    public unsafe GmpRational()
+    public unsafe GmpRational(bool isOwner = true)
     {
         fixed (Mpq_t* ptr = &Raw)
         {
             GmpLib.__gmpq_init((IntPtr)ptr);
         }
+        _isOwner = isOwner;
     }
 
-    public GmpRational(Mpq_t raw)
+    public GmpRational(Mpq_t raw, bool isOwner = true)
     {
         Raw = raw;
+        _isOwner = isOwner;
     }
 
     /// <summary>
@@ -289,7 +292,7 @@ public class GmpRational : IDisposable
                 // TODO: 释放托管状态(托管对象)
             }
 
-            Clear();
+            if (_isOwner) Clear();
             _disposed = true;
         }
     }
@@ -561,6 +564,34 @@ public class GmpRational : IDisposable
     }
 
     public override int GetHashCode() => Raw.GetHashCode();
+    #endregion
+
+    #region Applying Integer Functions to Rationals
+    public unsafe GmpInteger Num
+    {
+        get => new GmpInteger(Raw.Num, isOwner: false);
+        set
+        {
+            fixed (Mpq_t* pthis = &Raw)
+            fixed (Mpz_t* pop = &value.Raw)
+            {
+                GmpLib.__gmpq_set_num((IntPtr)pthis, (IntPtr)pop);
+            }
+        }
+    }
+
+    public unsafe GmpInteger Den
+    {
+        get => new GmpInteger(Raw.Den, isOwner: false);
+        set
+        {
+            fixed (Mpq_t* pthis = &Raw)
+            fixed (Mpz_t* pop = &value.Raw)
+            {
+                GmpLib.__gmpq_set_den((IntPtr)pthis, (IntPtr)pop);
+            }
+        }
+    }
     #endregion
 }
 
