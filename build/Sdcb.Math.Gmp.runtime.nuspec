@@ -13,7 +13,7 @@
         <summary>Native binding for gmp to work on {titleRid}.</summary>
         <releaseNotes></releaseNotes>
         <copyright>Copyright 2023</copyright>
-        <tags>linqpad-samples</tags>
+        <tags>GMP;multi-precision;arithmetic;BigInteger;BigRational;BigInt;BigFloat;bignum;linqpad-samples</tags>
         <repository type="git" url="https://github.com/sdcb/Sdcb.Math.Gmp.git" />
         <dependencies>
         </dependencies>

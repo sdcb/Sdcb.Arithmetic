@@ -11,7 +11,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/sdcb/Sdcb.Math.Gmp.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>linqpad-samples</PackageTags>
+    <PackageTags>GMP;multi-precision;arithmetic;BigInteger;BigRational;BigInt;BigFloat;BigNum;linqpad-samples</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
