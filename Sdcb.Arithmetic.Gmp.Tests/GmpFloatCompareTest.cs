@@ -309,8 +309,8 @@ public class GmpFloatCompareTest
     {
         GmpFloat rop = new GmpFloat();
         GmpFloat.RelDiffInplace(rop, GmpFloat.From(op1), GmpFloat.From(op2));
-        double res = System.Math.Abs((double)rop) - check;
-        Assert.True(System.Math.Abs(res) < 0.000001);
+        double res = Math.Abs((double)rop) - check;
+        Assert.True(Math.Abs(res) < 0.000001);
     }
 
     [Theory]
