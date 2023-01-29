@@ -19,8 +19,7 @@ public static class GmpLib
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return NativeLibrary.Load("gmp.dll", assembly, searchPath);
-                //return NativeLibrary.Load("gmp-10.dll");
+                return NativeLibrary.Load("gmp-10.dll", assembly, searchPath);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
