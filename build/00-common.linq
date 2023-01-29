@@ -16,13 +16,12 @@ async Task SetupAsync(CancellationToken cancellationToken = default)
 	await EnsureNugetExe(cancellationToken);
 }
 
-static Encoding encoding = Encoding.UTF8;
-static void NuGetRun(string args) => Run(@".\nuget.exe", args, encoding);
-static void DotNetRun(string args) => Run("dotnet", args, encoding);
+static void NuGetRun(string args) => Run(@".\nuget.exe", args, Encoding.GetEncoding("gb2312"));
+static void DotNetRun(string args) => Run("dotnet", args, Encoding.GetEncoding("utf-8"));
 static void Run(string exe, string args, Encoding encoding) => Util.Cmd(exe, args, encoding);
 static ProjectVersion[] Projects = new[]
 {
-	new ProjectVersion("Sdcb.Math.Gmp", "1.0.10-preview.7"), 
+	new ProjectVersion("Sdcb.Math.Gmp", "1.0.10-preview.8"), 
 };
 
 static async Task DownloadFile(Uri uri, string localFile, CancellationToken cancellationToken = default)

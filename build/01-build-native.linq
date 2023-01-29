@@ -15,7 +15,7 @@ static string NativeVersion => Projects.First(x => x.name == "Sdcb.Math.Gmp").ve
 async Task Main()
 {
 	await SetupAsync(QueryCancelToken);
-	await new WindowsNugetSource("win-x64", "win64", "gmp.dll", @"C:\_\3rd\vcpkg\packages\gmp_x64-windows\bin")
+	await new WindowsNugetSource("win-x64", "win64", "gmp-10.dll", @"C:\_\3rd\vcpkg\packages\gmp_x64-windows\bin")
 		.Process(QueryCancelToken);
 }
 
@@ -73,16 +73,11 @@ public record WindowsNugetSource(string rid, string titleRid, string libName, st
 {
 	protected override async Task Decompress(string folder, CancellationToken cancellationToken)
 	{
-		foreach (string entry in Directory.EnumerateFiles(folder).Where(x => Path.GetExtension(x) switch
-		{
-			".dll" => true, 
-			".pdb" => true, 
-			_ => false, 
-		}))
+		foreach (string entry in Directory.EnumerateFiles(folder).Where(x => Path.GetFileName(x) == libName))
 		{
 			string localEntryDest = Path.Combine(PlatformDir, Path.GetFileName(entry));
 			Console.Write($"Expand {entry} -> {localEntryDest}... ");
-			File.Copy(entry, localEntryDest);
+			File.Copy(entry, localEntryDest, overwrite: true);
 			Console.WriteLine("Done");
 		}
 	}
@@ -93,7 +88,6 @@ public record WindowsNugetSource(string rid, string titleRid, string libName, st
 			.Where(x => Path.GetExtension(x) switch
 			{
 				".dll" => true,
-				".pdb" => true,
 				_ => false,
 			})
 			.Select(f => f.Replace(rid + @"\", ""))
@@ -113,24 +107,24 @@ public abstract record NupkgBuildSource(string rid, string titleRid, string libN
 	public async Task Process(CancellationToken cancellationToken)
 	{
 		Console.WriteLine($"processing {titleRid}...");
-		if (!File.Exists(CLibFilePath))
+		if (File.Exists(CLibFilePath))
 		{
-			await Decompress(folder, cancellationToken);
+			Console.WriteLine($"{CLibFilePath} exists, override!");
 		}
+		await Decompress(folder, cancellationToken);
+		
 		string[] libs = GetDlls();
 
 		string nugetExePath = await EnsureNugetExe(cancellationToken);
 
 		string nuspecPath = BuildNuspec(libs, rid, titleRid);
-		if (!File.Exists(NuGetPath))
+		if (File.Exists(NuGetPath))
 		{
-			string iconDestPath = @$".\{titleRid}\icon.jpg";
-			if (!File.Exists(iconDestPath)) File.Copy(@$".\icon.jpg", iconDestPath);
-			NuGetRun($@"pack {nuspecPath} -Version {NativeVersion} -OutputDirectory .\nupkgs".Dump());
+			Console.WriteLine($"{NuGetPath} exists, override!");
 		}
-		else
-		{
-			Util.HorizontalRun(false, Util.Metatext(NuGetPath), " exists, skip.").Dump();
-		}
+		
+		string iconDestPath = @$".\{titleRid}\icon.jpg";
+		if (!File.Exists(iconDestPath)) File.Copy(@$".\icon.jpg", iconDestPath);
+		NuGetRun($@"pack {nuspecPath} -Version {NativeVersion} -OutputDirectory .\nupkgs".Dump());
 	}
 }

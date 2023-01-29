@@ -20,8 +20,7 @@
   </metadata>
   <files>
     <file src="..\icon.png" target="images\" />
-    <file src=".\bin\gmp.dll" target="runtimes\win-x64\native" />
-    <file src=".\bin\gmp.pdb" target="runtimes\win-x64\native" />
+    <file src=".\bin\gmp-10.dll" target="runtimes\win-x64\native" />
     <file src="Sdcb.Math.Gmp.runtime.win64.props" target="build\net\Sdcb.Math.Gmp.runtime.win64.props" />
     <file src="Sdcb.Math.Gmp.runtime.win64.props" target="build\netstandard\Sdcb.Math.Gmp.runtime.win64.props" />
     <file src="Sdcb.Math.Gmp.runtime.win64.props" target="build\netcoreapp\Sdcb.Math.Gmp.runtime.win64.props" />
