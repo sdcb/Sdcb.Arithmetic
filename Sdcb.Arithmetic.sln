@@ -10,8 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{974528A9
 		build\02-build-packages.linq = build\02-build-packages.linq
 		build\03-publish-proget-nuget.linq = build\03-publish-proget-nuget.linq
 		build\icon.png = build\icon.png
-		build\Sdcb.Math.Gmp.runtime.nuspec = build\Sdcb.Math.Gmp.runtime.nuspec
-		build\Sdcb.Math.Gmp.runtime.props = build\Sdcb.Math.Gmp.runtime.props
+		build\Sdcb.Arithmetic.Gmp.runtime.nuspec = build\Sdcb.Arithmetic.Gmp.runtime.nuspec
+		build\Sdcb.Arithmetic.Gmp.runtime.props = build\Sdcb.Arithmetic.Gmp.runtime.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Arithmetic.Gmp", "Sdcb.Arithmetic.Gmp\Sdcb.Arithmetic.Gmp.csproj", "{3A6347EB-FDBF-4DAD-B561-D4233E26F693}"

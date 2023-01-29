@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>Sdcb.Math.Gmp.runtime.win64</id>
+    <id>Sdcb.Arithmetic.Gmp.runtime.win64</id>
     <version>2.2.1</version>
     <title>GMP native bindings for win64</title>
     <authors>sdcb</authors>
@@ -13,7 +13,7 @@
     <summary>Native binding for gmp to work on win64.</summary>
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2023</copyright>
-    <tags>linqpad-samples</tags>
+    <tags>GMP;multi-precision;arithmetic;BigInteger;BigRational;BigInt;BigFloat;bignum;linqpad-samples</tags>
     <repository type="git" url="https://github.com/sdcb/Sdcb.Math.Gmp.git" />
     <dependencies></dependencies>
     <frameworkAssemblies></frameworkAssemblies>
@@ -21,8 +21,8 @@
   <files>
     <file src="..\icon.png" target="images\" />
     <file src=".\bin\gmp-10.dll" target="runtimes\win-x64\native" />
-    <file src="Sdcb.Math.Gmp.runtime.win64.props" target="build\net\Sdcb.Math.Gmp.runtime.win64.props" />
-    <file src="Sdcb.Math.Gmp.runtime.win64.props" target="build\netstandard\Sdcb.Math.Gmp.runtime.win64.props" />
-    <file src="Sdcb.Math.Gmp.runtime.win64.props" target="build\netcoreapp\Sdcb.Math.Gmp.runtime.win64.props" />
+    <file src="Sdcb.Arithmetic.Gmp.runtime.win64.props" target="build\net\Sdcb.Arithmetic.Gmp.runtime.win64.props" />
+    <file src="Sdcb.Arithmetic.Gmp.runtime.win64.props" target="build\netstandard\Sdcb.Arithmetic.Gmp.runtime.win64.props" />
+    <file src="Sdcb.Arithmetic.Gmp.runtime.win64.props" target="build\netcoreapp\Sdcb.Arithmetic.Gmp.runtime.win64.props" />
   </files>
 </package>
