@@ -2,7 +2,7 @@
 
 ## Examples
 
-Calculate 1,000,000 length of ¦Ð using `Sdcb.Arithmetic.Gmp`:
+Calculate 1,000,000 length of Ï€ using `Sdcb.Arithmetic.Gmp`:
 
 ```csharp
 // Install NuGet package: Sdcb.Arithmetic.Gmp
