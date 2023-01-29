@@ -60,6 +60,30 @@ public class GmpFloatCompareTest
     [Theory]
     [InlineData(3.14, 2.718, true)]
     [InlineData(2.718, 3.14, false)]
+    [InlineData(3.14, 3.14, true)]
+    public void GreaterOrEqualBigFloat(double op1, double op2, bool check)
+    {
+        Assert.Equal(check, GmpFloat.From(op1) >= GmpFloat.From(op2));
+        Assert.Equal(check, GmpFloat.From(op2) <= GmpFloat.From(op1));
+        Assert.Equal(check, GmpFloat.From(op1) >= op2);
+        Assert.Equal(check, GmpFloat.From(op2) <= op1);
+    }
+
+    [Theory]
+    [InlineData(3, 2, true)]
+    [InlineData(2, 4, false)]
+    [InlineData(100, 100, false)]
+    public void GreaterThanInt32(int op1, int op2, bool check)
+    {
+        Assert.Equal(check, GmpFloat.From(op1) > op2);
+        Assert.Equal(!check, GmpFloat.From(op1) <= op2);
+        Assert.Equal(check, GmpFloat.From(op2) < op1);
+        Assert.Equal(!check, GmpFloat.From(op2) >= op1);
+    }
+
+    [Theory]
+    [InlineData(3.14, 2.718, true)]
+    [InlineData(2.718, 3.14, false)]
     [InlineData(3.14, 3.14, false)]
     public void GreaterDouble(double op1, double op2, bool check)
     {
@@ -167,5 +191,15 @@ public class GmpFloatCompareTest
         Assert.Equal(!check, uint.Parse(op1) != GmpFloat.Parse(op2));
         Assert.Equal(!check, GmpFloat.Parse(op1) != int.Parse(op2));
         Assert.Equal(!check, GmpFloat.Parse(op1) != uint.Parse(op2));
+    }
+
+    [Theory]
+    [InlineData("-3.14", -1)]
+    [InlineData("777777777777777777777777777777777777777777777777.999999999999999999999", 1)]
+    [InlineData("0", 0)]
+    public void SignTest(string val, int expectedValue)
+    {
+        GmpFloat f = GmpFloat.Parse(val);
+        Assert.Equal(expectedValue, f.Sign);
     }
 }
