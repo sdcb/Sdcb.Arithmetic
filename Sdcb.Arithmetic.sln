@@ -18,6 +18,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Arithmetic.Gmp", "Sdcb
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Arithmetic.Gmp.Tests", "Sdcb.Arithmetic.Gmp.Tests\Sdcb.Arithmetic.Gmp.Tests.csproj", "{515B07FA-525D-4722-A5BC-9A44B0C69475}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决方案项", "{0D3F83AC-A1AE-49C6-87A7-8FEB8A416990}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
