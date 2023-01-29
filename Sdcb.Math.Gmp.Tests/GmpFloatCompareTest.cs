@@ -109,7 +109,24 @@ public class GmpFloatCompareTest
     {
         Assert.Equal(check, GmpFloat.From(op1) > op2);
         Assert.Equal(check, GmpFloat.From(op2) < op1);
+
+        Assert.Equal(!check, GmpFloat.From(op1) <= op2);
+        Assert.Equal(!check, GmpFloat.From(op2) >= op1);
     }
+
+    [Theory]
+    [InlineData(3.14, 2, true)]
+    [InlineData(2.718, 4, false)]
+    [InlineData(113, 113, false)]
+    public void GreaterInteger(double op1, uint op2, bool check)
+    {
+        Assert.Equal(check, GmpFloat.From(op1) > GmpInteger.From(op2));
+        Assert.Equal(check, GmpFloat.From(op2) < GmpInteger.From(op1));
+
+        Assert.Equal(!check, GmpFloat.From(op1) <= GmpInteger.From(op2));
+        Assert.Equal(!check, GmpFloat.From(op2) >= GmpInteger.From(op1));
+    }
+
 
     [Theory]
     [InlineData(3.14, 2.718, true)]
@@ -132,13 +149,13 @@ public class GmpFloatCompareTest
     }
 
     [Theory]
-    [InlineData(3.14, 2, true)]
-    [InlineData(2.718, 4, false)]
+    [InlineData(3.14, 2, false)]
+    [InlineData(2.718, 4, true)]
     [InlineData(113, 113, false)]
-    public void GreaterUIntRev(uint op1, double op2, bool check)
+    public void GreaterUIntRev(double op1, uint op2, bool check)
     {
-        Assert.Equal(check, op1 > GmpFloat.From(op2));
-        Assert.Equal(!check, op1 <= GmpFloat.From(op2));
+        Assert.Equal(check, GmpFloat.From(op1) < op2);
+        Assert.Equal(!check, GmpFloat.From(op1) >= op2);
     }
 
     [Theory]
@@ -183,6 +200,7 @@ public class GmpFloatCompareTest
         Assert.Equal(check, uint.Parse(op1) == GmpFloat.Parse(op2));
         Assert.Equal(check, GmpFloat.Parse(op1) == int.Parse(op2));
         Assert.Equal(check, GmpFloat.Parse(op1) == uint.Parse(op2));
+        Assert.Equal(check, GmpFloat.Parse(op1) == GmpInteger.Parse(op2));
 
         Assert.Equal(!check, GmpFloat.Parse(op1) != GmpFloat.Parse(op2));
         Assert.Equal(!check, GmpFloat.Parse(op1) != double.Parse(op2));
@@ -191,6 +209,7 @@ public class GmpFloatCompareTest
         Assert.Equal(!check, uint.Parse(op1) != GmpFloat.Parse(op2));
         Assert.Equal(!check, GmpFloat.Parse(op1) != int.Parse(op2));
         Assert.Equal(!check, GmpFloat.Parse(op1) != uint.Parse(op2));
+        Assert.Equal(!check, GmpFloat.Parse(op1) != GmpInteger.Parse(op2));
     }
 
     [Theory]
