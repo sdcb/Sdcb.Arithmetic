@@ -24,4 +24,16 @@ public class GmpRationalIOTest
         GmpRational z = GmpRational.From(val);
         Assert.Equal(expected, z.ToString(opBase));
     }
+
+    [Theory]
+    [InlineData("3/4", "3/4")]
+    [InlineData("-6/8", "-3/4")]
+    [InlineData("6/-8", "-3/4")]
+    [InlineData("0/5", "0")]
+    public void Canonicalize(string raw, string res)
+    {
+        GmpRational op = GmpRational.Parse(raw);
+        op.Canonicalize();
+        Assert.Equal(res, op.ToString());
+    }
 }
