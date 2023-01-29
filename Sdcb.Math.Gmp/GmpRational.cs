@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -23,6 +24,18 @@ public class GmpRational : IDisposable
     public GmpRational(Mpq_t raw)
     {
         Raw = raw;
+    }
+
+    /// <summary>
+    /// <para>Remove any factors that are common to the numerator and denominator of op, and make the denominator positive.</para>
+    /// <para>example: 5/-10 -> -1/2</para>
+    /// </summary>
+    public unsafe void Canonicalize()
+    {
+        fixed(Mpq_t* pthis = &Raw)
+        {
+            GmpLib.__gmpq_canonicalize((IntPtr)pthis);
+        }
     }
 
     #region From
@@ -297,7 +310,171 @@ public class GmpRational : IDisposable
     #endregion
 
     #region Arithmetic Functions
-    // https://gmplib.org/manual/Rational-Arithmetic
+    public static unsafe void AddInplace(GmpRational rop, GmpRational op1, GmpRational op2)
+    {
+        fixed (Mpq_t* pr = &rop.Raw)
+        fixed (Mpq_t* p1 = &op1.Raw)
+        fixed (Mpq_t* p2 = &op2.Raw)
+        {
+            GmpLib.__gmpq_add((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static GmpRational Add(GmpRational op1, GmpRational op2)
+    {
+        GmpRational rop = new();
+        AddInplace(rop, op1, op2);
+        return rop;
+    }
+
+    public static GmpRational operator +(GmpRational op1, GmpRational op2) => Add(op1, op2);
+
+    public static unsafe void SubtractInplace(GmpRational rop, GmpRational op1, GmpRational op2)
+    {
+        fixed (Mpq_t* pr = &rop.Raw)
+        fixed (Mpq_t* p1 = &op1.Raw)
+        fixed (Mpq_t* p2 = &op2.Raw)
+        {
+            GmpLib.__gmpq_sub((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static GmpRational Subtract(GmpRational op1, GmpRational op2)
+    {
+        GmpRational rop = new();
+        SubtractInplace(rop, op1, op2);
+        return rop;
+    }
+
+    public static GmpRational operator -(GmpRational op1, GmpRational op2) => Subtract(op1, op2);
+
+    public static unsafe void MultiplyInplace(GmpRational rop, GmpRational op1, GmpRational op2)
+    {
+        fixed (Mpq_t* pr = &rop.Raw)
+        fixed (Mpq_t* p1 = &op1.Raw)
+        fixed (Mpq_t* p2 = &op2.Raw)
+        {
+            GmpLib.__gmpq_mul((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static GmpRational Multiply(GmpRational op1, GmpRational op2)
+    {
+        GmpRational rop = new();
+        MultiplyInplace(rop, op1, op2);
+        return rop;
+    }
+
+    public static GmpRational operator *(GmpRational op1, GmpRational op2) => Multiply(op1, op2);
+
+    public static unsafe void Multiply2ExpInplace(GmpRational rop, GmpRational op1, uint bitCount)
+    {
+        fixed (Mpq_t* pr = &rop.Raw)
+        fixed (Mpq_t* p1 = &op1.Raw)
+        {
+            GmpLib.__gmpq_mul_2exp((IntPtr)pr, (IntPtr)p1, bitCount);
+        }
+    }
+
+    public static GmpRational Multiply2Exp(GmpRational op1, uint bitCount)
+    {
+        GmpRational rop = new();
+        Multiply2ExpInplace(rop, op1, bitCount);
+        return rop;
+    }
+
+    public static GmpRational operator <<(GmpRational op1, uint bitCount) => Multiply2Exp(op1, bitCount);
+
+    public static unsafe void DivideInplace(GmpRational rop, GmpRational op1, GmpRational op2)
+    {
+        fixed (Mpq_t* pr = &rop.Raw)
+        fixed (Mpq_t* p1 = &op1.Raw)
+        fixed (Mpq_t* p2 = &op2.Raw)
+        {
+            GmpLib.__gmpq_div((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static GmpRational Divide(GmpRational op1, GmpRational op2)
+    {
+        GmpRational rop = new();
+        DivideInplace(rop, op1, op2);
+        return rop;
+    }
+
+    public static GmpRational operator /(GmpRational op1, GmpRational op2) => Divide(op1, op2);
+
+    public static unsafe void Divide2ExpInplace(GmpRational rop, GmpRational op1, uint bitCount)
+    {
+        fixed (Mpq_t* pr = &rop.Raw)
+        fixed (Mpq_t* p1 = &op1.Raw)
+        {
+            GmpLib.__gmpq_div_2exp((IntPtr)pr, (IntPtr)p1, bitCount);
+        }
+    }
+
+    public static GmpRational Divide2Exp(GmpRational op1, uint bitCount)
+    {
+        GmpRational rop = new();
+        Divide2ExpInplace(rop, op1, bitCount);
+        return rop;
+    }
+
+    public static GmpRational operator >>(GmpRational op1, uint bitCount) => Divide2Exp(op1, bitCount);
+
+    public static unsafe void NegateInplace(GmpRational rop, GmpRational op)
+    {
+        fixed (Mpq_t* pr = &rop.Raw)
+        fixed (Mpq_t* pop = &op.Raw)
+        {
+            GmpLib.__gmpq_neg((IntPtr)pr, (IntPtr)pop);
+        }
+    }
+
+    public void NegateInplace() => NegateInplace(this, this);
+
+    public static GmpRational Negate(GmpRational op)
+    {
+        GmpRational rop = new();
+        NegateInplace(rop, op);
+        return rop;
+    }
+
+    public static GmpRational operator -(GmpRational op) => Negate(op);
+
+    public static unsafe void AbsInplace(GmpRational rop, GmpRational op)
+    {
+        fixed (Mpq_t* pr = &rop.Raw)
+        fixed (Mpq_t* pop = &op.Raw)
+        {
+            GmpLib.__gmpq_abs((IntPtr)pr, (IntPtr)pop);
+        }
+    }
+
+    public static GmpRational Abs(GmpRational op)
+    {
+        GmpRational rop = new();
+        AbsInplace(rop, op);
+        return rop;
+    }
+
+    public static unsafe void InvertInplace(GmpRational rop, GmpRational op)
+    {
+        fixed (Mpq_t* pr = &rop.Raw)
+        fixed (Mpq_t* pop = &op.Raw)
+        {
+            GmpLib.__gmpq_inv((IntPtr)pr, (IntPtr)pop);
+        }
+    }
+
+    public void InvertInplace() => InvertInplace(this, this);
+
+    public static GmpRational Invert(GmpRational op)
+    {
+        GmpRational rop = new();
+        InvertInplace(rop, op);
+        return rop;
+    }
     #endregion
 }
 
