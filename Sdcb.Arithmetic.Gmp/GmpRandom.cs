@@ -58,17 +58,17 @@ public class GmpRandom : IDisposable
         return seed;
     }
 
-    public unsafe void SetSeed(uint seed)
+    public void SetSeed(uint seed)
     {
         GmpLib.__gmp_randseed_ui(Raw, (uint)seed);
     }
 
-    public unsafe void SetSeed(GmpInteger seed)
+    public void SetSeed(GmpInteger seed)
     {
         GmpLib.__gmp_randseed(Raw, seed.Raw);
     }
 
-    public unsafe GmpRandom Clone()
+    public GmpRandom Clone()
     {
         IntPtr raw = GmpRandomState.Alloc();
         GmpLib.__gmp_randinit_set(raw, Raw);
@@ -81,7 +81,7 @@ public class GmpRandom : IDisposable
     /// and is recommended for applications with no special requirements. 
     /// Currently this is gmp_randinit_mt.
     /// </summary>
-    public static unsafe GmpRandom CreateDefault()
+    public static GmpRandom CreateDefault()
     {
         IntPtr raw = GmpRandomState.Alloc();
         GmpLib.__gmp_randinit_default(raw);
@@ -94,7 +94,7 @@ public class GmpRandom : IDisposable
     /// and is recommended for applications with no special requirements. 
     /// Currently this is gmp_randinit_mt.
     /// </summary>
-    public static unsafe GmpRandom CreateDefault(uint seed)
+    public static GmpRandom CreateDefault(uint seed)
     {
         IntPtr raw = GmpRandomState.Alloc();
         GmpLib.__gmp_randinit_default(raw);
@@ -107,7 +107,7 @@ public class GmpRandom : IDisposable
     /// and is recommended for applications with no special requirements. 
     /// Currently this is gmp_randinit_mt.
     /// </summary>
-    public static unsafe GmpRandom CreateDefault(GmpInteger seed)
+    public static GmpRandom CreateDefault(GmpInteger seed)
     {
         IntPtr raw = GmpRandomState.Alloc();
         GmpLib.__gmp_randinit_default(raw);
@@ -118,7 +118,7 @@ public class GmpRandom : IDisposable
     /// Initialize state for a Mersenne Twister algorithm. 
     /// This algorithm is fast and has good randomness properties.
     /// </summary>
-    public static unsafe GmpRandom CreateMersenneTwister()
+    public static GmpRandom CreateMersenneTwister()
     {
         IntPtr raw = GmpRandomState.Alloc();
         GmpLib.__gmp_randinit_mt(raw);
@@ -129,7 +129,7 @@ public class GmpRandom : IDisposable
     /// Initialize state for a Mersenne Twister algorithm. 
     /// This algorithm is fast and has good randomness properties.
     /// </summary>
-    public static unsafe GmpRandom CreateMersenneTwister(uint seed)
+    public static GmpRandom CreateMersenneTwister(uint seed)
     {
         IntPtr raw = GmpRandomState.Alloc();
         GmpLib.__gmp_randinit_mt(raw);
@@ -140,7 +140,7 @@ public class GmpRandom : IDisposable
     /// Initialize state for a Mersenne Twister algorithm. 
     /// This algorithm is fast and has good randomness properties.
     /// </summary>
-    public static unsafe GmpRandom CreateMersenneTwister(GmpInteger seed)
+    public static GmpRandom CreateMersenneTwister(GmpInteger seed)
     {
         IntPtr raw = GmpRandomState.Alloc();
         GmpLib.__gmp_randinit_mt(raw);
@@ -161,7 +161,7 @@ public class GmpRandom : IDisposable
     /// multiple iterations of the recurrence are used and the results concatenated.
     /// </para>
     /// </summary>
-    public static unsafe GmpRandom CreateLC2Exp(GmpInteger a, uint c, uint m2exp)
+    public static GmpRandom CreateLC2Exp(GmpInteger a, uint c, uint m2exp)
     {
         IntPtr raw = GmpRandomState.Alloc();
         GmpLib.__gmp_randinit_lc_2exp(raw, a.Raw, c, m2exp);
@@ -183,7 +183,7 @@ public class GmpRandom : IDisposable
     /// multiple iterations of the recurrence are used and the results concatenated.
     /// </para>
     /// </summary>
-    public static unsafe GmpRandom CreateLC2Exp(GmpInteger a, uint c, uint m2exp, uint seed)
+    public static GmpRandom CreateLC2Exp(GmpInteger a, uint c, uint m2exp, uint seed)
     {
         IntPtr raw = GmpRandomState.Alloc();
         GmpLib.__gmp_randinit_lc_2exp(raw, a.Raw, c, m2exp);
@@ -205,7 +205,7 @@ public class GmpRandom : IDisposable
     /// multiple iterations of the recurrence are used and the results concatenated.
     /// </para>
     /// </summary>
-    public static unsafe GmpRandom CreateLC2Exp(GmpInteger a, uint c, uint m2exp, GmpInteger seed)
+    public static GmpRandom CreateLC2Exp(GmpInteger a, uint c, uint m2exp, GmpInteger seed)
     {
         IntPtr raw = GmpRandomState.Alloc();
         GmpLib.__gmp_randinit_lc_2exp(raw, a.Raw, c, m2exp);
@@ -222,7 +222,7 @@ public class GmpRandom : IDisposable
     /// If size is bigger than the table data provides then the return <see cref="ArgumentOutOfRangeException"/>. 
     /// The maximum size currently supported is 128.
     /// </returns>
-    public static unsafe GmpRandom CreateLC2ExpSize(uint size = 128)
+    public static GmpRandom CreateLC2ExpSize(uint size = 128)
     {
         IntPtr raw = GmpRandomState.Alloc();
         if (GmpLib.__gmp_randinit_lc_2exp_size(raw, size) == 0)
@@ -241,7 +241,7 @@ public class GmpRandom : IDisposable
     /// If size is bigger than the table data provides then the return <see cref="ArgumentOutOfRangeException"/>. 
     /// The maximum size currently supported is 128.
     /// </returns>
-    public static unsafe GmpRandom CreateLC2ExpSize(uint size, uint seed)
+    public static GmpRandom CreateLC2ExpSize(uint size, uint seed)
     {
         IntPtr raw = GmpRandomState.Alloc();
         if (GmpLib.__gmp_randinit_lc_2exp_size(raw, size) == 0)
@@ -260,7 +260,7 @@ public class GmpRandom : IDisposable
     /// If size is bigger than the table data provides then the return <see cref="ArgumentOutOfRangeException"/>. 
     /// The maximum size currently supported is 128.
     /// </returns>
-    public static unsafe GmpRandom CreateLC2ExpSize(uint size, GmpInteger seed)
+    public static GmpRandom CreateLC2ExpSize(uint size, GmpInteger seed)
     {
         IntPtr raw = GmpRandomState.Alloc();
         if (GmpLib.__gmp_randinit_lc_2exp_size(raw, size) == 0)
@@ -275,7 +275,7 @@ public class GmpRandom : IDisposable
     /// <summary>
     /// Return a uniformly distributed random number of n bits, i.e. in the range 0 to 2^n-1 inclusive. n must be less than or equal to the number of bits in an unsigned long.
     /// </summary>
-    public unsafe uint NextNBits(uint bitCount)
+    public uint NextNBits(uint bitCount)
     {
         return GmpLib.__gmp_urandomb_ui(Raw, bitCount);
     }
@@ -283,7 +283,7 @@ public class GmpRandom : IDisposable
     /// <summary>
     /// Generate a uniformly distributed random integer in the range 0 to 2n-1, inclusive.
     /// </summary>
-    public unsafe void NextNBits(GmpInteger rop, uint bitCount)
+    public void NextNBits(GmpInteger rop, uint bitCount)
     {
         GmpLib.__gmpz_urandomb(rop.Raw, Raw, bitCount);
     }
@@ -291,7 +291,7 @@ public class GmpRandom : IDisposable
     /// <summary>
     /// Generate a uniformly distributed random integer in the range 0 to 2n-1, inclusive.
     /// </summary>
-    public unsafe GmpInteger NextGmpIntegerNBits(uint bitCount)
+    public GmpInteger NextGmpIntegerNBits(uint bitCount)
     {
         GmpInteger rop = new();
         NextNBits(rop, bitCount);
@@ -304,7 +304,7 @@ public class GmpRandom : IDisposable
     /// since this kind of random numbers have proven to be more likely to trigger corner-case bugs. 
     /// The random number will be in the range 2n-1 to 2n-1, inclusive.
     /// </summary>
-    public unsafe void RNextNBits(GmpInteger rop, uint bitCount)
+    public void RNextNBits(GmpInteger rop, uint bitCount)
     {
         GmpLib.__gmpz_rrandomb(rop.Raw, Raw, bitCount);
     }
@@ -313,7 +313,7 @@ public class GmpRandom : IDisposable
     /// Generate a uniformly distributed random integer in the range 0 to 2n-1, inclusive.
     /// </summary>
     /// <returns>The random number will be in the range 2n-1 to 2n-1, inclusive.</returns>
-    public unsafe GmpInteger RNextNBits(uint bitCount)
+    public GmpInteger RNextNBits(uint bitCount)
     {
         GmpInteger rop = new();
         RNextNBits(rop, bitCount);
@@ -323,7 +323,7 @@ public class GmpRandom : IDisposable
     /// <summary>
     /// Return a uniformly distributed random number in the range 0 to n-1, inclusive.
     /// </summary>
-    public unsafe uint Next(uint n)
+    public uint Next(uint n)
     {
         return GmpLib.__gmp_urandomm_ui(Raw, n);
     }
@@ -331,7 +331,7 @@ public class GmpRandom : IDisposable
     /// <summary>
     /// Generate a uniformly distributed random integer in the range 0 to 2n-1, inclusive.
     /// </summary>
-    public unsafe void Next(GmpInteger rop, GmpInteger n)
+    public void Next(GmpInteger rop, GmpInteger n)
     {
         GmpLib.__gmpz_urandomm(rop.Raw, Raw, n.Raw);
     }
@@ -339,7 +339,7 @@ public class GmpRandom : IDisposable
     /// <summary>
     /// Generate a uniformly distributed random integer in the range 0 to 2n-1, inclusive.
     /// </summary>
-    public unsafe GmpInteger NextGmpInteger(GmpInteger n)
+    public GmpInteger NextGmpInteger(GmpInteger n)
     {
         GmpInteger rop = new();
         Next(rop, n);
@@ -350,7 +350,7 @@ public class GmpRandom : IDisposable
     /// Generate a uniformly distributed random float in rop, such that 0 &lt;= rop &lt; 1, 
     /// with nbits significant bits in the mantissa or less if the precision of rop is smaller.
     /// </summary>
-    public unsafe void Next(GmpFloat rop, uint nbits)
+    public void Next(GmpFloat rop, uint nbits)
     {
         GmpLib.__gmpf_urandomb(rop.Raw, Raw, nbits);
     }
@@ -359,7 +359,7 @@ public class GmpRandom : IDisposable
     /// Generate a uniformly distributed random float in rop, such that 0 &lt;= rop &lt; 1, 
     /// with nbits significant bits in the mantissa or less if the precision of rop is smaller.
     /// </summary>
-    public unsafe GmpFloat NextGmpFloat(uint precision, uint nbits)
+    public GmpFloat NextGmpFloat(uint precision, uint nbits)
     {
         GmpFloat rop = new(precision);
         Next(rop, nbits);
@@ -370,7 +370,7 @@ public class GmpRandom : IDisposable
     #region Dispose pattern
     private bool _disposed;
 
-    private unsafe void Clear()
+    private void Clear()
     {
         GmpLib.__gmp_randclear(Raw);
         Marshal.FreeHGlobal(Raw);

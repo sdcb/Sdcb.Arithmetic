@@ -13,7 +13,7 @@ public class GmpRational : IDisposable
     private readonly bool _isOwner;
 
     #region Initialization and Assignment Functions
-    public unsafe GmpRational()
+    public GmpRational()
     {
         Raw = Mpq_t.Alloc();
         GmpLib.__gmpq_init(Raw);
@@ -30,7 +30,7 @@ public class GmpRational : IDisposable
     /// <para>Remove any factors that are common to the numerator and denominator of op, and make the denominator positive.</para>
     /// <para>example: 5/-10 -> -1/2</para>
     /// </summary>
-    public unsafe void Canonicalize()
+    public void Canonicalize()
     {
         GmpLib.__gmpq_canonicalize(Raw);
     }
@@ -95,7 +95,7 @@ public class GmpRational : IDisposable
     /// <para>The string can be an integer like “41” or a fraction like “41/152”. The fraction must be in canonical form (see Rational Number Functions), or if not then mpq_canonicalize must be called.</para>
     /// <para>The numerator and optional denominator are parsed the same as in mpz_set_str (see Assigning Integers). White space is allowed in the string, and is simply ignored. The base can vary from 2 to 62, or if base is 0 then the leading characters are used: 0x or 0X for hex, 0b or 0B for binary, 0 for octal, or decimal otherwise. Note that this is done separately for the numerator and denominator, so for instance 0xEF/100 is 239/100, whereas 0xEF/0x100 is 239/256.</para>
     /// </summary>
-    public static unsafe GmpRational Parse(string str, int @base = 0)
+    public static GmpRational Parse(string str, int @base = 0)
     {
         GmpRational r = new();
         r.Assign(str, @base);
@@ -125,22 +125,22 @@ public class GmpRational : IDisposable
 
     #region Assign
 
-    public unsafe void Assign(GmpRational op)
+    public void Assign(GmpRational op)
     {
         GmpLib.__gmpq_set(Raw, op.Raw);
     }
 
-    public unsafe void Assign(GmpInteger op)
+    public void Assign(GmpInteger op)
     {
         GmpLib.__gmpq_set_z(Raw, op.Raw);
     }
 
-    public unsafe void Assign(uint num, uint den)
+    public void Assign(uint num, uint den)
     {
         GmpLib.__gmpq_set_ui(Raw, num, den);
     }
 
-    public unsafe void Assign(int num, uint den)
+    public void Assign(int num, uint den)
     {
         GmpLib.__gmpq_set_si(Raw, num, den);
     }
@@ -166,7 +166,7 @@ public class GmpRational : IDisposable
     /// <summary>
     /// Set rop to the value of op. There is no rounding, this conversion is exact.
     /// </summary>
-    public unsafe void Assign(double val)
+    public void Assign(double val)
     {
         GmpLib.__gmpq_set_d(Raw, val);
     }
@@ -174,17 +174,17 @@ public class GmpRational : IDisposable
     /// <summary>
     /// Set rop to the value of op. There is no rounding, this conversion is exact.
     /// </summary>
-    public unsafe void Assign(GmpFloat val)
+    public void Assign(GmpFloat val)
     {
         GmpLib.__gmpq_set_f(Raw, val.Raw);
     }
 
-    public static unsafe void Swap(GmpRational op1, GmpRational op2)
+    public static void Swap(GmpRational op1, GmpRational op2)
     {
         GmpLib.__gmpq_swap(op1.Raw, op2.Raw);
     }
 
-    public unsafe GmpRational Clone()
+    public GmpRational Clone()
     {
         GmpRational r = new();
         r.Assign(this);
@@ -198,7 +198,7 @@ public class GmpRational : IDisposable
     /// <para>Convert op to a double, truncating if necessary (i.e. rounding towards zero).</para>
     /// <para>If the exponent from the conversion is too big or too small to fit a double then the result is system dependent. For too big an infinity is returned when available. For too small 0.0 is normally returned. Hardware overflow, underflow and denorm traps may or may not occur.</para>
     /// </summary>
-    public unsafe double ToDouble()
+    public double ToDouble()
     {
         return GmpLib.__gmpq_get_d(Raw);
     }
@@ -217,7 +217,7 @@ public class GmpRational : IDisposable
     /// </summary>
     /// <param name="base">For base in the range 2..36, digits and lower-case letters are used; for -2..-36, digits and upper-case letters are used; for 37..62, digits, upper-case letters, and lower-case letters (in that significance order) are used.</param>
     /// <exception cref="ArgumentException"></exception>
-    public unsafe string ToString(int @base)
+    public string ToString(int @base)
     {
         IntPtr ret = GmpLib.__gmpq_get_str(IntPtr.Zero, @base, Raw);
         if (ret == IntPtr.Zero)
@@ -237,7 +237,7 @@ public class GmpRational : IDisposable
     #endregion
 
     #region Dispose & Clear
-    private unsafe void Clear()
+    private void Clear()
     {
         GmpLib.__gmpq_clear(Raw);
         Marshal.FreeHGlobal(Raw);
@@ -273,7 +273,7 @@ public class GmpRational : IDisposable
     #endregion
 
     #region Arithmetic Functions
-    public static unsafe void AddInplace(GmpRational rop, GmpRational op1, GmpRational op2)
+    public static void AddInplace(GmpRational rop, GmpRational op1, GmpRational op2)
     {
         GmpLib.__gmpq_add(rop.Raw, op1.Raw, op2.Raw);
     }
@@ -287,7 +287,7 @@ public class GmpRational : IDisposable
 
     public static GmpRational operator +(GmpRational op1, GmpRational op2) => Add(op1, op2);
 
-    public static unsafe void SubtractInplace(GmpRational rop, GmpRational op1, GmpRational op2)
+    public static void SubtractInplace(GmpRational rop, GmpRational op1, GmpRational op2)
     {
         GmpLib.__gmpq_sub(rop.Raw, op1.Raw, op2.Raw);
     }
@@ -301,7 +301,7 @@ public class GmpRational : IDisposable
 
     public static GmpRational operator -(GmpRational op1, GmpRational op2) => Subtract(op1, op2);
 
-    public static unsafe void MultiplyInplace(GmpRational rop, GmpRational op1, GmpRational op2)
+    public static void MultiplyInplace(GmpRational rop, GmpRational op1, GmpRational op2)
     {
         GmpLib.__gmpq_mul(rop.Raw, op1.Raw, op2.Raw);
     }
@@ -315,7 +315,7 @@ public class GmpRational : IDisposable
 
     public static GmpRational operator *(GmpRational op1, GmpRational op2) => Multiply(op1, op2);
 
-    public static unsafe void Multiply2ExpInplace(GmpRational rop, GmpRational op1, uint bitCount)
+    public static void Multiply2ExpInplace(GmpRational rop, GmpRational op1, uint bitCount)
     {
         GmpLib.__gmpq_mul_2exp(rop.Raw, op1.Raw, bitCount);
     }
@@ -329,7 +329,7 @@ public class GmpRational : IDisposable
 
     public static GmpRational operator <<(GmpRational op1, uint bitCount) => Multiply2Exp(op1, bitCount);
 
-    public static unsafe void DivideInplace(GmpRational rop, GmpRational op1, GmpRational op2)
+    public static void DivideInplace(GmpRational rop, GmpRational op1, GmpRational op2)
     {
         GmpLib.__gmpq_div(rop.Raw, op1.Raw, op2.Raw);
     }
@@ -343,7 +343,7 @@ public class GmpRational : IDisposable
 
     public static GmpRational operator /(GmpRational op1, GmpRational op2) => Divide(op1, op2);
 
-    public static unsafe void Divide2ExpInplace(GmpRational rop, GmpRational op1, uint bitCount)
+    public static void Divide2ExpInplace(GmpRational rop, GmpRational op1, uint bitCount)
     {
         GmpLib.__gmpq_div_2exp(rop.Raw, op1.Raw, bitCount);
     }
@@ -357,7 +357,7 @@ public class GmpRational : IDisposable
 
     public static GmpRational operator >>(GmpRational op1, uint bitCount) => Divide2Exp(op1, bitCount);
 
-    public static unsafe void NegateInplace(GmpRational rop, GmpRational op)
+    public static void NegateInplace(GmpRational rop, GmpRational op)
     {
         GmpLib.__gmpq_neg(rop.Raw, op.Raw);
     }
@@ -373,7 +373,7 @@ public class GmpRational : IDisposable
 
     public static GmpRational operator -(GmpRational op) => Negate(op);
 
-    public static unsafe void AbsInplace(GmpRational rop, GmpRational op)
+    public static void AbsInplace(GmpRational rop, GmpRational op)
     {
         GmpLib.__gmpq_abs(rop.Raw, op.Raw);
     }
@@ -385,7 +385,7 @@ public class GmpRational : IDisposable
         return rop;
     }
 
-    public static unsafe void InvertInplace(GmpRational rop, GmpRational op)
+    public static void InvertInplace(GmpRational rop, GmpRational op)
     {
         GmpLib.__gmpq_inv(rop.Raw, op.Raw);
     }
@@ -405,7 +405,7 @@ public class GmpRational : IDisposable
     /// <para>Compare op1 and op2. Return a positive value if op1 &gt; op2, zero if op1 = op2, and a negative value if op1 &lt; op2.</para>
     /// <para>To determine if two rationals are equal, mpq_equal is faster than mpq_cmp.</para>
     /// </summary>
-    public static unsafe int Compare(GmpRational op1, GmpRational op2)
+    public static int Compare(GmpRational op1, GmpRational op2)
     {
         return GmpLib.__gmpq_cmp(op1.Raw, op2.Raw);
     }
@@ -421,7 +421,7 @@ public class GmpRational : IDisposable
     /// <para>Compare op1 and op2. Return a positive value if op1 &gt; op2, zero if op1 = op2, and a negative value if op1 &lt; op2.</para>
     /// <para>To determine if two rationals are equal, mpq_equal is faster than mpq_cmp.</para>
     /// </summary>
-    public static unsafe int Compare(GmpRational op1, GmpInteger op2)
+    public static int Compare(GmpRational op1, GmpInteger op2)
     {
         return GmpLib.__gmpq_cmp_z(op1.Raw, op2.Raw);
     }
@@ -440,17 +440,17 @@ public class GmpRational : IDisposable
     public static bool operator ==(GmpInteger op1, GmpRational op2) => Compare(op2, op1) == 0;
     public static bool operator !=(GmpInteger op1, GmpRational op2) => Compare(op2, op1) != 0;
 
-    public static unsafe int Compare(GmpRational op1, uint num, uint den)
+    public static int Compare(GmpRational op1, uint num, uint den)
     {
         return GmpLib.__gmpq_cmp_ui(op1.Raw, num, den);
     }
 
-    public static unsafe int Compare(GmpRational op1, int num, uint den)
+    public static int Compare(GmpRational op1, int num, uint den)
     {
         return GmpLib.__gmpq_cmp_si(op1.Raw, num, den);
     }
 
-    public static unsafe bool Equals(GmpRational op1, GmpRational op2)
+    public static bool Equals(GmpRational op1, GmpRational op2)
     {
         return GmpLib.__gmpq_equal(op1.Raw, op2.Raw) != 0;
     }

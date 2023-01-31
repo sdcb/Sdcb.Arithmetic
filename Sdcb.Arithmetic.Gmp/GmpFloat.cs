@@ -19,7 +19,7 @@ public class GmpFloat : IDisposable
 
     #region Initialization functions
 
-    public unsafe GmpFloat(bool isOwner = true)
+    public GmpFloat(bool isOwner = true)
     {
         Raw = Mpf_t.Alloc();
         GmpLib.__gmpf_init(Raw);
@@ -32,7 +32,7 @@ public class GmpFloat : IDisposable
         _isOwner = isOwner;
     }
 
-    public unsafe GmpFloat(uint precision, bool isOwner = true)
+    public GmpFloat(uint precision, bool isOwner = true)
     {
         Raw = Mpf_t.Alloc();
         if (precision == 0)
@@ -49,49 +49,49 @@ public class GmpFloat : IDisposable
 
     #region Combined Initialization and Assignment Functions
 
-    public unsafe static GmpFloat From(int val)
+    public static GmpFloat From(int val)
     {
         IntPtr raw = Mpf_t.Alloc();
         GmpLib.__gmpf_init_set_si(raw, val);
         return new GmpFloat(raw);
     }
 
-    public unsafe static GmpFloat From(int val, uint precision)
+    public static GmpFloat From(int val, uint precision)
     {
         GmpFloat f = new(precision);
         f.Assign(val);
         return f;
     }
 
-    public unsafe static GmpFloat From(uint val)
+    public static GmpFloat From(uint val)
     {
         IntPtr raw = Mpf_t.Alloc();
         GmpLib.__gmpf_init_set_ui(raw, val);
         return new GmpFloat(raw);
     }
 
-    public unsafe static GmpFloat From(uint val, uint precision)
+    public static GmpFloat From(uint val, uint precision)
     {
         GmpFloat f = new(precision);
         f.Assign(val);
         return f;
     }
 
-    public unsafe static GmpFloat From(double val)
+    public static GmpFloat From(double val)
     {
         IntPtr raw = Mpf_t.Alloc();
         GmpLib.__gmpf_init_set_d(raw, val);
         return new GmpFloat(raw);
     }
 
-    public unsafe static GmpFloat From(double val, uint precision)
+    public static GmpFloat From(double val, uint precision)
     {
         GmpFloat f = new(precision);
         f.Assign(val);
         return f;
     }
 
-    public unsafe static GmpFloat From(GmpInteger val, uint precision)
+    public static GmpFloat From(GmpInteger val, uint precision)
     {
         GmpFloat f = new(precision);
         f.Assign(val);
@@ -108,7 +108,7 @@ public class GmpFloat : IDisposable
         return f;
     }
 
-    public unsafe static GmpFloat Parse(string val, int @base = 10)
+    public static unsafe GmpFloat Parse(string val, int @base = 10)
     {
         IntPtr raw = Mpf_t.Alloc();
         byte[] valBytes = Encoding.UTF8.GetBytes(val);
@@ -131,7 +131,7 @@ public class GmpFloat : IDisposable
         return f;
     }
 
-    public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out GmpFloat result, int @base = 10)
+    public static unsafe bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out GmpFloat result, int @base = 10)
     {
         IntPtr raw = Mpf_t.Alloc();
         byte[] valBytes = Encoding.UTF8.GetBytes(val);
@@ -152,7 +152,7 @@ public class GmpFloat : IDisposable
         }
     }
 
-    public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out GmpFloat result, uint precision, int @base = 10)
+    public static unsafe bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out GmpFloat result, uint precision, int @base = 10)
     {
         GmpFloat f = new(precision);
         byte[] opBytes = Encoding.UTF8.GetBytes(val);
@@ -173,7 +173,7 @@ public class GmpFloat : IDisposable
         }
     }
 
-    public unsafe uint Precision
+    public uint Precision
     {
         get
         {
@@ -186,39 +186,39 @@ public class GmpFloat : IDisposable
     }
 
     [Obsolete("use Precision")]
-    public unsafe void SetRawPrecision(uint value)
+    public void SetRawPrecision(uint value)
     {
         GmpLib.__gmpf_set_prec_raw(Raw, value);
     }
     #endregion
 
     #region Assignment functions
-    public unsafe void Assign(GmpFloat op)
+    public void Assign(GmpFloat op)
     {
         GmpLib.__gmpf_set(Raw, op.Raw);
     }
 
-    public unsafe void Assign(uint op)
+    public void Assign(uint op)
     {
         GmpLib.__gmpf_set_ui(Raw, op);
     }
 
-    public unsafe void Assign(int op)
+    public void Assign(int op)
     {
         GmpLib.__gmpf_set_si(Raw, op);
     }
 
-    public unsafe void Assign(double op)
+    public void Assign(double op)
     {
         GmpLib.__gmpf_set_d(Raw, op);
     }
 
-    public unsafe void Assign(GmpInteger op)
+    public void Assign(GmpInteger op)
     {
         GmpLib.__gmpf_set_z(Raw, op.Raw);
     }
 
-    public unsafe void Assign(GmpRational op)
+    public void Assign(GmpRational op)
     {
         GmpLib.__gmpf_set_q(Raw, op.Raw);
     }
@@ -236,14 +236,14 @@ public class GmpFloat : IDisposable
         }
     }
 
-    public unsafe static void Swap(GmpFloat op1, GmpFloat op2)
+    public static void Swap(GmpFloat op1, GmpFloat op2)
     {
         GmpLib.__gmpf_swap(op1.Raw, op2.Raw);
     }
     #endregion
 
     #region Conversion Functions
-    public unsafe double ToDouble()
+    public double ToDouble()
     {
         return GmpLib.__gmpf_get_d(Raw);
     }
@@ -257,14 +257,14 @@ public class GmpFloat : IDisposable
         return new ExpDouble(exp, val);
     }
 
-    public unsafe int ToInt32()
+    public int ToInt32()
     {
         return GmpLib.__gmpf_get_si(Raw);
     }
 
     public static explicit operator int(GmpFloat op) => op.ToInt32();
 
-    public unsafe uint ToUInt32()
+    public uint ToUInt32()
     {
         return GmpLib.__gmpf_get_ui(Raw);
     }
@@ -277,7 +277,7 @@ public class GmpFloat : IDisposable
 
     public static explicit operator uint(GmpFloat op) => op.ToUInt32();
 
-    public unsafe override string? ToString() => ToString(@base: 10);
+    public override string? ToString() => ToString(@base: 10);
 
     public unsafe string? ToString(int @base = 10)
     {
@@ -327,77 +327,77 @@ public class GmpFloat : IDisposable
 
     #region Arithmetic Functions
     #region Arithmetic Functions - Raw inplace functions
-    public static unsafe void AddInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
+    public static void AddInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
         GmpLib.__gmpf_add(rop.Raw, op1.Raw, op2.Raw);
     }
 
-    public static unsafe void AddInplace(GmpFloat rop, GmpFloat op1, uint op2)
+    public static void AddInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         GmpLib.__gmpf_add_ui(rop.Raw, op1.Raw, op2);
     }
 
-    public static unsafe void SubtractInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
+    public static void SubtractInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
         GmpLib.__gmpf_sub(rop.Raw, op1.Raw, op2.Raw);
     }
 
-    public static unsafe void SubtractInplace(GmpFloat rop, GmpFloat op1, uint op2)
+    public static void SubtractInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         GmpLib.__gmpf_sub_ui(rop.Raw, op1.Raw, op2);
     }
 
-    public static unsafe void SubtractInplace(GmpFloat rop, uint op1, GmpFloat op2)
+    public static void SubtractInplace(GmpFloat rop, uint op1, GmpFloat op2)
     {
         GmpLib.__gmpf_ui_sub(rop.Raw, op1, op2.Raw);
     }
 
-    public static unsafe void MultiplyInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
+    public static void MultiplyInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
         GmpLib.__gmpf_mul(rop.Raw, op1.Raw, op2.Raw);
     }
 
-    public static unsafe void MultiplyInplace(GmpFloat rop, GmpFloat op1, uint op2)
+    public static void MultiplyInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         GmpLib.__gmpf_mul_ui(rop.Raw, op1.Raw, op2);
     }
 
-    public static unsafe void DivideInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
+    public static void DivideInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
         GmpLib.__gmpf_div(rop.Raw, op1.Raw, op2.Raw);
     }
 
-    public static unsafe void DivideInplace(GmpFloat rop, GmpFloat op1, uint op2)
+    public static void DivideInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         GmpLib.__gmpf_div_ui(rop.Raw, op1.Raw, op2);
     }
 
-    public static unsafe void DivideInplace(GmpFloat rop, uint op1, GmpFloat op2)
+    public static void DivideInplace(GmpFloat rop, uint op1, GmpFloat op2)
     {
         GmpLib.__gmpf_ui_div(rop.Raw, op1, op2.Raw);
     }
 
-    public static unsafe void PowerInplace(GmpFloat rop, GmpFloat op1, uint op2)
+    public static void PowerInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         GmpLib.__gmpf_pow_ui(rop.Raw, op1.Raw, op2);
     }
 
-    public static unsafe void NegateInplace(GmpFloat rop, GmpFloat op1)
+    public static void NegateInplace(GmpFloat rop, GmpFloat op1)
     {
         GmpLib.__gmpf_neg(rop.Raw, op1.Raw);
     }
 
-    public static unsafe void SqrtInplace(GmpFloat rop, GmpFloat op)
+    public static void SqrtInplace(GmpFloat rop, GmpFloat op)
     {
         GmpLib.__gmpf_sqrt(rop.Raw, op.Raw);
     }
 
-    public static unsafe void SqrtInplace(GmpFloat rop, uint op)
+    public static void SqrtInplace(GmpFloat rop, uint op)
     {
         GmpLib.__gmpf_sqrt_ui(rop.Raw, op);
     }
 
-    public static unsafe void AbsInplace(GmpFloat rop, GmpFloat op)
+    public static void AbsInplace(GmpFloat rop, GmpFloat op)
     {
         GmpLib.__gmpf_abs(rop.Raw, op.Raw);
     }
@@ -405,7 +405,7 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// op1 * Math.Pow(2, op2)
     /// </summary>
-    public static unsafe void Mul2ExpInplace(GmpFloat rop, GmpFloat op1, uint op2)
+    public static void Mul2ExpInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         GmpLib.__gmpf_mul_2exp(rop.Raw, op1.Raw, op2);
     }
@@ -413,7 +413,7 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// op1 / Math.Pow(2, op2)
     /// </summary>
-    public static unsafe void Div2ExpInplace(GmpFloat rop, GmpFloat op1, uint op2)
+    public static void Div2ExpInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         GmpLib.__gmpf_div_2exp(rop.Raw, op1.Raw, op2);
     }
@@ -422,105 +422,105 @@ public class GmpFloat : IDisposable
 
     #region Arithmetic Functions - Easier functions
 
-    public static unsafe GmpFloat Add(GmpFloat op1, GmpFloat op2, uint precision = 0)
+    public static GmpFloat Add(GmpFloat op1, GmpFloat op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         AddInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe GmpFloat Add(GmpFloat op1, uint op2, uint precision = 0)
+    public static GmpFloat Add(GmpFloat op1, uint op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         AddInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe GmpFloat Subtract(GmpFloat op1, GmpFloat op2, uint precision = 0)
+    public static GmpFloat Subtract(GmpFloat op1, GmpFloat op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         SubtractInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe GmpFloat Subtract(GmpFloat op1, uint op2, uint precision = 0)
+    public static GmpFloat Subtract(GmpFloat op1, uint op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         SubtractInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe GmpFloat Subtract(uint op1, GmpFloat op2, uint precision = 0)
+    public static GmpFloat Subtract(uint op1, GmpFloat op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         SubtractInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe GmpFloat Multiply(GmpFloat op1, GmpFloat op2, uint precision = 0)
+    public static GmpFloat Multiply(GmpFloat op1, GmpFloat op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         MultiplyInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe GmpFloat Multiply(GmpFloat op1, uint op2, uint precision = 0)
+    public static GmpFloat Multiply(GmpFloat op1, uint op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         MultiplyInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe GmpFloat Divide(GmpFloat op1, GmpFloat op2, uint precision = 0)
+    public static GmpFloat Divide(GmpFloat op1, GmpFloat op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         DivideInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe GmpFloat Divide(GmpFloat op1, uint op2, uint precision = 0)
+    public static GmpFloat Divide(GmpFloat op1, uint op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         DivideInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe GmpFloat Divide(uint op1, GmpFloat op2, uint precision = 0)
+    public static GmpFloat Divide(uint op1, GmpFloat op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         DivideInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe GmpFloat Power(GmpFloat op1, uint op2, uint precision = 0)
+    public static GmpFloat Power(GmpFloat op1, uint op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         PowerInplace(rop, op1, op2);
         return rop;
     }
 
-    public static unsafe GmpFloat Negate(GmpFloat op1, uint precision = 0)
+    public static GmpFloat Negate(GmpFloat op1, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         NegateInplace(rop, op1);
         return rop;
     }
 
-    public static unsafe GmpFloat Sqrt(GmpFloat op, uint precision = 0)
+    public static GmpFloat Sqrt(GmpFloat op, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         SqrtInplace(rop, op);
         return rop;
     }
 
-    public static unsafe GmpFloat Sqrt(uint op, uint precision = 0)
+    public static GmpFloat Sqrt(uint op, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         SqrtInplace(rop, op);
         return rop;
     }
 
-    public static unsafe GmpFloat Abs(GmpFloat op, uint precision = 0)
+    public static GmpFloat Abs(GmpFloat op, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         AbsInplace(rop, op);
@@ -530,7 +530,7 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// op1 * Math.Pow(2, op2)
     /// </summary>
-    public static unsafe GmpFloat Mul2Exp(GmpFloat op1, uint op2, uint precision = 0)
+    public static GmpFloat Mul2Exp(GmpFloat op1, uint op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         Mul2ExpInplace(rop, op1, op2);
@@ -540,7 +540,7 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// op1 / Math.Pow(2, op2)
     /// </summary>
-    public static unsafe GmpFloat Div2Exp(GmpFloat op1, uint op2, uint precision = 0)
+    public static GmpFloat Div2Exp(GmpFloat op1, uint op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         Div2ExpInplace(rop, op1, op2);
@@ -549,29 +549,29 @@ public class GmpFloat : IDisposable
     #endregion
 
     #region Arithmetic Functions - Operators
-    public static unsafe GmpFloat operator +(GmpFloat op1, GmpFloat op2) => Add(op1, op2, op1.Precision);
+    public static GmpFloat operator +(GmpFloat op1, GmpFloat op2) => Add(op1, op2, op1.Precision);
 
-    public static unsafe GmpFloat operator +(GmpFloat op1, uint op2) => Add(op1, op2, op1.Precision);
+    public static GmpFloat operator +(GmpFloat op1, uint op2) => Add(op1, op2, op1.Precision);
 
-    public static unsafe GmpFloat operator -(GmpFloat op1, GmpFloat op2) => Subtract(op1, op2, op1.Precision);
+    public static GmpFloat operator -(GmpFloat op1, GmpFloat op2) => Subtract(op1, op2, op1.Precision);
 
-    public static unsafe GmpFloat operator -(GmpFloat op1, uint op2) => Subtract(op1, op2, op1.Precision);
+    public static GmpFloat operator -(GmpFloat op1, uint op2) => Subtract(op1, op2, op1.Precision);
 
-    public static unsafe GmpFloat operator -(uint op1, GmpFloat op2) => Subtract(op1, op2, op2.Precision);
+    public static GmpFloat operator -(uint op1, GmpFloat op2) => Subtract(op1, op2, op2.Precision);
 
-    public static unsafe GmpFloat operator *(GmpFloat op1, GmpFloat op2) => Multiply(op1, op2, op1.Precision);
+    public static GmpFloat operator *(GmpFloat op1, GmpFloat op2) => Multiply(op1, op2, op1.Precision);
 
-    public static unsafe GmpFloat operator *(GmpFloat op1, uint op2) => Multiply(op1, op2, op1.Precision);
+    public static GmpFloat operator *(GmpFloat op1, uint op2) => Multiply(op1, op2, op1.Precision);
 
-    public static unsafe GmpFloat operator /(GmpFloat op1, GmpFloat op2) => Divide(op1, op2, op1.Precision);
+    public static GmpFloat operator /(GmpFloat op1, GmpFloat op2) => Divide(op1, op2, op1.Precision);
 
-    public static unsafe GmpFloat operator /(GmpFloat op1, uint op2) => Divide(op1, op2, op1.Precision);
+    public static GmpFloat operator /(GmpFloat op1, uint op2) => Divide(op1, op2, op1.Precision);
 
-    public static unsafe GmpFloat operator /(uint op1, GmpFloat op2) => Divide(op1, op2, op2.Precision);
+    public static GmpFloat operator /(uint op1, GmpFloat op2) => Divide(op1, op2, op2.Precision);
 
-    public static unsafe GmpFloat operator ^(GmpFloat op1, uint op2) => Power(op1, op2, op1.Precision);
+    public static GmpFloat operator ^(GmpFloat op1, uint op2) => Power(op1, op2, op1.Precision);
 
-    public static unsafe GmpFloat operator -(GmpFloat op1) => Negate(op1, op1.Precision);
+    public static GmpFloat operator -(GmpFloat op1) => Negate(op1, op1.Precision);
 
     #endregion
     #endregion
@@ -580,7 +580,7 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// Compare op1 and op2. Return a positive value if op1 > op2, zero if op1 = op2, and a negative value if op1 < op2.
     /// </summary>
-    public static unsafe int Compare(GmpFloat op1, GmpFloat op2)
+    public static int Compare(GmpFloat op1, GmpFloat op2)
     {
         return GmpLib.__gmpf_cmp(op1.Raw, op2.Raw);
     }
@@ -709,7 +709,7 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// Compare op1 and op2. Return a positive value if op1 > op2, zero if op1 = op2, and a negative value if op1 < op2.
     /// </summary>
-    public static unsafe int Compare(GmpFloat op1, GmpInteger op2)
+    public static int Compare(GmpFloat op1, GmpInteger op2)
     {
         return GmpLib.__gmpf_cmp_z(op1.Raw, op2.Raw);
     }
@@ -725,7 +725,7 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// Compare op1 and op2. Return a positive value if op1 > op2, zero if op1 = op2, and a negative value if op1 < op2.
     /// </summary>
-    public static unsafe int Compare(GmpFloat op1, int op2)
+    public static int Compare(GmpFloat op1, int op2)
     {
         return GmpLib.__gmpf_cmp_si(op1.Raw, op2);
     }
@@ -733,7 +733,7 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// Compare op1 and op2. Return a positive value if op1 > op2, zero if op1 = op2, and a negative value if op1 < op2.
     /// </summary>
-    public static unsafe int Compare(GmpFloat op1, uint op2)
+    public static int Compare(GmpFloat op1, uint op2)
     {
         return GmpLib.__gmpf_cmp_ui(op1.Raw, op2);
     }
@@ -742,7 +742,7 @@ public class GmpFloat : IDisposable
     /// Return non-zero if the first op3 bits of op1 and op2 are equal, zero otherwise. Note that numbers like e.g., 256 (binary 100000000) and 255 (binary 11111111) will never be equal by this function’s measure, and furthermore that 0 will only be equal to itself.
     /// </summary>
     [Obsolete("This function is mathematically ill-defined and should not be used.")]
-    public static unsafe int MpfEquals(GmpFloat op1, uint op2)
+    public static int MpfEquals(GmpFloat op1, uint op2)
     {
         return GmpLib.__gmpf_cmp_ui(op1.Raw, op2);
     }
@@ -750,7 +750,7 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// rop = abs(op1-op2)/op1
     /// </summary>
-    public static unsafe void RelDiffInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
+    public static void RelDiffInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
         GmpLib.__gmpf_reldiff(rop.Raw, op1.Raw, op2.Raw);
     }
@@ -758,7 +758,7 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// abs(op1-op2)/op1
     /// </summary>
-    public static unsafe GmpFloat RelDiff(GmpFloat op1, GmpFloat op2, uint precision = 0)
+    public static GmpFloat RelDiff(GmpFloat op1, GmpFloat op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
         RelDiffInplace(rop, op1, op2);
@@ -775,7 +775,7 @@ public class GmpFloat : IDisposable
     #endregion
 
     #region Misc Functions
-    public static unsafe void CeilInplace(GmpFloat rop, GmpFloat op)
+    public static void CeilInplace(GmpFloat rop, GmpFloat op)
     {
         GmpLib.__gmpf_ceil(rop.Raw, op.Raw);
     }
@@ -787,7 +787,7 @@ public class GmpFloat : IDisposable
         return rop;
     }
 
-    public static unsafe void FloorInplace(GmpFloat rop, GmpFloat op)
+    public static void FloorInplace(GmpFloat rop, GmpFloat op)
     {
         GmpLib.__gmpf_floor(rop.Raw, op.Raw);
     }
@@ -847,7 +847,7 @@ public class GmpFloat : IDisposable
     #endregion
 
     #region Dispose and Clear
-    private unsafe void Clear()
+    private void Clear()
     {
         GmpLib.__gmpf_clear(Raw);
         Marshal.FreeHGlobal(Raw);
@@ -891,7 +891,7 @@ public class GmpFloat : IDisposable
     /// Negative random numbers are generated when max_size is negative.
     /// </summary>
     [Obsolete("use GmpRandom")]
-    public static unsafe void Random2Inplace(GmpFloat rop, int maxLimbCount, int maxExp)
+    public static void Random2Inplace(GmpFloat rop, int maxLimbCount, int maxExp)
     {
         GmpLib.__gmpf_random2(rop.Raw, maxLimbCount, maxExp);
     }
@@ -921,7 +921,7 @@ public record struct Mpf_t
     public int Exponent;
     public IntPtr Limbs;
 
-    public unsafe static int RawSize => sizeof(Mpf_t);
+    public static unsafe int RawSize => sizeof(Mpf_t);
 
     public static unsafe IntPtr Alloc() => Marshal.AllocHGlobal(sizeof(Mpf_t));
 
