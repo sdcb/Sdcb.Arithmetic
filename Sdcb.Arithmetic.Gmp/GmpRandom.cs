@@ -6,52 +6,46 @@ namespace Sdcb.Arithmetic.Gmp;
 
 public class GmpRandom : IDisposable
 {
-    public GmpRandomState Raw;
+    private IntPtr Raw;
 
     #region Random State Initialization
 
-    public GmpRandom(GmpRandomState raw)
+    public GmpRandom(IntPtr raw)
     {
         Raw = raw;
         SetRandomSeed();
     }
 
-    public GmpRandom(GmpRandomState raw, uint seed)
+    private GmpRandom(IntPtr raw, uint seed)
     {
         Raw = raw;
         SetSeed(seed);
     }
 
-    public GmpRandom(GmpRandomState raw, GmpInteger seed)
+    private GmpRandom(IntPtr raw, GmpInteger seed)
     {
         Raw = raw;
         SetSeed(seed);
     }
 
-    public unsafe GmpRandom()
+    public GmpRandom()
     {
-        fixed (GmpRandomState* ptr = &Raw)
-        {
-            GmpLib.__gmp_randinit_default((IntPtr)ptr);
-        }
+        Raw = GmpRandomState.Alloc();
+        GmpLib.__gmp_randinit_default(Raw);
         SetRandomSeed();
     }
 
-    public unsafe GmpRandom(uint seed)
+    public GmpRandom(uint seed)
     {
-        fixed (GmpRandomState* ptr = &Raw)
-        {
-            GmpLib.__gmp_randinit_default((IntPtr)ptr);
-        }
+        Raw = GmpRandomState.Alloc();
+        GmpLib.__gmp_randinit_default(Raw);
         SetSeed(seed);
     }
 
-    public unsafe GmpRandom(GmpInteger seed)
+    public GmpRandom(GmpInteger seed)
     {
-        fixed (GmpRandomState* ptr = &Raw)
-        {
-            GmpLib.__gmp_randinit_default((IntPtr)ptr);
-        }
+        Raw = GmpRandomState.Alloc();
+        GmpLib.__gmp_randinit_default(Raw);
         SetSeed(seed);
     }
 
@@ -66,28 +60,18 @@ public class GmpRandom : IDisposable
 
     public unsafe void SetSeed(uint seed)
     {
-        fixed (GmpRandomState* ptr = &Raw)
-        {
-            GmpLib.__gmp_randseed_ui((IntPtr)ptr, (uint)seed);
-        }
+        GmpLib.__gmp_randseed_ui(Raw, (uint)seed);
     }
 
     public unsafe void SetSeed(GmpInteger seed)
     {
-        fixed (GmpRandomState* ptr = &Raw)
-        fixed (Mpz_t* seedPtr = &seed.Raw)
-        {
-            GmpLib.__gmp_randseed((IntPtr)ptr, (IntPtr)seedPtr);
-        }
+        GmpLib.__gmp_randseed(Raw, seed.Raw);
     }
 
     public unsafe GmpRandom Clone()
     {
-        GmpRandomState raw = new();
-        fixed (GmpRandomState* ptr = &Raw)
-        {
-            GmpLib.__gmp_randinit_set((IntPtr)(&raw), (IntPtr)ptr);
-        }
+        IntPtr raw = GmpRandomState.Alloc();
+        GmpLib.__gmp_randinit_set(raw, Raw);
         return new GmpRandom(raw);
     }
 
@@ -99,9 +83,9 @@ public class GmpRandom : IDisposable
     /// </summary>
     public static unsafe GmpRandom CreateDefault()
     {
-        GmpRandomState state = new();
-        GmpLib.__gmp_randinit_default((IntPtr)(&state));
-        return new GmpRandom(state);
+        IntPtr raw = GmpRandomState.Alloc();
+        GmpLib.__gmp_randinit_default(raw);
+        return new GmpRandom(raw);
     }
 
     /// <summary>
@@ -112,9 +96,9 @@ public class GmpRandom : IDisposable
     /// </summary>
     public static unsafe GmpRandom CreateDefault(uint seed)
     {
-        GmpRandomState state = new();
-        GmpLib.__gmp_randinit_default((IntPtr)(&state));
-        return new GmpRandom(state, seed);
+        IntPtr raw = GmpRandomState.Alloc();
+        GmpLib.__gmp_randinit_default(raw);
+        return new GmpRandom(raw, seed);
     }
 
     /// <summary>
@@ -125,9 +109,9 @@ public class GmpRandom : IDisposable
     /// </summary>
     public static unsafe GmpRandom CreateDefault(GmpInteger seed)
     {
-        GmpRandomState state = new();
-        GmpLib.__gmp_randinit_default((IntPtr)(&state));
-        return new GmpRandom(state, seed);
+        IntPtr raw = GmpRandomState.Alloc();
+        GmpLib.__gmp_randinit_default(raw);
+        return new GmpRandom(raw, seed);
     }
 
     /// <summary>
@@ -136,9 +120,9 @@ public class GmpRandom : IDisposable
     /// </summary>
     public static unsafe GmpRandom CreateMersenneTwister()
     {
-        GmpRandomState state = new();
-        GmpLib.__gmp_randinit_mt((IntPtr)(&state));
-        return new GmpRandom(state);
+        IntPtr raw = GmpRandomState.Alloc();
+        GmpLib.__gmp_randinit_mt(raw);
+        return new GmpRandom(raw);
     }
 
     /// <summary>
@@ -147,9 +131,9 @@ public class GmpRandom : IDisposable
     /// </summary>
     public static unsafe GmpRandom CreateMersenneTwister(uint seed)
     {
-        GmpRandomState state = new();
-        GmpLib.__gmp_randinit_mt((IntPtr)(&state));
-        return new GmpRandom(state, seed);
+        IntPtr raw = GmpRandomState.Alloc();
+        GmpLib.__gmp_randinit_mt(raw);
+        return new GmpRandom(raw, seed);
     }
 
     /// <summary>
@@ -158,9 +142,9 @@ public class GmpRandom : IDisposable
     /// </summary>
     public static unsafe GmpRandom CreateMersenneTwister(GmpInteger seed)
     {
-        GmpRandomState state = new();
-        GmpLib.__gmp_randinit_mt((IntPtr)(&state));
-        return new GmpRandom(state, seed);
+        IntPtr raw = GmpRandomState.Alloc();
+        GmpLib.__gmp_randinit_mt(raw);
+        return new GmpRandom(raw, seed);
     }
 
     /// <summary>
@@ -179,13 +163,10 @@ public class GmpRandom : IDisposable
     /// </summary>
     public static unsafe GmpRandom CreateLC2Exp(GmpInteger a, uint c, uint m2exp)
     {
-        GmpRandomState state = new();
-        fixed (Mpz_t* pa = &a.Raw)
-        {
-            GmpLib.__gmp_randinit_lc_2exp((IntPtr)(&state), (IntPtr)pa, c, m2exp);
-        }
+        IntPtr raw = GmpRandomState.Alloc();
+        GmpLib.__gmp_randinit_lc_2exp(raw, a.Raw, c, m2exp);
 
-        return new GmpRandom(state);
+        return new GmpRandom(raw);
     }
 
     /// <summary>
@@ -204,13 +185,10 @@ public class GmpRandom : IDisposable
     /// </summary>
     public static unsafe GmpRandom CreateLC2Exp(GmpInteger a, uint c, uint m2exp, uint seed)
     {
-        GmpRandomState state = new();
-        fixed (Mpz_t* pa = &a.Raw)
-        {
-            GmpLib.__gmp_randinit_lc_2exp((IntPtr)(&state), (IntPtr)pa, c, m2exp);
-        }
+        IntPtr raw = GmpRandomState.Alloc();
+        GmpLib.__gmp_randinit_lc_2exp(raw, a.Raw, c, m2exp);
 
-        return new GmpRandom(state, seed);
+        return new GmpRandom(raw, seed);
     }
 
     /// <summary>
@@ -229,13 +207,10 @@ public class GmpRandom : IDisposable
     /// </summary>
     public static unsafe GmpRandom CreateLC2Exp(GmpInteger a, uint c, uint m2exp, GmpInteger seed)
     {
-        GmpRandomState state = new();
-        fixed (Mpz_t* pa = &a.Raw)
-        {
-            GmpLib.__gmp_randinit_lc_2exp((IntPtr)(&state), (IntPtr)pa, c, m2exp);
-        }
+        IntPtr raw = GmpRandomState.Alloc();
+        GmpLib.__gmp_randinit_lc_2exp(raw, a.Raw, c, m2exp);
 
-        return new GmpRandom(state, seed);
+        return new GmpRandom(raw, seed);
     }
 
     /// <summary>
@@ -249,12 +224,12 @@ public class GmpRandom : IDisposable
     /// </returns>
     public static unsafe GmpRandom CreateLC2ExpSize(uint size = 128)
     {
-        GmpRandomState state = new();
-        if (GmpLib.__gmp_randinit_lc_2exp_size((IntPtr)(&state), size) == 0)
+        IntPtr raw = GmpRandomState.Alloc();
+        if (GmpLib.__gmp_randinit_lc_2exp_size(raw, size) == 0)
         {
             throw new ArgumentOutOfRangeException("size");
         }
-        return new GmpRandom(state);
+        return new GmpRandom(raw);
     }
 
     /// <summary>
@@ -268,12 +243,12 @@ public class GmpRandom : IDisposable
     /// </returns>
     public static unsafe GmpRandom CreateLC2ExpSize(uint size, uint seed)
     {
-        GmpRandomState state = new();
-        if (GmpLib.__gmp_randinit_lc_2exp_size((IntPtr)(&state), size) == 0)
+        IntPtr raw = GmpRandomState.Alloc();
+        if (GmpLib.__gmp_randinit_lc_2exp_size(raw, size) == 0)
         {
             throw new ArgumentOutOfRangeException("size");
         }
-        return new GmpRandom(state, seed);
+        return new GmpRandom(raw, seed);
     }
 
     /// <summary>
@@ -287,12 +262,12 @@ public class GmpRandom : IDisposable
     /// </returns>
     public static unsafe GmpRandom CreateLC2ExpSize(uint size, GmpInteger seed)
     {
-        GmpRandomState state = new();
-        if (GmpLib.__gmp_randinit_lc_2exp_size((IntPtr)(&state), size) == 0)
+        IntPtr raw = GmpRandomState.Alloc();
+        if (GmpLib.__gmp_randinit_lc_2exp_size(raw, size) == 0)
         {
             throw new ArgumentOutOfRangeException("size");
         }
-        return new GmpRandom(state, seed);
+        return new GmpRandom(raw, seed);
     }
     #endregion
 
@@ -302,10 +277,7 @@ public class GmpRandom : IDisposable
     /// </summary>
     public unsafe uint NextNBits(uint bitCount)
     {
-        fixed (GmpRandomState* ptr = &Raw)
-        {
-            return GmpLib.__gmp_urandomb_ui((IntPtr)ptr, bitCount);
-        }
+        return GmpLib.__gmp_urandomb_ui(Raw, bitCount);
     }
 
     /// <summary>
@@ -313,11 +285,7 @@ public class GmpRandom : IDisposable
     /// </summary>
     public unsafe void NextNBits(GmpInteger rop, uint bitCount)
     {
-        fixed (Mpz_t* pr= &rop.Raw)
-        fixed (GmpRandomState* prandom = &Raw)
-        {
-            GmpLib.__gmpz_urandomb((IntPtr)pr, (IntPtr)prandom, bitCount);
-        }
+        GmpLib.__gmpz_urandomb(rop.Raw, Raw, bitCount);
     }
 
     /// <summary>
@@ -338,11 +306,7 @@ public class GmpRandom : IDisposable
     /// </summary>
     public unsafe void RNextNBits(GmpInteger rop, uint bitCount)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (GmpRandomState* prandom = &Raw)
-        {
-            GmpLib.__gmpz_rrandomb((IntPtr)pr, (IntPtr)prandom, bitCount);
-        }
+        GmpLib.__gmpz_rrandomb(rop.Raw, Raw, bitCount);
     }
 
     /// <summary>
@@ -361,10 +325,7 @@ public class GmpRandom : IDisposable
     /// </summary>
     public unsafe uint Next(uint n)
     {
-        fixed (GmpRandomState* ptr = &Raw)
-        {
-            return GmpLib.__gmp_urandomm_ui((IntPtr)ptr, n);
-        }
+        return GmpLib.__gmp_urandomm_ui(Raw, n);
     }
 
     /// <summary>
@@ -372,12 +333,7 @@ public class GmpRandom : IDisposable
     /// </summary>
     public unsafe void Next(GmpInteger rop, GmpInteger n)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (GmpRandomState* prandom = &Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            GmpLib.__gmpz_urandomm((IntPtr)pr, (IntPtr)prandom, (IntPtr)pn);
-        }
+        GmpLib.__gmpz_urandomm(rop.Raw, Raw, n.Raw);
     }
 
     /// <summary>
@@ -396,10 +352,7 @@ public class GmpRandom : IDisposable
     /// </summary>
     public unsafe void Next(GmpFloat rop, uint nbits)
     {
-        fixed (GmpRandomState* prandom = &Raw)
-        {
-            GmpLib.__gmpf_urandomb(rop.Raw, (IntPtr)prandom, nbits);
-        }
+        GmpLib.__gmpf_urandomb(rop.Raw, Raw, nbits);
     }
 
     /// <summary>
@@ -419,10 +372,9 @@ public class GmpRandom : IDisposable
 
     private unsafe void Clear()
     {
-        fixed (GmpRandomState* ptr = &Raw)
-        {
-            GmpLib.__gmp_randclear((IntPtr)ptr);
-        }
+        GmpLib.__gmp_randclear(Raw);
+        Marshal.FreeHGlobal(Raw);
+        Raw = IntPtr.Zero;
     }
 
     protected virtual void Dispose(bool disposing)
@@ -454,16 +406,19 @@ public class GmpRandom : IDisposable
     #endregion
 }
 
-[StructLayout(LayoutKind.Sequential)]
-public struct GmpRandomState
-{
-    public Mpz_t Seed;
-    public GmpRandomAlgorithm Algorithm;
-    public IntPtr Data;
-}
-
 public enum GmpRandomAlgorithm
 {
     Default = 0,
     LC = 0,
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public record struct GmpRandomState
+{
+    public Mpz_t Seed;
+    public GmpRandomAlgorithm Algorithm;
+    public IntPtr Data;
+
+    public static unsafe int RawSize => sizeof(GmpRandomState);
+    public static unsafe IntPtr Alloc() => Marshal.AllocHGlobal(sizeof(GmpRandomState));
 }

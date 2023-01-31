@@ -101,9 +101,9 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// Convert BigInteger to BigFloat, precision default to abs(BigInteger.Raw.Size)
     /// </summary>
-    public unsafe static GmpFloat From(GmpInteger val)
+    public static unsafe GmpFloat From(GmpInteger val)
     {
-        GmpFloat f = new(precision: (uint)Math.Abs(val.Raw.Size) * GmpLib.LimbBitSize);
+        GmpFloat f = new(precision: (uint)Math.Abs(((Mpz_t*)val.Raw)->Size) * GmpLib.LimbBitSize);
         f.Assign(val);
         return f;
     }
@@ -215,18 +215,12 @@ public class GmpFloat : IDisposable
 
     public unsafe void Assign(GmpInteger op)
     {
-        fixed (Mpz_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpf_set_z(Raw, (IntPtr)pop);
-        }
+        GmpLib.__gmpf_set_z(Raw, op.Raw);
     }
 
     public unsafe void Assign(GmpRational op)
     {
-        fixed (Mpq_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpf_set_q(Raw, (IntPtr)pop);
-        }
+        GmpLib.__gmpf_set_q(Raw, op.Raw);
     }
 
     public unsafe void Assign(string op, int @base = 10)
@@ -278,9 +272,7 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// Set rop to the value of op. There is no rounding, this conversion is exact.
     /// </summary>
-    // TODO!
-    //public GmpRational ToGmpRational() => GmpRational.From(this);
-    public GmpRational ToGmpRational() => throw new NotImplementedException();
+    public GmpRational ToGmpRational() => GmpRational.From(this);
 
 
     public static explicit operator uint(GmpFloat op) => op.ToUInt32();
@@ -719,10 +711,7 @@ public class GmpFloat : IDisposable
     /// </summary>
     public static unsafe int Compare(GmpFloat op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pop2 = &op2.Raw)
-        {
-            return GmpLib.__gmpf_cmp_z(op1.Raw, (IntPtr)pop2);
-        }
+        return GmpLib.__gmpf_cmp_z(op1.Raw, op2.Raw);
     }
 
     /// <summary>

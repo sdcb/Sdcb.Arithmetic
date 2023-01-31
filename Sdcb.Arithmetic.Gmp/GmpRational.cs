@@ -8,21 +8,19 @@ namespace Sdcb.Arithmetic.Gmp;
 
 public class GmpRational : IDisposable
 {
-    public Mpq_t Raw = new();
+    public IntPtr Raw;
     private bool _disposed = false;
-    private bool _isOwner;
+    private readonly bool _isOwner;
 
     #region Initialization and Assignment Functions
-    public unsafe GmpRational(bool isOwner = true)
+    public unsafe GmpRational()
     {
-        fixed (Mpq_t* ptr = &Raw)
-        {
-            GmpLib.__gmpq_init((IntPtr)ptr);
-        }
-        _isOwner = isOwner;
+        Raw = Mpq_t.Alloc();
+        GmpLib.__gmpq_init(Raw);
+        _isOwner = true;
     }
 
-    public GmpRational(Mpq_t raw, bool isOwner = true)
+    public GmpRational(IntPtr raw, bool isOwner)
     {
         Raw = raw;
         _isOwner = isOwner;
@@ -34,10 +32,7 @@ public class GmpRational : IDisposable
     /// </summary>
     public unsafe void Canonicalize()
     {
-        fixed (Mpq_t* pthis = &Raw)
-        {
-            GmpLib.__gmpq_canonicalize((IntPtr)pthis);
-        }
+        GmpLib.__gmpq_canonicalize(Raw);
     }
 
     #region From
@@ -78,10 +73,9 @@ public class GmpRational : IDisposable
     {
         GmpRational r = new();
         byte[] strData = Encoding.UTF8.GetBytes(str);
-        fixed (Mpq_t* pthis = &r.Raw)
         fixed (byte* strPtr = strData)
         {
-            int ret = GmpLib.__gmpq_set_str((IntPtr)pthis, (IntPtr)strPtr, @base);
+            int ret = GmpLib.__gmpq_set_str(r.Raw, (IntPtr)strPtr, @base);
             if (ret != 0)
             {
                 rop = null;
@@ -133,36 +127,22 @@ public class GmpRational : IDisposable
 
     public unsafe void Assign(GmpRational op)
     {
-        fixed (Mpq_t* pthis = &Raw)
-        fixed (Mpq_t* r = &op.Raw)
-        {
-            GmpLib.__gmpq_set((IntPtr)pthis, (IntPtr)r);
-        }
+        GmpLib.__gmpq_set(Raw, op.Raw);
     }
 
     public unsafe void Assign(GmpInteger op)
     {
-        fixed (Mpq_t* pthis = &Raw)
-        fixed (Mpz_t* r = &op.Raw)
-        {
-            GmpLib.__gmpq_set_z((IntPtr)pthis, (IntPtr)r);
-        }
+        GmpLib.__gmpq_set_z(Raw, op.Raw);
     }
 
     public unsafe void Assign(uint num, uint den)
     {
-        fixed (Mpq_t* pthis = &Raw)
-        {
-            GmpLib.__gmpq_set_ui((IntPtr)pthis, num, den);
-        }
+        GmpLib.__gmpq_set_ui(Raw, num, den);
     }
 
     public unsafe void Assign(int num, uint den)
     {
-        fixed (Mpq_t* pthis = &Raw)
-        {
-            GmpLib.__gmpq_set_si((IntPtr)pthis, num, den);
-        }
+        GmpLib.__gmpq_set_si(Raw, num, den);
     }
 
     /// <summary>
@@ -173,10 +153,9 @@ public class GmpRational : IDisposable
     public unsafe void Assign(string str, int @base = 0)
     {
         byte[] strData = Encoding.UTF8.GetBytes(str);
-        fixed (Mpq_t* pthis = &Raw)
         fixed (byte* strPtr = strData)
         {
-            int ret = GmpLib.__gmpq_set_str((IntPtr)pthis, (IntPtr)strPtr, @base);
+            int ret = GmpLib.__gmpq_set_str(Raw, (IntPtr)strPtr, @base);
             if (ret != 0)
             {
                 throw new ArgumentException($"Failed to parse {str}, base={@base} to GmpRational, __gmpq_set_str returns {ret}");
@@ -189,10 +168,7 @@ public class GmpRational : IDisposable
     /// </summary>
     public unsafe void Assign(double val)
     {
-        fixed (Mpq_t* pthis = &Raw)
-        {
-            GmpLib.__gmpq_set_d((IntPtr)pthis, val);
-        }
+        GmpLib.__gmpq_set_d(Raw, val);
     }
 
     /// <summary>
@@ -200,19 +176,12 @@ public class GmpRational : IDisposable
     /// </summary>
     public unsafe void Assign(GmpFloat val)
     {
-        fixed (Mpq_t* pthis = &Raw)
-        {
-            GmpLib.__gmpq_set_f((IntPtr)pthis, val.Raw);
-        }
+        GmpLib.__gmpq_set_f(Raw, val.Raw);
     }
 
     public static unsafe void Swap(GmpRational op1, GmpRational op2)
     {
-        fixed (Mpq_t* p1 = &op1.Raw)
-        fixed (Mpq_t* p2 = &op2.Raw)
-        {
-            GmpLib.__gmpq_swap((IntPtr)p1, (IntPtr)p2);
-        }
+        GmpLib.__gmpq_swap(op1.Raw, op2.Raw);
     }
 
     public unsafe GmpRational Clone()
@@ -231,10 +200,7 @@ public class GmpRational : IDisposable
     /// </summary>
     public unsafe double ToDouble()
     {
-        fixed (Mpq_t* pthis = &Raw)
-        {
-            return GmpLib.__gmpq_get_d((IntPtr)pthis);
-        }
+        return GmpLib.__gmpq_get_d(Raw);
     }
 
     /// <summary>
@@ -253,22 +219,19 @@ public class GmpRational : IDisposable
     /// <exception cref="ArgumentException"></exception>
     public unsafe string ToString(int @base)
     {
-        fixed (Mpq_t* ptr = &Raw)
+        IntPtr ret = GmpLib.__gmpq_get_str(IntPtr.Zero, @base, Raw);
+        if (ret == IntPtr.Zero)
         {
-            IntPtr ret = GmpLib.__gmpq_get_str(IntPtr.Zero, @base, (IntPtr)ptr);
-            if (ret == IntPtr.Zero)
-            {
-                throw new ArgumentException($"Unable to convert GmpRational to string.");
-            }
+            throw new ArgumentException($"Unable to convert GmpRational to string.");
+        }
 
-            try
-            {
-                return Marshal.PtrToStringUTF8(ret)!;
-            }
-            finally
-            {
-                GmpMemory.Free(ret);
-            }
+        try
+        {
+            return Marshal.PtrToStringUTF8(ret)!;
+        }
+        finally
+        {
+            GmpMemory.Free(ret);
         }
     }
     #endregion
@@ -276,10 +239,9 @@ public class GmpRational : IDisposable
     #region Dispose & Clear
     private unsafe void Clear()
     {
-        fixed (Mpq_t* ptr = &Raw)
-        {
-            GmpLib.__gmpq_clear((IntPtr)ptr);
-        }
+        GmpLib.__gmpq_clear(Raw);
+        Marshal.FreeHGlobal(Raw);
+        Raw = IntPtr.Zero;
     }
 
     protected virtual void Dispose(bool disposing)
@@ -313,12 +275,7 @@ public class GmpRational : IDisposable
     #region Arithmetic Functions
     public static unsafe void AddInplace(GmpRational rop, GmpRational op1, GmpRational op2)
     {
-        fixed (Mpq_t* pr = &rop.Raw)
-        fixed (Mpq_t* p1 = &op1.Raw)
-        fixed (Mpq_t* p2 = &op2.Raw)
-        {
-            GmpLib.__gmpq_add((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
-        }
+        GmpLib.__gmpq_add(rop.Raw, op1.Raw, op2.Raw);
     }
 
     public static GmpRational Add(GmpRational op1, GmpRational op2)
@@ -332,12 +289,7 @@ public class GmpRational : IDisposable
 
     public static unsafe void SubtractInplace(GmpRational rop, GmpRational op1, GmpRational op2)
     {
-        fixed (Mpq_t* pr = &rop.Raw)
-        fixed (Mpq_t* p1 = &op1.Raw)
-        fixed (Mpq_t* p2 = &op2.Raw)
-        {
-            GmpLib.__gmpq_sub((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
-        }
+        GmpLib.__gmpq_sub(rop.Raw, op1.Raw, op2.Raw);
     }
 
     public static GmpRational Subtract(GmpRational op1, GmpRational op2)
@@ -351,12 +303,7 @@ public class GmpRational : IDisposable
 
     public static unsafe void MultiplyInplace(GmpRational rop, GmpRational op1, GmpRational op2)
     {
-        fixed (Mpq_t* pr = &rop.Raw)
-        fixed (Mpq_t* p1 = &op1.Raw)
-        fixed (Mpq_t* p2 = &op2.Raw)
-        {
-            GmpLib.__gmpq_mul((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
-        }
+        GmpLib.__gmpq_mul(rop.Raw, op1.Raw, op2.Raw);
     }
 
     public static GmpRational Multiply(GmpRational op1, GmpRational op2)
@@ -370,11 +317,7 @@ public class GmpRational : IDisposable
 
     public static unsafe void Multiply2ExpInplace(GmpRational rop, GmpRational op1, uint bitCount)
     {
-        fixed (Mpq_t* pr = &rop.Raw)
-        fixed (Mpq_t* p1 = &op1.Raw)
-        {
-            GmpLib.__gmpq_mul_2exp((IntPtr)pr, (IntPtr)p1, bitCount);
-        }
+        GmpLib.__gmpq_mul_2exp(rop.Raw, op1.Raw, bitCount);
     }
 
     public static GmpRational Multiply2Exp(GmpRational op1, uint bitCount)
@@ -388,12 +331,7 @@ public class GmpRational : IDisposable
 
     public static unsafe void DivideInplace(GmpRational rop, GmpRational op1, GmpRational op2)
     {
-        fixed (Mpq_t* pr = &rop.Raw)
-        fixed (Mpq_t* p1 = &op1.Raw)
-        fixed (Mpq_t* p2 = &op2.Raw)
-        {
-            GmpLib.__gmpq_div((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
-        }
+        GmpLib.__gmpq_div(rop.Raw, op1.Raw, op2.Raw);
     }
 
     public static GmpRational Divide(GmpRational op1, GmpRational op2)
@@ -407,11 +345,7 @@ public class GmpRational : IDisposable
 
     public static unsafe void Divide2ExpInplace(GmpRational rop, GmpRational op1, uint bitCount)
     {
-        fixed (Mpq_t* pr = &rop.Raw)
-        fixed (Mpq_t* p1 = &op1.Raw)
-        {
-            GmpLib.__gmpq_div_2exp((IntPtr)pr, (IntPtr)p1, bitCount);
-        }
+        GmpLib.__gmpq_div_2exp(rop.Raw, op1.Raw, bitCount);
     }
 
     public static GmpRational Divide2Exp(GmpRational op1, uint bitCount)
@@ -425,11 +359,7 @@ public class GmpRational : IDisposable
 
     public static unsafe void NegateInplace(GmpRational rop, GmpRational op)
     {
-        fixed (Mpq_t* pr = &rop.Raw)
-        fixed (Mpq_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpq_neg((IntPtr)pr, (IntPtr)pop);
-        }
+        GmpLib.__gmpq_neg(rop.Raw, op.Raw);
     }
 
     public void NegateInplace() => NegateInplace(this, this);
@@ -445,11 +375,7 @@ public class GmpRational : IDisposable
 
     public static unsafe void AbsInplace(GmpRational rop, GmpRational op)
     {
-        fixed (Mpq_t* pr = &rop.Raw)
-        fixed (Mpq_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpq_abs((IntPtr)pr, (IntPtr)pop);
-        }
+        GmpLib.__gmpq_abs(rop.Raw, op.Raw);
     }
 
     public static GmpRational Abs(GmpRational op)
@@ -461,11 +387,7 @@ public class GmpRational : IDisposable
 
     public static unsafe void InvertInplace(GmpRational rop, GmpRational op)
     {
-        fixed (Mpq_t* pr = &rop.Raw)
-        fixed (Mpq_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpq_inv((IntPtr)pr, (IntPtr)pop);
-        }
+        GmpLib.__gmpq_inv(rop.Raw, op.Raw);
     }
 
     public void InvertInplace() => InvertInplace(this, this);
@@ -485,11 +407,7 @@ public class GmpRational : IDisposable
     /// </summary>
     public static unsafe int Compare(GmpRational op1, GmpRational op2)
     {
-        fixed (Mpq_t* p1 = &op1.Raw)
-        fixed (Mpq_t* p2 = &op2.Raw)
-        {
-            return GmpLib.__gmpq_cmp((IntPtr)p1, (IntPtr)p2);
-        }
+        return GmpLib.__gmpq_cmp(op1.Raw, op2.Raw);
     }
 
     public static bool operator >(GmpRational op1, GmpRational op2) => Compare(op1, op2) > 0;
@@ -505,11 +423,7 @@ public class GmpRational : IDisposable
     /// </summary>
     public static unsafe int Compare(GmpRational op1, GmpInteger op2)
     {
-        fixed (Mpq_t* p1 = &op1.Raw)
-        fixed (Mpz_t* p2 = &op2.Raw)
-        {
-            return GmpLib.__gmpq_cmp_z((IntPtr)p1, (IntPtr)p2);
-        }
+        return GmpLib.__gmpq_cmp_z(op1.Raw, op2.Raw);
     }
 
     public static bool operator >(GmpRational op1, GmpInteger op2) => Compare(op1, op2) > 0;
@@ -528,27 +442,17 @@ public class GmpRational : IDisposable
 
     public static unsafe int Compare(GmpRational op1, uint num, uint den)
     {
-        fixed (Mpq_t* p1 = &op1.Raw)
-        {
-            return GmpLib.__gmpq_cmp_ui((IntPtr)p1, num, den);
-        }
+        return GmpLib.__gmpq_cmp_ui(op1.Raw, num, den);
     }
 
     public static unsafe int Compare(GmpRational op1, int num, uint den)
     {
-        fixed (Mpq_t* p1 = &op1.Raw)
-        {
-            return GmpLib.__gmpq_cmp_si((IntPtr)p1, num, den);
-        }
+        return GmpLib.__gmpq_cmp_si(op1.Raw, num, den);
     }
 
     public static unsafe bool Equals(GmpRational op1, GmpRational op2)
     {
-        fixed (Mpq_t* p1 = &op1.Raw)
-        fixed (Mpq_t* p2 = &op2.Raw)
-        {
-            return GmpLib.__gmpq_equal((IntPtr)p1, (IntPtr)p2) != 0;
-        }
+        return GmpLib.__gmpq_equal(op1.Raw, op2.Raw) != 0;
     }
 
     public override bool Equals(object? obj)
@@ -556,7 +460,7 @@ public class GmpRational : IDisposable
         return obj switch
         {
             null => false,
-            GmpRational r => Equals(this, r), 
+            GmpRational r => Equals(this, r),
             GmpInteger bi => Compare(this, bi) == 0,
             _ => false
         };
@@ -568,27 +472,19 @@ public class GmpRational : IDisposable
     #region Applying Integer Functions to Rationals
     public unsafe GmpInteger Num
     {
-        get => new(Raw.Num, isOwner: false);
+        get => new((IntPtr)(&((Mpq_t*)Raw)->Num), isOwner: false);
         set
         {
-            fixed (Mpq_t* pthis = &Raw)
-            fixed (Mpz_t* pop = &value.Raw)
-            {
-                GmpLib.__gmpq_set_num((IntPtr)pthis, (IntPtr)pop);
-            }
+            GmpLib.__gmpq_set_num(Raw, value.Raw);
         }
     }
 
     public unsafe GmpInteger Den
     {
-        get => new(Raw.Den, isOwner: false);
+        get => new((IntPtr)(&((Mpq_t*)Raw)->Den), isOwner: false);
         set
         {
-            fixed (Mpq_t* pthis = &Raw)
-            fixed (Mpz_t* pop = &value.Raw)
-            {
-                GmpLib.__gmpq_set_den((IntPtr)pthis, (IntPtr)pop);
-            }
+            GmpLib.__gmpq_set_den(Raw, value.Raw);
         }
     }
     #endregion
@@ -599,7 +495,9 @@ public struct Mpq_t
 {
     public Mpz_t Num, Den;
 
-    public static int RawSize => Marshal.SizeOf<Mpq_t>();
+    public static unsafe int RawSize => sizeof(Mpq_t);
+
+    public static unsafe IntPtr Alloc() => Marshal.AllocHGlobal(sizeof(Mpq_t));
 
     public override int GetHashCode() => HashCode.Combine(Num.GetHashCode(), Den.GetHashCode());
 }

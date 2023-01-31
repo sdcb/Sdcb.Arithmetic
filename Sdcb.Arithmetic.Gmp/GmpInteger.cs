@@ -13,109 +13,79 @@ public class GmpInteger : IDisposable
         set => GmpLib.__gmpf_set_default_prec(value);
     }
 
-    public Mpz_t Raw = new();
+    public IntPtr Raw;
     private bool _disposed;
-    private bool _isOwner;
+    private readonly bool _isOwner;
 
     #region Initializing Integers
-    public unsafe GmpInteger(bool isOwner = true)
+    public GmpInteger()
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            GmpLib.__gmpz_init((IntPtr)ptr);
-        }
-        _isOwner = isOwner;
+        Raw = Mpz_t.Alloc();
+        GmpLib.__gmpz_init(Raw);
+        _isOwner = true;
     }
 
-    public unsafe GmpInteger(Mpz_t raw, bool isOwner = true)
+    public GmpInteger(IntPtr raw, bool isOwner)
     {
         Raw = raw;
         _isOwner = isOwner;
     }
 
-    public unsafe GmpInteger(uint bitCount, bool isOwner = true)
+    public GmpInteger(uint bitCount)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            GmpLib.__gmpz_init2((IntPtr)ptr, bitCount);
-        }
-        _isOwner = isOwner;
+        Raw = Mpz_t.Alloc();
+        GmpLib.__gmpz_init2(Raw, bitCount);
+        _isOwner = true;
     }
 
     /// <summary>
     /// Change the space for integer to new_alloc limbs. The value in integer is preserved if it fits, or is set to 0 if not.
     /// </summary>
-    public unsafe void ReallocByLimbs(int limbs)
+    public void ReallocByLimbs(int limbs)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            GmpLib.__gmpz_realloc((IntPtr)ptr, limbs);
-        }
+        GmpLib.__gmpz_realloc(Raw, limbs);
     }
 
     /// <summary>
     /// Change the space allocated for x to n bits. The value in x is preserved if it fits, or is set to 0 if not.
     /// </summary>
-    public unsafe void ReallocByBits(uint bits)
+    public void ReallocByBits(uint bits)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            GmpLib.__gmpz_realloc2((IntPtr)ptr, bits);
-        }
+        GmpLib.__gmpz_realloc2(Raw, bits);
     }
 
-    public unsafe void ReallocToFit() => ReallocByLimbs(System.Math.Abs(Raw.Size));
+    public unsafe void ReallocToFit() => ReallocByLimbs(Math.Abs(((Mpz_t*)Raw)->Size));
     #endregion
 
     #region Assignment Functions
-    public unsafe void Assign(GmpInteger op)
+    public void Assign(GmpInteger op)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        fixed (Mpz_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpz_set((IntPtr)ptr, (IntPtr)pop);
-        }
+        GmpLib.__gmpz_set(Raw, op.Raw);
     }
 
-    public unsafe void Assign(uint op)
+    public void Assign(uint op)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            GmpLib.__gmpz_set_ui((IntPtr)ptr, op);
-        }
+        GmpLib.__gmpz_set_ui(Raw, op);
     }
 
-    public unsafe void Assign(int op)
+    public void Assign(int op)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            GmpLib.__gmpz_set_si((IntPtr)ptr, op);
-        }
+        GmpLib.__gmpz_set_si(Raw, op);
     }
 
     public unsafe void Assign(double op)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            GmpLib.__gmpz_set_d((IntPtr)ptr, op);
-        }
+        GmpLib.__gmpz_set_d(Raw, op);
     }
 
     public unsafe void Assign(GmpRational op)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        fixed (Mpq_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpz_set_q((IntPtr)ptr, (IntPtr)pop);
-        }
+        GmpLib.__gmpz_set_q(Raw, op.Raw);
     }
 
     public unsafe void Assign(GmpFloat op)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            GmpLib.__gmpz_set_f((IntPtr)ptr, op.Raw);
-        }
+        GmpLib.__gmpz_set_f(Raw, op.Raw);
     }
 
     /// <summary>
@@ -123,60 +93,50 @@ public class GmpInteger : IDisposable
     /// </summary>
     public unsafe void Assign(string op, int opBase = 0)
     {
-        fixed (Mpz_t* ptr = &Raw)
+        byte[] opBytes = Encoding.UTF8.GetBytes(op);
+        fixed (byte* opPtr = opBytes)
         {
-            byte[] opBytes = Encoding.UTF8.GetBytes(op);
-            fixed (byte* opPtr = opBytes)
+            int ret = GmpLib.__gmpz_set_str(Raw, (IntPtr)opPtr, opBase);
+            if (ret != 0)
             {
-                int ret = GmpLib.__gmpz_set_str((IntPtr)ptr, (IntPtr)opPtr, opBase);
-                if (ret != 0)
-                {
-                    throw new FormatException($"Failed to parse \"{op}\", base={opBase} to BigInteger, __gmpz_set_str returns {ret}");
-                }
+                throw new FormatException($"Failed to parse \"{op}\", base={opBase} to BigInteger, __gmpz_set_str returns {ret}");
             }
         }
     }
 
     public static unsafe void Swap(GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        fixed (Mpz_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpz_swap((IntPtr)pop1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpz_swap(op1.Raw, op2.Raw);
     }
     #endregion
 
     #region Combined Initialization and Assignment Functions
     public static unsafe GmpInteger From(GmpInteger op)
     {
-        Mpz_t raw = new();
-        fixed (Mpz_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpz_init_set((IntPtr)(&raw), (IntPtr)pop);
-        }
-        return new GmpInteger(raw);
+        IntPtr raw = Mpz_t.Alloc();
+        GmpLib.__gmpz_init_set(raw, op.Raw);
+        return new GmpInteger(raw, isOwner: true);
     }
 
     public static unsafe GmpInteger From(uint op)
     {
-        Mpz_t raw = new();
-        GmpLib.__gmpz_init_set_ui((IntPtr)(&raw), op);
-        return new GmpInteger(raw);
+        IntPtr raw = Mpz_t.Alloc();
+        GmpLib.__gmpz_init_set_ui(raw, op);
+        return new GmpInteger(raw, isOwner: true);
     }
 
     public static unsafe GmpInteger From(int op)
     {
-        Mpz_t raw = new();
-        GmpLib.__gmpz_init_set_si((IntPtr)(&raw), op);
-        return new GmpInteger(raw);
+        IntPtr raw = Mpz_t.Alloc();
+        GmpLib.__gmpz_init_set_si(raw, op);
+        return new GmpInteger(raw, isOwner: true);
     }
 
     public static unsafe GmpInteger From(double op)
     {
-        Mpz_t raw = new();
-        GmpLib.__gmpz_init_set_d((IntPtr)(&raw), op);
-        return new GmpInteger(raw);
+        IntPtr raw = Mpz_t.Alloc();
+        GmpLib.__gmpz_init_set_d(raw, op);
+        return new GmpInteger(raw, isOwner: true);
     }
 
     /// <summary>
@@ -184,18 +144,19 @@ public class GmpInteger : IDisposable
     /// </summary>
     public unsafe static GmpInteger Parse(string val, int valBase = 0)
     {
-        Mpz_t raw = new();
+        IntPtr raw = Mpz_t.Alloc();
         byte[] valBytes = Encoding.UTF8.GetBytes(val);
         fixed (byte* pval = valBytes)
         {
-            int ret = GmpLib.__gmpz_init_set_str((IntPtr)(&raw), (IntPtr)pval, valBase);
+            int ret = GmpLib.__gmpz_init_set_str(raw, (IntPtr)pval, valBase);
             if (ret != 0)
             {
-                GmpLib.__gmpz_clear((IntPtr)(&raw));
+                GmpLib.__gmpz_clear(raw);
+                Marshal.FreeHGlobal(raw);
                 throw new FormatException($"Failed to parse {val}, base={valBase} to BigInteger, __gmpf_init_set_str returns {ret}");
             }
         }
-        return new GmpInteger(raw);
+        return new GmpInteger(raw, isOwner: true);
     }
 
     /// <summary>
@@ -203,21 +164,21 @@ public class GmpInteger : IDisposable
     /// </summary>
     public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out GmpInteger result, int valBase = 10)
     {
-        Mpz_t raw = new();
-        Mpz_t* ptr = &raw;
+        IntPtr raw = Mpz_t.Alloc();
         byte[] valBytes = Encoding.UTF8.GetBytes(val);
         fixed (byte* pval = valBytes)
         {
-            int rt = GmpLib.__gmpz_init_set_str((IntPtr)ptr, (IntPtr)pval, valBase);
+            int rt = GmpLib.__gmpz_init_set_str(raw, (IntPtr)pval, valBase);
             if (rt != 0)
             {
-                GmpLib.__gmpz_clear((IntPtr)ptr);
+                GmpLib.__gmpz_clear(raw);
+                Marshal.FreeHGlobal(raw);
                 result = null;
                 return false;
             }
             else
             {
-                result = new GmpInteger(raw);
+                result = new GmpInteger(raw, isOwner: true);
                 return true;
             }
         }
@@ -228,10 +189,9 @@ public class GmpInteger : IDisposable
 
     private unsafe void Clear()
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            GmpLib.__gmpz_clear((IntPtr)ptr);
-        }
+        GmpLib.__gmpz_clear(Raw);
+        Marshal.FreeHGlobal(Raw);
+        Raw = IntPtr.Zero;
     }
 
     protected virtual void Dispose(bool disposing)
@@ -264,12 +224,7 @@ public class GmpInteger : IDisposable
     #region Arithmetic Functions
     public static unsafe void AddInplace(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        fixed (Mpz_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpz_add((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpz_add(r.Raw, op1.Raw, op2.Raw);
     }
 
     public static GmpInteger Add(GmpInteger op1, GmpInteger op2)
@@ -283,11 +238,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void AddInplace(GmpInteger r, GmpInteger op1, uint op2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpz_add_ui((IntPtr)pr, (IntPtr)pop1, op2);
-        }
+        GmpLib.__gmpz_add_ui(r.Raw, op1.Raw, op2);
     }
 
     public static GmpInteger Add(GmpInteger op1, uint op2)
@@ -302,12 +253,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void SubtractInplace(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        fixed (Mpz_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpz_sub((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpz_sub(r.Raw, op1.Raw, op2.Raw);
     }
 
     public static GmpInteger Subtract(GmpInteger op1, GmpInteger op2)
@@ -321,11 +267,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void SubtractInplace(GmpInteger r, GmpInteger op1, uint op2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpz_sub_ui((IntPtr)pr, (IntPtr)pop1, op2);
-        }
+        GmpLib.__gmpz_sub_ui(r.Raw, op1.Raw, op2);
     }
 
     public static GmpInteger Subtract(GmpInteger op1, uint op2)
@@ -339,11 +281,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void SubtractInplace(GmpInteger r, uint op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpz_ui_sub((IntPtr)pr, op1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpz_ui_sub(r.Raw, op1, op2.Raw);
     }
 
     public static GmpInteger Subtract(uint op1, GmpInteger op2)
@@ -357,12 +295,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void MultiplyInplace(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        fixed (Mpz_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpz_mul((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpz_mul(r.Raw, op1.Raw, op2.Raw);
     }
 
     public static GmpInteger Multiply(GmpInteger op1, GmpInteger op2)
@@ -376,11 +309,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void MultiplyInplace(GmpInteger r, GmpInteger op1, int op2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpz_mul_si((IntPtr)pr, (IntPtr)pop1, op2);
-        }
+        GmpLib.__gmpz_mul_si(r.Raw, op1.Raw, op2);
     }
 
     public static GmpInteger Multiply(GmpInteger op1, int op2)
@@ -395,11 +324,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void MultiplyInplace(GmpInteger r, GmpInteger op1, uint op2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpz_mul_ui((IntPtr)pr, (IntPtr)pop1, op2);
-        }
+        GmpLib.__gmpz_mul_ui(r.Raw, op1.Raw, op2);
     }
 
     public static GmpInteger Multiply(GmpInteger op1, uint op2)
@@ -417,12 +342,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void AddMultiply(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        fixed (Mpz_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpz_addmul((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpz_addmul(r.Raw, op1.Raw, op2.Raw);
     }
 
     /// <summary>
@@ -430,11 +350,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void AddMultiply(GmpInteger r, GmpInteger op1, uint op2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpz_addmul_ui((IntPtr)pr, (IntPtr)pop1, op2);
-        }
+        GmpLib.__gmpz_addmul_ui(r.Raw, op1.Raw, op2);
     }
 
     /// <summary>
@@ -442,12 +358,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void SubtractMultiply(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        fixed (Mpz_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpz_submul((IntPtr)pr, (IntPtr)pop1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpz_submul(r.Raw, op1.Raw, op2.Raw);
     }
 
     /// <summary>
@@ -455,20 +366,12 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void SubtractMultiply(GmpInteger r, GmpInteger op1, uint op2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpz_submul_ui((IntPtr)pr, (IntPtr)pop1, op2);
-        }
+        GmpLib.__gmpz_submul_ui(r.Raw, op1.Raw, op2);
     }
 
     public static unsafe void Multiply2ExpInplace(GmpInteger r, GmpInteger op1, uint exp2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpz_mul_2exp((IntPtr)pr, (IntPtr)pop1, exp2);
-        }
+        GmpLib.__gmpz_mul_2exp(r.Raw, op1.Raw, exp2);
     }
 
     public static unsafe GmpInteger Multiply2Exp(GmpInteger op1, uint exp2)
@@ -484,11 +387,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void NegateInplace(GmpInteger r, GmpInteger op1)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpz_neg((IntPtr)pr, (IntPtr)pop1);
-        }
+        GmpLib.__gmpz_neg(r.Raw, op1.Raw);
     }
 
     public static GmpInteger Negate(GmpInteger op1)
@@ -502,11 +401,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void AbsInplace(GmpInteger r, GmpInteger op1)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpz_abs((IntPtr)pr, (IntPtr)pop1);
-        }
+        GmpLib.__gmpz_abs(r.Raw, op1.Raw);
     }
 
     public static GmpInteger Abs(GmpInteger op1)
@@ -520,26 +415,17 @@ public class GmpInteger : IDisposable
     #region Conversion Functions
     public unsafe uint ToUInt32()
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpz_get_ui((IntPtr)ptr);
-        }
+        return GmpLib.__gmpz_get_ui(Raw);
     }
 
     public unsafe int ToInt32()
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpz_get_si((IntPtr)ptr);
-        }
+        return GmpLib.__gmpz_get_si(Raw);
     }
 
     public unsafe double ToDouble()
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpz_get_d((IntPtr)ptr);
-        }
+        return GmpLib.__gmpz_get_d(Raw);
     }
 
     public static explicit operator uint(GmpInteger op) => op.ToUInt32();
@@ -549,34 +435,28 @@ public class GmpInteger : IDisposable
 
     public unsafe ExpDouble ToExpDouble()
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            int exp = default;
-            double val = GmpLib.__gmpz_get_d_2exp((IntPtr)(&exp), (IntPtr)ptr);
-            return new ExpDouble(exp, val);
-        }
+        int exp = default;
+        double val = GmpLib.__gmpz_get_d_2exp((IntPtr)(&exp), Raw);
+        return new ExpDouble(exp, val);
     }
 
     public override string ToString() => ToString(10);
 
     public unsafe string ToString(int opBase)
     {
-        fixed (Mpz_t* ptr = &Raw)
+        IntPtr ret = GmpLib.__gmpz_get_str(IntPtr.Zero, opBase, Raw);
+        if (ret == IntPtr.Zero)
         {
-            IntPtr ret = GmpLib.__gmpz_get_str(IntPtr.Zero, opBase, (IntPtr)ptr);
-            if (ret == IntPtr.Zero)
-            {
-                throw new ArgumentException($"Unable to convert BigInteger to string.");
-            }
+            throw new ArgumentException($"Unable to convert BigInteger to string.");
+        }
 
-            try
-            {
-                return Marshal.PtrToStringUTF8(ret)!;
-            }
-            finally
-            {
-                GmpMemory.Free(ret);
-            }
+        try
+        {
+            return Marshal.PtrToStringUTF8(ret)!;
+        }
+        finally
+        {
+            GmpMemory.Free(ret);
         }
     }
     #endregion
@@ -588,12 +468,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void CeilingDivideInplace(GmpInteger q, GmpInteger n, GmpInteger d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        fixed (Mpz_t* pd = &d.Raw)
-        {
-            GmpLib.__gmpz_cdiv_q((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
-        }
+        GmpLib.__gmpz_cdiv_q(q.Raw, n.Raw, d.Raw);
     }
 
     /// <summary>
@@ -611,12 +486,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void CeilingReminderInplace(GmpInteger r, GmpInteger n, GmpInteger d)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        fixed (Mpz_t* pd = &d.Raw)
-        {
-            GmpLib.__gmpz_cdiv_r((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
-        }
+        GmpLib.__gmpz_cdiv_r(r.Raw, n.Raw, d.Raw);
     }
 
     /// <summary>
@@ -634,13 +504,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void CeilingDivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, GmpInteger d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        fixed (Mpz_t* pd = &d.Raw)
-        {
-            GmpLib.__gmpz_cdiv_qr((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
-        }
+        GmpLib.__gmpz_cdiv_qr(q.Raw, r.Raw, n.Raw, d.Raw);
     }
 
     /// <summary>
@@ -659,11 +523,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe uint CeilingDivideInplace(GmpInteger q, GmpInteger n, uint d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            return GmpLib.__gmpz_cdiv_q_ui((IntPtr)pq, (IntPtr)pn, d);
-        }
+        return GmpLib.__gmpz_cdiv_q_ui(q.Raw, n.Raw, d);
     }
 
     /// <summary>
@@ -682,11 +542,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe uint CeilingReminderInplace(GmpInteger r, GmpInteger n, uint d)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            return GmpLib.__gmpz_cdiv_r_ui((IntPtr)pr, (IntPtr)pn, d);
-        }
+        return GmpLib.__gmpz_cdiv_r_ui(r.Raw, n.Raw, d);
     }
 
     /// <summary>
@@ -695,12 +551,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe uint CeilingDivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, uint d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            return GmpLib.__gmpz_cdiv_qr_ui((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, d);
-        }
+        return GmpLib.__gmpz_cdiv_qr_ui(q.Raw, r.Raw, n.Raw, d);
     }
 
     /// <summary>
@@ -716,10 +567,7 @@ public class GmpInteger : IDisposable
     /// <returns>n mod d (ceiling)</returns>
     public static unsafe uint CeilingReminderToUInt32(GmpInteger n, uint d)
     {
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            return GmpLib.__gmpz_cdiv_ui((IntPtr)pn, d);
-        }
+        return GmpLib.__gmpz_cdiv_ui(n.Raw, d);
     }
 
     /// <returns>n mod d (ceiling)</returns>
@@ -736,11 +584,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe void CeilingDivide2ExpInplace(GmpInteger q, GmpInteger n, uint exp2)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            GmpLib.__gmpz_cdiv_q_2exp((IntPtr)pq, (IntPtr)pn, exp2);
-        }
+        GmpLib.__gmpz_cdiv_q_2exp(q.Raw, n.Raw, exp2);
     }
 
     /// <summary>
@@ -759,11 +603,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe void CeilingReminder2ExpInplace(GmpInteger r, GmpInteger n, uint exp2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            GmpLib.__gmpz_cdiv_r_2exp((IntPtr)pr, (IntPtr)pn, exp2);
-        }
+        GmpLib.__gmpz_cdiv_r_2exp(r.Raw, n.Raw, exp2);
     }
 
     /// <summary>
@@ -783,12 +623,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void FloorDivideInplace(GmpInteger q, GmpInteger n, GmpInteger d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        fixed (Mpz_t* pd = &d.Raw)
-        {
-            GmpLib.__gmpz_fdiv_q((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
-        }
+        GmpLib.__gmpz_fdiv_q(q.Raw, n.Raw, d.Raw);
     }
 
     /// <summary>
@@ -806,12 +641,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void FloorReminderInplace(GmpInteger r, GmpInteger n, GmpInteger d)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        fixed (Mpz_t* pd = &d.Raw)
-        {
-            GmpLib.__gmpz_fdiv_r((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
-        }
+        GmpLib.__gmpz_fdiv_r(r.Raw, n.Raw, d.Raw);
     }
 
     /// <summary>
@@ -829,13 +659,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void FloorDivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, GmpInteger d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        fixed (Mpz_t* pd = &d.Raw)
-        {
-            GmpLib.__gmpz_fdiv_qr((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
-        }
+        GmpLib.__gmpz_fdiv_qr(q.Raw, r.Raw, n.Raw, d.Raw);
     }
 
     /// <summary>
@@ -854,11 +678,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe uint FloorDivideInplace(GmpInteger q, GmpInteger n, uint d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            return GmpLib.__gmpz_fdiv_q_ui((IntPtr)pq, (IntPtr)pn, d);
-        }
+        return GmpLib.__gmpz_fdiv_q_ui(q.Raw, n.Raw, d);
     }
 
     /// <summary>
@@ -877,11 +697,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe uint FloorReminderInplace(GmpInteger r, GmpInteger n, uint d)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            return GmpLib.__gmpz_fdiv_r_ui((IntPtr)pr, (IntPtr)pn, d);
-        }
+        return GmpLib.__gmpz_fdiv_r_ui(r.Raw, n.Raw, d);
     }
 
     /// <summary>
@@ -890,12 +706,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe uint FloorDivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, uint d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            return GmpLib.__gmpz_fdiv_qr_ui((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, d);
-        }
+        return GmpLib.__gmpz_fdiv_qr_ui(q.Raw, r.Raw, n.Raw, d);
     }
 
     /// <summary>
@@ -911,10 +722,7 @@ public class GmpInteger : IDisposable
     /// <returns>n mod d (Floor)</returns>
     public static unsafe uint FloorReminderToUInt32(GmpInteger n, uint d)
     {
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            return GmpLib.__gmpz_fdiv_ui((IntPtr)pn, d);
-        }
+        return GmpLib.__gmpz_fdiv_ui(n.Raw, d);
     }
 
     /// <returns>n mod d (Floor)</returns>
@@ -931,11 +739,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe void FloorDivide2ExpInplace(GmpInteger q, GmpInteger n, uint exp2)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            GmpLib.__gmpz_fdiv_q_2exp((IntPtr)pq, (IntPtr)pn, exp2);
-        }
+        GmpLib.__gmpz_fdiv_q_2exp(q.Raw, n.Raw, exp2);
     }
 
     /// <summary>
@@ -954,11 +758,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe void FloorReminder2ExpInplace(GmpInteger r, GmpInteger n, uint exp2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            GmpLib.__gmpz_fdiv_r_2exp((IntPtr)pr, (IntPtr)pn, exp2);
-        }
+        GmpLib.__gmpz_fdiv_r_2exp(r.Raw, n.Raw, exp2);
     }
 
     /// <summary>
@@ -978,12 +778,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void DivideInplace(GmpInteger q, GmpInteger n, GmpInteger d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        fixed (Mpz_t* pd = &d.Raw)
-        {
-            GmpLib.__gmpz_tdiv_q((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
-        }
+        GmpLib.__gmpz_tdiv_q(q.Raw, n.Raw, d.Raw);
     }
 
     /// <summary>
@@ -1001,12 +796,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void ReminderInplace(GmpInteger r, GmpInteger n, GmpInteger d)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        fixed (Mpz_t* pd = &d.Raw)
-        {
-            GmpLib.__gmpz_tdiv_r((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
-        }
+        GmpLib.__gmpz_tdiv_r(r.Raw, n.Raw, d.Raw);
     }
 
     /// <summary>
@@ -1024,13 +814,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void DivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, GmpInteger d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        fixed (Mpz_t* pd = &d.Raw)
-        {
-            GmpLib.__gmpz_tdiv_qr((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
-        }
+        GmpLib.__gmpz_tdiv_qr(q.Raw, r.Raw, n.Raw, d.Raw);
     }
 
     /// <summary>
@@ -1049,11 +833,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe uint DivideInplace(GmpInteger q, GmpInteger n, uint d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            return GmpLib.__gmpz_tdiv_q_ui((IntPtr)pq, (IntPtr)pn, d);
-        }
+        return GmpLib.__gmpz_tdiv_q_ui(q.Raw, n.Raw, d);
     }
 
     /// <summary>
@@ -1072,11 +852,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe uint ReminderInplace(GmpInteger r, GmpInteger n, uint d)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            return GmpLib.__gmpz_tdiv_r_ui((IntPtr)pr, (IntPtr)pn, d);
-        }
+        return GmpLib.__gmpz_tdiv_r_ui(r.Raw, n.Raw, d);
     }
 
     /// <summary>
@@ -1085,12 +861,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe uint DivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, uint d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            return GmpLib.__gmpz_tdiv_qr_ui((IntPtr)pq, (IntPtr)pr, (IntPtr)pn, d);
-        }
+        return GmpLib.__gmpz_tdiv_qr_ui(q.Raw, r.Raw, n.Raw, d);
     }
 
     /// <summary>
@@ -1106,10 +877,7 @@ public class GmpInteger : IDisposable
     /// <returns>n mod d (Truncate)</returns>
     public static unsafe uint ReminderToUInt32(GmpInteger n, uint d)
     {
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            return GmpLib.__gmpz_tdiv_ui((IntPtr)pn, d);
-        }
+        return GmpLib.__gmpz_tdiv_ui(n.Raw, d);
     }
 
     /// <returns>n mod d (Truncate)</returns>
@@ -1126,11 +894,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe void Divide2ExpInplace(GmpInteger q, GmpInteger n, uint exp2)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            GmpLib.__gmpz_tdiv_q_2exp((IntPtr)pq, (IntPtr)pn, exp2);
-        }
+        GmpLib.__gmpz_tdiv_q_2exp(q.Raw, n.Raw, exp2);
     }
 
     /// <summary>
@@ -1149,11 +913,7 @@ public class GmpInteger : IDisposable
     /// <returns>the remainder</returns>
     public static unsafe void Reminder2ExpInplace(GmpInteger r, GmpInteger n, uint exp2)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            GmpLib.__gmpz_tdiv_r_2exp((IntPtr)pr, (IntPtr)pn, exp2);
-        }
+        GmpLib.__gmpz_tdiv_r_2exp(r.Raw, n.Raw, exp2);
     }
 
     /// <summary>
@@ -1183,12 +943,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void ModInplace(GmpInteger r, GmpInteger n, GmpInteger d)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        fixed (Mpz_t* pd = &d.Raw)
-        {
-            GmpLib.__gmpz_mod((IntPtr)pr, (IntPtr)pn, (IntPtr)pd);
-        }
+        GmpLib.__gmpz_mod(r.Raw, n.Raw, d.Raw);
     }
 
     /// <summary>
@@ -1219,12 +974,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void DivExactInplace(GmpInteger q, GmpInteger n, GmpInteger d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        fixed (Mpz_t* pd = &d.Raw)
-        {
-            GmpLib.__gmpz_divexact((IntPtr)pq, (IntPtr)pn, (IntPtr)pd);
-        }
+        GmpLib.__gmpz_divexact(q.Raw, n.Raw, d.Raw);
     }
 
     /// <summary>
@@ -1244,11 +994,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void DivExactInplace(GmpInteger q, GmpInteger n, uint d)
     {
-        fixed (Mpz_t* pq = &q.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            GmpLib.__gmpz_divexact_ui((IntPtr)pq, (IntPtr)pn, d);
-        }
+        GmpLib.__gmpz_divexact_ui(q.Raw, n.Raw, d);
     }
 
     /// <summary>
@@ -1269,12 +1015,7 @@ public class GmpInteger : IDisposable
     /// <returns>true if n = c mod d</returns>
     public static unsafe bool Congruent(GmpInteger n, GmpInteger c, GmpInteger d)
     {
-        fixed (Mpz_t* pn = &n.Raw)
-        fixed (Mpz_t* pc = &c.Raw)
-        fixed (Mpz_t* pd = &d.Raw)
-        {
-            return GmpLib.__gmpz_congruent_p((IntPtr)pn, (IntPtr)pc, (IntPtr)pd) != 0;
-        }
+        return GmpLib.__gmpz_congruent_p(n.Raw, c.Raw, d.Raw) != 0;
     }
 
     /// <summary>
@@ -1284,10 +1025,7 @@ public class GmpInteger : IDisposable
     /// <returns>true if n = c mod d</returns>
     public static unsafe bool Congruent(GmpInteger n, uint c, uint d)
     {
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            return GmpLib.__gmpz_congruent_ui_p((IntPtr)pn, c, d) != 0;
-        }
+        return GmpLib.__gmpz_congruent_ui_p(n.Raw, c, d) != 0;
     }
 
     /// <summary>
@@ -1296,11 +1034,7 @@ public class GmpInteger : IDisposable
     /// <returns>true if n = c mod (2^b)</returns>
     public static unsafe bool Congruent2Exp(GmpInteger n, GmpInteger c, uint b)
     {
-        fixed (Mpz_t* pn = &n.Raw)
-        fixed (Mpz_t* pc = &c.Raw)
-        {
-            return GmpLib.__gmpz_congruent_2exp_p((IntPtr)pn, (IntPtr)pc, b) != 0;
-        }
+        return GmpLib.__gmpz_congruent_2exp_p(n.Raw, c.Raw, b) != 0;
     }
     #endregion
     #endregion
@@ -1311,13 +1045,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void PowerModInplace(GmpInteger r, GmpInteger @base, GmpInteger exp, GmpInteger mod)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pbase = &@base.Raw)
-        fixed (Mpz_t* pexp = &exp.Raw)
-        fixed (Mpz_t* pmod = &mod.Raw)
-        {
-            GmpLib.__gmpz_powm((IntPtr)pr, (IntPtr)pbase, (IntPtr)pexp, (IntPtr)pmod);
-        }
+        GmpLib.__gmpz_powm(r.Raw, @base.Raw, exp.Raw, mod.Raw);
     }
 
     /// <returns>(@base ^ exp) % mod</returns>
@@ -1333,12 +1061,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void PowerModInplace(GmpInteger r, GmpInteger @base, uint exp, GmpInteger mod)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pbase = &@base.Raw)
-        fixed (Mpz_t* pmod = &mod.Raw)
-        {
-            GmpLib.__gmpz_powm_ui((IntPtr)pr, (IntPtr)pbase, exp, (IntPtr)pmod);
-        }
+        GmpLib.__gmpz_powm_ui(r.Raw, @base.Raw, exp, mod.Raw);
     }
 
     /// <returns>(@base ^ exp) % mod</returns>
@@ -1361,13 +1084,7 @@ public class GmpInteger : IDisposable
     /// </remarks>
     public static unsafe void PowerModSecureInplace(GmpInteger r, GmpInteger @base, GmpInteger exp, GmpInteger mod)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pbase = &@base.Raw)
-        fixed (Mpz_t* pexp = &exp.Raw)
-        fixed (Mpz_t* pmod = &mod.Raw)
-        {
-            GmpLib.__gmpz_powm_sec((IntPtr)pr, (IntPtr)pbase, (IntPtr)pexp, (IntPtr)pmod);
-        }
+        GmpLib.__gmpz_powm_sec(r.Raw, @base.Raw, exp.Raw, mod.Raw);
     }
 
     /// <returns>(@base ^ exp) % mod</returns>
@@ -1391,11 +1108,7 @@ public class GmpInteger : IDisposable
     /// <remarks>The case 0^0 yields 1</remarks>
     public static unsafe void PowerInplace(GmpInteger r, GmpInteger @base, uint exp)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pbase = &@base.Raw)
-        {
-            GmpLib.__gmpz_pow_ui((IntPtr)pr, (IntPtr)pbase, exp);
-        }
+        GmpLib.__gmpz_pow_ui(r.Raw, @base.Raw, exp);
     }
 
     /// <returns>base ^ exp</returns>
@@ -1413,10 +1126,7 @@ public class GmpInteger : IDisposable
     /// <remarks>The case 0^0 yields 1</remarks>
     public static unsafe void PowerInplace(GmpInteger r, uint @base, uint exp)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        {
-            GmpLib.__gmpz_ui_pow_ui((IntPtr)pr, @base, exp);
-        }
+        GmpLib.__gmpz_ui_pow_ui(r.Raw, @base, exp);
     }
 
     /// <returns>base ^ exp</returns>
@@ -1441,11 +1151,7 @@ public class GmpInteger : IDisposable
     /// <returns>true if computation was exact</returns>
     public static unsafe bool RootInplace(GmpInteger r, GmpInteger op, uint n)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* pop = &op.Raw)
-        {
-            return GmpLib.__gmpz_root((IntPtr)pr, (IntPtr)pop, n) != 0;
-        }
+        return GmpLib.__gmpz_root(r.Raw, op.Raw, n) != 0;
     }
 
     /// <returns>sqsrt(op, n)</returns>
@@ -1461,12 +1167,7 @@ public class GmpInteger : IDisposable
     /// </summary>\
     public static unsafe void RootReminderInplace(GmpInteger r, GmpInteger reminder, GmpInteger op, uint n)
     {
-        fixed (Mpz_t* pr = &r.Raw)
-        fixed (Mpz_t* preminder = &reminder.Raw)
-        fixed (Mpz_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpz_rootrem((IntPtr)pr, (IntPtr)preminder, (IntPtr)pop, n);
-        }
+        GmpLib.__gmpz_rootrem(r.Raw, reminder.Raw, op.Raw, n);
     }
 
     /// <returns>(root, reminder)</returns>
@@ -1484,10 +1185,7 @@ public class GmpInteger : IDisposable
     /// </remarks>
     public unsafe bool HasPerfectPower()
     {
-        fixed (Mpz_t* pop = &Raw)
-        {
-            return GmpLib.__gmpz_perfect_power_p((IntPtr)pop) != 0;
-        }
+        return GmpLib.__gmpz_perfect_power_p(Raw) != 0;
     }
 
     /// <returns>
@@ -1496,10 +1194,7 @@ public class GmpInteger : IDisposable
     /// </returns>
     public unsafe bool HasPerfectSquare()
     {
-        fixed (Mpz_t* pop = &Raw)
-        {
-            return GmpLib.__gmpz_perfect_square_p((IntPtr)pop) != 0;
-        }
+        return GmpLib.__gmpz_perfect_square_p(Raw) != 0;
     }
     #endregion
 
@@ -1511,10 +1206,7 @@ public class GmpInteger : IDisposable
     /// <returns></returns>
     public unsafe PrimePossibility ProbablePrime(int reps = 15)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            return (PrimePossibility)GmpLib.__gmpz_probab_prime_p((IntPtr)ptr, reps);
-        }
+        return (PrimePossibility)GmpLib.__gmpz_probab_prime_p(Raw, reps);
     }
 
     /// <summary>
@@ -1523,11 +1215,7 @@ public class GmpInteger : IDisposable
     /// <remarks>This function uses a probabilistic algorithm to identify primes. For practical purposes it’s adequate, the chance of a composite passing will be extremely small.</remarks>
     public static unsafe void NextPrimeInplace(GmpInteger rop, GmpInteger op)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (Mpz_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpz_nextprime((IntPtr)pr, (IntPtr)pop);
-        }
+        GmpLib.__gmpz_nextprime(rop.Raw, op.Raw);
     }
 
     /// <summary>
@@ -1554,12 +1242,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void GcdInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (Mpz_t* p1 = &op1.Raw)
-        fixed (Mpz_t* p2 = &op2.Raw)
-        {
-            GmpLib.__gmpz_gcd((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
-        }
+        GmpLib.__gmpz_gcd(rop.Raw, op1.Raw, op2.Raw);
     }
 
     public static unsafe GmpInteger Gcd(GmpInteger op1, GmpInteger op2)
@@ -1571,11 +1254,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void GcdInplace(GmpInteger rop, GmpInteger op1, uint op2)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (Mpz_t* p1 = &op1.Raw)
-        {
-            GmpLib.__gmpz_gcd_ui((IntPtr)pr, (IntPtr)p1, op2);
-        }
+        GmpLib.__gmpz_gcd_ui(rop.Raw, op1.Raw, op2);
     }
 
     public static unsafe GmpInteger Gcd(GmpInteger op1, uint op2)
@@ -1599,14 +1278,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void Gcd2Inplace(GmpInteger g, GmpInteger s, GmpInteger t, GmpInteger a, GmpInteger b)
     {
-        fixed (Mpz_t* pg = &g.Raw)
-        fixed (Mpz_t* ps = &s.Raw)
-        fixed (Mpz_t* pt = &t.Raw)
-        fixed (Mpz_t* pa = &a.Raw)
-        fixed (Mpz_t* pb = &b.Raw)
-        {
-            GmpLib.__gmpz_gcdext((IntPtr)pg, (IntPtr)ps, (IntPtr)pt, (IntPtr)pa, (IntPtr)pb);
-        }
+        GmpLib.__gmpz_gcdext(g.Raw, s.Raw, t.Raw, a.Raw, b.Raw);
     }
 
     /// <summary>
@@ -1632,12 +1304,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void LcmInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (Mpz_t* p1 = &op1.Raw)
-        fixed (Mpz_t* p2 = &op2.Raw)
-        {
-            GmpLib.__gmpz_lcm((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
-        }
+        GmpLib.__gmpz_lcm(rop.Raw, op1.Raw, op2.Raw);
     }
 
     public static unsafe GmpInteger Lcm(GmpInteger op1, GmpInteger op2)
@@ -1649,11 +1316,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void LcmInplace(GmpInteger rop, GmpInteger op1, uint op2)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (Mpz_t* p1 = &op1.Raw)
-        {
-            GmpLib.__gmpz_lcm_ui((IntPtr)pr, (IntPtr)p1, op2);
-        }
+        GmpLib.__gmpz_lcm_ui(rop.Raw, op1.Raw, op2);
     }
 
     public static unsafe GmpInteger Lcm(GmpInteger op1, uint op2)
@@ -1672,12 +1335,7 @@ public class GmpInteger : IDisposable
     /// <returns>true if find the inverse.</returns>
     public static unsafe bool InvertInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (Mpz_t* p1 = &op1.Raw)
-        fixed (Mpz_t* p2 = &op2.Raw)
-        {
-            return GmpLib.__gmpz_invert((IntPtr)pr, (IntPtr)p1, (IntPtr)p2) != 0;
-        }
+        return GmpLib.__gmpz_invert(rop.Raw, op1.Raw, op2.Raw) != 0;
     }
 
     /// <summary>
@@ -1698,11 +1356,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe int Jacobi(GmpInteger a, GmpInteger b)
     {
-        fixed (Mpz_t* p1 = &a.Raw)
-        fixed (Mpz_t* p2 = &b.Raw)
-        {
-            return GmpLib.__gmpz_jacobi((IntPtr)p1, (IntPtr)p2);
-        }
+        return GmpLib.__gmpz_jacobi(a.Raw, b.Raw);
     }
 
     /// <summary>
@@ -1723,10 +1377,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe int Kronecker(GmpInteger a, int b)
     {
-        fixed (Mpz_t* p1 = &a.Raw)
-        {
-            return GmpLib.__gmpz_kronecker_si((IntPtr)p1, b);
-        }
+        return GmpLib.__gmpz_kronecker_si(a.Raw, b);
     }
 
     /// <summary>
@@ -1735,10 +1386,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe int Kronecker(GmpInteger a, uint b)
     {
-        fixed (Mpz_t* p1 = &a.Raw)
-        {
-            return GmpLib.__gmpz_kronecker_ui((IntPtr)p1, b);
-        }
+        return GmpLib.__gmpz_kronecker_ui(a.Raw, b);
     }
 
     /// <summary>
@@ -1747,10 +1395,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe int Kronecker(int a, GmpInteger b)
     {
-        fixed (Mpz_t* p2 = &b.Raw)
-        {
-            return GmpLib.__gmpz_si_kronecker(a, (IntPtr)p2);
-        }
+        return GmpLib.__gmpz_si_kronecker(a, b.Raw);
     }
 
     /// <summary>
@@ -1759,10 +1404,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe int Kronecker(uint a, GmpInteger b)
     {
-        fixed (Mpz_t* p2 = &b.Raw)
-        {
-            return GmpLib.__gmpz_ui_kronecker(a, (IntPtr)p2);
-        }
+        return GmpLib.__gmpz_ui_kronecker(a, b.Raw);
     }
 
     /// <summary>
@@ -1771,12 +1413,7 @@ public class GmpInteger : IDisposable
     /// <returns>The return value is how many such occurrences were removed.</returns>
     public static unsafe uint RemoveFactorInplace(GmpInteger rop, GmpInteger op, GmpInteger f)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (Mpz_t* pop = &op.Raw)
-        fixed (Mpz_t* pf = &f.Raw)
-        {
-            return GmpLib.__gmpz_remove((IntPtr)pr, (IntPtr)pop, (IntPtr)pf);
-        }
+        return GmpLib.__gmpz_remove(rop.Raw, op.Raw, f.Raw);
     }
 
     /// <summary>
@@ -1799,10 +1436,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void FactorialInplace(GmpInteger rop, uint n)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        {
-            GmpLib.__gmpz_fac_ui((IntPtr)pr, n);
-        }
+        GmpLib.__gmpz_fac_ui(rop.Raw, n);
     }
 
     /// <summary>
@@ -1820,10 +1454,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void Factorial2Inplace(GmpInteger rop, uint n)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        {
-            GmpLib.__gmpz_2fac_ui((IntPtr)pr, n);
-        }
+        GmpLib.__gmpz_2fac_ui(rop.Raw, n);
     }
 
     /// <summary>
@@ -1841,10 +1472,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void FactorialMInplace(GmpInteger rop, uint n, uint m)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        {
-            GmpLib.__gmpz_mfac_uiui((IntPtr)pr, n, m);
-        }
+        GmpLib.__gmpz_mfac_uiui(rop.Raw, n, m);
     }
 
     /// <summary>
@@ -1862,11 +1490,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void BinomialCoefficientInplace(GmpInteger rop, GmpInteger n, uint k)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (Mpz_t* pn = &n.Raw)
-        {
-            GmpLib.__gmpz_bin_ui((IntPtr)pr, (IntPtr)pn, k);
-        }
+        GmpLib.__gmpz_bin_ui(rop.Raw, n.Raw, k);
     }
 
     /// <summary>
@@ -1884,10 +1508,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void BinomialCoefficientInplace(GmpInteger rop, uint n, uint k)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        {
-            GmpLib.__gmpz_bin_uiui((IntPtr)pr, n, k);
-        }
+        GmpLib.__gmpz_bin_uiui(rop.Raw, n, k);
     }
 
     /// <summary>
@@ -1905,10 +1526,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void FibonacciInplace(GmpInteger fn, uint n)
     {
-        fixed (Mpz_t* pr = &fn.Raw)
-        {
-            GmpLib.__gmpz_fib_ui((IntPtr)pr, n);
-        }
+        GmpLib.__gmpz_fib_ui(fn.Raw, n);
     }
 
     /// <summary>
@@ -1926,11 +1544,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void Fibonacci2Inplace(GmpInteger fn, GmpInteger fnsub1, uint n)
     {
-        fixed (Mpz_t* pr = &fn.Raw)
-        fixed (Mpz_t* pr1 = &fnsub1.Raw)
-        {
-            GmpLib.__gmpz_fib2_ui((IntPtr)pr, (IntPtr)pr1, n);
-        }
+        GmpLib.__gmpz_fib2_ui(fn.Raw, fnsub1.Raw, n);
     }
 
     /// <summary>
@@ -1949,10 +1563,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void LucasNumInplace(GmpInteger fn, uint n)
     {
-        fixed (Mpz_t* pr = &fn.Raw)
-        {
-            GmpLib.__gmpz_lucnum_ui((IntPtr)pr, n);
-        }
+        GmpLib.__gmpz_lucnum_ui(fn.Raw, n);
     }
 
     /// <summary>
@@ -1970,11 +1581,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void LucasNum2Inplace(GmpInteger fn, GmpInteger fnsub1, uint n)
     {
-        fixed (Mpz_t* pr = &fn.Raw)
-        fixed (Mpz_t* pr1 = &fnsub1.Raw)
-        {
-            GmpLib.__gmpz_lucnum2_ui((IntPtr)pr, (IntPtr)pr1, n);
-        }
+        GmpLib.__gmpz_lucnum2_ui(fn.Raw, fnsub1.Raw, n);
     }
 
     /// <summary>
@@ -1992,11 +1599,7 @@ public class GmpInteger : IDisposable
     #region Comparison Functions
     public static unsafe int Compare(GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* p1 = &op1.Raw)
-        fixed (Mpz_t* p2 = &op2.Raw)
-        {
-            return GmpLib.__gmpz_cmp((IntPtr)p1, (IntPtr)p2);
-        }
+        return GmpLib.__gmpz_cmp(op1.Raw, op2.Raw);
     }
 
     public static bool operator ==(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) == 0;
@@ -2008,10 +1611,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe int Compare(GmpInteger op1, double op2)
     {
-        fixed (Mpz_t* p1 = &op1.Raw)
-        {
-            return GmpLib.__gmpz_cmp_d((IntPtr)p1, op2);
-        }
+        return GmpLib.__gmpz_cmp_d(op1.Raw, op2);
     }
 
     public static bool operator ==(GmpInteger op1, double op2) => Compare(op1, op2) == 0;
@@ -2029,10 +1629,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe int Compare(GmpInteger op1, int op2)
     {
-        fixed (Mpz_t* p1 = &op1.Raw)
-        {
-            return GmpLib.__gmpz_cmp_si((IntPtr)p1, op2);
-        }
+        return GmpLib.__gmpz_cmp_si(op1.Raw, op2);
     }
 
     public static bool operator ==(GmpInteger op1, int op2) => Compare(op1, op2) == 0;
@@ -2050,10 +1647,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe int Compare(GmpInteger op1, uint op2)
     {
-        fixed (Mpz_t* p1 = &op1.Raw)
-        {
-            return GmpLib.__gmpz_cmp_ui((IntPtr)p1, op2);
-        }
+        return GmpLib.__gmpz_cmp_ui(op1.Raw, op2);
     }
 
     public static bool operator ==(GmpInteger op1, uint op2) => Compare(op1, op2) == 0;
@@ -2082,45 +1676,35 @@ public class GmpInteger : IDisposable
         };
     }
 
-    public override int GetHashCode() => Raw.GetHashCode();
+    public override unsafe int GetHashCode() => ((Mpz_t*)Raw)->GetHashCode();
 
     public static unsafe int CompareAbs(GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* p1 = &op1.Raw)
-        fixed (Mpz_t* p2 = &op2.Raw)
-        {
-            return GmpLib.__gmpz_cmpabs((IntPtr)p1, (IntPtr)p2);
-        }
+        return GmpLib.__gmpz_cmpabs(op1.Raw, op2.Raw);
     }
 
     public static unsafe int CompareAbs(GmpInteger op1, double op2)
     {
-        fixed (Mpz_t* p1 = &op1.Raw)
-        {
-            return GmpLib.__gmpz_cmpabs_d((IntPtr)p1, op2);
-        }
+        return GmpLib.__gmpz_cmpabs_d(op1.Raw, op2);
     }
 
     public static unsafe int CompareAbs(GmpInteger op1, uint op2)
     {
-        fixed (Mpz_t* p1 = &op1.Raw)
-        {
-            return GmpLib.__gmpz_cmpabs_ui((IntPtr)p1, op2);
-        }
+        return GmpLib.__gmpz_cmpabs_ui(op1.Raw, op2);
     }
 
-    public int Sign => Raw.Size < 0 ? -1 : Raw.Size > 0 ? 1 : 0;
+    public unsafe int Sign => ((Mpz_t*)Raw)->Size switch
+    {
+        < 0 => -1,
+        0 => 0,
+        > 0 => 1
+    };
     #endregion
 
     #region Logical and Bit Manipulation Functions
     public static unsafe void BitwiseAndInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (Mpz_t* p1 = &op1.Raw)
-        fixed (Mpz_t* p2 = &op2.Raw)
-        {
-            GmpLib.__gmpz_and((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
-        }
+        GmpLib.__gmpz_and(rop.Raw, op1.Raw, op2.Raw);
     }
 
     public static GmpInteger BitwiseAnd(GmpInteger op1, GmpInteger op2)
@@ -2134,12 +1718,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void BitwiseOrInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (Mpz_t* p1 = &op1.Raw)
-        fixed (Mpz_t* p2 = &op2.Raw)
-        {
-            GmpLib.__gmpz_ior((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
-        }
+        GmpLib.__gmpz_ior(rop.Raw, op1.Raw, op2.Raw);
     }
 
     public static GmpInteger BitwiseOr(GmpInteger op1, GmpInteger op2)
@@ -2153,12 +1732,7 @@ public class GmpInteger : IDisposable
 
     public static unsafe void BitwiseXorInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (Mpz_t* p1 = &op1.Raw)
-        fixed (Mpz_t* p2 = &op2.Raw)
-        {
-            GmpLib.__gmpz_xor((IntPtr)pr, (IntPtr)p1, (IntPtr)p2);
-        }
+        GmpLib.__gmpz_xor(rop.Raw, op1.Raw, op2.Raw);
     }
 
     public static GmpInteger BitwiseXor(GmpInteger op1, GmpInteger op2)
@@ -2178,11 +1752,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe void ComplementInplace(GmpInteger rop, GmpInteger op)
     {
-        fixed (Mpz_t* pr = &rop.Raw)
-        fixed (Mpz_t* p = &op.Raw)
-        {
-            GmpLib.__gmpz_com((IntPtr)pr, (IntPtr)p);
-        }
+        GmpLib.__gmpz_com(rop.Raw, op.Raw);
     }
 
     /// <summary>
@@ -2202,10 +1772,7 @@ public class GmpInteger : IDisposable
     /// <returns></returns>
     public unsafe uint PopulationCount()
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpz_popcount((IntPtr)ptr);
-        }
+        return GmpLib.__gmpz_popcount(Raw);
     }
 
     /// <summary>
@@ -2220,11 +1787,7 @@ public class GmpInteger : IDisposable
     /// </summary>
     public static unsafe uint HammingDistance(GmpInteger op1, GmpInteger op2)
     {
-        fixed (Mpz_t* p1 = &op1.Raw)
-        fixed (Mpz_t* p2 = &op2.Raw)
-        {
-            return GmpLib.__gmpz_hamdist((IntPtr)p1, (IntPtr)p2);
-        }
+        return GmpLib.__gmpz_hamdist(op1.Raw, op2.Raw);
     }
 
     /// <summary>
@@ -2239,10 +1802,7 @@ public class GmpInteger : IDisposable
     /// <returns>The index of the found bit.</returns>
     public unsafe uint FirstIndexOf0(uint startingBit = 0)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpz_scan0((IntPtr)ptr, startingBit);
-        }
+        return GmpLib.__gmpz_scan0(Raw, startingBit);
     }
 
     /// <summary>
@@ -2257,42 +1817,27 @@ public class GmpInteger : IDisposable
     /// <returns>The index of the found bit.</returns>
     public unsafe uint FirstIndexOf1(uint startingBit = 0)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpz_scan1((IntPtr)ptr, startingBit);
-        }
+        return GmpLib.__gmpz_scan1(Raw, startingBit);
     }
 
     public unsafe void SetBit(uint bitIndex)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            GmpLib.__gmpz_setbit((IntPtr)ptr, bitIndex);
-        }
+        GmpLib.__gmpz_setbit(Raw, bitIndex);
     }
 
     public unsafe void ClearBit(uint bitIndex)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            GmpLib.__gmpz_clrbit((IntPtr)ptr, bitIndex);
-        }
+        GmpLib.__gmpz_clrbit(Raw, bitIndex);
     }
 
     public unsafe void ComplementBit(uint bitIndex)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            GmpLib.__gmpz_combit((IntPtr)ptr, bitIndex);
-        }
+        GmpLib.__gmpz_combit(Raw, bitIndex);
     }
 
     public unsafe int TestBit(uint bitIndex)
     {
-        fixed (Mpz_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpz_tstbit((IntPtr)ptr, bitIndex);
-        }
+        return GmpLib.__gmpz_tstbit(Raw, bitIndex);
     }
     #endregion
 
@@ -2305,10 +1850,7 @@ public class GmpInteger : IDisposable
     [Obsolete("use GmpRandom")]
     public static unsafe void RandomInplace(GmpInteger rop, int maxLimbCount)
     {
-        fixed (Mpz_t* ptr = &rop.Raw)
-        {
-            GmpLib.__gmpz_random((IntPtr)ptr, maxLimbCount);
-        }
+        GmpLib.__gmpz_random(rop.Raw, maxLimbCount);
     }
 
     /// <summary>
@@ -2334,10 +1876,7 @@ public class GmpInteger : IDisposable
     [Obsolete("use GmpRandom")]
     public static unsafe void Random2Inplace(GmpInteger rop, int maxLimbCount)
     {
-        fixed (Mpz_t* ptr = &rop.Raw)
-        {
-            GmpLib.__gmpz_random((IntPtr)ptr, maxLimbCount);
-        }
+        GmpLib.__gmpz_random(rop.Raw, maxLimbCount);
     }
 
     /// <summary>

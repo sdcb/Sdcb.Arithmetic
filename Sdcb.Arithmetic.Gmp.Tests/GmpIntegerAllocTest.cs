@@ -17,12 +17,12 @@ public class GmpIntegerAllocTest
         "12345678901234567890123456789012345678901234567890123456" +
         "12345678901234567890123456789012345678901234567890123456" +
         "12345678901234567890123456789012345678901234567890123456")]
-    public void RellocToFitShouldOk(string num)
+    public unsafe void RellocToFitShouldOk(string num)
     {
         using GmpInteger n = new GmpInteger(bitCount: 65536);
         n.Assign(num);
         n.ReallocToFit();
-        Assert.True(n.Raw.Allocated * GmpLib.LimbBitSize < 65536);
+        Assert.True(((Mpz_t*)n.Raw)->Allocated * GmpLib.LimbBitSize < 65536);
         Assert.Equal(num, n.ToString());
     }
 }
