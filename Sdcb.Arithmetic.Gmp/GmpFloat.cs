@@ -861,6 +861,7 @@ public class GmpFloat : IDisposable
     private unsafe void Clear()
     {
         GmpLib.__gmpf_clear(Raw);
+        Marshal.FreeHGlobal(Raw);
         Raw = IntPtr.Zero;
     }
 
