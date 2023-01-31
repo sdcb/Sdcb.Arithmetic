@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
-using SysMath = System.Math;
 
 namespace Sdcb.Arithmetic.Gmp;
 
@@ -14,22 +13,20 @@ public class GmpFloat : IDisposable
         set => GmpLib.__gmpf_set_default_prec(value);
     }
 
-    public Mpf_t Raw = new();
-    private bool _isOwner;
+    public IntPtr Raw;
+    private readonly bool _isOwner;
     private bool _disposed;
 
     #region Initialization functions
 
     public unsafe GmpFloat(bool isOwner = true)
     {
-        fixed (Mpf_t* ptr = &Raw)
-        {
-            GmpLib.__gmpf_init((IntPtr)ptr);
-        }
+        Raw = Mpf_t.Alloc();
+        GmpLib.__gmpf_init(Raw);
         _isOwner = isOwner;
     }
 
-    public GmpFloat(Mpf_t raw, bool isOwner = true)
+    public GmpFloat(IntPtr raw, bool isOwner = true)
     {
         Raw = raw;
         _isOwner = isOwner;
@@ -37,16 +34,14 @@ public class GmpFloat : IDisposable
 
     public unsafe GmpFloat(uint precision, bool isOwner = true)
     {
-        fixed (Mpf_t* ptr = &Raw)
+        Raw = Mpf_t.Alloc();
+        if (precision == 0)
         {
-            if (precision == 0)
-            {
-                GmpLib.__gmpf_init((IntPtr)ptr);
-            }
-            else
-            {
-                GmpLib.__gmpf_init2((IntPtr)ptr, precision);
-            }
+            GmpLib.__gmpf_init(Raw);
+        }
+        else
+        {
+            GmpLib.__gmpf_init2(Raw, precision);
         }
         _isOwner = isOwner;
     }
@@ -56,9 +51,8 @@ public class GmpFloat : IDisposable
 
     public unsafe static GmpFloat From(int val)
     {
-        Mpf_t raw = new();
-        Mpf_t* ptr = &raw;
-        GmpLib.__gmpf_init_set_si((IntPtr)ptr, val);
+        IntPtr raw = Mpf_t.Alloc();
+        GmpLib.__gmpf_init_set_si(raw, val);
         return new GmpFloat(raw);
     }
 
@@ -71,9 +65,8 @@ public class GmpFloat : IDisposable
 
     public unsafe static GmpFloat From(uint val)
     {
-        Mpf_t raw = new();
-        Mpf_t* ptr = &raw;
-        GmpLib.__gmpf_init_set_ui((IntPtr)ptr, val);
+        IntPtr raw = Mpf_t.Alloc();
+        GmpLib.__gmpf_init_set_ui(raw, val);
         return new GmpFloat(raw);
     }
 
@@ -86,9 +79,8 @@ public class GmpFloat : IDisposable
 
     public unsafe static GmpFloat From(double val)
     {
-        Mpf_t raw = new();
-        Mpf_t* ptr = &raw;
-        GmpLib.__gmpf_init_set_d((IntPtr)ptr, val);
+        IntPtr raw = Mpf_t.Alloc();
+        GmpLib.__gmpf_init_set_d(raw, val);
         return new GmpFloat(raw);
     }
 
@@ -111,22 +103,21 @@ public class GmpFloat : IDisposable
     /// </summary>
     public unsafe static GmpFloat From(GmpInteger val)
     {
-        GmpFloat f = new(precision: (uint)SysMath.Abs(val.Raw.Size) * GmpLib.LimbBitSize);
+        GmpFloat f = new(precision: (uint)Math.Abs(val.Raw.Size) * GmpLib.LimbBitSize);
         f.Assign(val);
         return f;
     }
 
     public unsafe static GmpFloat Parse(string val, int @base = 10)
     {
-        Mpf_t raw = new();
-        Mpf_t* ptr = &raw;
+        IntPtr raw = Mpf_t.Alloc();
         byte[] valBytes = Encoding.UTF8.GetBytes(val);
         fixed (byte* pval = valBytes)
         {
-            int ret = GmpLib.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, @base);
+            int ret = GmpLib.__gmpf_init_set_str(raw, (IntPtr)pval, @base);
             if (ret != 0)
             {
-                GmpLib.__gmpf_clear((IntPtr)ptr);
+                GmpLib.__gmpf_clear(raw);
                 throw new FormatException($"Failed to parse {val}, base={@base} to BigFloat, __gmpf_init_set_str returns {ret}");
             }
         }
@@ -142,15 +133,14 @@ public class GmpFloat : IDisposable
 
     public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out GmpFloat result, int @base = 10)
     {
-        Mpf_t raw = new();
-        Mpf_t* ptr = &raw;
+        IntPtr raw = Mpf_t.Alloc();
         byte[] valBytes = Encoding.UTF8.GetBytes(val);
         fixed (byte* pval = valBytes)
         {
-            int rt = GmpLib.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, @base);
+            int rt = GmpLib.__gmpf_init_set_str(raw, (IntPtr)pval, @base);
             if (rt != 0)
             {
-                GmpLib.__gmpf_clear((IntPtr)ptr);
+                GmpLib.__gmpf_clear(raw);
                 result = null;
                 return false;
             }
@@ -165,23 +155,20 @@ public class GmpFloat : IDisposable
     public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out GmpFloat result, uint precision, int @base = 10)
     {
         GmpFloat f = new(precision);
-        fixed (Mpf_t* pf = &f.Raw)
+        byte[] opBytes = Encoding.UTF8.GetBytes(val);
+        fixed (byte* opBytesPtr = opBytes)
         {
-            byte[] opBytes = Encoding.UTF8.GetBytes(val);
-            fixed (byte* opBytesPtr = opBytes)
+            int ret = GmpLib.__gmpf_set_str(f.Raw, (IntPtr)opBytesPtr, @base);
+            if (ret != 0)
             {
-                int ret = GmpLib.__gmpf_set_str((IntPtr)pf, (IntPtr)opBytesPtr, @base);
-                if (ret != 0)
-                {
-                    result = null;
-                    f.Dispose();
-                    return false;
-                }
-                else
-                {
-                    result = f;
-                    return true;
-                }
+                result = null;
+                f.Dispose();
+                return false;
+            }
+            else
+            {
+                result = f;
+                return true;
             }
         }
     }
@@ -190,151 +177,111 @@ public class GmpFloat : IDisposable
     {
         get
         {
-            fixed (Mpf_t* ptr = &Raw)
-            {
-                return GmpLib.__gmpf_get_prec((IntPtr)ptr);
-            }
+            return GmpLib.__gmpf_get_prec(Raw);
         }
         set
         {
-            fixed (Mpf_t* ptr = &Raw)
-            {
-                GmpLib.__gmpf_set_prec((IntPtr)ptr, value);
-            }
+            GmpLib.__gmpf_set_prec(Raw, value);
         }
     }
 
     [Obsolete("use Precision")]
     public unsafe void SetRawPrecision(uint value)
     {
-        fixed (Mpf_t* ptr = &Raw)
-        {
-            GmpLib.__gmpf_set_prec_raw((IntPtr)ptr, value);
-        }
+        GmpLib.__gmpf_set_prec_raw(Raw, value);
     }
     #endregion
 
     #region Assignment functions
     public unsafe void Assign(GmpFloat op)
     {
-        fixed (Mpf_t* pthis = &Raw)
-        fixed (Mpf_t* pthat = &op.Raw)
-        {
-            GmpLib.__gmpf_set((IntPtr)pthis, (IntPtr)pthat);
-        }
+        GmpLib.__gmpf_set(Raw, op.Raw);
     }
 
     public unsafe void Assign(uint op)
     {
-        fixed (Mpf_t* pthis = &Raw)
-        {
-            GmpLib.__gmpf_set_ui((IntPtr)pthis, op);
-        }
+        GmpLib.__gmpf_set_ui(Raw, op);
     }
 
     public unsafe void Assign(int op)
     {
-        fixed (Mpf_t* pthis = &Raw)
-        {
-            GmpLib.__gmpf_set_si((IntPtr)pthis, op);
-        }
+        GmpLib.__gmpf_set_si(Raw, op);
     }
 
     public unsafe void Assign(double op)
     {
-        fixed (Mpf_t* pthis = &Raw)
-        {
-            GmpLib.__gmpf_set_d((IntPtr)pthis, op);
-        }
+        GmpLib.__gmpf_set_d(Raw, op);
     }
 
     public unsafe void Assign(GmpInteger op)
     {
-        fixed (Mpf_t* pthis = &Raw)
         fixed (Mpz_t* pop = &op.Raw)
         {
-            GmpLib.__gmpf_set_z((IntPtr)pthis, (IntPtr)pop);
+            GmpLib.__gmpf_set_z(Raw, (IntPtr)pop);
         }
     }
 
     public unsafe void Assign(GmpRational op)
     {
-        fixed (Mpf_t* pthis = &Raw)
         fixed (Mpq_t* pop = &op.Raw)
         {
-            GmpLib.__gmpf_set_q((IntPtr)pthis, (IntPtr)pop);
+            GmpLib.__gmpf_set_q(Raw, (IntPtr)pop);
         }
     }
 
     public unsafe void Assign(string op, int @base = 10)
     {
-        fixed (Mpf_t* pthis = &Raw)
+        byte[] opBytes = Encoding.UTF8.GetBytes(op);
+        fixed (byte* opBytesPtr = opBytes)
         {
-            byte[] opBytes = Encoding.UTF8.GetBytes(op);
-            fixed (byte* opBytesPtr = opBytes)
+            int ret = GmpLib.__gmpf_set_str(Raw, (IntPtr)opBytesPtr, @base);
+            if (ret != 0)
             {
-                int ret = GmpLib.__gmpf_set_str((IntPtr)pthis, (IntPtr)opBytesPtr, @base);
-                if (ret != 0)
-                {
-                    throw new FormatException($"Failed to parse \"{op}\", base={@base} to BigFloat, __gmpf_set_str returns {ret}");
-                }
+                throw new FormatException($"Failed to parse \"{op}\", base={@base} to BigFloat, __gmpf_set_str returns {ret}");
             }
         }
     }
 
     public unsafe static void Swap(GmpFloat op1, GmpFloat op2)
     {
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        fixed (Mpf_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpf_swap((IntPtr)pop1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpf_swap(op1.Raw, op2.Raw);
     }
     #endregion
 
     #region Conversion Functions
     public unsafe double ToDouble()
     {
-        fixed (Mpf_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpf_get_d((IntPtr)ptr);
-        }
+        return GmpLib.__gmpf_get_d(Raw);
     }
 
     public static explicit operator double(GmpFloat op) => op.ToDouble();
 
     public unsafe ExpDouble ToExpDouble()
     {
-        fixed (Mpf_t* ptr = &Raw)
-        {
-            int exp;
-            double val = GmpLib.__gmpf_get_d_2exp((IntPtr)ptr, (IntPtr)(&exp));
-            return new ExpDouble(exp, val);
-        }
+        int exp;
+        double val = GmpLib.__gmpf_get_d_2exp(Raw, (IntPtr)(&exp));
+        return new ExpDouble(exp, val);
     }
 
     public unsafe int ToInt32()
     {
-        fixed (Mpf_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpf_get_si((IntPtr)ptr);
-        }
+        return GmpLib.__gmpf_get_si(Raw);
     }
 
     public static explicit operator int(GmpFloat op) => op.ToInt32();
 
     public unsafe uint ToUInt32()
     {
-        fixed (Mpf_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpf_get_ui((IntPtr)ptr);
-        }
+        return GmpLib.__gmpf_get_ui(Raw);
     }
 
     /// <summary>
     /// Set rop to the value of op. There is no rounding, this conversion is exact.
     /// </summary>
-    public GmpRational ToGmpRational() => GmpRational.From(this);
+    // TODO!
+    //public GmpRational ToGmpRational() => GmpRational.From(this);
+    public GmpRational ToGmpRational() => throw new NotImplementedException();
+
 
     public static explicit operator uint(GmpFloat op) => op.ToUInt32();
 
@@ -344,45 +291,42 @@ public class GmpFloat : IDisposable
     {
         const nint srcptr = 0;
         const int digits = 0;
-        fixed (Mpf_t* ptr = &Raw)
+        int exp;
+        IntPtr ret = default;
+        try
         {
-            int exp;
-            IntPtr ret = default;
-            try
+            ret = GmpLib.__gmpf_get_str(srcptr, (IntPtr)(&exp), @base, digits, Raw);
+            if (ret == IntPtr.Zero)
             {
-                ret = GmpLib.__gmpf_get_str(srcptr, (IntPtr)(&exp), @base, digits, (IntPtr)ptr);
-                if (ret == IntPtr.Zero)
-                {
-                    throw new ArgumentException($"Unable to convert BigInteger to string.");
-                }
-
-                string s = Marshal.PtrToStringUTF8(ret)!;
-
-                int sign = Sign;
-                string pre = sign == -1 ? "-" : "";
-                s = sign == -1 ? s[1..] : s;
-
-                return pre + (exp switch
-                {
-                    > 0 => s.Length.CompareTo(exp) switch
-                    {
-                        > 0 => (s + new string('0', SysMath.Max(0, exp - s.Length + 1))) switch { var ss => ss[..exp] + "." + ss[exp..] },
-                        < 0 => (s + new string('0', SysMath.Max(0, exp - s.Length))),
-                        0 => s
-                    },
-                    _ => s switch
-                    {
-                        "" => 0, 
-                        _ => "0." + new string('0', -exp) + s
-                    }
-                });
+                throw new ArgumentException($"Unable to convert BigInteger to string.");
             }
-            finally
+
+            string s = Marshal.PtrToStringUTF8(ret)!;
+
+            int sign = Sign;
+            string pre = sign == -1 ? "-" : "";
+            s = sign == -1 ? s[1..] : s;
+
+            return pre + (exp switch
             {
-                if (ret != IntPtr.Zero)
+                > 0 => s.Length.CompareTo(exp) switch
                 {
-                    GmpMemory.Free(ret);
+                    > 0 => (s + new string('0', Math.Max(0, exp - s.Length + 1))) switch { var ss => ss[..exp] + "." + ss[exp..] },
+                    < 0 => (s + new string('0', Math.Max(0, exp - s.Length))),
+                    0 => s
+                },
+                _ => s switch
+                {
+                    "" => 0,
+                    _ => "0." + new string('0', -exp) + s
                 }
+            });
+        }
+        finally
+        {
+            if (ret != IntPtr.Zero)
+            {
+                GmpMemory.Free(ret);
             }
         }
     }
@@ -393,140 +337,77 @@ public class GmpFloat : IDisposable
     #region Arithmetic Functions - Raw inplace functions
     public static unsafe void AddInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        fixed (Mpf_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpf_add((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpf_add(rop.Raw, op1.Raw, op2.Raw);
     }
 
     public static unsafe void AddInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpf_add_ui((IntPtr)prop, (IntPtr)pop1, op2);
-        }
+        GmpLib.__gmpf_add_ui(rop.Raw, op1.Raw, op2);
     }
 
     public static unsafe void SubtractInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        fixed (Mpf_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpf_sub((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpf_sub(rop.Raw, op1.Raw, op2.Raw);
     }
 
     public static unsafe void SubtractInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpf_sub_ui((IntPtr)prop, (IntPtr)pop1, op2);
-        }
+        GmpLib.__gmpf_sub_ui(rop.Raw, op1.Raw, op2);
     }
 
     public static unsafe void SubtractInplace(GmpFloat rop, uint op1, GmpFloat op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpf_ui_sub((IntPtr)prop, op1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpf_ui_sub(rop.Raw, op1, op2.Raw);
     }
 
     public static unsafe void MultiplyInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        fixed (Mpf_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpf_mul((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpf_mul(rop.Raw, op1.Raw, op2.Raw);
     }
 
     public static unsafe void MultiplyInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpf_mul_ui((IntPtr)prop, (IntPtr)pop1, op2);
-        }
+        GmpLib.__gmpf_mul_ui(rop.Raw, op1.Raw, op2);
     }
 
     public static unsafe void DivideInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        fixed (Mpf_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpf_div((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpf_div(rop.Raw, op1.Raw, op2.Raw);
     }
 
     public static unsafe void DivideInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpf_div_ui((IntPtr)prop, (IntPtr)pop1, op2);
-        }
+        GmpLib.__gmpf_div_ui(rop.Raw, op1.Raw, op2);
     }
 
     public static unsafe void DivideInplace(GmpFloat rop, uint op1, GmpFloat op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpf_ui_div((IntPtr)prop, op1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpf_ui_div(rop.Raw, op1, op2.Raw);
     }
 
     public static unsafe void PowerInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpf_pow_ui((IntPtr)prop, (IntPtr)pop1, op2);
-        }
+        GmpLib.__gmpf_pow_ui(rop.Raw, op1.Raw, op2);
     }
 
     public static unsafe void NegateInplace(GmpFloat rop, GmpFloat op1)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpf_neg((IntPtr)prop, (IntPtr)pop1);
-        }
+        GmpLib.__gmpf_neg(rop.Raw, op1.Raw);
     }
 
     public static unsafe void SqrtInplace(GmpFloat rop, GmpFloat op)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpf_sqrt((IntPtr)prop, (IntPtr)pop);
-        }
+        GmpLib.__gmpf_sqrt(rop.Raw, op.Raw);
     }
 
     public static unsafe void SqrtInplace(GmpFloat rop, uint op)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        {
-            GmpLib.__gmpf_sqrt_ui((IntPtr)prop, op);
-        }
+        GmpLib.__gmpf_sqrt_ui(rop.Raw, op);
     }
 
     public static unsafe void AbsInplace(GmpFloat rop, GmpFloat op)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpf_abs((IntPtr)prop, (IntPtr)pop);
-        }
+        GmpLib.__gmpf_abs(rop.Raw, op.Raw);
     }
 
     /// <summary>
@@ -534,11 +415,7 @@ public class GmpFloat : IDisposable
     /// </summary>
     public static unsafe void Mul2ExpInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpf_mul_2exp((IntPtr)prop, (IntPtr)pop1, op2);
-        }
+        GmpLib.__gmpf_mul_2exp(rop.Raw, op1.Raw, op2);
     }
 
     /// <summary>
@@ -546,11 +423,7 @@ public class GmpFloat : IDisposable
     /// </summary>
     public static unsafe void Div2ExpInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        {
-            GmpLib.__gmpf_div_2exp((IntPtr)prop, (IntPtr)pop1, op2);
-        }
+        GmpLib.__gmpf_div_2exp(rop.Raw, op1.Raw, op2);
     }
 
     #endregion
@@ -717,11 +590,7 @@ public class GmpFloat : IDisposable
     /// </summary>
     public static unsafe int Compare(GmpFloat op1, GmpFloat op2)
     {
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        fixed (Mpf_t* pop2 = &op2.Raw)
-        {
-            return GmpLib.__gmpf_cmp((IntPtr)pop1, (IntPtr)pop2);
-        }
+        return GmpLib.__gmpf_cmp(op1.Raw, op2.Raw);
     }
 
     public override bool Equals(object? obj) => obj switch
@@ -735,7 +604,7 @@ public class GmpFloat : IDisposable
         _ => false
     };
 
-    public override int GetHashCode() => Raw.GetHashCode();
+    public override unsafe int GetHashCode() => ((Mpf_t*)Raw)->GetHashCode();
 
     public static bool operator ==(GmpFloat left, GmpFloat right) => Compare(left, right) == 0;
 
@@ -850,22 +719,18 @@ public class GmpFloat : IDisposable
     /// </summary>
     public static unsafe int Compare(GmpFloat op1, GmpInteger op2)
     {
-        fixed (Mpf_t* pop1 = &op1.Raw)
         fixed (Mpz_t* pop2 = &op2.Raw)
         {
-            return GmpLib.__gmpf_cmp_z((IntPtr)pop1, (IntPtr)pop2);
+            return GmpLib.__gmpf_cmp_z(op1.Raw, (IntPtr)pop2);
         }
     }
 
     /// <summary>
     /// Compare op1 and op2. Return a positive value if op1 > op2, zero if op1 = op2, and a negative value if op1 < op2.
     /// </summary>
-    public static unsafe int Compare(GmpFloat op1, double op2)
+    public static int Compare(GmpFloat op1, double op2)
     {
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        {
-            return GmpLib.__gmpf_cmp_d((IntPtr)pop1, op2);
-        }
+        return GmpLib.__gmpf_cmp_d(op1.Raw, op2);
     }
 
     /// <summary>
@@ -873,10 +738,7 @@ public class GmpFloat : IDisposable
     /// </summary>
     public static unsafe int Compare(GmpFloat op1, int op2)
     {
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        {
-            return GmpLib.__gmpf_cmp_si((IntPtr)pop1, op2);
-        }
+        return GmpLib.__gmpf_cmp_si(op1.Raw, op2);
     }
 
     /// <summary>
@@ -884,10 +746,7 @@ public class GmpFloat : IDisposable
     /// </summary>
     public static unsafe int Compare(GmpFloat op1, uint op2)
     {
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        {
-            return GmpLib.__gmpf_cmp_ui((IntPtr)pop1, op2);
-        }
+        return GmpLib.__gmpf_cmp_ui(op1.Raw, op2);
     }
 
     /// <summary>
@@ -896,10 +755,7 @@ public class GmpFloat : IDisposable
     [Obsolete("This function is mathematically ill-defined and should not be used.")]
     public static unsafe int MpfEquals(GmpFloat op1, uint op2)
     {
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        {
-            return GmpLib.__gmpf_cmp_ui((IntPtr)pop1, op2);
-        }
+        return GmpLib.__gmpf_cmp_ui(op1.Raw, op2);
     }
 
     /// <summary>
@@ -907,12 +763,7 @@ public class GmpFloat : IDisposable
     /// </summary>
     public static unsafe void RelDiffInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop1 = &op1.Raw)
-        fixed (Mpf_t* pop2 = &op2.Raw)
-        {
-            GmpLib.__gmpf_reldiff((IntPtr)prop, (IntPtr)pop1, (IntPtr)pop2);
-        }
+        GmpLib.__gmpf_reldiff(rop.Raw, op1.Raw, op2.Raw);
     }
 
     /// <summary>
@@ -925,18 +776,19 @@ public class GmpFloat : IDisposable
         return rop;
     }
 
-    public int Sign => Raw.Size < 0 ? -1 : Raw.Size > 0 ? 1 : 0;
+    public unsafe int Sign => ((Mpf_t*)Raw)->Size switch
+    {
+        < 0 => -1,
+        0 => 0,
+        > 0 => 1
+    };
 
     #endregion
 
     #region Misc Functions
     public static unsafe void CeilInplace(GmpFloat rop, GmpFloat op)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpf_ceil((IntPtr)prop, (IntPtr)pop);
-        }
+        GmpLib.__gmpf_ceil(rop.Raw, op.Raw);
     }
 
     public static GmpFloat Ceil(GmpFloat op, uint precision = 0)
@@ -948,11 +800,7 @@ public class GmpFloat : IDisposable
 
     public static unsafe void FloorInplace(GmpFloat rop, GmpFloat op)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpf_floor((IntPtr)prop, (IntPtr)pop);
-        }
+        GmpLib.__gmpf_floor(rop.Raw, op.Raw);
     }
 
     public static GmpFloat Floor(GmpFloat op, uint precision = 0)
@@ -965,13 +813,9 @@ public class GmpFloat : IDisposable
     /// <summary>
     /// mpf_trunc, Set rop to op rounded to an integer, to the integer towards zero.
     /// </summary>
-    public static unsafe void RoundInplace(GmpFloat rop, GmpFloat op)
+    public static void RoundInplace(GmpFloat rop, GmpFloat op)
     {
-        fixed (Mpf_t* prop = &rop.Raw)
-        fixed (Mpf_t* pop = &op.Raw)
-        {
-            GmpLib.__gmpf_trunc((IntPtr)prop, (IntPtr)pop);
-        }
+        GmpLib.__gmpf_trunc(rop.Raw, op.Raw);
     }
 
     /// <summary>
@@ -984,57 +828,40 @@ public class GmpFloat : IDisposable
         return rop;
     }
 
-    public unsafe bool IsInteger
+    public bool IsInteger
     {
         get
         {
-            fixed (Mpf_t* ptr = &Raw)
-            {
-                return GmpLib.__gmpf_integer_p((IntPtr)ptr) != 0;
-            }
+            return GmpLib.__gmpf_integer_p(Raw) != 0;
         }
     }
 
-    public unsafe bool FitsInt32()
+    public bool FitsInt32()
     {
-        fixed (Mpf_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpf_fits_sint_p((IntPtr)ptr) != 0;
-        }
+        return GmpLib.__gmpf_fits_sint_p(Raw) != 0;
     }
 
-    public unsafe bool FitsUInt32()
+    public bool FitsUInt32()
     {
-        fixed (Mpf_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpf_fits_uint_p((IntPtr)ptr) != 0;
-        }
+        return GmpLib.__gmpf_fits_uint_p(Raw) != 0;
     }
 
-    public unsafe bool FitsInt16()
+    public bool FitsInt16()
     {
-        fixed (Mpf_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpf_fits_sshort_p((IntPtr)ptr) != 0;
-        }
+        return GmpLib.__gmpf_fits_sshort_p(Raw) != 0;
     }
 
-    public unsafe bool FitsUInt16()
+    public bool FitsUInt16()
     {
-        fixed (Mpf_t* ptr = &Raw)
-        {
-            return GmpLib.__gmpf_fits_ushort_p((IntPtr)ptr) != 0;
-        }
+        return GmpLib.__gmpf_fits_ushort_p(Raw) != 0;
     }
     #endregion
 
     #region Dispose and Clear
     private unsafe void Clear()
     {
-        fixed (Mpf_t* ptr = &Raw)
-        {
-            GmpLib.__gmpf_clear((IntPtr)ptr);
-        }
+        GmpLib.__gmpf_clear(Raw);
+        Raw = IntPtr.Zero;
     }
 
     protected virtual void Dispose(bool disposing)
@@ -1076,10 +903,7 @@ public class GmpFloat : IDisposable
     [Obsolete("use GmpRandom")]
     public static unsafe void Random2Inplace(GmpFloat rop, int maxLimbCount, int maxExp)
     {
-        fixed (Mpf_t* ptr = &rop.Raw)
-        {
-            GmpLib.__gmpf_random2((IntPtr)ptr, maxLimbCount, maxExp);
-        }
+        GmpLib.__gmpf_random2(rop.Raw, maxLimbCount, maxExp);
     }
 
     /// <summary>
@@ -1107,10 +931,12 @@ public record struct Mpf_t
     public int Exponent;
     public IntPtr Limbs;
 
-    public static int RawSize => Marshal.SizeOf<Mpf_t>();
+    //public unsafe static int RawSize => sizeof(Mpf_t);
+
+    public static unsafe IntPtr Alloc() => Marshal.AllocHGlobal(sizeof(Mpf_t));
 
 
-    private unsafe Span<int> GetLimbData() => new Span<int>((void*)Limbs, Precision - 1);
+    private unsafe Span<int> GetLimbData() => new((void*)Limbs, Precision - 1);
 
     public override int GetHashCode()
     {

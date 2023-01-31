@@ -396,10 +396,9 @@ public class GmpRandom : IDisposable
     /// </summary>
     public unsafe void Next(GmpFloat rop, uint nbits)
     {
-        fixed (Mpf_t* pr = &rop.Raw)
         fixed (GmpRandomState* prandom = &Raw)
         {
-            GmpLib.__gmpf_urandomb((IntPtr)pr, (IntPtr)prandom, nbits);
+            GmpLib.__gmpf_urandomb(rop.Raw, (IntPtr)prandom, nbits);
         }
     }
 

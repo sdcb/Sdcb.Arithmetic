@@ -201,9 +201,8 @@ public class GmpRational : IDisposable
     public unsafe void Assign(GmpFloat val)
     {
         fixed (Mpq_t* pthis = &Raw)
-        fixed (Mpf_t* pval = &val.Raw)
         {
-            GmpLib.__gmpq_set_f((IntPtr)pthis, (IntPtr)pval);
+            GmpLib.__gmpq_set_f((IntPtr)pthis, val.Raw);
         }
     }
 
@@ -569,7 +568,7 @@ public class GmpRational : IDisposable
     #region Applying Integer Functions to Rationals
     public unsafe GmpInteger Num
     {
-        get => new GmpInteger(Raw.Num, isOwner: false);
+        get => new(Raw.Num, isOwner: false);
         set
         {
             fixed (Mpq_t* pthis = &Raw)
@@ -582,7 +581,7 @@ public class GmpRational : IDisposable
 
     public unsafe GmpInteger Den
     {
-        get => new GmpInteger(Raw.Den, isOwner: false);
+        get => new(Raw.Den, isOwner: false);
         set
         {
             fixed (Mpq_t* pthis = &Raw)

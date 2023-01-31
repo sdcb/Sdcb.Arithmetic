@@ -113,9 +113,8 @@ public class GmpInteger : IDisposable
     public unsafe void Assign(GmpFloat op)
     {
         fixed (Mpz_t* ptr = &Raw)
-        fixed (Mpf_t* pop = &op.Raw)
         {
-            GmpLib.__gmpz_set_f((IntPtr)ptr, (IntPtr)pop);
+            GmpLib.__gmpz_set_f((IntPtr)ptr, op.Raw);
         }
     }
 
