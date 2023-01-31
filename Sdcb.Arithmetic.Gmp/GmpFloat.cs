@@ -914,7 +914,7 @@ public class GmpFloat : IDisposable
     #endregion
 }
 
-public record struct Mpf_t
+internal record struct Mpf_t
 {
     public int Precision;
     public int Size;

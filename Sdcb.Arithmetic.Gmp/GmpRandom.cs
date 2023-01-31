@@ -413,7 +413,7 @@ public enum GmpRandomAlgorithm
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public record struct GmpRandomState
+internal record struct GmpRandomState
 {
     public Mpz_t Seed;
     public GmpRandomAlgorithm Algorithm;

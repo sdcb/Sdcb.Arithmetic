@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+
+[assembly: InternalsVisibleTo("Sdcb.Arithmetic.Gmp.Tests")]
 
 namespace Sdcb.Arithmetic.Gmp;
 
@@ -9,7 +12,7 @@ public static class GmpLib
 
     static GmpLib() => GmpNativeLoader.Init();
 
-    internal const string Dll = "gmp";
+    internal const string Dll = "gmp-10.dll";
 
     // NOTE: code is all auto generated below
 

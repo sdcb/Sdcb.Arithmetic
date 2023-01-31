@@ -1914,7 +1914,7 @@ public enum PrimePossibility
     Yes = 2,
 }
 
-public record struct Mpz_t
+internal record struct Mpz_t
 {
     public int Allocated;
     public int Size;

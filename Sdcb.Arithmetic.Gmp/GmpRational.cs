@@ -491,7 +491,7 @@ public class GmpRational : IDisposable
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct Mpq_t
+internal struct Mpq_t
 {
     public Mpz_t Num, Den;
 
