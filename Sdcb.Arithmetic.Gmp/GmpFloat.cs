@@ -931,7 +931,7 @@ public record struct Mpf_t
     public int Exponent;
     public IntPtr Limbs;
 
-    //public unsafe static int RawSize => sizeof(Mpf_t);
+    public unsafe static int RawSize => sizeof(Mpf_t);
 
     public static unsafe IntPtr Alloc() => Marshal.AllocHGlobal(sizeof(Mpf_t));
 
