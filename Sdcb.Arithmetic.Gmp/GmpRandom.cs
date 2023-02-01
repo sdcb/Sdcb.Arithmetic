@@ -6,7 +6,7 @@ namespace Sdcb.Arithmetic.Gmp;
 
 public class GmpRandom : IDisposable
 {
-    public GmpRandomState Raw;
+    public readonly GmpRandomState Raw;
 
     #region Random State Initialization
 

@@ -13,9 +13,8 @@ public class GmpInteger : IDisposable
         set => GmpLib.__gmpf_set_default_prec(value);
     }
 
-    public Mpz_t Raw = new();
-    private bool _disposed;
-    private bool _isOwner;
+    public readonly Mpz_t Raw = new();
+    private readonly bool _isOwner;
 
     #region Initializing Integers
     public unsafe GmpInteger(bool isOwner = true)
@@ -226,6 +225,7 @@ public class GmpInteger : IDisposable
     #endregion
 
     #region Dispose and Clear
+    private bool _disposed;
 
     private unsafe void Clear()
     {

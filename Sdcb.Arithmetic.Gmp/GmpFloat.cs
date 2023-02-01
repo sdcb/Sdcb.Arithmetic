@@ -14,9 +14,8 @@ public class GmpFloat : IDisposable
         set => GmpLib.__gmpf_set_default_prec(value);
     }
 
-    public Mpf_t Raw = new();
-    private bool _isOwner;
-    private bool _disposed;
+    public readonly Mpf_t Raw = new();
+    private readonly bool _isOwner;
 
     #region Initialization functions
 
@@ -1029,6 +1028,7 @@ public class GmpFloat : IDisposable
     #endregion
 
     #region Dispose and Clear
+    private bool _disposed;
     private unsafe void Clear()
     {
         fixed (Mpf_t* ptr = &Raw)
@@ -1110,7 +1110,7 @@ public record struct Mpf_t
     public static int RawSize => Marshal.SizeOf<Mpf_t>();
 
 
-    private unsafe Span<int> GetLimbData() => new Span<int>((void*)Limbs, Precision - 1);
+    private unsafe Span<int> GetLimbData() => new((void*)Limbs, Precision - 1);
 
     public override int GetHashCode()
     {

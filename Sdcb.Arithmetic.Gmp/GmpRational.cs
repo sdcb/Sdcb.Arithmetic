@@ -8,9 +8,8 @@ namespace Sdcb.Arithmetic.Gmp;
 
 public class GmpRational : IDisposable
 {
-    public Mpq_t Raw = new();
-    private bool _disposed = false;
-    private bool _isOwner;
+    public readonly Mpq_t Raw = new();
+    private readonly bool _isOwner;
 
     #region Initialization and Assignment Functions
     public unsafe GmpRational(bool isOwner = true)
@@ -275,6 +274,8 @@ public class GmpRational : IDisposable
     #endregion
 
     #region Dispose & Clear
+    private bool _disposed;
+
     private unsafe void Clear()
     {
         fixed (Mpq_t* ptr = &Raw)
