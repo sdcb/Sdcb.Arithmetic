@@ -96,3 +96,83 @@ public ref struct PQT
     }
 }
 ```
+
+## Technical notes
+
+### Why choosing struct in class design instead of raw memory IntPtr design?
+* (1) `Struct in class` design:
+  ```csharp
+  class GmpInteger
+  {
+    public readonly Mpz_t Raw;
+
+    public unsafe void DoWork()
+    {
+        fixed (Mpz_t* ptr = &Raw)
+        {
+            GmpLib.__dowork((IntPtr)ptr);
+        }
+    }
+  }
+
+  struct Mpz_t
+  {
+    public int A, B;
+    public IntPtr Limbs;
+  }
+  ```
+* (2) `Raw memory IntPtr` design:
+  ```csharp
+  class GmpInteger : IDisposable
+  {
+    public readonly IntPtr Raw;
+
+    public unsafe GmpInteger()
+    {
+        Raw = Marshal.AllocHGlobal(sizeof(Mpz_t));
+    }
+
+    public void DoWork()
+    {
+        GmpLib.__dowork(Raw);
+    }
+
+    public void Dispose()
+    {
+        Marshal.FreeHGlobal(Raw);
+    }
+  }
+  ```
+
+  Here is some benchmark I tested for both `DoWork` senario and `initialize-dispose` senario:
+
+  Details:
+  * init & dispose combines following actions:
+    * allocating struct memory
+    * calling `mpz_init`
+    * calling `mpz_free`
+    * free the memory
+    * Measure the operations-per-seconds, **higher ops is better**
+  * dowork contains following actions:
+    * create a GmpInteger to `1.5`
+    * Calling MultiplyInplace `10*1024*1024` times
+    * Measure the duration, **lower is better**
+  
+  Here is the tested results in my laptop:
+  
+  | case/senario      | init & dispose | dowork |
+  | ----------------- | -------------- | ------ |
+  | Struct in class   | 82,055,792 ops | 1237ms |
+  | Raw memory IntPtr | 15,543,619 ops | 1134ms |
+
+  As you can see, raw memory IntPtr design will benifits ~8.33% faster in `dowork` senario above, but reduces Struct in class design will be 5.2x faster in `init & dispose` senario.
+
+  Finally I choosed the Struct in class design in action, here is some existing Raw memory IntPtr design work if you also wants to test:
+  * branch: https://github.com/sdcb/Sdcb.Arithmetic/tree/feature/gmp-raw-ptr
+  * nuget-package: https://www.nuget.org/packages/Sdcb.Arithmetic.Gmp/1.0.10-preview.12
+
+  Struct in class performance results environment:
+  * commit: https://github.com/sdcb/Sdcb.Arithmetic/tree/976d4271c487a554be936cf56ed55f2b1314042e
+  * nuget-package: https://www.nuget.org/packages/Sdcb.Arithmetic.Gmp/1.0.10-preview.11
+
+  In the future, `Raw memory IntPtr` design can be pick-up if a handy, good performance memory allocator was found.
