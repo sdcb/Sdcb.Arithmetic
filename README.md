@@ -154,8 +154,8 @@ public ref struct PQT
     * free the memory
     * Measure the operations-per-seconds, **higher ops is better**
   * dowork contains following actions:
-    * create a GmpInteger to `1.5`
-    * Calling MultiplyInplace `10*1024*1024` times
+    * create a `GmpFloat` to `1.5` with precision=1000(v = 1, a = 1.5)
+    * Calling `MultiplyInplace`(v *= a) `10*1024*1024` times
     * Measure the duration, **lower is better**
   
   Here is the tested results in my laptop:
@@ -165,9 +165,9 @@ public ref struct PQT
   | Struct in class   | 82,055,792 ops | 1237ms |
   | Raw memory IntPtr | 15,543,619 ops | 1134ms |
 
-  As you can see, raw memory IntPtr design will benifits ~8.33% faster in `dowork` senario above, but reduces Struct in class design will be 5.2x faster in `init & dispose` senario.
+  As you can see, raw memory IntPtr design will benifits **~8.33%** faster in `dowork` senario above, but struct in class design will be **5.2x faster** in `init & dispose` senario.
 
-  Finally I choosed the Struct in class design in action, here is some existing Raw memory IntPtr design work if you also wants to test:
+  Finally I choosed the **struct in class** design, here is some existing Raw memory IntPtr design work if you also wants to check or test:
   * branch: https://github.com/sdcb/Sdcb.Arithmetic/tree/feature/gmp-raw-ptr
   * nuget-package: https://www.nuget.org/packages/Sdcb.Arithmetic.Gmp/1.0.10-preview.12
 
