@@ -23,6 +23,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决�
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdcb.Arithmetic.Mpfr", "Sdcb.Arithmetic.Mpfr\Sdcb.Arithmetic.Mpfr.csproj", "{81B70A39-36EE-4A51-B89A-3B685A3B5E0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdcb.Arithmetic.Mpfr.Tests", "Sdcb.Arithmetic.Mpfr.Tests\Sdcb.Arithmetic.Mpfr.Tests.csproj", "{6BEB1651-ED6A-4D7E-B1C1-CF2F06B41DBF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +41,14 @@ Global
 		{515B07FA-525D-4722-A5BC-9A44B0C69475}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{515B07FA-525D-4722-A5BC-9A44B0C69475}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{515B07FA-525D-4722-A5BC-9A44B0C69475}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81B70A39-36EE-4A51-B89A-3B685A3B5E0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81B70A39-36EE-4A51-B89A-3B685A3B5E0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81B70A39-36EE-4A51-B89A-3B685A3B5E0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81B70A39-36EE-4A51-B89A-3B685A3B5E0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BEB1651-ED6A-4D7E-B1C1-CF2F06B41DBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BEB1651-ED6A-4D7E-B1C1-CF2F06B41DBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BEB1651-ED6A-4D7E-B1C1-CF2F06B41DBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BEB1651-ED6A-4D7E-B1C1-CF2F06B41DBF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
