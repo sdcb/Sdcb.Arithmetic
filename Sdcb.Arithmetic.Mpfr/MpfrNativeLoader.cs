@@ -8,7 +8,7 @@ namespace Sdcb.Arithmetic.Mpfr
     {
         static MpfrNativeLoader()
         {
-            NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), GmpImportResolver);
+            NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), MpfrImportResolver);
         }
 
         public static void Init()
@@ -16,7 +16,7 @@ namespace Sdcb.Arithmetic.Mpfr
             // stub to ensure static constructor executed at least once.
         }
 
-        private static IntPtr GmpImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+        private static IntPtr MpfrImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
         {
             if (libraryName == MpfrLib.Dll)
             {
