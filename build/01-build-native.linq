@@ -10,64 +10,81 @@
 
 #load ".\00-common"
 
-static string NativeVersion => Projects.First(x => x.name == "Sdcb.Arithmetic.Gmp").version;
-
 async Task Main()
 {
 	await SetupAsync(QueryCancelToken);
-	await new WindowsNugetSource("win-x64", "win64", "gmp-10.dll", @"C:\_\3rd\vcpkg\packages\gmp_x64-windows\bin")
+	await new WindowsNugetSource("win-x64", "win64", "gmp-10.dll", @"C:\_\3rd\vcpkg\packages\gmp_x64-windows\bin", "Sdcb.Arithmetic.Gmp", deps: new string[0])
 		.Process(QueryCancelToken);
-	await new WindowsNugetSource("win-x86", "win32", "gmp-10.dll", @"C:\_\3rd\vcpkg\packages\gmp_x86-windows\bin")
+	await new WindowsNugetSource("win-x86", "win32", "gmp-10.dll", @"C:\_\3rd\vcpkg\packages\gmp_x86-windows\bin", "Sdcb.Arithmetic.Gmp", deps: new string[0])
 		.Process(QueryCancelToken);
-	await new WindowsNugetSource("win-x64", "win64", "mpfr-6.dll", @"C:\_\3rd\vcpkg\packages\mpfr_x64-windows\bin")
+	await new WindowsNugetSource("win-x64", "win64", "mpfr-6.dll", @"C:\_\3rd\vcpkg\packages\mpfr_x64-windows\bin", "Sdcb.Arithmetic.Mpfr", deps: new[] { "Sdcb.Arithmetic.Gmp" })
 		.Process(QueryCancelToken);
-	await new WindowsNugetSource("win-x86", "win32", "mpfr-6.dll", @"C:\_\3rd\vcpkg\packages\mpfr_x86-windows\bin")
+	await new WindowsNugetSource("win-x86", "win32", "mpfr-6.dll", @"C:\_\3rd\vcpkg\packages\mpfr_x86-windows\bin", "Sdcb.Arithmetic.Mpfr", deps: new[] { "Sdcb.Arithmetic.Gmp" } )
 		.Process(QueryCancelToken);
 }
 
-static string BuildNuspec(string[] libs, string rid, string titleRid, string folder)
+static string BuildNuspec(string[] libs, string rid, string titleRid, string folder, string pkgName, string[] deps)
 {
 	// props
 	{
-		XDocument props = XDocument.Parse(File
-			.ReadAllText("./Sdcb.Arithmetic.Gmp.runtime.props"));
+		string propsFile = $"./{pkgName}.runtime.props";
+		XDocument props = XDocument.Parse(File.ReadAllText(propsFile));
+		string normalizedName = pkgName.Replace(".", "") + "Dlls";
 		string ns = props.Root.GetDefaultNamespace().NamespaceName;
 		XmlNamespaceManager nsr = new(new NameTable());
 		nsr.AddNamespace("p", ns);
 
 		string platform = rid.Split("-").Last();
 
-		XElement itemGroup = props.XPathSelectElement("/p:Project/p:ItemGroup", nsr);
+		XElement? itemGroup = props.XPathSelectElement("/p:Project/p:ItemGroup", nsr);
+		if (itemGroup == null) throw new Exception($"{nameof(itemGroup)} invalid in {propsFile}");
 		itemGroup.Add(
 		libs
 			.Select(x => Path.GetFileName(x))
-			.Select(x => new XElement(XName.Get("Content", ns), new XAttribute("Include", $@"$(SdcbGmpDlls)\{rid}\native\{x}"),
-				new XElement(XName.Get("Link", ns), @$"dll\{platform}\{x}"),
-				new XElement(XName.Get("CopyToOutputDirectory", ns), "PreserveNewest")))
+			.Select(x => 
+				new XElement(XName.Get("Content", ns), new XAttribute("Include", $@"$({normalizedName})\{rid}\native\{x}"),
+					new XElement(XName.Get("Link", ns), @$"dll\{platform}\{x}"),
+					new XElement(XName.Get("CopyToOutputDirectory", ns), "PreserveNewest")))
 				);
-		props.Save(Path.Combine(folder, $"Sdcb.Arithmetic.Gmp.runtime.{titleRid}.props"));
+
+		XElement? propGroup = props.XPathSelectElement("/p:Project/p:PropertyGroup", nsr);
+		if (propGroup == null) throw new Exception($"{nameof(propGroup)} invalid in {propsFile}");
+		propGroup.Add(new XElement(XName.Get(normalizedName, ns), @"$(MSBuildThisFileDirectory)..\..\runtimes"));
+		props.Save(Path.Combine(folder, $"{pkgName}.runtime.{titleRid}.props"));
 	}
 
 	// nuspec
 	{
+		string nuspecFile = $"./{pkgName}.runtime.nuspec";
 		XDocument nuspec = XDocument.Parse(File
-			.ReadAllText("./Sdcb.Arithmetic.Gmp.runtime.nuspec")
+			.ReadAllText(nuspecFile)
 			.Replace("{rid}", rid)
+			.Replace("{id}", $"{pkgName}.runtime.{titleRid}")
 			.Replace("{titleRid}", titleRid));
 
 		string ns = nuspec.Root.GetDefaultNamespace().NamespaceName;
 		XmlNamespaceManager nsr = new(new NameTable());
 		nsr.AddNamespace("p", ns);
 
-		XElement files = nuspec.XPathSelectElement("/p:package/p:files", nsr);
+		XElement? files = nuspec.XPathSelectElement("/p:package/p:files", nsr);
+		if (files == null) throw new Exception($"{nameof(files)} invalid in {nuspecFile}");
 		files.Add(libs.Select(x => new XElement(
 			XName.Get("file", ns),
 			new XAttribute("src", x.Split('\\', 2)[1]),
 			new XAttribute("target", @$"runtimes\{rid}\native"))));
 		files.Add(new[] { "net", "netstandard", "netcoreapp" }.Select(x => new XElement(
 			XName.Get("file", ns),
-			new XAttribute("src", $"Sdcb.Arithmetic.Gmp.runtime.{titleRid}.props"),
-			new XAttribute("target", @$"build\{x}\Sdcb.Arithmetic.Gmp.runtime.{titleRid}.props"))));
+			new XAttribute("src", $"{pkgName}.runtime.{titleRid}.props"),
+			new XAttribute("target", @$"build\{x}\{pkgName}.runtime.{titleRid}.props"))));
+		
+		if (deps.Any())
+		{
+			XElement? dependencies = nuspec.XPathSelectElement("/p:package/p:metadata/p:dependencies", nsr);
+			if (dependencies == null) throw new Exception($"{nameof(dependencies)} invalid in {nuspecFile}");
+			dependencies.Add(deps.Select(depId => new XElement(XName.Get("dependency", ns), 
+				new XAttribute("id", $"{depId}.runtime.{titleRid}"), 
+				new XAttribute("version", Projects.First(x => x.name == depId).version))));
+		}
 
 		string destinationFile = Path.Combine(folder, $"{rid}.nuspec");
 		nuspec.Save(destinationFile);
@@ -75,9 +92,9 @@ static string BuildNuspec(string[] libs, string rid, string titleRid, string fol
 	}
 }
 
-public record WindowsNugetSource(string rid, string titleRid, string libName, string folder) : NupkgBuildSource(rid, titleRid, libName, folder)
+public record WindowsNugetSource(string rid, string titleRid, string libName, string folder, string pkgName, string[] deps) : NupkgBuildSource(rid, titleRid, libName, folder, pkgName, deps)
 {
-	protected override async Task Decompress(string folder, CancellationToken cancellationToken)
+	protected override Task Decompress(string folder, CancellationToken cancellationToken)
 	{
 		Directory.CreateDirectory(CLibFolder);
 		foreach (string entry in Directory.EnumerateFiles(folder).Where(x => Path.GetFileName(x) == libName))
@@ -87,6 +104,7 @@ public record WindowsNugetSource(string rid, string titleRid, string libName, st
 			File.Copy(entry, localEntryDest, overwrite: true);
 			Console.WriteLine("Done");
 		}
+		return Task.CompletedTask;
 	}
 
 	protected override string[] GetDlls()
@@ -102,12 +120,13 @@ public record WindowsNugetSource(string rid, string titleRid, string libName, st
 	}
 }
 
-public abstract record NupkgBuildSource(string rid, string titleRid, string libName, string folder)
+public abstract record NupkgBuildSource(string rid, string titleRid, string libName, string folder, string pkgName, string[] deps)
 {
 	public string CLibFilePath => Path.Combine(CLibFolder, libName);
 	public string CLibFolder => Path.Combine(RidFolder, "bin");
 	public string RidFolder => $@"{titleRid}-{Path.GetFileNameWithoutExtension(libName)}";
-	public string NuGetPath => Path.Combine("nupkgs", $"Sdcb.Arithmetic.Gmp.runtime.{titleRid}.{NativeVersion}.nupkg");
+	public string Version => Projects.First(x => x.name == pkgName).version;
+	public string NuGetPath => Path.Combine("nupkgs", $"{pkgName}.runtime.{titleRid}.{Version}.nupkg");
 
 	protected abstract Task Decompress(string localZipFile, CancellationToken cancellationToken);
 	protected abstract string[] GetDlls();
@@ -125,8 +144,8 @@ public abstract record NupkgBuildSource(string rid, string titleRid, string libN
 
 		string nugetExePath = await EnsureNugetExe(cancellationToken);
 
-		Directory.CreateDirectory(Path.GetDirectoryName(CLibFilePath));
-		string nuspecPath = BuildNuspec(libs, rid, titleRid, RidFolder);
+		Directory.CreateDirectory(Path.GetDirectoryName(CLibFilePath)!);
+		string nuspecPath = BuildNuspec(libs, rid, titleRid, RidFolder, pkgName, deps);
 		if (File.Exists(NuGetPath))
 		{
 			Console.WriteLine($"{NuGetPath} exists, override!");
@@ -134,6 +153,6 @@ public abstract record NupkgBuildSource(string rid, string titleRid, string libN
 		
 		string iconDestPath = Path.Combine(RidFolder, "icon.png");
 		if (!File.Exists(iconDestPath)) File.Copy(@$".\icon.png", iconDestPath);
-		NuGetRun($@"pack {nuspecPath} -Version {NativeVersion} -OutputDirectory .\nupkgs".Dump());
+		NuGetRun($@"pack {nuspecPath} -Version {Version} -OutputDirectory .\nupkgs".Dump());
 	}
 }

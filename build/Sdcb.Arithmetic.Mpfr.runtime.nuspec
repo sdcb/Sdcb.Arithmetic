@@ -3,17 +3,17 @@
     <metadata>
         <id>{id}</id>
         <version>2.2.1</version>
-        <title>GMP native bindings for {titleRid}</title>
+        <title>MPFR native bindings for {titleRid}</title>
         <authors>sdcb</authors>
         <license type="expression">LGPL-3.0-only</license>
         <projectUrl>https://github.com/sdcb/Sdcb.Arithmetic</projectUrl>
         <icon>images\icon.png</icon>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
-        <description>Native binding for gmp to work on {titleRid}.</description>
-        <summary>Native binding for gmp to work on {titleRid}.</summary>
+        <description>Native binding for MPFR to work on {titleRid}.</description>
+        <summary>Native binding for MPFR to work on {titleRid}.</summary>
         <releaseNotes></releaseNotes>
         <copyright>Copyright 2023</copyright>
-        <tags>GMP;multi-precision;arithmetic;BigInteger;BigRational;BigInt;BigFloat;bignum;linqpad-samples</tags>
+        <tags>MPFR;GMP;multi-precision;arithmetic;BigInteger;BigRational;BigInt;BigFloat;bignum;linqpad-samples</tags>
         <repository type="git" url="https://github.com/sdcb/Sdcb.Arithmetic.git" />
         <dependencies>
         </dependencies>
