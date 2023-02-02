@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
-        <id>{id}</id>
+        <id>{pkgName}.runtime.{titleRid}</id>
         <version>2.2.1</version>
         <title>MPFR native bindings for {titleRid}</title>
         <authors>sdcb</authors>
@@ -21,6 +21,6 @@
         </frameworkAssemblies>
     </metadata>
     <files>
-        <file src="..\icon.png" target="images\" />
+        <file src="..\{pkgName}.png" target="images\icon.png" />
     </files>
 </package>

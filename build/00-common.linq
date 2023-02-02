@@ -21,8 +21,8 @@ static void DotNetRun(string args) => Run("dotnet", args, Encoding.GetEncoding("
 static void Run(string exe, string args, Encoding encoding) => Util.Cmd(exe, args, encoding);
 static ProjectVersion[] Projects = new[]
 {
-	new ProjectVersion("Sdcb.Arithmetic.Gmp", "1.1-preview.1"), 
-	new ProjectVersion("Sdcb.Arithmetic.Mpfr", "1.1-preview.1"), 
+	new ProjectVersion("Sdcb.Arithmetic.Gmp", "1.1-preview.2"), 
+	new ProjectVersion("Sdcb.Arithmetic.Mpfr", "1.1-preview.2"), 
 };
 
 static async Task DownloadFile(Uri uri, string localFile, CancellationToken cancellationToken = default)

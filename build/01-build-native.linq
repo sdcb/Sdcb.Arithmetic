@@ -50,7 +50,7 @@ static string BuildNuspec(string[] libs, string rid, string titleRid, string fol
 		XElement? propGroup = props.XPathSelectElement("/p:Project/p:PropertyGroup", nsr);
 		if (propGroup == null) throw new Exception($"{nameof(propGroup)} invalid in {propsFile}");
 		propGroup.Add(new XElement(XName.Get(normalizedName, ns), @"$(MSBuildThisFileDirectory)..\..\runtimes"));
-		props.Save(Path.Combine(folder, $"{pkgName}.runtime.{titleRid}.props"));
+		props.Save(Path.Combine(folder, $"{titleRid}.props"));
 	}
 
 	// nuspec
@@ -59,7 +59,7 @@ static string BuildNuspec(string[] libs, string rid, string titleRid, string fol
 		XDocument nuspec = XDocument.Parse(File
 			.ReadAllText(nuspecFile)
 			.Replace("{rid}", rid)
-			.Replace("{id}", $"{pkgName}.runtime.{titleRid}")
+			.Replace("{pkgName}", pkgName)
 			.Replace("{titleRid}", titleRid));
 
 		string ns = nuspec.Root.GetDefaultNamespace().NamespaceName;
@@ -74,7 +74,7 @@ static string BuildNuspec(string[] libs, string rid, string titleRid, string fol
 			new XAttribute("target", @$"runtimes\{rid}\native"))));
 		files.Add(new[] { "net", "netstandard", "netcoreapp" }.Select(x => new XElement(
 			XName.Get("file", ns),
-			new XAttribute("src", $"{pkgName}.runtime.{titleRid}.props"),
+			new XAttribute("src", $"{titleRid}.props"),
 			new XAttribute("target", @$"build\{x}\{pkgName}.runtime.{titleRid}.props"))));
 		
 		if (deps.Any())
@@ -86,7 +86,7 @@ static string BuildNuspec(string[] libs, string rid, string titleRid, string fol
 				new XAttribute("version", Projects.First(x => x.name == depId).version))));
 		}
 
-		string destinationFile = Path.Combine(folder, $"{rid}.nuspec");
+		string destinationFile = Path.Combine(folder, $"{titleRid}.nuspec");
 		nuspec.Save(destinationFile);
 		return destinationFile;
 	}
@@ -150,9 +150,7 @@ public abstract record NupkgBuildSource(string rid, string titleRid, string libN
 		{
 			Console.WriteLine($"{NuGetPath} exists, override!");
 		}
-		
-		string iconDestPath = Path.Combine(RidFolder, "icon.png");
-		if (!File.Exists(iconDestPath)) File.Copy(@$".\icon.png", iconDestPath);
+
 		NuGetRun($@"pack {nuspecPath} -Version {Version} -OutputDirectory .\nupkgs".Dump());
 	}
 }
