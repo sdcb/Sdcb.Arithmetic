@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
-using SysMath = System.Math;
 
 namespace Sdcb.Arithmetic.Gmp;
 
@@ -110,7 +109,7 @@ public class GmpFloat : IDisposable
     /// </summary>
     public unsafe static GmpFloat From(GmpInteger val)
     {
-        GmpFloat f = new(precision: (uint)SysMath.Abs(val.Raw.Size) * GmpLib.LimbBitSize);
+        GmpFloat f = new(precision: (uint)Math.Abs(val.Raw.Size) * GmpLib.LimbBitSize);
         f.Assign(val);
         return f;
     }
@@ -355,26 +354,7 @@ public class GmpFloat : IDisposable
                     throw new ArgumentException($"Unable to convert BigInteger to string.");
                 }
 
-                string s = Marshal.PtrToStringUTF8(ret)!;
-
-                int sign = Sign;
-                string pre = sign == -1 ? "-" : "";
-                s = sign == -1 ? s[1..] : s;
-
-                return pre + (exp switch
-                {
-                    > 0 => s.Length.CompareTo(exp) switch
-                    {
-                        > 0 => (s + new string('0', SysMath.Max(0, exp - s.Length + 1))) switch { var ss => ss[..exp] + "." + ss[exp..] },
-                        < 0 => (s + new string('0', SysMath.Max(0, exp - s.Length))),
-                        0 => s
-                    },
-                    _ => s switch
-                    {
-                        "" => 0, 
-                        _ => "0." + new string('0', -exp) + s
-                    }
-                });
+                return ToString(ret, Sign, exp);
             }
             finally
             {
@@ -384,6 +364,29 @@ public class GmpFloat : IDisposable
                 }
             }
         }
+    }
+
+    internal static string ToString(IntPtr ret, int sign, int exp)
+    {
+        string s = Marshal.PtrToStringUTF8(ret)!;
+
+        string pre = sign == -1 ? "-" : "";
+        s = sign == -1 ? s[1..] : s;
+
+        return pre + (exp switch
+        {
+            > 0 => s.Length.CompareTo(exp) switch
+            {
+                > 0 => (s + new string('0', Math.Max(0, exp - s.Length + 1))) switch { var ss => ss[..exp] + "." + ss[exp..] },
+                < 0 => s + new string('0', Math.Max(0, exp - s.Length)),
+                0 => s
+            },
+            _ => s switch
+            {
+                "" => 0,
+                _ => "0." + new string('0', -exp) + s
+            }
+        });
     }
 
     #endregion
@@ -1100,6 +1103,7 @@ public class GmpFloat : IDisposable
     #endregion
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public record struct Mpf_t
 {
     public int Precision;

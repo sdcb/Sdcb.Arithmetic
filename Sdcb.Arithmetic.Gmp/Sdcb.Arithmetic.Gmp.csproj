@@ -8,7 +8,7 @@
     <Authors>sdcb</Authors>
     <Description>A better GMP library dotnet binding</Description>
     <PackageProjectUrl>https://github.com/sdcb/sdcb.math.gmp</PackageProjectUrl>
-    <PackageIcon>icon.png</PackageIcon>
+    <PackageIcon>Sdcb.Arithmetic.Gmp.png</PackageIcon>
     <RepositoryUrl>https://github.com/sdcb/Sdcb.Math.Gmp.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>GMP;multi-precision;arithmetic;BigInteger;BigRational;BigInt;BigFloat;BigNum;linqpad-samples</PackageTags>
@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\build\icon.png">
+    <None Include="..\build\Sdcb.Arithmetic.Gmp.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

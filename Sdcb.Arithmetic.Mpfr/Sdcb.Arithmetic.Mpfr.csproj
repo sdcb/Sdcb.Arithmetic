@@ -3,7 +3,16 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>11</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <PackageIcon>Sdcb.Arithmetic.Mpfr.png</PackageIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\build\Sdcb.Arithmetic.Mpfr.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Sdcb.Arithmetic.Gmp\Sdcb.Arithmetic.Gmp.csproj" />
