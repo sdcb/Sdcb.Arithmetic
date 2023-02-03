@@ -47,18 +47,11 @@ public unsafe class MpfrFloat : IDisposable
         set => MpfrLib.mpfr_set_default_prec(value);
     }
 
-    private static readonly ThreadLocal<MpfrRounding> _defaultRounding = new(GetRawRounding); /* should be MpfrRounding.Nearest */
     public static MpfrRounding DefaultRounding
     {
-        get => _defaultRounding.Value;
-        set
-        {
-            _defaultRounding.Value = value;
-            MpfrLib.mpfr_set_default_rounding_mode(value);
-        }
+        get => MpfrLib.mpfr_get_default_rounding_mode();
+        set => MpfrLib.mpfr_set_default_rounding_mode(value);
     }
-
-    private static MpfrRounding GetRawRounding() => MpfrLib.mpfr_get_default_rounding_mode();
 
     /// <summary>
     /// The number of bits used to store its significand.

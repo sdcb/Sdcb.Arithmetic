@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+
+[assembly: InternalsVisibleTo("Sdcb.Arithmetic.Mpfr.Tests")]
 
 namespace Sdcb.Arithmetic.Mpfr;
 

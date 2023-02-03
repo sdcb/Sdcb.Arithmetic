@@ -1,4 +1,5 @@
-﻿using Xunit.Abstractions;
+﻿using System.Diagnostics;
+using Xunit.Abstractions;
 
 namespace Sdcb.Arithmetic.Mpfr.Tests
 {
@@ -68,6 +69,14 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             MpfrFloat.DefaultPrecision = 100;
             using MpfrFloat flt = new(precision: 80);
             Assert.Equal(80, flt.Precision);
+        }
+
+        [Fact]
+        public void ToStringTest()
+        {
+            MpfrFloat flt = new();
+            flt.Assign(1.625);
+            Assert.Equal("1.625", flt.ToString());
         }
     }
 }

@@ -368,7 +368,7 @@ public class GmpFloat : IDisposable
 
     internal static string ToString(IntPtr ret, int sign, int exp)
     {
-        string s = Marshal.PtrToStringUTF8(ret)!;
+        string s = Marshal.PtrToStringUTF8(ret)!.TrimEnd('0');
 
         string pre = sign == -1 ? "-" : "";
         s = sign == -1 ? s[1..] : s;
