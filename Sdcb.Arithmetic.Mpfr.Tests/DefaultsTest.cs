@@ -12,6 +12,13 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         }
 
         [Fact]
+        public void DefaultValueShouldBeNan()
+        {
+            using MpfrFloat r = new();
+            Assert.Equal(double.NaN, r.ToDouble());
+        }
+
+        [Fact]
         public void MpfrRoundingDefault()
         {
             Assert.Equal(MpfrRounding.Nearest, MpfrFloat.DefaultRounding);

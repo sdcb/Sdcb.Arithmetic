@@ -1,6 +1,7 @@
 ﻿using Sdcb.Arithmetic.Gmp;
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 
 namespace Sdcb.Arithmetic.Mpfr;
@@ -46,7 +47,7 @@ public unsafe class MpfrFloat : IDisposable
         set => MpfrLib.mpfr_set_default_prec(value);
     }
 
-    private static ThreadLocal<MpfrRounding> _defaultRounding = new ThreadLocal<MpfrRounding>(GetRawRounding); /* should be MpfrRounding.Nearest */
+    private static readonly ThreadLocal<MpfrRounding> _defaultRounding = new(GetRawRounding); /* should be MpfrRounding.Nearest */
     public static MpfrRounding DefaultRounding
     {
         get => _defaultRounding.Value;
@@ -82,12 +83,256 @@ public unsafe class MpfrFloat : IDisposable
     #endregion
 
     #region 2. Assignment Functions
-    public void Assign(MpfrFloat val, MpfrRounding rounding)
+    public void Assign(MpfrFloat val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
         fixed (Mpfr_t* pval = &val.Raw)
         {
-            MpfrLib.mpfr_set((IntPtr)pthis, (IntPtr)pval, rounding);
+            MpfrLib.mpfr_set((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
+        }
+    }
+
+    public void Assign(uint val, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            MpfrLib.mpfr_set_ui((IntPtr)pthis, val, rounding ?? DefaultRounding);
+        }
+    }
+
+    public void Assign(int val, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            MpfrLib.mpfr_set_si((IntPtr)pthis, val, rounding ?? DefaultRounding);
+        }
+    }
+
+    public void Assign(float val, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            MpfrLib.mpfr_set_flt((IntPtr)pthis, val, rounding ?? DefaultRounding);
+        }
+    }
+
+    public void Assign(double val, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            MpfrLib.mpfr_set_d((IntPtr)pthis, val, rounding ?? DefaultRounding);
+        }
+    }
+
+    public void Assign(GmpInteger val, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        fixed (Mpz_t* pval = &val.Raw)
+        {
+            MpfrLib.mpfr_set_z((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
+        }
+    }
+
+    public void Assign(GmpRational val, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        fixed (Mpq_t* pval = &val.Raw)
+        {
+            MpfrLib.mpfr_set_q((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
+        }
+    }
+
+    public void Assign(GmpFloat val, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        fixed (Mpf_t* pval = &val.Raw)
+        {
+            MpfrLib.mpfr_set_f((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// Set the value of rop from op multiplied by two to the power e,
+    /// rounded toward the given direction rnd.
+    /// Note that the input 0 is converted to +0.
+    /// </summary>
+    public void Assign2Exp(uint op, int e, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            MpfrLib.mpfr_set_ui_2exp((IntPtr)pthis, op, e, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// Set the value of rop from op multiplied by two to the power e,
+    /// rounded toward the given direction rnd.
+    /// Note that the input 0 is converted to +0.
+    /// </summary>
+    public void Assign2Exp(int op, int e, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            MpfrLib.mpfr_set_si_2exp((IntPtr)pthis, op, e, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// Set the value of rop from op multiplied by two to the power e,
+    /// rounded toward the given direction rnd.
+    /// Note that the input 0 is converted to +0.
+    /// </summary>
+    public void Assign2Exp(GmpInteger op, int e, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        fixed (Mpz_t* pop = &op.Raw)
+        {
+            MpfrLib.mpfr_set_z_2exp((IntPtr)pthis, (IntPtr)pop, e, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// Set rop to the value of the string s in base base, rounded in the direction rnd. 
+    /// </summary>
+    public void Assign(string s, int @base = 0, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            byte[] opBytes = Encoding.UTF8.GetBytes(s);
+            fixed (byte* opPtr = opBytes)
+            {
+                IntPtr endptr = default;
+                int ret = MpfrLib.mpfr_strtofr((IntPtr)pthis, (IntPtr)opPtr, (IntPtr)(&endptr), @base, rounding ?? DefaultRounding);
+                if (endptr != default)
+                {
+                    string location = Marshal.PtrToStringUTF8(endptr);
+                    throw new FormatException($"Failed to parse \"{s}\", base={@base} to {nameof(MpfrFloat)}, mpfr_strtofr returns {ret} at: {location}");
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Set to the value of the string s in base base, rounded in the direction rnd. 
+    /// </summary>
+    public bool TryAssign(string s, int @base = 0, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            byte[] opBytes = Encoding.UTF8.GetBytes(s);
+            fixed (byte* opPtr = opBytes)
+            {
+                IntPtr endptr = default;
+                int ret = MpfrLib.mpfr_strtofr((IntPtr)pthis, (IntPtr)opPtr, (IntPtr)(&endptr), @base, rounding ?? DefaultRounding);
+                return endptr == default;
+            }
+        }
+    }
+
+    /// <summary>
+    /// set to NaN(not-a-number)
+    /// </summary>
+    public void AssignNaN()
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            MpfrLib.mpfr_set_nan((IntPtr)pthis);
+        }
+    }
+
+    /// <summary>
+    /// set to +inf if sign >= 0, otherwise -inf
+    /// </summary>
+    public void AssignInfinity(int sign)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            MpfrLib.mpfr_set_inf((IntPtr)pthis, sign);
+        }
+    }
+
+    /// <summary>
+    /// set to +0 if sign >= 0, otherwise -0
+    /// </summary>
+    /// <param name="sign"></param>
+    public void AssignZero(int sign = 0)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            MpfrLib.mpfr_set_zero((IntPtr)pthis, sign);
+        }
+    }
+
+    /// <summary>
+    /// Swap the structures pointed to by x and y.
+    /// In particular, the values are exchanged without rounding
+    /// (this may be different from three mpfr_set calls using a third auxiliary variable).
+    /// </summary>
+    public static void Swap(MpfrFloat x, MpfrFloat y)
+    {
+        fixed (Mpfr_t* p1 = &x.Raw)
+        fixed (Mpfr_t* p2 = &y.Raw)
+        {
+            MpfrLib.mpfr_swap((IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    /// <summary>
+    /// Swap the structures pointed to by this and op.
+    /// In particular, the values are exchanged without rounding
+    /// (this may be different from three mpfr_set calls using a third auxiliary variable).
+    /// </summary>
+    public void Swap(MpfrFloat op) => Swap(this, op);
+    #endregion
+
+    #region 4. Conversion Functions
+    public double ToDouble(MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            return MpfrLib.mpfr_get_d((IntPtr)pthis, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static explicit operator double(MpfrFloat op) => op.ToDouble();
+
+    public float ToFloat(MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            return MpfrLib.mpfr_get_flt((IntPtr)pthis, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static explicit operator float(MpfrFloat op) => op.ToFloat();
+
+    public override string ToString() => ToString(10);
+
+    public string ToString(int @base = 10, MpfrRounding? rounding = null)
+    {
+        const nint srcptr = 0;
+        const int digits = 0;
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            int exp;
+            IntPtr ret = default;
+            try
+            {
+                ret = MpfrLib.mpfr_get_str(srcptr, (IntPtr)(&exp), @base, digits, (IntPtr)pthis, rounding ?? DefaultRounding);
+                if (ret == IntPtr.Zero)
+                {
+                    throw new ArgumentException($"Unable to convert BigInteger to string.");
+                }
+
+                return GmpFloat.ToString(ret, Raw.Sign, exp);
+            }
+            finally
+            {
+                if (ret != IntPtr.Zero)
+                {
+                    GmpMemory.Free(ret);
+                }
+            }
         }
     }
     #endregion
