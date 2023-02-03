@@ -1,6 +1,7 @@
 ﻿using Sdcb.Arithmetic.Gmp;
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Sdcb.Arithmetic.Mpfr;
 
@@ -10,7 +11,7 @@ public unsafe class MpfrFloat : IDisposable
 
     public readonly Mpfr_t Raw;
 
-    #region Initialization Functions
+    #region 1. Initialization Functions
     /// <summary>
     /// Initialize, set its precision to be exactly prec bits and its value to NaN.
     /// (Warning: the corresponding MPF function initializes to zero instead.)
@@ -45,6 +46,19 @@ public unsafe class MpfrFloat : IDisposable
         set => MpfrLib.mpfr_set_default_prec(value);
     }
 
+    private static ThreadLocal<MpfrRounding> _defaultRounding = new ThreadLocal<MpfrRounding>(GetRawRounding); /* should be MpfrRounding.Nearest */
+    public static MpfrRounding DefaultRounding
+    {
+        get => _defaultRounding.Value;
+        set
+        {
+            _defaultRounding.Value = value;
+            MpfrLib.mpfr_set_default_rounding_mode(value);
+        }
+    }
+
+    private static MpfrRounding GetRawRounding() => MpfrLib.mpfr_get_default_rounding_mode();
+
     /// <summary>
     /// The number of bits used to store its significand.
     /// </summary>
@@ -67,7 +81,18 @@ public unsafe class MpfrFloat : IDisposable
     }
     #endregion
 
-    #region Compatibility With MPF
+    #region 2. Assignment Functions
+    public void Assign(MpfrFloat val, MpfrRounding rounding)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        fixed (Mpfr_t* pval = &val.Raw)
+        {
+            MpfrLib.mpfr_set((IntPtr)pthis, (IntPtr)pval, rounding);
+        }
+    }
+    #endregion
+
+    #region 15. Compatibility With MPF
     /// <summary>
     /// Reset the precision of x to be exactly prec bits.
     /// The only difference with mpfr_set_prec is that prec 
@@ -102,6 +127,86 @@ public unsafe class MpfrFloat : IDisposable
         {
             return MpfrLib.mpfr_eq((IntPtr)p1, (IntPtr)p2, op3);
         }
+    }
+
+    /// <summary>
+    /// <para>rop = abs(op1-op2)/op1</para>
+    /// <para>
+    /// Compute the relative difference between op1 and op2 and store the result in rop.
+    /// This function does not guarantee the correct rounding on the relative difference;
+    /// it just computes |op1 - op2| / op1</para>
+    /// </summary>
+    public static unsafe void RelDiffInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding rounding)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            MpfrLib.mpfr_reldiff((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding);
+        }
+    }
+
+    /// <summary>
+    /// <para>
+    /// Compute the relative difference between op1 and op2 and store the result in rop.
+    /// This function does not guarantee the correct rounding on the relative difference;
+    /// it just computes |op1 - op2| / op1</para>
+    /// </summary>
+    /// <param name="precision">the result precision</param>
+    /// <returns>abs(op1-op2)/op1</returns>
+    public static MpfrFloat RelDiff(MpfrFloat op1, MpfrFloat op2, MpfrRounding rounding, int precision = 0)
+    {
+        MpfrFloat rop = new(precision);
+        RelDiffInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// These functions are identical to mpfr_mul_2ui and mpfr_div_2ui respectively.
+    /// These functions are only kept for compatibility with MPF, one should prefer mpfr_mul_2ui and mpfr_div_2ui otherwise.
+    /// </summary>
+    public static void Multiply2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding rounding)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            MpfrLib.mpfr_mul_2exp((IntPtr)pr, (IntPtr)p1, op2, rounding);
+        }
+    }
+
+    /// <summary>
+    /// These functions are identical to mpfr_mul_2ui and mpfr_div_2ui respectively.
+    /// These functions are only kept for compatibility with MPF, one should prefer mpfr_mul_2ui and mpfr_div_2ui otherwise.
+    /// </summary>
+    public static void Divide2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding rounding)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            MpfrLib.mpfr_div_2exp((IntPtr)pr, (IntPtr)p1, op2, rounding);
+        }
+    }
+
+    /// <summary>
+    /// These functions are identical to mpfr_mul_2ui and mpfr_div_2ui respectively.
+    /// These functions are only kept for compatibility with MPF, one should prefer mpfr_mul_2ui and mpfr_div_2ui otherwise.
+    /// </summary>
+    public static MpfrFloat Multiply2Exp(MpfrFloat op1, uint op2, MpfrRounding rounding, int precision)
+    {
+        MpfrFloat rop = new (precision);
+        Multiply2ExpInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// These functions are identical to mpfr_mul_2ui and mpfr_div_2ui respectively.
+    /// These functions are only kept for compatibility with MPF, one should prefer mpfr_mul_2ui and mpfr_div_2ui otherwise.
+    /// </summary>
+    public static MpfrFloat Divide2Exp(MpfrFloat op1, uint op2, MpfrRounding rounding, int precision)
+    {
+        MpfrFloat rop = new(precision);
+        Divide2ExpInplace(rop, op1, op2, rounding);
+        return rop;
     }
     #endregion
 
@@ -156,7 +261,6 @@ public record struct Mpfr_t
     public IntPtr Limbs;
 
     public static int RawSize => Marshal.SizeOf<Mpf_t>();
-
 
     private unsafe Span<int> GetLimbData() => new((void*)Limbs, Precision - 1);
 

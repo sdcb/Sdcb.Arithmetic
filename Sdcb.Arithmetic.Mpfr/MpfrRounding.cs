@@ -1,9 +1,7 @@
 ﻿namespace Sdcb.Arithmetic.Mpfr
 {
     /// <summary>
-    /// <para>
-    /// Definition of rounding modes (DON'T USE MPFR_RNDNA!).
-    /// </para>
+    /// Definition of MPFR rounding modes
     /// </summary>
     public enum MpfrRounding
     {
@@ -36,10 +34,5 @@
         /// faithful rounding
         /// </summary>
         Faithful,
-
-        /// <summary>
-        /// round to nearest, with ties away from zero (mpfr_round)
-        /// </summary>
-        NA = -1, 
     }
 }
