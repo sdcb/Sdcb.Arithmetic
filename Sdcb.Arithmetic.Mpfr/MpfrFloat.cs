@@ -1,15 +1,13 @@
 ﻿using Sdcb.Arithmetic.Gmp;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 
 namespace Sdcb.Arithmetic.Mpfr;
 
 public unsafe class MpfrFloat : IDisposable
 {
-    // https://www.mpfr.org/mpfr-current/mpfr.html
-
     public readonly Mpfr_t Raw;
 
     #region 1. Initialization Functions
@@ -17,13 +15,17 @@ public unsafe class MpfrFloat : IDisposable
     /// Initialize, set its precision to be exactly prec bits and its value to NaN.
     /// (Warning: the corresponding MPF function initializes to zero instead.)
     /// </summary>
-    /// <param name="precision"></param>
     public MpfrFloat(int precision)
     {
         fixed (Mpfr_t* ptr = &Raw)
         {
             MpfrLib.mpfr_init2((IntPtr)ptr, precision);
         }
+    }
+
+    public MpfrFloat(Mpfr_t raw)
+    {
+        Raw = raw;
     }
 
     /// <summary>
@@ -37,6 +39,12 @@ public unsafe class MpfrFloat : IDisposable
             MpfrLib.mpfr_init((IntPtr)ptr);
         }
     }
+
+    internal static MpfrFloat CreateWithNullablePrecision(int? precision) => precision switch
+    {
+        null => new MpfrFloat(),
+        _ => new MpfrFloat(precision.Value)
+    };
 
     /// <summary>
     /// The current default MPFR precision in bits.
@@ -278,6 +286,90 @@ public unsafe class MpfrFloat : IDisposable
     public void Swap(MpfrFloat op) => Swap(this, op);
     #endregion
 
+    #region 3. Combined Initialization and Assignment Functions
+    public static MpfrFloat From(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        rop.Assign(op, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat From(uint op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        rop.Assign(op, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat From(int op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        rop.Assign(op, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat From(double op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        rop.Assign(op, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat From(GmpInteger op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        rop.Assign(op, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat From(GmpRational op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        rop.Assign(op, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat From(GmpFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        rop.Assign(op, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat Parse(string s, int @base = 0, int? precision = null, MpfrRounding? rounding = null)
+    {
+        Mpfr_t raw = new();
+        byte[] opBytes = Encoding.UTF8.GetBytes(s);
+        fixed (byte* opPtr = opBytes)
+        {
+            int ret = MpfrLib.mpfr_init_set_str((IntPtr)(&raw), (IntPtr)opPtr, @base, rounding ?? DefaultRounding);
+            if (ret != 0)
+            {
+                MpfrLib.mpfr_clear((IntPtr)(&raw));
+                throw new FormatException($"Failed to parse \"{s}\", base={@base} to {nameof(MpfrFloat)}, mpfr_init_set_str returns {ret}");
+            }
+            return new MpfrFloat(raw);
+        }
+    }
+
+    public static bool TryParse(string s, [MaybeNullWhen(returnValue: false)] MpfrFloat rop, int @base = 0, int? precision = null, MpfrRounding? rounding = null)
+    {
+        Mpfr_t raw = new();
+        byte[] opBytes = Encoding.UTF8.GetBytes(s);
+        fixed (byte* opPtr = opBytes)
+        {
+            int ret = MpfrLib.mpfr_init_set_str((IntPtr)(&raw), (IntPtr)opPtr, @base, rounding ?? DefaultRounding);
+            if (ret != 0)
+            {
+                MpfrLib.mpfr_clear((IntPtr)(&raw));
+                return false;
+            }
+            rop = new MpfrFloat(raw);
+            return true;
+        }
+    }
+    #endregion
+
     #region 4. Conversion Functions
     public double ToDouble(MpfrRounding? rounding = null)
     {
@@ -298,6 +390,51 @@ public unsafe class MpfrFloat : IDisposable
     }
 
     public static explicit operator float(MpfrFloat op) => op.ToFloat();
+
+    public int ToInt32(MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            return MpfrLib.mpfr_get_si((IntPtr)pthis, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static explicit operator int(MpfrFloat op) => op.ToInt32();
+
+    public uint ToUInt32(MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            return MpfrLib.mpfr_get_ui((IntPtr)pthis, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static explicit operator uint(MpfrFloat op) => op.ToUInt32();
+
+    /// <summary>
+    /// <para>
+    /// Return d and set exp (formally, the value pointed to by exp) such that 0.5 &lt;= abs(d) &lt; 1
+    /// and d times 2 raised to exp equals op rounded to double (resp. long double) precision, 
+    /// using the given rounding mode.
+    /// </para>
+    /// <para>
+    /// If op is zero, then a zero of the same sign (or an unsigned zero, if the implementation
+    /// does not have signed zeros) is returned, and exp is set to 0. If op is NaN or an infinity,
+    /// then the corresponding double precision (resp. long-double precision) value is returned,
+    /// and exp is undefined.
+    /// </para>
+    /// </summary>
+    public ExpDouble ToExpDouble(MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            int exp;
+            double d = MpfrLib.mpfr_get_d_2exp((IntPtr)(&exp), (IntPtr)pthis, rounding ?? DefaultRounding);
+            return new ExpDouble(exp, d);
+        }
+    }
+
+    // TODO: https://www.mpfr.org/mpfr-current/mpfr.html#index-mpfr_005ffrexp
 
     public override string ToString() => ToString(10);
 
@@ -431,7 +568,7 @@ public unsafe class MpfrFloat : IDisposable
     /// </summary>
     public static MpfrFloat Multiply2Exp(MpfrFloat op1, uint op2, MpfrRounding rounding, int precision)
     {
-        MpfrFloat rop = new (precision);
+        MpfrFloat rop = new(precision);
         Multiply2ExpInplace(rop, op1, op2, rounding);
         return rop;
     }
