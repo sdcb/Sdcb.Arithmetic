@@ -1,6 +1,9 @@
 ﻿using Sdcb.Arithmetic.Gmp;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -613,6 +616,968 @@ public unsafe class MpfrFloat : IDisposable
         fixed (Mpfr_t* pthis = &Raw)
         {
             return MpfrLib.mpfr_fits_intmax_p((IntPtr)pthis, rounding ?? DefaultRounding) != 0;
+        }
+    }
+    #endregion
+
+    #region 5.  Arithmetic Functions
+    #region Add
+    public static int AddInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_add((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Add(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        AddInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator +(MpfrFloat op1, MpfrFloat op2) => Add(op1, op2, op1.Precision);
+
+    public static int AddInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_add_ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Add(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        AddInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator +(MpfrFloat op1, uint op2) => Add(op1, op2, op1.Precision);
+    public static MpfrFloat operator +(uint op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+
+    public static int AddInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_add_si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Add(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        AddInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator +(MpfrFloat op1, int op2) => Add(op1, op2, op1.Precision);
+    public static MpfrFloat operator +(int op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+
+    public static int AddInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_add_d((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Add(MpfrFloat op1, double op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        AddInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator +(MpfrFloat op1, double op2) => Add(op1, op2, op1.Precision);
+    public static MpfrFloat operator +(double op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+
+    public static int AddInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_add_z((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Add(MpfrFloat op1, GmpInteger op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        AddInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator +(MpfrFloat op1, GmpInteger op2) => Add(op1, op2, op1.Precision);
+    public static MpfrFloat operator +(GmpInteger op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+
+    public static int AddInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpq_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_add_q((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Add(MpfrFloat op1, GmpRational op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        AddInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator +(MpfrFloat op1, GmpRational op2) => Add(op1, op2, op1.Precision);
+    public static MpfrFloat operator +(GmpRational op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+    #endregion
+
+    #region Subtract
+    public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_sub((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Subtract(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        SubtractInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator -(MpfrFloat op1, MpfrFloat op2) => Subtract(op1, op2, op1.Precision);
+
+    public static int SubtractInplace(MpfrFloat rop, uint op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_ui_sub((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Subtract(uint op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        SubtractInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator -(uint op1, MpfrFloat op2) => Subtract(op1, op2, op2.Precision);
+
+    public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_sub_ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Subtract(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        SubtractInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator -(MpfrFloat op1, uint op2) => Subtract(op1, op2, op1.Precision);
+
+    public static int SubtractInplace(MpfrFloat rop, int op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_si_sub((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Subtract(int op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        SubtractInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator -(int op1, MpfrFloat op2) => Subtract(op1, op2, op2.Precision);
+
+    public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_sub_si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Subtract(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        SubtractInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator -(MpfrFloat op1, int op2) => Subtract(op1, op2, op1.Precision);
+
+    public static int SubtractInplace(MpfrFloat rop, double op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_d_sub((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Subtract(double op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        SubtractInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator -(double op1, MpfrFloat op2) => Subtract(op1, op2, op2.Precision);
+
+    public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_sub_d((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Subtract(MpfrFloat op1, double op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        SubtractInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator -(MpfrFloat op1, double op2) => Subtract(op1, op2, op1.Precision);
+
+    public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_sub_z((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Subtract(MpfrFloat op1, GmpInteger op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        AddInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator -(MpfrFloat op1, GmpInteger op2) => Subtract(op1, op2, op1.Precision);
+
+    public static int SubtractInplace(MpfrFloat rop, GmpInteger op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpz_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_z_sub((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Subtract(GmpInteger op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        SubtractInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator -(GmpInteger op1, MpfrFloat op2) => Subtract(op1, op2, op2.Precision);
+
+    public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpq_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_sub_q((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Subtract(MpfrFloat op1, GmpRational op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        SubtractInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator -(MpfrFloat op1, GmpRational op2) => Subtract(op1, op2, op1.Precision);
+    #endregion
+
+    #region Multiply
+    public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_mul((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Multiply(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        MultiplyInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator *(MpfrFloat op1, MpfrFloat op2) => Add(op1, op2, op1.Precision);
+
+    public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_mul_ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Multiply(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        MultiplyInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator *(MpfrFloat op1, uint op2) => Add(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(uint op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+
+    public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_mul_si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Multiply(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        MultiplyInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator *(MpfrFloat op1, int op2) => Add(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(int op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+
+    public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_mul_d((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Multiply(MpfrFloat op1, double op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        MultiplyInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator *(MpfrFloat op1, double op2) => Add(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(double op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+
+    public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_mul_z((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Multiply(MpfrFloat op1, GmpInteger op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        MultiplyInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator *(MpfrFloat op1, GmpInteger op2) => Add(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(GmpInteger op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+
+    public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpq_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_mul_q((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Multiply(MpfrFloat op1, GmpRational op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        MultiplyInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator *(MpfrFloat op1, GmpRational op2) => Add(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(GmpRational op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+    #endregion
+
+    public static void SquareInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            MpfrLib.mpfr_sqr((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Square(MpfrFloat op1, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op1.Precision);
+        SquareInplace(rop, op1, rounding);
+        return rop;
+    }
+
+    #region Divide
+    public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_div((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Divide(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        DivideInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator /(MpfrFloat op1, MpfrFloat op2) => Divide(op1, op2, op1.Precision);
+
+    public static int DivideInplace(MpfrFloat rop, uint op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_ui_div((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Divide(uint op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        DivideInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator /(uint op1, MpfrFloat op2) => Divide(op1, op2, op2.Precision);
+
+    public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_div_ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Divide(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        DivideInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator /(MpfrFloat op1, uint op2) => Divide(op1, op2, op1.Precision);
+
+    public static int DivideInplace(MpfrFloat rop, int op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_si_div((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Divide(int op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        DivideInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator /(int op1, MpfrFloat op2) => Divide(op1, op2, op2.Precision);
+
+    public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_div_si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Divide(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        DivideInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator /(MpfrFloat op1, int op2) => Divide(op1, op2, op1.Precision);
+
+    public static int DivideInplace(MpfrFloat rop, double op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_d_div((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Divide(double op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        DivideInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator /(double op1, MpfrFloat op2) => Divide(op1, op2, op2.Precision);
+
+    public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_div_d((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Divide(MpfrFloat op1, double op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        DivideInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator /(MpfrFloat op1, double op2) => Divide(op1, op2, op1.Precision);
+
+    public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_div_z((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Divide(MpfrFloat op1, GmpInteger op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        AddInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator /(MpfrFloat op1, GmpInteger op2) => Divide(op1, op2, op1.Precision);
+
+    public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpq_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_div_q((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Divide(MpfrFloat op1, GmpRational op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        DivideInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator /(MpfrFloat op1, GmpRational op2) => Divide(op1, op2, op1.Precision);
+    #endregion
+
+    public static void SqrtInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            MpfrLib.mpfr_sqrt((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Sqrt(MpfrFloat op1, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op1.Precision);
+        SqrtInplace(rop, op1, rounding);
+        return rop;
+    }
+
+    public static void SqrtInplace(MpfrFloat rop, uint op1, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        {
+            MpfrLib.mpfr_sqrt_ui((IntPtr)pr, op1, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Sqrt(uint op1, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        SqrtInplace(rop, op1, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// set rop to 1/sqrt(op)
+    /// </summary>
+    public static void ReciprocalSquareInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op.Raw)
+        {
+            MpfrLib.mpfr_rec_sqrt((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>1/sqrt(op)</returns>
+    public static MpfrFloat ReciprocalSquare(MpfrFloat op, int? precision, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        ReciprocalSquareInplace(rop, op, rounding);
+        return rop;
+    }
+
+    public static void CubicRootInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op.Raw)
+        {
+            MpfrLib.mpfr_cbrt((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat CubicRoot(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        CubicRootInplace(rop, op, rounding);
+        return rop;
+    }
+
+    public static void RootNInplace(MpfrFloat rop, MpfrFloat op, uint n, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op.Raw)
+        {
+            MpfrLib.mpfr_rootn_ui((IntPtr)pr, (IntPtr)p1, n, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat RootN(MpfrFloat op, uint n, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        RootNInplace(rop, op, n, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// This function is the same as mpfr_rootn_ui except when op is −0 and n is even:
+    /// the result is −0 instead of +0 (the reason was to be consistent with mpfr_sqrt).
+    /// Said otherwise, if op is zero, set rop to op
+    /// </summary>
+    [Obsolete("use RootN")]
+    public static void RootInplace(MpfrFloat rop, MpfrFloat op, uint n, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op.Raw)
+        {
+            MpfrLib.mpfr_rootn_ui((IntPtr)pr, (IntPtr)p1, n, rounding ?? DefaultRounding);
+        }
+    }
+
+    [Obsolete("use RootN")]
+    public static MpfrFloat Root(MpfrFloat op, uint n, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        RootNInplace(rop, op, n, rounding);
+        return rop;
+    }
+
+    public static int NegateInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_neg((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Negate(MpfrFloat op, int? precision, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        NegateInplace(rop, op, rounding);
+        return rop;
+    }
+
+    public static int AbsInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_abs((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Abs(MpfrFloat op, int? precision, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AbsInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = op1 - op2(if op1 > op2), +0 (otherwise)</summary>
+    public static int DimInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_dim((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>op1 - op2(if op1 > op2), +0 (otherwise)</returns>
+    public static MpfrFloat Dim(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        DimInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static int Multiply2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_mul_2ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Multiply2Exp(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op1.Precision);
+        Multiply2ExpInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static int Multiply2ExpInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_mul_2si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Multiply2Exp(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op1.Precision);
+        Multiply2ExpInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static int Divide2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_div_2ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Divide2Exp(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op1.Precision);
+        Divide2ExpInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static int Divide2ExpInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_div_2si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Divide2Exp(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op1.Precision);
+        Divide2ExpInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static int FactorialInplace(MpfrFloat rop, uint op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        {
+            return MpfrLib.mpfr_fac_ui((IntPtr)pr, op, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Factorial(uint op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        FactorialInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// set rop to (op1 * op2) + op3
+    /// </summary>
+    public static int FMAInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (Mpfr_t* p3 = &op3.Raw)
+        {
+            return MpfrLib.mpfr_fma((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, (IntPtr)p3, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>(op1 * op2) + op3</returns>
+    public static MpfrFloat FMA(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, int? precision, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        FMAInplace(rop, op1, op2, op3, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// set rop to (op1 * op2) - op3
+    /// </summary>
+    public static int FMSInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (Mpfr_t* p3 = &op3.Raw)
+        {
+            return MpfrLib.mpfr_fms((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, (IntPtr)p3, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>(op1 * op2) - op3</returns>
+    public static MpfrFloat FMS(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, int? precision, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        FMSInplace(rop, op1, op2, op3, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// set rop to (op1 * op2) + (op3 * op4)
+    /// </summary>
+    public static int FMMAInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (Mpfr_t* p3 = &op3.Raw)
+        fixed (Mpfr_t* p4 = &op4.Raw)
+        {
+            return MpfrLib.mpfr_fmma((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, (IntPtr)p3, (IntPtr)p4, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>(op1 * op2) + (op3 * op4)</returns>
+    public static MpfrFloat FMMA(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, int? precision, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        FMMAInplace(rop, op1, op2, op3, op4, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// set rop to (op1 * op2) - (op3 * op4)
+    /// </summary>
+    public static int FMMSInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (Mpfr_t* p3 = &op3.Raw)
+        fixed (Mpfr_t* p4 = &op4.Raw)
+        {
+            return MpfrLib.mpfr_fmms((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, (IntPtr)p3, (IntPtr)p4, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>(op1 * op2) - (op3 * op4)</returns>
+    public static MpfrFloat FMMS(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, int? precision, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        FMMSInplace(rop, op1, op2, op3, op4, rounding);
+        return rop;
+    }
+
+    /// <summary>set rop to sqrt(op1 * op2 + op2 * op2)</summary>
+    public static int HypotInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_hypot((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>sqrt(op1 * op2 + op2 * op2)</returns>
+    public static MpfrFloat Hypot(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        HypotInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static int SumInplace(MpfrFloat rop, IEnumerable<MpfrFloat> tab, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        {
+            GCHandle[] handles = tab.Select(x => GCHandle.Alloc(x.Raw, GCHandleType.Pinned)).ToArray();
+            IntPtr[] ptrs = handles.Select(x => x.AddrOfPinnedObject()).ToArray();
+            // TODO
         }
     }
     #endregion
