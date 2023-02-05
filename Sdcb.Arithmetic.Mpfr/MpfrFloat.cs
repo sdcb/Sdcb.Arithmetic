@@ -567,6 +567,54 @@ public unsafe class MpfrFloat : IDisposable
             return GmpFloat.ToString(ret, Raw.Sign, exp);
         }
     }
+
+    public bool FitsUInt32(MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            return MpfrLib.mpfr_fits_ulong_p((IntPtr)pthis, rounding ?? DefaultRounding) != 0;
+        }
+    }
+
+    public bool FitsInt32(MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            return MpfrLib.mpfr_fits_slong_p((IntPtr)pthis, rounding ?? DefaultRounding) != 0;
+        }
+    }
+
+    public bool FitsUInt16(MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            return MpfrLib.mpfr_fits_ushort_p((IntPtr)pthis, rounding ?? DefaultRounding) != 0;
+        }
+    }
+
+    public bool FitsInt16(MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            return MpfrLib.mpfr_fits_sshort_p((IntPtr)pthis, rounding ?? DefaultRounding) != 0;
+        }
+    }
+
+    public bool FitsUInt64(MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            return MpfrLib.mpfr_fits_uintmax_p((IntPtr)pthis, rounding ?? DefaultRounding) != 0;
+        }
+    }
+
+    public bool FitsInt64(MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            return MpfrLib.mpfr_fits_intmax_p((IntPtr)pthis, rounding ?? DefaultRounding) != 0;
+        }
+    }
     #endregion
 
     #region 15. Compatibility With MPF
