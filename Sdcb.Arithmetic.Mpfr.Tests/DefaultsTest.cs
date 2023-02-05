@@ -71,12 +71,15 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             Assert.Equal(80, flt.Precision);
         }
 
-        [Fact]
-        public void ToStringTest()
+        [Theory]
+        [InlineData("1.625", "1.625")]
+        [InlineData("NaN", "NaN")]
+        [InlineData("-inf", "-Inf")]
+        [InlineData("+iNf", "Inf")]
+        public void ToStringTest(string val, string expected)
         {
-            MpfrFloat flt = new();
-            flt.Assign(1.625);
-            Assert.Equal("1.625", flt.ToString());
+            MpfrFloat flt = MpfrFloat.Parse(val);
+            Assert.Equal(expected, flt.ToString());
         }
     }
 }

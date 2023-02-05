@@ -48,6 +48,12 @@ public class GmpFloat : IDisposable
         }
         _isOwner = isOwner;
     }
+
+    internal static GmpFloat CreateWithNullablePrecision(uint? precision) => precision switch
+    {
+        null => new GmpFloat(),
+        { } p => new GmpFloat(p)
+    };
     #endregion
 
     #region Combined Initialization and Assignment Functions
@@ -384,6 +390,7 @@ public class GmpFloat : IDisposable
             _ => s switch
             {
                 "" => 0,
+                var x when x[0] == '@' => x[1..^1], 
                 _ => "0." + new string('0', -exp) + s
             }
         });

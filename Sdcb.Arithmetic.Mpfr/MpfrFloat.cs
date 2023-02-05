@@ -434,35 +434,137 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
-    // TODO: https://www.mpfr.org/mpfr-current/mpfr.html#index-mpfr_005ffrexp
+    /// <summary>
+    /// y * 2^exp = x
+    /// </summary>
+    public (int exp, bool overflowed) FrexpInplace(MpfrFloat y, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        fixed (Mpfr_t* py = &y.Raw)
+        {
+            int exp;
+            bool overflowed = MpfrLib.mpfr_frexp((IntPtr)(&exp), (IntPtr)py, (IntPtr)pthis, rounding ?? DefaultRounding) != 0;
+            return (exp, overflowed);
+        }
+    }
+
+    /// <summary>
+    /// y * 2^exp = x
+    /// </summary>
+    public (MpfrFloat y, int exp, bool overflowed) Frexp(int? precision = 0, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        (int exp, bool overflowed) = FrexpInplace(rop, rounding);
+        return (rop, exp, overflowed);
+    }
+
+    /// <summary>
+    /// z * 2^exp = x
+    /// </summary>
+    public int GetZ2ExpInplace(GmpInteger z)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        fixed (Mpz_t* pz = &z.Raw)
+        {
+            return MpfrLib.mpfr_get_z_2exp((IntPtr)pz, (IntPtr)pthis);
+        }
+    }
+
+    /// <summary>
+    /// y * 2^exp = x
+    /// </summary>
+    public (GmpInteger z, int exp) Z2Exp
+    {
+        get
+        {
+            GmpInteger z = new();
+            int exp = GetZ2ExpInplace(z);
+            return (z, exp);
+        }
+    }
+
+    public int ToGmpIntegerInplace(GmpInteger z, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        fixed (Mpz_t* pz = &z.Raw)
+        {
+            return MpfrLib.mpfr_get_z((IntPtr)pz, (IntPtr)pthis, rounding ?? DefaultRounding);
+        }
+    }
+
+    public GmpInteger ToGmpInteger(MpfrRounding? rounding = null)
+    {
+        GmpInteger rop = new();
+        ToGmpIntegerInplace(rop, rounding);
+        return rop;
+    }
+
+    public static explicit operator GmpInteger(MpfrFloat r) => r.ToGmpInteger();
+
+    public void ToGmpRationalInplace(GmpRational q, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        fixed (Mpq_t* pq = &q.Raw)
+        {
+            MpfrLib.mpfr_get_q((IntPtr)pq, (IntPtr)pthis);
+        }
+    }
+
+    public GmpRational ToGmpRational()
+    {
+        GmpRational rop = new();
+        ToGmpRationalInplace(rop);
+        return rop;
+    }
+
+    public static explicit operator GmpRational(MpfrFloat r) => r.ToGmpRational();
+
+    public int ToGmpFloatInplace(GmpFloat f, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        fixed (Mpf_t* pf = &f.Raw)
+        {
+            return MpfrLib.mpfr_get_f((IntPtr)pf, (IntPtr)pthis, rounding ?? DefaultRounding);
+        }
+    }
+
+    public GmpFloat ToGmpFloat(uint? precision = null, MpfrRounding? rounding = null)
+    {
+        GmpFloat rop = GmpFloat.CreateWithNullablePrecision(precision);
+        ToGmpFloatInplace(rop, rounding);
+        return rop;
+    }
+
+    public static explicit operator GmpFloat(MpfrFloat r) => r.ToGmpFloat();
+
+    public static nint GetMaxStringLength(int precision, int @base = 10)
+    {
+        if (@base >= 2 && @base <= 62)
+        {
+            return MpfrLib.mpfr_get_str_ndigits(@base, precision);
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(@base));
+        }
+    }
 
     public override string ToString() => ToString(10);
 
     public string ToString(int @base = 10, MpfrRounding? rounding = null)
     {
-        const nint srcptr = 0;
-        const int digits = 0;
+        byte[] resbuf = new byte[GetMaxStringLength(Raw.Precision, @base)];
         fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* srcptr = &resbuf[0])
         {
             int exp;
-            IntPtr ret = default;
-            try
+            IntPtr ret = MpfrLib.mpfr_get_str((IntPtr)srcptr, (IntPtr)(&exp), @base, resbuf.Length, (IntPtr)pthis, rounding ?? DefaultRounding);
+            if (ret == IntPtr.Zero)
             {
-                ret = MpfrLib.mpfr_get_str(srcptr, (IntPtr)(&exp), @base, digits, (IntPtr)pthis, rounding ?? DefaultRounding);
-                if (ret == IntPtr.Zero)
-                {
-                    throw new ArgumentException($"Unable to convert BigInteger to string.");
-                }
+                throw new ArgumentException($"Unable to convert {nameof(MpfrFloat)} to string.");
+            }
 
-                return GmpFloat.ToString(ret, Raw.Sign, exp);
-            }
-            finally
-            {
-                if (ret != IntPtr.Zero)
-                {
-                    GmpMemory.Free(ret);
-                }
-            }
+            return GmpFloat.ToString(ret, Raw.Sign, exp);
         }
     }
     #endregion
