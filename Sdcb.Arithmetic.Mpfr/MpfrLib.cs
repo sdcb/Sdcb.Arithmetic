@@ -16,7 +16,6 @@ public static class MpfrLib
     public const string Dll = "mpfr-6.dll";
 
 
-
     [DllImport(Dll)]
     public static extern IntPtr mpfr_get_version();
 
@@ -608,10 +607,24 @@ public static class MpfrLib
 
     /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
     /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_powr(IntPtr p0, IntPtr p1, IntPtr p2, mpfr_rnd_t p3);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
     /// <param name="p2" />
     /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
     [DllImport(Dll)]
     public static extern int mpfr_pow_si(IntPtr p0, IntPtr p1, int p2, mpfr_rnd_t p3);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2" />
+    /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_compound_si(IntPtr p0, IntPtr p1, int p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
     /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
@@ -871,6 +884,18 @@ public static class MpfrLib
     public static extern int mpfr_log1p(IntPtr p0, IntPtr p1, mpfr_rnd_t p2);
 
     /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_log2p1(IntPtr p0, IntPtr p1, mpfr_rnd_t p2);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_log10p1(IntPtr p0, IntPtr p1, mpfr_rnd_t p2);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
     /// <param name="p1" />
     /// <param name="p2">(<see cref="mpfr_rnd_t" />) </param>
     [DllImport(Dll)]
@@ -899,6 +924,18 @@ public static class MpfrLib
     /// <param name="p2">(<see cref="mpfr_rnd_t" />) </param>
     [DllImport(Dll)]
     public static extern int mpfr_expm1(IntPtr p0, IntPtr p1, mpfr_rnd_t p2);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_exp2m1(IntPtr p0, IntPtr p1, mpfr_rnd_t p2);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_exp10m1(IntPtr p0, IntPtr p1, mpfr_rnd_t p2);
 
     /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
     /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
@@ -1119,6 +1156,13 @@ public static class MpfrLib
     /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
     [DllImport(Dll)]
     public static extern int mpfr_fmod(IntPtr p0, IntPtr p1, IntPtr p2, mpfr_rnd_t p3);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2" />
+    /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_fmod_ui(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
     /// <param name="p1">(<see cref="int*" />) </param>
@@ -1373,6 +1417,99 @@ public static class MpfrLib
 
     /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
     /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2" />
+    /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_sinu(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2" />
+    /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_cosu(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2" />
+    /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_tanu(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2" />
+    /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_acosu(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2" />
+    /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_asinu(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2" />
+    /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_atanu(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p3" />
+    /// <param name="p4">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_atan2u(IntPtr p0, IntPtr p1, IntPtr p2, uint p3, mpfr_rnd_t p4);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_acospi(IntPtr p0, IntPtr p1, mpfr_rnd_t p2);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_asinpi(IntPtr p0, IntPtr p1, mpfr_rnd_t p2);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_atanpi(IntPtr p0, IntPtr p1, mpfr_rnd_t p2);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_atan2pi(IntPtr p0, IntPtr p1, IntPtr p2, mpfr_rnd_t p3);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_sinpi(IntPtr p0, IntPtr p1, mpfr_rnd_t p2);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_cospi(IntPtr p0, IntPtr p1, mpfr_rnd_t p2);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_tanpi(IntPtr p0, IntPtr p1, mpfr_rnd_t p2);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
     /// <param name="p2">(<see cref="mpfr_srcptr" />) </param>
     /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
     [DllImport(Dll)]
@@ -1409,6 +1546,13 @@ public static class MpfrLib
     /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
     [DllImport(Dll)]
     public static extern int mpfr_rootn_ui(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+
+    /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
+    /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
+    /// <param name="p2" />
+    /// <param name="p3">(<see cref="mpfr_rnd_t" />) </param>
+    [DllImport(Dll)]
+    public static extern int mpfr_rootn_si(IntPtr p0, IntPtr p1, int p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(<see cref="mpfr_ptr" />) </param>
     /// <param name="p1">(<see cref="mpfr_srcptr" />) </param>
