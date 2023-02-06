@@ -44,6 +44,30 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             Assert.Equal(100, exp.ToDouble()); // 10 ^ 2
         }
 
+        [Theory]
+        [InlineData(3, 4, 81)]
+        [InlineData(0, 0, 1)]
+        [InlineData(double.NaN, 0, 1)]
+        public void PowerTest(double op1, double op2, double result)
+        {
+            using MpfrFloat fop1 = MpfrFloat.From(op1);
+            using MpfrFloat fop2 = MpfrFloat.From(op2);
+            using MpfrFloat rop = MpfrFloat.Power(fop1, fop2);
+            Assert.Equal(result, rop.ToDouble());
+        }
+
+        [Theory]
+        [InlineData(3, 4, 81)]
+        [InlineData(0, 0, double.NaN)]
+        [InlineData(double.NaN, 0, double.NaN)]
+        public void PowerRTest(double op1, double op2, double result)
+        {
+            using MpfrFloat fop1 = MpfrFloat.From(op1);
+            using MpfrFloat fop2 = MpfrFloat.From(op2);
+            using MpfrFloat rop = MpfrFloat.PowerR(fop1, fop2);
+            Assert.Equal(result, rop.ToDouble());
+        }
+
         [Fact]
         public void ConstPiTest()
         {

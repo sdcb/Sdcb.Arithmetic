@@ -344,7 +344,7 @@ public unsafe class MpfrFloat : IDisposable
         {
             rop.Assign(s, @base, rounding);
         }
-        catch 
+        catch
         {
             rop.Clear();
             throw;
@@ -2119,6 +2119,33 @@ public unsafe class MpfrFloat : IDisposable
     }
 
     public static MpfrFloat operator ^(MpfrFloat op1, MpfrFloat op2) => Power(op1, op2);
+
+    /// <summary>
+    /// <para>powr(x,y) is NaN for x=NaN or x &lt; 0 (a)</para>
+    /// <para>powr(+/-0,+/-0) is NaN whereas pow(x,+/-0) = 1 if x is not NaN (b)</para>
+    /// <para>powr(+Inf,+/-0) is NaN whereas pow(x,+/-0) = 1 if x is not NaN (b)</para>
+    /// </summary>
+    public static int PowerRInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_powr((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// <para>powr(x,y) is NaN for x=NaN or x &lt; 0 (a)</para>
+    /// <para>powr(+/-0,+/-0) is NaN whereas pow(x,+/-0) = 1 if x is not NaN (b)</para>
+    /// <para>powr(+Inf,+/-0) is NaN whereas pow(x,+/-0) = 1 if x is not NaN (b)</para>
+    /// </summary>
+    public static MpfrFloat PowerR(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        PowerRInplace(rop, op1, op2, rounding);
+        return rop;
+    }
 
     public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
