@@ -150,6 +150,47 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             Assert.Equal(expected, rop.ToDouble());
         }
 
+        #region Trigonometric function
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(Math.PI / 2, 0)]
+        [InlineData(Math.PI, -1)]
+        [InlineData(Math.PI * 1.5, 0)]
+        [InlineData(Math.PI * 2, 1)]
+        public void CosTest(double op, double expected)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Cos(fop);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(Math.PI / 2, 1)]
+        [InlineData(Math.PI, 0)]
+        [InlineData(Math.PI * 1.5, -1)]
+        [InlineData(Math.PI * 2, 0)]
+        public void SinTest(double op, double expected)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Sin(fop);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(Math.PI / 2, 16331239353195370)]
+        [InlineData(Math.PI, 0)]
+        [InlineData(Math.PI * 1.5, 5443746451065123)]
+        [InlineData(Math.PI * 2, 0)]
+        public void TanTest(double op, double expected)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Tan(fop);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
+        #endregion
+
         [Fact]
         public void ConstPiTest()
         {
