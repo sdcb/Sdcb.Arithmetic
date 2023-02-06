@@ -563,7 +563,7 @@ public unsafe class MpfrFloat : IDisposable
                 throw new ArgumentException($"Unable to convert {nameof(MpfrFloat)} to string.");
             }
 
-            return GmpFloat.ToString(ret, Raw.Sign, exp);
+            return GmpFloat.ToString(ret, Sign, exp);
         }
     }
 
@@ -1606,12 +1606,57 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
-    public static bool operator ==(MpfrFloat op1, MpfrFloat op2) => Compare(op1, op2) == 0;
-    public static bool operator !=(MpfrFloat op1, MpfrFloat op2) => Compare(op1, op2) != 0;
-    public static bool operator >(MpfrFloat op1, MpfrFloat op2) => Compare(op1, op2) > 0;
-    public static bool operator <(MpfrFloat op1, MpfrFloat op2) => Compare(op1, op2) < 0;
-    public static bool operator >=(MpfrFloat op1, MpfrFloat op2) => Compare(op1, op2) >= 0;
-    public static bool operator <=(MpfrFloat op1, MpfrFloat op2) => Compare(op1, op2) <= 0;
+    public static bool CompareGreater(MpfrFloat op1, MpfrFloat op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_greater_p((IntPtr)p1, (IntPtr)p2) != 0;
+        }
+    }
+
+    public static bool CompareGreaterOrEquals(MpfrFloat op1, MpfrFloat op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_greaterequal_p((IntPtr)p1, (IntPtr)p2) != 0;
+        }
+    }
+
+    public static bool CompareLess(MpfrFloat op1, MpfrFloat op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_less_p((IntPtr)p1, (IntPtr)p2) != 0;
+        }
+    }
+
+    public static bool CompareLessOrEquals(MpfrFloat op1, MpfrFloat op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_lessequal_p((IntPtr)p1, (IntPtr)p2) != 0;
+        }
+    }
+
+    public static bool CompareEquals(MpfrFloat op1, MpfrFloat op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_equal_p((IntPtr)p1, (IntPtr)p2) != 0;
+        }
+    }
+
+    public static bool operator ==(MpfrFloat op1, MpfrFloat op2) => CompareEquals(op1, op2);
+    public static bool operator !=(MpfrFloat op1, MpfrFloat op2) => !CompareEquals(op1, op2);
+    public static bool operator >(MpfrFloat op1, MpfrFloat op2) => CompareGreater(op1, op2);
+    public static bool operator <(MpfrFloat op1, MpfrFloat op2) => CompareLess(op1, op2);
+    public static bool operator >=(MpfrFloat op1, MpfrFloat op2) => CompareGreaterOrEquals(op1, op2);
+    public static bool operator <=(MpfrFloat op1, MpfrFloat op2) => CompareLessOrEquals(op1, op2);
 
     public static int Compare(MpfrFloat op1, uint op2)
     {
@@ -1762,6 +1807,142 @@ public unsafe class MpfrFloat : IDisposable
     public override int GetHashCode()
     {
         return Raw.GetHashCode();
+    }
+
+    /// <summary> compare op1 and op2 * 2 ^ e</summary>
+    public static int Compare2Exp(MpfrFloat op1, uint op2, int e)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_cmp_ui_2exp((IntPtr)p1, op2, e);
+        }
+    }
+
+    /// <summary> compare op1 and op2 * 2 ^ e</summary>
+    public static int Compare2Exp(MpfrFloat op1, int op2, int e)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_cmp_si_2exp((IntPtr)p1, op2, e);
+        }
+    }
+
+    public static int CompareAbs(MpfrFloat op1, MpfrFloat op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_cmpabs((IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static int CompareAbs(MpfrFloat op1, uint op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_cmpabs_ui((IntPtr)p1, op2);
+        }
+    }
+
+    public bool IsNaN
+    {
+        get
+        {
+            fixed (Mpfr_t* pthis = &Raw)
+            {
+                return MpfrLib.mpfr_nan_p((IntPtr)pthis) != 0;
+            }
+        }
+    }
+
+    public bool IsInfinity
+    {
+        get
+        {
+            fixed (Mpfr_t* pthis = &Raw)
+            {
+                return MpfrLib.mpfr_inf_p((IntPtr)pthis) != 0;
+            }
+        }
+    }
+
+    public bool IsNumber
+    {
+        get
+        {
+            fixed (Mpfr_t* pthis = &Raw)
+            {
+                return MpfrLib.mpfr_number_p((IntPtr)pthis) != 0;
+            }
+        }
+    }
+
+    public bool IsZero
+    {
+        get
+        {
+            fixed (Mpfr_t* pthis = &Raw)
+            {
+                return MpfrLib.mpfr_zero_p((IntPtr)pthis) != 0;
+            }
+        }
+    }
+
+    /// <summary>neither NaN, infinity nor zero</summary>
+    public bool IsRegular
+    {
+        get
+        {
+            fixed (Mpfr_t* pthis = &Raw)
+            {
+                return MpfrLib.mpfr_regular_p((IntPtr)pthis) != 0;
+            }
+        }
+    }
+
+    public int Sign
+    {
+        get
+        {
+            fixed (Mpfr_t* pthis = &Raw)
+            {
+                return MpfrLib.mpfr_sgn((IntPtr)pthis);
+            }
+        }
+    }
+
+    /// <returns>true if (op1 &lt; op2) or (op1 &gt; op2), false otherwise(NaN, or equals)</returns>
+    public static bool IsLessOrGreater(MpfrFloat op1, MpfrFloat op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_lessequal_p((IntPtr)p1, (IntPtr)p2) != 0;
+        }
+    }
+
+    /// <returns>true if op1 or op2 is NaN, false otherwise</returns>
+    public static bool IsUnordered(MpfrFloat op1, MpfrFloat op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_unordered_p((IntPtr)p1, (IntPtr)p2) != 0;
+        }
+    }
+
+    /// <summary>
+    /// This function implements the totalOrder predicate from IEEE 754,
+    /// where -NaN &lt; -Inf &lt; negative finite numbers &lt; -0 &lt; +0 &lt; positive finite numbers &lt; +Inf &lt; +NaN.
+    /// </summary>
+    /// <returns>true when x is smaller than or equal to y for this order relation, false otherwise.</returns>
+    public static bool TotalOrderLessOrEquals(MpfrFloat op1, MpfrFloat op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_total_order_p((IntPtr)p1, (IntPtr)p2) != 0;
+        }
     }
     #endregion
 
