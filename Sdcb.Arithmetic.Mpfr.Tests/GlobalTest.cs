@@ -22,7 +22,7 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             string? version = Marshal.PtrToStringAnsi(ver);
             Assert.NotNull(version);
 
-            _console.WriteLine(version); // 4.1.1-p1
+            _console.WriteLine(version); // "4.2.0"
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             string? patches = Marshal.PtrToStringAnsi(ver);
             Assert.NotNull(patches);
 
-            _console.WriteLine(patches); // mpfr_custom_get_kind
+            _console.WriteLine(patches); // ""
         }
 
         [Fact]
