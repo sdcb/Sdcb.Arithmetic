@@ -141,6 +141,15 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             Assert.Equal(expected, exp.ToDouble());
         }
 
+        [Theory]
+        [InlineData(0.5, 2, 2.25)]
+        public void CompoundTest(double op, int n, double expected)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Compound(fop, n);
+            Assert.Equal(expected, rop.ToDouble());
+        }
+
         [Fact]
         public void ConstPiTest()
         {

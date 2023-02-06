@@ -2306,9 +2306,25 @@ public unsafe class MpfrFloat : IDisposable
     }
 
     public static MpfrFloat operator ^(uint op1, MpfrFloat op2) => Power(op1, op2);
-
-    // TODO: https://www.mpfr.org/mpfr-current/mpfr.html#index-mpfr_005fcompound_005fsi
     #endregion
+
+    /// <summary>rop = (1 + op) * 2 ^ n</summary>
+    public static int CompoundInplace(MpfrFloat rop, MpfrFloat op, int n, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_compound_si((IntPtr)pr, (IntPtr)pop, n, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>(1 + op) * 2 ^ n</returns>
+    public static MpfrFloat Compound(MpfrFloat op, int n, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        CompoundInplace(rop, op, n, rounding);
+        return rop;
+    }
 
     public static int ConstPiInplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
