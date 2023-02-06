@@ -458,6 +458,131 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             using MpfrFloat rop = MpfrFloat.Atan2Pi(fop1, fop2);
             Assert.Equal(expected, rop.ToDouble(), 15);
         }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(Math.PI / 4)]
+        [InlineData(Math.PI / 2)]
+        [InlineData(Math.PI)]
+        [InlineData(Math.PI * 2)]
+        public void CoshTest(double op)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Cosh(fop);
+            Assert.Equal(Math.Cosh(op), rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(Math.PI / 2)]
+        [InlineData(Math.PI)]
+        [InlineData(Math.PI * 1.5)]
+        [InlineData(Math.PI * 2)]
+        public void SinhTest(double op)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Sinh(fop);
+            Assert.Equal(Math.Sinh(op), rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(Math.PI / 4)]
+        [InlineData(Math.PI / 2)]
+        [InlineData(Math.PI)]
+        [InlineData(Math.PI * 2)]
+        public void TanhTest(double op)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Tanh(fop);
+            Assert.Equal(Math.Tanh(op), rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(Math.PI / 2)]
+        [InlineData(Math.PI)]
+        [InlineData(Math.PI * 1.5)]
+        [InlineData(Math.PI * 2)]
+        public void SinhCoshTest(double op)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            (MpfrFloat sop, MpfrFloat cop) = MpfrFloat.SinhCosh(fop);
+            Assert.Equal(Math.Sinh(op), sop.ToDouble(), 15);
+            Assert.Equal(Math.Cosh(op), cop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(Math.PI / 2)]
+        [InlineData(Math.PI)]
+        [InlineData(Math.PI * 1.5)]
+        [InlineData(Math.PI * 2)]
+        public void SechTest(double op)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Sech(fop);
+            Assert.Equal(1.0 / Math.Cosh(op), rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(Math.PI / 2)]
+        [InlineData(Math.PI)]
+        [InlineData(Math.PI * 1.5)]
+        [InlineData(Math.PI * 2)]
+        public void CschTest(double op)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Csch(fop);
+            Assert.Equal(1.0 / Math.Sinh(op), rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(Math.PI / 2)]
+        [InlineData(Math.PI)]
+        [InlineData(Math.PI * 1.5)]
+        [InlineData(Math.PI * 2)]
+        public void CothTest(double op)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Coth(fop);
+            Assert.Equal(1.0 / Math.Tanh(op), rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(Math.PI / 2)]
+        [InlineData(Math.PI)]
+        public void AcoshTest(double op)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Acosh(fop);
+            Assert.Equal(Math.Acosh(op), rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(Math.PI / 2)]
+        [InlineData(-Math.PI / 2)]
+        public void AsinhTest(double op)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Asinh(fop);
+            Assert.Equal(Math.Asinh(op), rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(Math.PI / 2)]
+        [InlineData(-Math.PI / 2)]
+        public void AtanhTest(double op)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Atanh(fop);
+            Assert.Equal(Math.Atanh(op), rop.ToDouble(), 15);
+        }
         #endregion
 
         [Fact]

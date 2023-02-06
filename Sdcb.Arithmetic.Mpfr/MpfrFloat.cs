@@ -2773,6 +2773,180 @@ public unsafe class MpfrFloat : IDisposable
         Atan2PiInplace(rop, y, x, rounding);
         return rop;
     }
+
+    public static int CoshInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_cosh((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Cosh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        CoshInplace(rop, op, rounding);
+        return rop;
+    }
+
+    public static int SinhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_sinh((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Sinh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        SinhInplace(rop, op, rounding);
+        return rop;
+    }
+
+    public static int TanhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_tanh((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Tanh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        TanhInplace(rop, op, rounding);
+        return rop;
+    }
+
+    public static int SinhCoshInplace(MpfrFloat sop, MpfrFloat cop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* psin = &sop.Raw)
+        fixed (Mpfr_t* pcos = &cop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_sinh_cosh((IntPtr)psin, (IntPtr)pcos, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static (MpfrFloat sinh, MpfrFloat cosh) SinhCosh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat sop = new(precision ?? op.Precision);
+        MpfrFloat cop = new(precision ?? op.Precision);
+        SinhCoshInplace(sop, cop, op, rounding);
+        return (sop, cop);
+    }
+
+    /// <summary>rop = 1 / cosh(op)</summary>
+    public static int SechInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_sech((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>1 / cosh(op)</returns>
+    public static MpfrFloat Sech(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        SechInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = 1/ sinh(op)</summary>
+    public static int CschInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_csch((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>1 / sinh(op)</returns>
+    public static MpfrFloat Csch(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        CschInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = 1 / tanh(op)</summary>
+    public static int CothInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_coth((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>1 / tanh(op)</returns>
+    public static MpfrFloat Coth(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        CothInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = acosh(op)</summary>
+    public static int AcoshInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_acosh((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>acosh(op)</returns>
+    public static MpfrFloat Acosh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AcoshInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = asinh(op)</summary>
+    public static int AsinhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_asinh((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>asinh(op)</returns>
+    public static MpfrFloat Asinh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AsinhInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = atanh(op)</summary>
+    public static int AtanhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_atanh((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>atanh(op)</returns>
+    public static MpfrFloat Atanh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AtanhInplace(rop, op, rounding);
+        return rop;
+    }
     #endregion
 
     public static int ConstPiInplace(MpfrFloat rop, MpfrRounding? rounding = null)
