@@ -2554,6 +2554,60 @@ public unsafe class MpfrFloat : IDisposable
         CotInplace(rop, op, rounding);
         return rop;
     }
+
+    /// <summary>rop = acos(op)</summary>
+    public static int AcosInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_acos((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>acos(op)</returns>
+    public static MpfrFloat Acos(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AcosInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = asin(op)</summary>
+    public static int AsinInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_asin((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>asin(op)</returns>
+    public static MpfrFloat Asin(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AsinInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = atan(op)</summary>
+    public static int AtanInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_atan((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>1 / tan(op)</returns>
+    public static MpfrFloat Atan(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AtanInplace(rop, op, rounding);
+        return rop;
+    }
     #endregion
 
     public static int ConstPiInplace(MpfrFloat rop, MpfrRounding? rounding = null)
