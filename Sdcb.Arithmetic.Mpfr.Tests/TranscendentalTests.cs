@@ -419,6 +419,45 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             using MpfrFloat rop = MpfrFloat.AtanPi(fop);
             Assert.Equal(expected, rop.ToDouble(), 15);
         }
+
+        [Theory]
+        [InlineData(0, 0, 1)]
+        [InlineData(Math.PI / 4, 1, 1)]
+        [InlineData(Math.PI / 2, 1, 0)]
+        [InlineData(-Math.PI / 2, -1, 0)]
+        public void Atan2Test(double expected, double op1, double op2)
+        {
+            using MpfrFloat fop1 = MpfrFloat.From(op1);
+            using MpfrFloat fop2 = MpfrFloat.From(op2);
+            using MpfrFloat rop = MpfrFloat.Atan2(fop1, fop2);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0, 0, 1)]
+        [InlineData(45, 1, 1)]
+        [InlineData(90, 1, 0)]
+        [InlineData(-90, -1, 0)]
+        public void Atan2UTest(double expected, double op1, double op2)
+        {
+            using MpfrFloat fop1 = MpfrFloat.From(op1);
+            using MpfrFloat fop2 = MpfrFloat.From(op2);
+            using MpfrFloat rop = MpfrFloat.Atan2U(fop1, fop2);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0, 0, 1)]
+        [InlineData(0.25, 1, 1)]
+        [InlineData(0.5, 1, 0)]
+        [InlineData(-0.5, -1, 0)]
+        public void Atan2PiTest(double expected, double op1, double op2)
+        {
+            using MpfrFloat fop1 = MpfrFloat.From(op1);
+            using MpfrFloat fop2 = MpfrFloat.From(op2);
+            using MpfrFloat rop = MpfrFloat.Atan2Pi(fop1, fop2);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
         #endregion
 
         [Fact]

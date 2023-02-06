@@ -2716,6 +2716,63 @@ public unsafe class MpfrFloat : IDisposable
         AtanPiInplace(rop, op, rounding);
         return rop;
     }
+
+    /// <summary>rop = atan2(y, x)</summary>
+    public static int Atan2Inplace(MpfrFloat rop, MpfrFloat y, MpfrFloat x, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* py = &y.Raw)
+        fixed (Mpfr_t* px = &x.Raw)
+        {
+            return MpfrLib.mpfr_atan2((IntPtr)pr, (IntPtr)py, (IntPtr)px, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>atan2(op)</returns>
+    public static MpfrFloat Atan2(MpfrFloat y, MpfrFloat x, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? DefaultPrecision);
+        Atan2Inplace(rop, y, x, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = atan2(y, x) / 2𝝿 * u</summary>
+    public static int Atan2UInplace(MpfrFloat rop, MpfrFloat y, MpfrFloat x, uint u = 360, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* py = &y.Raw)
+        fixed (Mpfr_t* px = &x.Raw)
+        {
+            return MpfrLib.mpfr_atan2u((IntPtr)pr, (IntPtr)py, (IntPtr)px, u, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>atan2(y, x) / 2𝝿 * u</returns>
+    public static MpfrFloat Atan2U(MpfrFloat y, MpfrFloat x, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? DefaultPrecision);
+        Atan2UInplace(rop, y, x, u, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = atan2(y, x) / 𝝿</summary>
+    public static int Atan2PiInplace(MpfrFloat rop, MpfrFloat y, MpfrFloat x, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* py = &y.Raw)
+        fixed (Mpfr_t* px = &x.Raw)
+        {
+            return MpfrLib.mpfr_atan2pi((IntPtr)pr, (IntPtr)py, (IntPtr)px, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>atan2(y, x) / 𝝿</returns>
+    public static MpfrFloat Atan2Pi(MpfrFloat y, MpfrFloat x, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? DefaultPrecision);
+        Atan2PiInplace(rop, y, x, rounding);
+        return rop;
+    }
     #endregion
 
     public static int ConstPiInplace(MpfrFloat rop, MpfrRounding? rounding = null)
