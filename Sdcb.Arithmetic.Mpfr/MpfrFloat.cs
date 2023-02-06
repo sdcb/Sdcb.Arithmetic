@@ -87,71 +87,71 @@ public unsafe class MpfrFloat : IDisposable
     #endregion
 
     #region 2. Assignment Functions
-    public void Assign(MpfrFloat val, MpfrRounding? rounding = null)
+    public int Assign(MpfrFloat val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
         fixed (Mpfr_t* pval = &val.Raw)
         {
-            MpfrLib.mpfr_set((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_set((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
         }
     }
 
-    public void Assign(uint val, MpfrRounding? rounding = null)
+    public int Assign(uint val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
         {
-            MpfrLib.mpfr_set_ui((IntPtr)pthis, val, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_set_ui((IntPtr)pthis, val, rounding ?? DefaultRounding);
         }
     }
 
-    public void Assign(int val, MpfrRounding? rounding = null)
+    public int Assign(int val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
         {
-            MpfrLib.mpfr_set_si((IntPtr)pthis, val, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_set_si((IntPtr)pthis, val, rounding ?? DefaultRounding);
         }
     }
 
-    public void Assign(float val, MpfrRounding? rounding = null)
+    public int Assign(float val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
         {
-            MpfrLib.mpfr_set_flt((IntPtr)pthis, val, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_set_flt((IntPtr)pthis, val, rounding ?? DefaultRounding);
         }
     }
 
-    public void Assign(double val, MpfrRounding? rounding = null)
+    public int Assign(double val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
         {
-            MpfrLib.mpfr_set_d((IntPtr)pthis, val, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_set_d((IntPtr)pthis, val, rounding ?? DefaultRounding);
         }
     }
 
-    public void Assign(GmpInteger val, MpfrRounding? rounding = null)
+    public int Assign(GmpInteger val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
         fixed (Mpz_t* pval = &val.Raw)
         {
-            MpfrLib.mpfr_set_z((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_set_z((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
         }
     }
 
-    public void Assign(GmpRational val, MpfrRounding? rounding = null)
+    public int Assign(GmpRational val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
         fixed (Mpq_t* pval = &val.Raw)
         {
-            MpfrLib.mpfr_set_q((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_set_q((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
         }
     }
 
-    public void Assign(GmpFloat val, MpfrRounding? rounding = null)
+    public int Assign(GmpFloat val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
         fixed (Mpf_t* pval = &val.Raw)
         {
-            MpfrLib.mpfr_set_f((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_set_f((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
         }
     }
 
@@ -160,11 +160,11 @@ public unsafe class MpfrFloat : IDisposable
     /// rounded toward the given direction rnd.
     /// Note that the input 0 is converted to +0.
     /// </summary>
-    public void Assign2Exp(uint op, int e, MpfrRounding? rounding = null)
+    public int Assign2Exp(uint op, int e, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
         {
-            MpfrLib.mpfr_set_ui_2exp((IntPtr)pthis, op, e, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_set_ui_2exp((IntPtr)pthis, op, e, rounding ?? DefaultRounding);
         }
     }
 
@@ -173,11 +173,11 @@ public unsafe class MpfrFloat : IDisposable
     /// rounded toward the given direction rnd.
     /// Note that the input 0 is converted to +0.
     /// </summary>
-    public void Assign2Exp(int op, int e, MpfrRounding? rounding = null)
+    public int Assign2Exp(int op, int e, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
         {
-            MpfrLib.mpfr_set_si_2exp((IntPtr)pthis, op, e, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_set_si_2exp((IntPtr)pthis, op, e, rounding ?? DefaultRounding);
         }
     }
 
@@ -186,18 +186,17 @@ public unsafe class MpfrFloat : IDisposable
     /// rounded toward the given direction rnd.
     /// Note that the input 0 is converted to +0.
     /// </summary>
-    public void Assign2Exp(GmpInteger op, int e, MpfrRounding? rounding = null)
+    public int Assign2Exp(GmpInteger op, int e, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
         fixed (Mpz_t* pop = &op.Raw)
         {
-            MpfrLib.mpfr_set_z_2exp((IntPtr)pthis, (IntPtr)pop, e, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_set_z_2exp((IntPtr)pthis, (IntPtr)pop, e, rounding ?? DefaultRounding);
         }
     }
 
-    /// <summary>
-    /// Set rop to the value of the string s in base base, rounded in the direction rnd. 
-    /// </summary>
+    /// <summary>Set rop to the value of the string s in base base, rounded in the direction rnd. </summary>
+    /// <exception cref="FormatException" />
     public void Assign(string s, int @base = 0, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -205,20 +204,18 @@ public unsafe class MpfrFloat : IDisposable
             byte[] opBytes = Encoding.UTF8.GetBytes(s);
             fixed (byte* opPtr = opBytes)
             {
-                IntPtr endptr = default;
+                byte* endptr = default;
                 int ret = MpfrLib.mpfr_strtofr((IntPtr)pthis, (IntPtr)opPtr, (IntPtr)(&endptr), @base, rounding ?? DefaultRounding);
-                if (endptr != default)
+                if (endptr[0] != 0)
                 {
-                    string location = Marshal.PtrToStringUTF8(endptr);
+                    string location = Marshal.PtrToStringUTF8((IntPtr)endptr);
                     throw new FormatException($"Failed to parse \"{s}\", base={@base} to {nameof(MpfrFloat)}, mpfr_strtofr returns {ret} at: {location}");
                 }
             }
         }
     }
 
-    /// <summary>
-    /// Set to the value of the string s in base base, rounded in the direction rnd. 
-    /// </summary>
+    /// <summary>Set to the value of the string s in base base, rounded in the direction rnd.</summary>
     public bool TryAssign(string s, int @base = 0, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -226,9 +223,9 @@ public unsafe class MpfrFloat : IDisposable
             byte[] opBytes = Encoding.UTF8.GetBytes(s);
             fixed (byte* opPtr = opBytes)
             {
-                IntPtr endptr = default;
+                byte* endptr = default;
                 int ret = MpfrLib.mpfr_strtofr((IntPtr)pthis, (IntPtr)opPtr, (IntPtr)(&endptr), @base, rounding ?? DefaultRounding);
-                return endptr == default;
+                return endptr[0] == 0;
             }
         }
     }
@@ -339,36 +336,35 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
+    /// <exception cref="FormatException" />
     public static MpfrFloat Parse(string s, int @base = 0, int? precision = null, MpfrRounding? rounding = null)
     {
-        Mpfr_t raw = new();
-        byte[] opBytes = Encoding.UTF8.GetBytes(s);
-        fixed (byte* opPtr = opBytes)
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        try
         {
-            int ret = MpfrLib.mpfr_init_set_str((IntPtr)(&raw), (IntPtr)opPtr, @base, rounding ?? DefaultRounding);
-            if (ret != 0)
-            {
-                MpfrLib.mpfr_clear((IntPtr)(&raw));
-                throw new FormatException($"Failed to parse \"{s}\", base={@base} to {nameof(MpfrFloat)}, mpfr_init_set_str returns {ret}");
-            }
-            return new MpfrFloat(raw);
+            rop.Assign(s, @base, rounding);
         }
+        catch 
+        {
+            rop.Clear();
+            throw;
+        }
+        return rop;
     }
 
-    public static bool TryParse(string s, [MaybeNullWhen(returnValue: false)] MpfrFloat rop, int @base = 0, int? precision = null, MpfrRounding? rounding = null)
+    public static bool TryParse(string s, [MaybeNullWhen(returnValue: false)] out MpfrFloat rop, int @base = 0, int? precision = null, MpfrRounding? rounding = null)
     {
-        Mpfr_t raw = new();
-        byte[] opBytes = Encoding.UTF8.GetBytes(s);
-        fixed (byte* opPtr = opBytes)
+        MpfrFloat r = CreateWithNullablePrecision(precision);
+        if (r.TryAssign(s, @base, rounding))
         {
-            int ret = MpfrLib.mpfr_init_set_str((IntPtr)(&raw), (IntPtr)opPtr, @base, rounding ?? DefaultRounding);
-            if (ret != 0)
-            {
-                MpfrLib.mpfr_clear((IntPtr)(&raw));
-                return false;
-            }
-            rop = new MpfrFloat(raw);
+            rop = r;
             return true;
+        }
+        else
+        {
+            r.Clear();
+            rop = null;
+            return false;
         }
     }
     #endregion
@@ -1477,7 +1473,7 @@ public unsafe class MpfrFloat : IDisposable
     }
 
     /// <returns>(op1 * op2) + op3</returns>
-    public static MpfrFloat FMA(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, int? precision = null , MpfrRounding? rounding = null)
+    public static MpfrFloat FMA(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
         FMAInplace(rop, op1, op2, op3, rounding);
@@ -1595,6 +1591,193 @@ public unsafe class MpfrFloat : IDisposable
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
         SumInplace(rop, tab, rounding);
+        return rop;
+    }
+    #endregion
+
+    #region 6. Comparison Functions
+    #region Compares
+    public static int Compare(MpfrFloat op1, MpfrFloat op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_cmp((IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static bool operator ==(MpfrFloat op1, MpfrFloat op2) => Compare(op1, op2) == 0;
+    public static bool operator !=(MpfrFloat op1, MpfrFloat op2) => Compare(op1, op2) != 0;
+    public static bool operator >(MpfrFloat op1, MpfrFloat op2) => Compare(op1, op2) > 0;
+    public static bool operator <(MpfrFloat op1, MpfrFloat op2) => Compare(op1, op2) < 0;
+    public static bool operator >=(MpfrFloat op1, MpfrFloat op2) => Compare(op1, op2) >= 0;
+    public static bool operator <=(MpfrFloat op1, MpfrFloat op2) => Compare(op1, op2) <= 0;
+
+    public static int Compare(MpfrFloat op1, uint op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_cmp_ui((IntPtr)p1, op2);
+        }
+    }
+
+    public static bool operator ==(MpfrFloat op1, uint op2) => Compare(op1, op2) == 0;
+    public static bool operator !=(MpfrFloat op1, uint op2) => Compare(op1, op2) != 0;
+    public static bool operator >(MpfrFloat op1, uint op2) => Compare(op1, op2) > 0;
+    public static bool operator <(MpfrFloat op1, uint op2) => Compare(op1, op2) < 0;
+    public static bool operator >=(MpfrFloat op1, uint op2) => Compare(op1, op2) >= 0;
+    public static bool operator <=(MpfrFloat op1, uint op2) => Compare(op1, op2) <= 0;
+    public static bool operator ==(uint op1, MpfrFloat op2) => Compare(op2, op1) == 0;
+    public static bool operator !=(uint op1, MpfrFloat op2) => Compare(op2, op1) != 0;
+    public static bool operator >(uint op1, MpfrFloat op2) => Compare(op2, op1) < 0;
+    public static bool operator <(uint op1, MpfrFloat op2) => Compare(op2, op1) > 0;
+    public static bool operator >=(uint op1, MpfrFloat op2) => Compare(op2, op1) <= 0;
+    public static bool operator <=(uint op1, MpfrFloat op2) => Compare(op2, op1) >= 0;
+
+    public static int Compare(MpfrFloat op1, int op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_cmp_si((IntPtr)p1, op2);
+        }
+    }
+
+    public static bool operator ==(MpfrFloat op1, int op2) => Compare(op1, op2) == 0;
+    public static bool operator !=(MpfrFloat op1, int op2) => Compare(op1, op2) != 0;
+    public static bool operator >(MpfrFloat op1, int op2) => Compare(op1, op2) > 0;
+    public static bool operator <(MpfrFloat op1, int op2) => Compare(op1, op2) < 0;
+    public static bool operator >=(MpfrFloat op1, int op2) => Compare(op1, op2) >= 0;
+    public static bool operator <=(MpfrFloat op1, int op2) => Compare(op1, op2) <= 0;
+    public static bool operator ==(int op1, MpfrFloat op2) => Compare(op2, op1) == 0;
+    public static bool operator !=(int op1, MpfrFloat op2) => Compare(op2, op1) != 0;
+    public static bool operator >(int op1, MpfrFloat op2) => Compare(op2, op1) < 0;
+    public static bool operator <(int op1, MpfrFloat op2) => Compare(op2, op1) > 0;
+    public static bool operator >=(int op1, MpfrFloat op2) => Compare(op2, op1) <= 0;
+    public static bool operator <=(int op1, MpfrFloat op2) => Compare(op2, op1) >= 0;
+
+    public static int Compare(MpfrFloat op1, double op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_cmp_d((IntPtr)p1, op2);
+        }
+    }
+
+    public static bool operator ==(MpfrFloat op1, double op2) => Compare(op1, op2) == 0;
+    public static bool operator !=(MpfrFloat op1, double op2) => Compare(op1, op2) != 0;
+    public static bool operator >(MpfrFloat op1, double op2) => Compare(op1, op2) > 0;
+    public static bool operator <(MpfrFloat op1, double op2) => Compare(op1, op2) < 0;
+    public static bool operator >=(MpfrFloat op1, double op2) => Compare(op1, op2) >= 0;
+    public static bool operator <=(MpfrFloat op1, double op2) => Compare(op1, op2) <= 0;
+    public static bool operator ==(double op1, MpfrFloat op2) => Compare(op2, op1) == 0;
+    public static bool operator !=(double op1, MpfrFloat op2) => Compare(op2, op1) != 0;
+    public static bool operator >(double op1, MpfrFloat op2) => Compare(op2, op1) < 0;
+    public static bool operator <(double op1, MpfrFloat op2) => Compare(op2, op1) > 0;
+    public static bool operator >=(double op1, MpfrFloat op2) => Compare(op2, op1) <= 0;
+    public static bool operator <=(double op1, MpfrFloat op2) => Compare(op2, op1) >= 0;
+
+    public static int Compare(MpfrFloat op1, GmpInteger op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_cmp_z((IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static bool operator ==(MpfrFloat op1, GmpInteger op2) => Compare(op1, op2) == 0;
+    public static bool operator !=(MpfrFloat op1, GmpInteger op2) => Compare(op1, op2) != 0;
+    public static bool operator >(MpfrFloat op1, GmpInteger op2) => Compare(op1, op2) > 0;
+    public static bool operator <(MpfrFloat op1, GmpInteger op2) => Compare(op1, op2) < 0;
+    public static bool operator >=(MpfrFloat op1, GmpInteger op2) => Compare(op1, op2) >= 0;
+    public static bool operator <=(MpfrFloat op1, GmpInteger op2) => Compare(op1, op2) <= 0;
+    public static bool operator ==(GmpInteger op1, MpfrFloat op2) => Compare(op2, op1) == 0;
+    public static bool operator !=(GmpInteger op1, MpfrFloat op2) => Compare(op2, op1) != 0;
+    public static bool operator >(GmpInteger op1, MpfrFloat op2) => Compare(op2, op1) < 0;
+    public static bool operator <(GmpInteger op1, MpfrFloat op2) => Compare(op2, op1) > 0;
+    public static bool operator >=(GmpInteger op1, MpfrFloat op2) => Compare(op2, op1) <= 0;
+    public static bool operator <=(GmpInteger op1, MpfrFloat op2) => Compare(op2, op1) >= 0;
+
+    public static int Compare(MpfrFloat op1, GmpRational op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpq_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_cmp_q((IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static bool operator ==(MpfrFloat op1, GmpRational op2) => Compare(op1, op2) == 0;
+    public static bool operator !=(MpfrFloat op1, GmpRational op2) => Compare(op1, op2) != 0;
+    public static bool operator >(MpfrFloat op1, GmpRational op2) => Compare(op1, op2) > 0;
+    public static bool operator <(MpfrFloat op1, GmpRational op2) => Compare(op1, op2) < 0;
+    public static bool operator >=(MpfrFloat op1, GmpRational op2) => Compare(op1, op2) >= 0;
+    public static bool operator <=(MpfrFloat op1, GmpRational op2) => Compare(op1, op2) <= 0;
+    public static bool operator ==(GmpRational op1, MpfrFloat op2) => Compare(op2, op1) == 0;
+    public static bool operator !=(GmpRational op1, MpfrFloat op2) => Compare(op2, op1) != 0;
+    public static bool operator >(GmpRational op1, MpfrFloat op2) => Compare(op2, op1) < 0;
+    public static bool operator <(GmpRational op1, MpfrFloat op2) => Compare(op2, op1) > 0;
+    public static bool operator >=(GmpRational op1, MpfrFloat op2) => Compare(op2, op1) <= 0;
+    public static bool operator <=(GmpRational op1, MpfrFloat op2) => Compare(op2, op1) >= 0;
+
+    public static int Compare(MpfrFloat op1, GmpFloat op2)
+    {
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpf_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_cmp_f((IntPtr)p1, (IntPtr)p2);
+        }
+    }
+
+    public static bool operator ==(MpfrFloat op1, GmpFloat op2) => Compare(op1, op2) == 0;
+    public static bool operator !=(MpfrFloat op1, GmpFloat op2) => Compare(op1, op2) != 0;
+    public static bool operator >(MpfrFloat op1, GmpFloat op2) => Compare(op1, op2) > 0;
+    public static bool operator <(MpfrFloat op1, GmpFloat op2) => Compare(op1, op2) < 0;
+    public static bool operator >=(MpfrFloat op1, GmpFloat op2) => Compare(op1, op2) >= 0;
+    public static bool operator <=(MpfrFloat op1, GmpFloat op2) => Compare(op1, op2) <= 0;
+    public static bool operator ==(GmpFloat op1, MpfrFloat op2) => Compare(op2, op1) == 0;
+    public static bool operator !=(GmpFloat op1, MpfrFloat op2) => Compare(op2, op1) != 0;
+    public static bool operator >(GmpFloat op1, MpfrFloat op2) => Compare(op2, op1) < 0;
+    public static bool operator <(GmpFloat op1, MpfrFloat op2) => Compare(op2, op1) > 0;
+    public static bool operator >=(GmpFloat op1, MpfrFloat op2) => Compare(op2, op1) <= 0;
+    public static bool operator <=(GmpFloat op1, MpfrFloat op2) => Compare(op2, op1) >= 0;
+    #endregion
+
+    public override bool Equals(object obj)
+    {
+        return obj switch
+        {
+            null => false,
+            MpfrFloat r => this == r,
+            uint ui => this == ui,
+            int si => this == si,
+            double dbl => this == dbl,
+            GmpInteger z => this == z,
+            GmpRational q => this == q,
+            GmpFloat f => this == f,
+            _ => false,
+        };
+    }
+
+    public override int GetHashCode()
+    {
+        return Raw.GetHashCode();
+    }
+    #endregion
+
+    #region 7. Transcendental Functions
+    public static int ConstPiInplace(MpfrFloat rop, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        {
+            return MpfrLib.mpfr_const_pi((IntPtr)pr, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat ConstPi(int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        ConstPiInplace(rop, rounding);
         return rop;
     }
     #endregion
@@ -1767,9 +1950,11 @@ public record struct Mpfr_t
     public int Exponent;
     public IntPtr Limbs;
 
-    public static int RawSize => Marshal.SizeOf<Mpf_t>();
+    public static unsafe int RawSize => sizeof(Mpfr_t);
 
-    private unsafe Span<int> GetLimbData() => new((void*)Limbs, Precision - 1);
+    private int LimbCount => (Precision - 1) / (IntPtr.Size * 8) + 1;
+
+    private unsafe Span<nint> GetLimbData() => new((void*)Limbs, LimbCount);
 
     public override int GetHashCode()
     {
@@ -1777,7 +1962,7 @@ public record struct Mpfr_t
         c.Add(Precision);
         c.Add(Sign);
         c.Add(Exponent);
-        foreach (int i in GetLimbData())
+        foreach (nint i in GetLimbData())
         {
             c.Add(i);
         }
