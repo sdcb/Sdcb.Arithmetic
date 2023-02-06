@@ -2374,6 +2374,54 @@ public unsafe class MpfrFloat : IDisposable
         TanInplace(rop, op, rounding);
         return rop;
     }
+
+    public static int CosUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_cosu((IntPtr)pr, (IntPtr)pop, u, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat CosU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        CosUInplace(rop, op, u, rounding);
+        return rop;
+    }
+
+    public static int SinUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_sinu((IntPtr)pr, (IntPtr)pop, u, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat SinU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        SinUInplace(rop, op, u, rounding);
+        return rop;
+    }
+
+    public static int TanUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_tanu((IntPtr)pr, (IntPtr)pop, u, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat TanU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        TanUInplace(rop, op, u, rounding);
+        return rop;
+    }
     #endregion
 
     public static int ConstPiInplace(MpfrFloat rop, MpfrRounding? rounding = null)
