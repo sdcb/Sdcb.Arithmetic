@@ -281,6 +281,45 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             Assert.Equal(expectedSin, sop.ToDouble(), 15);
             Assert.Equal(expectedCos, cop.ToDouble(), 15);
         }
+
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(Math.PI / 2, 16331239353195370)]
+        [InlineData(Math.PI, -1)]
+        [InlineData(Math.PI * 1.5, -5443746451065123)]
+        [InlineData(Math.PI * 2, 1)]
+        public void SecTest(double op, double expected)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Sec(fop);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0, double.PositiveInfinity)]
+        [InlineData(Math.PI / 2, 1)]
+        [InlineData(Math.PI, 8165619676597686)]
+        [InlineData(Math.PI * 1.5, -1)]
+        [InlineData(Math.PI * 2, -4082809838298843)]
+        public void CscTest(double op, double expected)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Csc(fop);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0, double.PositiveInfinity)]
+        [InlineData(Math.PI / 2, 0)]
+        [InlineData(Math.PI, -8165619676597686)]
+        [InlineData(Math.PI * 1.5, 0)]
+        [InlineData(Math.PI * 2, -4082809838298843)]
+        public void CotTest(double op, double expected)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.Cot(fop);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
         #endregion
 
         [Fact]
