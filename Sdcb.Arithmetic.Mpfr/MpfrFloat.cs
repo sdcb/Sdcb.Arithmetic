@@ -2375,6 +2375,7 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
+    /// <summary>rop = cos(op * 2𝝿 / u)</summary>
     public static int CosUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2384,6 +2385,7 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
+    /// <returns>cos(op * 2𝝿 / u)</returns>
     public static MpfrFloat CosU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2391,6 +2393,7 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
+    /// <summary>rop = sin(op * 2𝝿 / u)</summary>
     public static int SinUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2400,6 +2403,7 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
+    /// <returns>sin(op * 2𝝿 / u)</returns>
     public static MpfrFloat SinU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2407,6 +2411,7 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
+    /// <summary>rop = tan(op * 2𝝿 / u)</summary>
     public static int TanUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2416,11 +2421,84 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
+    /// <returns>tan(op * 2𝝿 / u)</returns>
     public static MpfrFloat TanU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
         TanUInplace(rop, op, u, rounding);
         return rop;
+    }
+
+    /// <summary>rop = cos(op * 𝝿)</summary>
+    public static int CosPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_cospi((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>cos(op * 𝝿)</returns>
+    public static MpfrFloat CosPi(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        CosPiInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = sin(op * 𝝿)</summary>
+    public static int SinPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_sinpi((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>sin(op * 𝝿)</returns>
+    public static MpfrFloat SinPi(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        SinPiInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = tan(op * 𝝿)</summary>
+    public static int TanPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_tanpi((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>tan(op * 𝝿)</returns>
+    public static MpfrFloat TanPi(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        TanPiInplace(rop, op, rounding);
+        return rop;
+    }
+
+    public static int SinCosInplace(MpfrFloat sop, MpfrFloat cop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* psin = &sop.Raw)
+        fixed (Mpfr_t* pcos = &cop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_sin_cos((IntPtr)psin, (IntPtr)pcos, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static (MpfrFloat sin, MpfrFloat cos) SinCos(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat sop = new(precision ?? op.Precision);
+        MpfrFloat cop = new(precision ?? op.Precision);
+        SinCosInplace(sop, cop, op, rounding);
+        return (sop, cop);
     }
     #endregion
 

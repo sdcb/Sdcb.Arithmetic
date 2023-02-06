@@ -228,6 +228,59 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             using MpfrFloat rop = MpfrFloat.TanU(fop);
             Assert.Equal(expected, rop.ToDouble(), 15);
         }
+
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(0.5, 0)]
+        [InlineData(1, -1)]
+        [InlineData(1.5, 0)]
+        [InlineData(2, 1)]
+        public void CosPiTest(double op, double expected)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.CosPi(fop);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(0.5, 1)]
+        [InlineData(1, 0)]
+        [InlineData(1.5, -1)]
+        [InlineData(2, 0)]
+        public void SinPiTest(double op, double expected)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.SinPi(fop);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(0.5, double.PositiveInfinity)]
+        [InlineData(1, 0)]
+        [InlineData(1.5, double.NegativeInfinity)]
+        [InlineData(2, 0)]
+        public void TanPiTest(double op, double expected)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.TanPi(fop);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0, 0, 1)]
+        [InlineData(Math.PI / 2, 1, 0)]
+        [InlineData(Math.PI, 0, -1)]
+        [InlineData(Math.PI * 1.5, -1, 0)]
+        [InlineData(Math.PI * 2, 0, 1)]
+        public void SinCosTest(double op, double expectedSin, double expectedCos)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            (MpfrFloat sop, MpfrFloat cop)= MpfrFloat.SinCos(fop);
+            Assert.Equal(expectedSin, sop.ToDouble(), 15);
+            Assert.Equal(expectedCos, cop.ToDouble(), 15);
+        }
         #endregion
 
         [Fact]
