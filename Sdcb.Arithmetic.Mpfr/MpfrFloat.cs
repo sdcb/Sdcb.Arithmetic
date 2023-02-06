@@ -2601,11 +2601,65 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
-    /// <returns>1 / tan(op)</returns>
+    /// <returns>atan(op)</returns>
     public static MpfrFloat Atan(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
         AtanInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = acos(op) / 2𝝿 * u</summary>
+    public static int AcosUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_acosu((IntPtr)pr, (IntPtr)pop, u, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>acos(op) / 2𝝿 * u</returns>
+    public static MpfrFloat AcosU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AcosUInplace(rop, op, u, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = asin(op) / 2𝝿 * u</summary>
+    public static int AsinUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_asinu((IntPtr)pr, (IntPtr)pop, u, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>asin(op) / 2𝝿 * u</returns>
+    public static MpfrFloat AsinU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AsinUInplace(rop, op, u, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = atan(op) / 2𝝿 * u</summary>
+    public static int AtanUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_atanu((IntPtr)pr, (IntPtr)pop, u, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>atan(op) / 2𝝿 * u</returns>
+    public static MpfrFloat AtanU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AtanUInplace(rop, op, u, rounding);
         return rop;
     }
     #endregion
