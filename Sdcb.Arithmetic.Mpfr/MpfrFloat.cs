@@ -1477,7 +1477,7 @@ public unsafe class MpfrFloat : IDisposable
     }
 
     /// <returns>(op1 * op2) + op3</returns>
-    public static MpfrFloat FMA(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, int? precision, MpfrRounding? rounding = null)
+    public static MpfrFloat FMA(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, int? precision = null , MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
         FMAInplace(rop, op1, op2, op3, rounding);
@@ -1499,7 +1499,7 @@ public unsafe class MpfrFloat : IDisposable
     }
 
     /// <returns>(op1 * op2) - op3</returns>
-    public static MpfrFloat FMS(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, int? precision, MpfrRounding? rounding = null)
+    public static MpfrFloat FMS(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
         FMSInplace(rop, op1, op2, op3, rounding);
@@ -1522,7 +1522,7 @@ public unsafe class MpfrFloat : IDisposable
     }
 
     /// <returns>(op1 * op2) + (op3 * op4)</returns>
-    public static MpfrFloat FMMA(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, int? precision, MpfrRounding? rounding = null)
+    public static MpfrFloat FMMA(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
         FMMAInplace(rop, op1, op2, op3, op4, rounding);
@@ -1545,7 +1545,7 @@ public unsafe class MpfrFloat : IDisposable
     }
 
     /// <returns>(op1 * op2) - (op3 * op4)</returns>
-    public static MpfrFloat FMMS(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, int? precision, MpfrRounding? rounding = null)
+    public static MpfrFloat FMMS(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
         FMMSInplace(rop, op1, op2, op3, op4, rounding);
@@ -1576,9 +1576,26 @@ public unsafe class MpfrFloat : IDisposable
         fixed (Mpfr_t* pr = &rop.Raw)
         {
             GCHandle[] handles = tab.Select(x => GCHandle.Alloc(x.Raw, GCHandleType.Pinned)).ToArray();
-            IntPtr[] ptrs = handles.Select(x => x.AddrOfPinnedObject()).ToArray();
-            // TODO
+            try
+            {
+                IntPtr[] ptrs = handles.Select(x => x.AddrOfPinnedObject()).ToArray();
+                fixed (IntPtr* ptab = &ptrs[0])
+                {
+                    return MpfrLib.mpfr_sum((IntPtr)pr, (IntPtr)ptab, (uint)ptrs.Length, rounding ?? DefaultRounding);
+                }
+            }
+            finally
+            {
+                foreach (GCHandle handle in handles) handle.Free();
+            }
         }
+    }
+
+    public static MpfrFloat Sum(IEnumerable<MpfrFloat> tab, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        SumInplace(rop, tab, rounding);
+        return rop;
     }
     #endregion
 
