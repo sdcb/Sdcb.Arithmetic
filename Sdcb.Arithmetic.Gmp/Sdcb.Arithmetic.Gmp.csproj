@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
-    <LangVersion>11.0</LangVersion>
+    <LangVersion>11</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
+    <PackageIcon>Sdcb.Arithmetic.Gmp.png</PackageIcon>
     <Authors>sdcb</Authors>
     <Description>A better GMP library dotnet binding</Description>
     <PackageProjectUrl>https://github.com/sdcb/sdcb.math.gmp</PackageProjectUrl>
-    <PackageIcon>Sdcb.Arithmetic.Gmp.png</PackageIcon>
+    
     <RepositoryUrl>https://github.com/sdcb/Sdcb.Math.Gmp.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>GMP;multi-precision;arithmetic;BigInteger;BigRational;BigInt;BigFloat;BigNum;linqpad-samples</PackageTags>

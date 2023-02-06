@@ -3,8 +3,17 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>11</LangVersion>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
     <PackageIcon>Sdcb.Arithmetic.Mpfr.png</PackageIcon>
+    <Authors>sdcb</Authors>
+    <Description>A better MPFR library dotnet binding</Description>
+    <PackageProjectUrl>https://github.com/sdcb/sdcb.arithmetic</PackageProjectUrl>
+
+    <RepositoryUrl>https://github.com/sdcb/Sdcb.Arithmetic.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>GMP;multi-precision;arithmetic;BigInteger;BigRational;BigInt;BigFloat;BigNum;linqpad-samples</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
