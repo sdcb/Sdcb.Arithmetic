@@ -40,6 +40,7 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         [Fact]
         public unsafe void CalcE()
         {
+#pragma warning disable CA1806 // 不要忽略方法结果
             // https://www.mpfr.org/sample.html
             Mpfr_t s, t, u;
             MpfrLib.mpfr_init2((IntPtr)(&t), 200);
@@ -64,6 +65,7 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             MpfrLib.mpfr_clear((IntPtr)(&t));
             MpfrLib.mpfr_clear((IntPtr)(&u));
             MpfrLib.mpfr_free_cache();
+#pragma warning restore CA1806 // 不要忽略方法结果
         }
     }
 }
