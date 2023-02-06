@@ -386,6 +386,39 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             using MpfrFloat rop = MpfrFloat.AtanU(fop);
             Assert.Equal(expected, rop.ToDouble(), 15);
         }
+
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(0.5, 0)]
+        [InlineData(1, -1)]
+        public void AcosPiTest(double expected, double op)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.AcosPi(fop);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(0.5, 1)]
+        [InlineData(-0.5, -1)]
+        public void AsinPiTest(double expected, double op)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.AsinPi(fop);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
+
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(0.5, double.PositiveInfinity)]
+        [InlineData(-0.5, double.NegativeInfinity)]
+        public void AtanPiTest(double expected, double op)
+        {
+            using MpfrFloat fop = MpfrFloat.From(op);
+            using MpfrFloat rop = MpfrFloat.AtanPi(fop);
+            Assert.Equal(expected, rop.ToDouble(), 15);
+        }
         #endregion
 
         [Fact]

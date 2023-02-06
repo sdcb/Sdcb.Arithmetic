@@ -2662,6 +2662,60 @@ public unsafe class MpfrFloat : IDisposable
         AtanUInplace(rop, op, u, rounding);
         return rop;
     }
+
+    /// <summary>rop = acos(op) / 𝝿</summary>
+    public static int AcosPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_acospi((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>acos(op) / 𝝿</returns>
+    public static MpfrFloat AcosPi(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AcosPiInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = asin(op) / 𝝿</summary>
+    public static int AsinPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_asinpi((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>asin(op) / 𝝿</returns>
+    public static MpfrFloat AsinPi(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AsinPiInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = atan(op) / 𝝿</summary>
+    public static int AtanPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_atanpi((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>atan(op) / 𝝿</returns>
+    public static MpfrFloat AtanPi(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AtanPiInplace(rop, op, rounding);
+        return rop;
+    }
     #endregion
 
     public static int ConstPiInplace(MpfrFloat rop, MpfrRounding? rounding = null)
