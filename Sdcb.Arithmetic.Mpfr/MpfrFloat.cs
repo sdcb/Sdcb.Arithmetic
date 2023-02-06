@@ -1947,6 +1947,270 @@ public unsafe class MpfrFloat : IDisposable
     #endregion
 
     #region 7. Transcendental Functions
+    public static int LogInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_log((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Log(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        LogInplace(rop, op, rounding);
+        return rop;
+    }
+
+    public static int LogInplace(MpfrFloat rop, uint op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        {
+            return MpfrLib.mpfr_log_ui((IntPtr)pr, op, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Log(uint op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        LogInplace(rop, op, rounding);
+        return rop;
+    }
+
+    public static int Log2Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_log2((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Log2(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        Log2Inplace(rop, op, rounding);
+        return rop;
+    }
+
+    public static int Log10Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_log10((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Log10(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        Log10Inplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = log(op + 1)</summary>
+    public static int LogP1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_log1p((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>log(op + 1)</returns>
+    public static MpfrFloat LogP1(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        LogP1Inplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = e ^ op</summary>
+    public static int ExpInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_exp((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>e ^ op</returns>
+    public static MpfrFloat Exp(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        ExpInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = 2 ^ op</summary>
+    public static int Exp2Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_exp2((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>2 ^ op</returns>
+    public static MpfrFloat Exp2(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        Exp2Inplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = 10 ^ op</summary>
+    public static int Exp10Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_exp10((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>10 ^ op</returns>
+    public static MpfrFloat Exp10(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        Exp10Inplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>rop = e ^ op - 1</summary>
+    public static int ExpM1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_expm1((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>e ^ op - 1</returns>
+    public static MpfrFloat ExpM1(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        ExpM1Inplace(rop, op, rounding);
+        return rop;
+    }
+
+    #region Power
+    public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_pow((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Power(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        PowerInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator ^(MpfrFloat op1, MpfrFloat op2) => Power(op1, op2);
+
+    public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_pow_ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Power(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        PowerInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator ^(MpfrFloat op1, uint op2) => Power(op1, op2);
+
+    public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        {
+            return MpfrLib.mpfr_pow_si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Power(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        PowerInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator ^(MpfrFloat op1, int op2) => Power(op1, op2);
+
+    public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpz_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_pow_z((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Power(MpfrFloat op1, GmpInteger op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        PowerInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator ^(MpfrFloat op1, GmpInteger op2) => Power(op1, op2);
+
+    public static int PowerInplace(MpfrFloat rop, uint op1, uint op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        {
+            return MpfrLib.mpfr_ui_pow_ui((IntPtr)pr, op1, op2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Power(uint op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        PowerInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static int PowerInplace(MpfrFloat rop, uint op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_ui_pow((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Power(uint op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        PowerInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static MpfrFloat operator ^(uint op1, MpfrFloat op2) => Power(op1, op2);
+
+    // TODO: https://www.mpfr.org/mpfr-current/mpfr.html#index-mpfr_005fcompound_005fsi
+    #endregion
+
     public static int ConstPiInplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
