@@ -6,32 +6,32 @@
     public enum MpfrRounding
     {
         /// <summary>
-        /// round to nearest, with ties to even
+        /// MPFR_RNDN, round to nearest, with ties to even
         /// </summary>
-        Nearest = 0,
+        ToEven = 0,
 
         /// <summary>
-        /// round toward zero
+        /// MPFR_RNDZ, round toward zero
         /// </summary>
-        Zero,
+        ToZero,
 
         /// <summary>
-        /// round toward +Inf
+        /// MPFR_RNDU, round toward +Inf
         /// </summary>
-        Up,
+        ToPositiveInfinity,
 
         /// <summary>
-        /// round toward -Inf
+        /// MPFR_RNDD, round toward -Inf
         /// </summary>
-        Down,
+        ToNegativeInfinity,
 
         /// <summary>
-        /// round away from zero
+        /// MPFR_RNDA, round away from zero
         /// </summary>
         AwayFromZero,
 
         /// <summary>
-        /// faithful rounding
+        /// MPFR_RNDF, faithful rounding
         /// </summary>
         Faithful,
     }

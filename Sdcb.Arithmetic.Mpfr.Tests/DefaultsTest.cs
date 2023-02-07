@@ -22,14 +22,14 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         [Fact]
         public void MpfrRoundingDefault()
         {
-            Assert.Equal(MpfrRounding.Nearest, MpfrFloat.DefaultRounding);
+            Assert.Equal(MpfrRounding.ToEven, MpfrFloat.DefaultRounding);
         }
 
         [Fact]
         public void AssignRounding()
         {
-            MpfrFloat.DefaultRounding = MpfrRounding.Up;
-            Assert.Equal(MpfrRounding.Up, MpfrFloat.DefaultRounding);
+            MpfrFloat.DefaultRounding = MpfrRounding.ToPositiveInfinity;
+            Assert.Equal(MpfrRounding.ToPositiveInfinity, MpfrFloat.DefaultRounding);
         }
 
         [Fact]
@@ -37,9 +37,9 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         {
             Task.Run(() =>
             {
-                MpfrFloat.DefaultRounding = MpfrRounding.Up;
+                MpfrFloat.DefaultRounding = MpfrRounding.ToPositiveInfinity;
             }).Wait();
-            Assert.Equal(MpfrRounding.Nearest, MpfrFloat.DefaultRounding);
+            Assert.Equal(MpfrRounding.ToEven, MpfrFloat.DefaultRounding);
         }
 
         [Fact]

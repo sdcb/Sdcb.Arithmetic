@@ -3478,6 +3478,116 @@ public unsafe class MpfrFloat : IDisposable
     }
     #endregion
 
+    #region 10. Integer and Remainder Related Functions
+    /// <summary>rounds to the nearest representable integer in the given direction rnd.</summary>
+    public static int RIntInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_rint((IntPtr)pr, (IntPtr)pop, rounding);
+        }
+    }
+
+    /// <returns>rounds to the nearest representable integer in the given direction rnd.</returns>
+    public static MpfrFloat RInt(MpfrFloat op, MpfrRounding rounding, int? precision = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        RIntInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>to the next higher or equal representable integer (like mpfr_rint with MPFR_RNDU)</summary>
+    public static int CeilingInplace(MpfrFloat rop, MpfrFloat op)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_ceil((IntPtr)pr, (IntPtr)pop);
+        }
+    }
+
+    /// <summary>to the next higher or equal representable integer (like mpfr_rint with MPFR_RNDU)</summary>
+    public static MpfrFloat Ceiling(MpfrFloat op, int? precision = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        CeilingInplace(rop, op);
+        return rop;
+    }
+
+    /// <summary>to the next lower or equal representable integer (like mpfr_rint with MPFR_RNDD)</summary>
+    public static int FloorInplace(MpfrFloat rop, MpfrFloat op)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_floor((IntPtr)pr, (IntPtr)pop);
+        }
+    }
+
+    /// <summary>to the next lower or equal representable integer (like mpfr_rint with MPFR_RNDD)</summary>
+    public static MpfrFloat Floor(MpfrFloat op, int? precision = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        FloorInplace(rop, op);
+        return rop;
+    }
+
+    /// <summary>to the nearest representable integer, rounding halfway cases away from zero (as in the roundTiesToAway mode of IEEE 754)</summary>
+    public static int RoundInplace(MpfrFloat rop, MpfrFloat op)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_round((IntPtr)pr, (IntPtr)pop);
+        }
+    }
+
+    /// <summary>to the nearest representable integer, rounding halfway cases away from zero (as in the roundTiesToAway mode of IEEE 754)</summary>
+    public static MpfrFloat Round(MpfrFloat op, int? precision = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        RoundInplace(rop, op);
+        return rop;
+    }
+
+    /// <summary>to the nearest representable integer, rounding halfway cases with the even-rounding rule (like mpfr_rint with MPFR_RNDN)</summary>
+    public static int RoundEvenInplace(MpfrFloat rop, MpfrFloat op)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_roundeven((IntPtr)pr, (IntPtr)pop);
+        }
+    }
+
+    /// <summary>to the nearest representable integer, rounding halfway cases with the even-rounding rule (like mpfr_rint with MPFR_RNDN)</summary>
+    public static MpfrFloat RoundEven(MpfrFloat op, int? precision = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        RoundEvenInplace(rop, op);
+        return rop;
+    }
+
+    /// <summary>to the next representable integer toward zero (like mpfr_rint with MPFR_RNDZ).</summary>
+    public static int TruncateInplace(MpfrFloat rop, MpfrFloat op)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_trunc((IntPtr)pr, (IntPtr)pop);
+        }
+    }
+
+    /// <summary>to the next representable integer toward zero (like mpfr_rint with MPFR_RNDZ).</summary>
+    public static MpfrFloat Truncate(MpfrFloat op, int? precision = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        RoundEvenInplace(rop, op);
+        return rop;
+    }
+    #endregion
+
     #region 15. Compatibility With MPF
     /// <summary>
     /// Reset the precision of x to be exactly prec bits.
