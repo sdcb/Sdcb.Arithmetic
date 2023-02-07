@@ -3586,6 +3586,135 @@ public unsafe class MpfrFloat : IDisposable
         RoundEvenInplace(rop, op);
         return rop;
     }
+
+    /// <summary>to the next higher or equal integer</summary>
+    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    public static int RIntCeilingInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_rint_ceil((IntPtr)pr, (IntPtr)pop, rounding);
+        }
+    }
+
+    /// <returns>to the next higher or equal integer</returns>
+    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    public static MpfrFloat RIntCeiling(MpfrFloat op, MpfrRounding rounding, int? precision = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        RIntCeilingInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>to the next lower or equal integer</summary>
+    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    public static int RIntFloorInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_rint_floor((IntPtr)pr, (IntPtr)pop, rounding);
+        }
+    }
+
+    /// <returns>to the next lower or equal integer</returns>
+    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    public static MpfrFloat RIntFloor(MpfrFloat op, MpfrRounding rounding, int? precision = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        RIntFloorInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>to the nearest integer, rounding halfway cases away from zero.</summary>
+    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    public static int RIntRoundInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_rint_round((IntPtr)pr, (IntPtr)pop, rounding);
+        }
+    }
+
+    /// <returns>to the nearest integer, rounding halfway cases away from zero.</returns>
+    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    public static MpfrFloat RIntRound(MpfrFloat op, MpfrRounding rounding, int? precision = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        RIntRoundInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>to the nearest integer, rounding halfway cases to the nearest even integer</summary>
+    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    public static int RIntRoundEvenInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_rint_roundeven((IntPtr)pr, (IntPtr)pop, rounding);
+        }
+    }
+
+    /// <returns>to the nearest integer, rounding halfway cases to the nearest even integer</returns>
+    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    public static MpfrFloat RIntRoundEven(MpfrFloat op, MpfrRounding rounding, int? precision = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        RIntRoundEvenInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>to the next integer toward zero</summary>
+    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    public static int RIntTruncateInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_rint_trunc((IntPtr)pr, (IntPtr)pop, rounding);
+        }
+    }
+
+    /// <returns>to the next integer toward zero</returns>
+    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    public static MpfrFloat RIntTruncate(MpfrFloat op, MpfrRounding rounding, int? precision = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        RIntTruncateInplace(rop, op, rounding);
+        return rop;
+    }
+
+    public static int FractionalInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_frac((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Fractional(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? DefaultPrecision);
+        FractionalInplace(rop, op, rounding);
+        return rop;
+    }
+
+    // TODO: https://www.mpfr.org/mpfr-current/mpfr.html#index-mpfr_005fmodf
+
+    public bool IsInteger
+    {
+        get
+        {
+            fixed (Mpfr_t* pthis = &Raw)
+            {
+                return MpfrLib.mpfr_integer_p((IntPtr)pthis) != 0;
+            }
+        }
+    }
     #endregion
 
     #region 15. Compatibility With MPF

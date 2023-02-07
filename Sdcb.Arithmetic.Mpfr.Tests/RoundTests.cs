@@ -52,4 +52,20 @@ public class RoundTests
         MpfrFloat.RoundInplace(rop, fop);
         Assert.Equal(Math.Round(op, MidpointRounding.AwayFromZero), rop.ToDouble());
     }
+
+    [Fact]
+    public void FractionalTest()
+    {
+        using MpfrFloat op = MpfrFloat.From(3.14);
+        Assert.Equal(0.14, MpfrFloat.Fractional(op).ToDouble(), 2);
+    }
+
+    [Theory]
+    [InlineData(3.14, false)]
+    [InlineData(10086, true)]
+    public void IsIntegerTest(double d, bool isInteger)
+    {
+        using MpfrFloat op = MpfrFloat.From(d);
+        Assert.Equal(isInteger, op.IsInteger);
+    }
 }
