@@ -3366,9 +3366,7 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    /// <summary>
-    /// Set rop to the arithmetic-geometric mean of op1 and op2, rounded in the direction rnd.
-    /// </summary>
+    /// <summary>Set rop to the arithmetic-geometric mean of op1 and op2, rounded in the direction rnd.</summary>
     public static int AGMInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3387,6 +3385,53 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
+    /// <summary>Set rop to the value of the Airy function Ai on x, rounded in the direction rnd.</summary>
+    /// <remarks>
+    /// When x is NaN, rop is always set to NaN.
+    /// When x is +Inf or -Inf, rop is +0.
+    /// The current implementation is not intended to be used with large arguments.
+    /// It works with abs(x) typically smaller than 500.
+    /// For larger arguments, other methods should be used and will be implemented in a future version.
+    /// </remarks>
+    public static int AiryInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_ai((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>The value of the Airy function Ai on x, rounded in the direction rnd.</returns>
+    /// <remarks>
+    /// When x is NaN, rop is always set to NaN.
+    /// When x is +Inf or -Inf, rop is +0.
+    /// The current implementation is not intended to be used with large arguments.
+    /// It works with abs(x) typically smaller than 500.
+    /// For larger arguments, other methods should be used and will be implemented in a future version.
+    /// </remarks>
+    public static MpfrFloat Airy(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        AiryInplace(rop, op, rounding);
+        return rop;
+    }
+
+    public static int ConstLog2Inplace(MpfrFloat rop, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        {
+            return MpfrLib.mpfr_const_log2((IntPtr)pr, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat ConstLog2(int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        ConstLog2Inplace(rop, rounding);
+        return rop;
+    }
+
     public static int ConstPiInplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3399,6 +3444,36 @@ public unsafe class MpfrFloat : IDisposable
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
         ConstPiInplace(rop, rounding);
+        return rop;
+    }
+
+    public static int ConstEulerInplace(MpfrFloat rop, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        {
+            return MpfrLib.mpfr_const_euler((IntPtr)pr, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat ConstEuler(int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        ConstEulerInplace(rop, rounding);
+        return rop;
+    }
+
+    public static int ConstCatalanInplace(MpfrFloat rop, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        {
+            return MpfrLib.mpfr_const_catalan((IntPtr)pr, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat ConstCatalan(int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        ConstCatalanInplace(rop, rounding);
         return rop;
     }
     #endregion

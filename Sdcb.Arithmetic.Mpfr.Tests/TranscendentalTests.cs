@@ -685,6 +685,23 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             Assert.Equal(0.000003, rop.ToDouble(), 6);
         }
 
+        [Fact]
+        public void AGMTest()
+        {
+            using MpfrFloat op1 = MpfrFloat.From(3);
+            using MpfrFloat op2 = MpfrFloat.From(5);
+            using MpfrFloat rop = MpfrFloat.AGM(op1, op2);
+            Assert.Equal(3.936236, rop.ToDouble(), 6);
+        }
+
+        [Fact]
+        public void AiryTest()
+        {
+            using MpfrFloat op = MpfrFloat.From(8);
+            using MpfrFloat rop = MpfrFloat.Airy(op);
+            Assert.Equal(0, rop.ToDouble(), 6);
+        }
+
         #region Bessel function
         [Fact]
         public void BesselJTest()
@@ -712,6 +729,13 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         #endregion
 
         [Fact]
+        public void ConstLog2Test()
+        {
+            using MpfrFloat log2 = MpfrFloat.ConstLog2();
+            Assert.Equal(Math.Log(2), log2.ToDouble());
+        }
+
+        [Fact]
         public void ConstPiTest()
         {
             Stopwatch sw = Stopwatch.StartNew();
@@ -720,6 +744,20 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             _console.WriteLine($"elapsed={sw.ElapsedMilliseconds}ms");
             _console.WriteLine(pi.ToString().Length.ToString());
             Assert.StartsWith("3.1415926", pi.ToString());
+        }
+
+        [Fact]
+        public void ConstEularTest()
+        {
+            using MpfrFloat log2 = MpfrFloat.ConstEuler();
+            Assert.Equal(0.5772156649015329, log2.ToDouble());
+        }
+
+        [Fact]
+        public void ConstCatalanTest()
+        {
+            using MpfrFloat log2 = MpfrFloat.ConstCatalan();
+            Assert.Equal(0.915965594177219, log2.ToDouble(), 3);
         }
     }
 }
