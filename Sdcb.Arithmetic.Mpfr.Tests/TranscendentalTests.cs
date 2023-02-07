@@ -586,6 +586,132 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         #endregion
 
         [Fact]
+        public void EintTest()
+        {
+            using MpfrFloat op = MpfrFloat.From(1);
+            using MpfrFloat eint = MpfrFloat.Eint(op);
+            Assert.Equal(1.8951178163559368, eint.ToDouble());
+        }
+
+        [Fact]
+        public void Li2Test()
+        {
+            using MpfrFloat op = MpfrFloat.From(1);
+            using MpfrFloat li2 = MpfrFloat.Li2(op);
+            Assert.Equal(1.6449340668482264, li2.ToDouble());
+        }
+
+        [Fact]
+        public void GammaTest()
+        {
+            using MpfrFloat op = MpfrFloat.From(7);
+            using MpfrFloat gamma = MpfrFloat.Gamma(op);
+            Assert.Equal(720, gamma.ToDouble());
+        }
+
+        [Fact]
+        public void GammaIncTest()
+        {
+            using MpfrFloat op = MpfrFloat.From(7);
+            using MpfrFloat op2 = MpfrFloat.From(0);
+            using MpfrFloat gamma = MpfrFloat.GammaInc(op, op2);
+            Assert.Equal(720, gamma.ToDouble());
+        }
+
+        [Fact]
+        public void LogGammaTest()
+        {
+            using MpfrFloat op = MpfrFloat.From(7);
+            using MpfrFloat gamma = MpfrFloat.LogGamma(op);
+            Assert.Equal(Math.Log(720), gamma.ToDouble());
+        }
+
+        [Fact]
+        public void LGammaTest()
+        {
+            using MpfrFloat op = MpfrFloat.From(7);
+            (int sign, MpfrFloat lgamma, int round) = MpfrFloat.LGamma(op);
+            Assert.Equal(1, sign);
+            Assert.Equal(Math.Log(720), lgamma.ToDouble());
+            Assert.Equal(1, round);
+        }
+
+        [Fact]
+        public void DigammaTest()
+        {
+            using MpfrFloat op = MpfrFloat.From(1);
+            using MpfrFloat digamma = MpfrFloat.Digamma(op);
+            Assert.Equal(0.577215664901532, -digamma.ToDouble(), 14);
+        }
+
+
+        [Fact]
+        public void BetaTest()
+        {
+            using MpfrFloat op1 = MpfrFloat.From(1);
+            using MpfrFloat op2 = MpfrFloat.From(2);
+            using MpfrFloat rop = MpfrFloat.Beta(op1, op2);
+            Assert.Equal(0.5, rop.ToDouble());
+        }
+
+        [Fact]
+        public void ZetaTest()
+        {
+            using MpfrFloat op = MpfrFloat.From(1);
+            using MpfrFloat rop = MpfrFloat.Zeta(op);
+            Assert.Equal(double.PositiveInfinity, rop.ToDouble());
+        }
+
+        [Fact]
+        public void ZetaUIntTest()
+        {
+            using MpfrFloat rop = MpfrFloat.Zeta(1);
+            Assert.Equal(double.PositiveInfinity, rop.ToDouble());
+        }
+
+        [Fact]
+        public void ErrorFunctionTest()
+        {
+            using MpfrFloat op = MpfrFloat.From(3.29);
+            using MpfrFloat rop = MpfrFloat.ErrorFunction(op);
+            Assert.Equal(0.999997, rop.ToDouble(), 6);
+        }
+
+        [Fact]
+        public void ComplementaryErrorFunctionTest()
+        {
+            using MpfrFloat op = MpfrFloat.From(3.29);
+            using MpfrFloat rop = MpfrFloat.ComplementaryErrorFunction(op);
+            Assert.Equal(0.000003, rop.ToDouble(), 6);
+        }
+
+        #region Bessel function
+        [Fact]
+        public void BesselJTest()
+        {
+            using MpfrFloat op = MpfrFloat.From(1);
+            using MpfrFloat j0 = MpfrFloat.J0(op);
+            using MpfrFloat j1 = MpfrFloat.J1(op);
+            using MpfrFloat j2 = MpfrFloat.JN(2, op);
+            Assert.Equal(0.765198, j0.ToDouble(), 6);
+            Assert.Equal(0.440051, j1.ToDouble(), 6);
+            Assert.Equal(0.114903, j2.ToDouble(), 6);
+        }
+
+        [Fact]
+        public void BesselYTest()
+        {
+            using MpfrFloat op = MpfrFloat.From(1);
+            using MpfrFloat y0 = MpfrFloat.Y0(op);
+            using MpfrFloat y1 = MpfrFloat.Y1(op);
+            using MpfrFloat y2 = MpfrFloat.YN(2, op);
+            Assert.Equal(0.088257, y0.ToDouble(), 6);
+            Assert.Equal(-0.781213, y1.ToDouble(), 6);
+            Assert.Equal(-1.650683, y2.ToDouble(), 6);
+        }
+        #endregion
+
+        [Fact]
         public void ConstPiTest()
         {
             Stopwatch sw = Stopwatch.StartNew();

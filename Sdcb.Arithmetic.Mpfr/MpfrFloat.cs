@@ -2949,6 +2949,444 @@ public unsafe class MpfrFloat : IDisposable
     }
     #endregion
 
+    public static int EintInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_eint((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Eint(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        EintInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// Compute the real part of the dilogarithm defined by:
+    /// <para>Li2(x) = -\Int_{t=0}^x log(1-t)/t dt</para>
+    /// </summary>
+    public static int Li2Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_li2((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// Compute the real part of the dilogarithm defined by:
+    /// <para>Li2(x) = -\Int_{t=0}^x log(1-t)/t dt</para>
+    /// </summary>
+    public static MpfrFloat Li2(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        Li2Inplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>Set rop to the value of the Gamma function on op.</summary>
+    public static int GammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_gamma((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>The value of the Gamma function on op.</returns>
+    public static MpfrFloat Gamma(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        GammaInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>upper incomplete Gamma function</summary>
+    public static int GammaIncInplace(MpfrFloat rop, MpfrFloat op, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (Mpfr_t* pop2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_gamma_inc((IntPtr)pr, (IntPtr)pop, (IntPtr)pop2, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>upper incomplete Gamma function</summary>
+    public static MpfrFloat GammaInc(MpfrFloat op, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        GammaIncInplace(rop, op, op2, rounding);
+        return rop;
+    }
+
+    /// <summary>Set rop to the value of the logarithm of the Gamma function on op, rounded in the direction rnd.</summary>
+    public static int LogGammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_lngamma((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>the value of the logarithm of the Gamma function on op, rounded in the direction rnd.</returns>
+    public static MpfrFloat LogGamma(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        LogGammaInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>Set rop to the value of the logarithm of the absolute value of the Gamma function on op</summary>
+    public static (int sign, int round) LGammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            int sign;
+            int round = MpfrLib.mpfr_lgamma((IntPtr)pr, (IntPtr)(&sign), (IntPtr)pop, rounding ?? DefaultRounding);
+            return (sign, round);
+        }
+    }
+
+    /// <returns>The value of the logarithm of the absolute value of the Gamma function on op</returns>
+    public static (int sign, MpfrFloat value, int round) LGamma(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        (int sign, int round) = LGammaInplace(rop, op, rounding);
+        return (sign, rop, round);
+    }
+
+    /// <summary>
+    /// Set rop to the value of the Digamma (sometimes also called Psi) function on op, rounded in the direction rnd.
+    /// When op is a negative integer, set rop to NaN.
+    /// </summary>
+    public static int DigammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_digamma((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>
+    /// The value of the Digamma (sometimes also called Psi) function on op, rounded in the direction rnd.
+    /// When op is a negative integer, set rop to NaN.
+    /// </returns>
+    public static MpfrFloat Digamma(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        DigammaInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>Set rop to the value of the Beta function at arguments op1 and op2.</summary>
+    /// <remarks>Note: the current code does not try to avoid internal overflow or underflow, and might use a huge internal precision in some cases.</remarks>
+    public static int BetaInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_beta((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>The value of the Beta function at arguments op1 and op2.</returns>
+    /// <remarks>Note: the current code does not try to avoid internal overflow or underflow, and might use a huge internal precision in some cases.</remarks>
+    public static MpfrFloat Beta(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        BetaInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    /// <summary>Set rop to the value of the Riemann Zeta function on op, rounded in the direction rnd.</summary>
+    public static int ZetaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_zeta((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>The value of the Riemann Zeta function on op, rounded in the direction rnd.</returns>
+    public static MpfrFloat Zeta(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        ZetaInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>Set rop to the value of the Riemann Zeta function on op, rounded in the direction rnd.</summary>
+    public static int ZetaInplace(MpfrFloat rop, uint op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        {
+            return MpfrLib.mpfr_zeta_ui((IntPtr)pr, op, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>The value of the Riemann Zeta function on op, rounded in the direction rnd.</returns>
+    public static MpfrFloat Zeta(uint op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        ZetaInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>Set rop to the value of the error function on op, rounded in the direction rnd.</summary>
+    public static int ErrorFunctionInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_erf((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>The value of the error function on op, rounded in the direction rnd.</returns>
+    public static MpfrFloat ErrorFunction(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        ErrorFunctionInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>Set rop to the value of the complementary error function on op, rounded in the direction rnd.</summary>
+    public static int ComplementaryErrorFunctionInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_erfc((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>The value of the complementary error function on op, rounded in the direction rnd.</returns>
+    public static MpfrFloat ComplementaryErrorFunction(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        ComplementaryErrorFunctionInplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
+    /// <list type="bullet">
+    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
+    /// <item>When op is +Inf, rop is set to +0.</item>
+    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
+    /// </list>
+    /// </summary>
+    public static int J0Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_j0((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
+    /// <list type="bullet">
+    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
+    /// <item>When op is +Inf, rop is set to +0.</item>
+    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
+    /// </list>
+    /// </summary>
+    public static MpfrFloat J0(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        J0Inplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
+    /// <list type="bullet">
+    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
+    /// <item>When op is +Inf, rop is set to +0.</item>
+    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
+    /// </list>
+    /// </summary>
+    public static int J1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_j1((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
+    /// <list type="bullet">
+    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
+    /// <item>When op is +Inf, rop is set to +0.</item>
+    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
+    /// </list>
+    /// </summary>
+    public static MpfrFloat J1(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        J1Inplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
+    /// <list type="bullet">
+    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
+    /// <item>When op is +Inf, rop is set to +0.</item>
+    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
+    /// </list>
+    /// </summary>
+    public static int JNInplace(MpfrFloat rop, int n, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_jn((IntPtr)pr, n, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
+    /// <list type="bullet">
+    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
+    /// <item>When op is +Inf, rop is set to +0.</item>
+    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
+    /// </list>
+    /// </summary>
+    public static MpfrFloat JN(int n, MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        JNInplace(rop, n, op, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
+    /// <list type="bullet">
+    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
+    /// <item>When op is +Inf, rop is set to +0.</item>
+    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
+    /// </list>
+    /// </summary>
+    public static int Y0Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_y0((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
+    /// <list type="bullet">
+    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
+    /// <item>When op is +Inf, rop is set to +0.</item>
+    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
+    /// </list>
+    /// </summary>
+    public static MpfrFloat Y0(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        Y0Inplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
+    /// <list type="bullet">
+    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
+    /// <item>When op is +Inf, rop is set to +0.</item>
+    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
+    /// </list>
+    /// </summary>
+    public static int Y1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_y1((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
+    /// <list type="bullet">
+    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
+    /// <item>When op is +Inf, rop is set to +0.</item>
+    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
+    /// </list>
+    /// </summary>
+    public static MpfrFloat Y1(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        Y1Inplace(rop, op, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
+    /// <list type="bullet">
+    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
+    /// <item>When op is +Inf, rop is set to +0.</item>
+    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
+    /// </list>
+    /// </summary>
+    public static int YNInplace(MpfrFloat rop, int n, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_yn((IntPtr)pr, n, (IntPtr)pop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
+    /// <list type="bullet">
+    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
+    /// <item>When op is +Inf, rop is set to +0.</item>
+    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
+    /// </list>
+    /// </summary>
+    public static MpfrFloat YN(int n, MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        YNInplace(rop, n, op, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// Set rop to the arithmetic-geometric mean of op1 and op2, rounded in the direction rnd.
+    /// </summary>
+    public static int AGMInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_agm((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <returns>The arithmetic-geometric mean of op1 and op2, rounded in the direction rnd.</returns>
+    public static MpfrFloat AGM(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        AGMInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
     public static int ConstPiInplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
