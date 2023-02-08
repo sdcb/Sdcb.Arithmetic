@@ -57,5 +57,14 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             Assert.Equal(r50, r100);
             Assert.Equal(50, r100.Precision);
         }
+
+        [Fact]
+        public void MinimalPrecisionTest()
+        {
+            MpfrFloat r50to100 = MpfrFloat.ConstPi(50);
+            r50to100.Precision = 100;
+            _console.WriteLine(r50to100.MinimalPrecision.ToString());
+            _console.WriteLine(r50to100.ToString());
+        }
     }
 }

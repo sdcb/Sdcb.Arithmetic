@@ -58,6 +58,9 @@ public unsafe class MpfrFloat : IDisposable
         set => MpfrLib.mpfr_set_default_prec(value);
     }
 
+    public const int MaximalSupportedPrecision = int.MaxValue - 256;
+    public const int MinimalSupportedPrecision = 1;
+
     /// <summary>
     /// The number of bits used to store its significand.
     /// </summary>
@@ -72,10 +75,24 @@ public unsafe class MpfrFloat : IDisposable
         }
         set
         {
-            fixed (Mpfr_t* ptr = &Raw)
-            {
-                MpfrLib.mpfr_set_prec((IntPtr)ptr, value);
-            }
+            CheckPrecision(value);
+            RoundToPrecision(Precision, DefaultRounding);
+        }
+    }
+
+    private static void CheckPrecision(int precision)
+    {
+        if (precision < 1 || precision > MaximalSupportedPrecision)
+            throw new ArgumentOutOfRangeException(nameof(Precision), $"Precision should in range of [{MinimalSupportedPrecision}..{MaximalSupportedPrecision}].");
+    }
+
+    /// <remarks>Note: reset precision will clear the value.</remarks>
+    public void ResetPrecision(int precision)
+    {
+        CheckPrecision(precision);
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            MpfrLib.mpfr_set_prec((IntPtr)pthis, precision);
         }
     }
     #endregion
@@ -3877,6 +3894,28 @@ public unsafe class MpfrFloat : IDisposable
         fixed (Mpfr_t* pthis = &Raw)
         {
             return MpfrLib.mpfr_prec_round((IntPtr)pthis, precision, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// <see cref="MpfrLib.mpfr_can_round"/>
+    /// </summary>
+    public bool CanRound(int error, MpfrRounding round1, MpfrRounding round2, int precision)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            return MpfrLib.mpfr_can_round((IntPtr)pthis, error, round1, round2, precision) != 0;
+        }
+    }
+
+    public int MinimalPrecision
+    {
+        get
+        {
+            fixed (Mpfr_t* pthis = &Raw)
+            {
+                return MpfrLib.mpfr_min_prec((IntPtr)pthis);
+            }
         }
     }
     #endregion
