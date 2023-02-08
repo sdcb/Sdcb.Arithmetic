@@ -75,7 +75,6 @@ public unsafe class MpfrFloat : IDisposable
         }
         set
         {
-            CheckPrecision(value);
             RoundToPrecision(Precision, DefaultRounding);
         }
     }
@@ -3889,8 +3888,10 @@ public unsafe class MpfrFloat : IDisposable
     /// Otherwise, the significand is rounded to precision prec with the given direction; no memory reallocation to free the unused limbs is done.
     /// In both cases, the precision of x is changed to prec.
     /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException" />
     public int RoundToPrecision(int precision, MpfrRounding? rounding = null)
     {
+        CheckPrecision(precision);
         fixed (Mpfr_t* pthis = &Raw)
         {
             return MpfrLib.mpfr_prec_round((IntPtr)pthis, precision, rounding ?? DefaultRounding);
@@ -3917,6 +3918,67 @@ public unsafe class MpfrFloat : IDisposable
                 return MpfrLib.mpfr_min_prec((IntPtr)pthis);
             }
         }
+    }
+    #endregion
+
+    #region 12. Miscellaneous Functions
+    public void NextToward(MpfrFloat y)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        fixed (Mpfr_t* py = &y.Raw)
+        {
+            MpfrLib.mpfr_nexttoward((IntPtr)pthis, (IntPtr)py);
+        }
+    }
+
+    public void NextAbove()
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            MpfrLib.mpfr_nextabove((IntPtr)pthis);
+        }
+    }
+
+    public void NextBelow()
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            MpfrLib.mpfr_nextbelow((IntPtr)pthis);
+        }
+    }
+
+    public static int MinInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_min((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Min(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? Math.Max(op1.Precision, op2.Precision));
+        MinInplace(rop, op1, op2, rounding);
+        return rop;
+    }
+
+    public static int MaxInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (Mpfr_t* p2 = &op2.Raw)
+        {
+            return MpfrLib.mpfr_max((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrFloat Max(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? Math.Max(op1.Precision, op2.Precision));
+        MaxInplace(rop, op1, op2, rounding);
+        return rop;
     }
     #endregion
 

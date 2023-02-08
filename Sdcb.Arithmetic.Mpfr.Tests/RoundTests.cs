@@ -63,8 +63,8 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         {
             MpfrFloat r50to100 = MpfrFloat.ConstPi(50);
             r50to100.Precision = 100;
-            _console.WriteLine(r50to100.MinimalPrecision.ToString());
-            _console.WriteLine(r50to100.ToString());
+            Assert.Equal(50, r50to100.MinimalPrecision);
+            Assert.Equal(3.1415926535897931, r50to100.ToDouble());
         }
     }
 }
