@@ -58,12 +58,6 @@ public unsafe class MpfrFloat : IDisposable
         set => MpfrLib.mpfr_set_default_prec(value);
     }
 
-    public static MpfrRounding DefaultRounding
-    {
-        get => MpfrLib.mpfr_get_default_rounding_mode();
-        set => MpfrLib.mpfr_set_default_rounding_mode(value);
-    }
-
     /// <summary>
     /// The number of bits used to store its significand.
     /// </summary>
@@ -3861,6 +3855,28 @@ public unsafe class MpfrFloat : IDisposable
             {
                 return MpfrLib.mpfr_integer_p((IntPtr)pthis) != 0;
             }
+        }
+    }
+    #endregion
+
+    #region 11. Rounding-Related Functions
+    public static MpfrRounding DefaultRounding
+    {
+        get => MpfrLib.mpfr_get_default_rounding_mode();
+        set => MpfrLib.mpfr_set_default_rounding_mode(value);
+    }
+
+    /// <summary>
+    /// Round x according to rnd with precision prec, which must be an integer between MPFR_PREC_MIN and MPFR_PREC_MAX (otherwise the behavior is undefined).
+    /// If prec is greater than or equal to the precision of x, then new space is allocated for the significand, and it is filled with zeros.
+    /// Otherwise, the significand is rounded to precision prec with the given direction; no memory reallocation to free the unused limbs is done.
+    /// In both cases, the precision of x is changed to prec.
+    /// </summary>
+    public int RoundToPrecision(int precision, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            return MpfrLib.mpfr_prec_round((IntPtr)pthis, precision, rounding ?? DefaultRounding);
         }
     }
     #endregion
