@@ -208,7 +208,7 @@ public unsafe class MpfrFloat : IDisposable
                 int ret = MpfrLib.mpfr_strtofr((IntPtr)pthis, (IntPtr)opPtr, (IntPtr)(&endptr), @base, rounding ?? DefaultRounding);
                 if (endptr[0] != 0)
                 {
-                    string location = Marshal.PtrToStringUTF8((IntPtr)endptr);
+                    string location = Marshal.PtrToStringUTF8((IntPtr)endptr)!;
                     throw new FormatException($"Failed to parse \"{s}\", base={@base} to {nameof(MpfrFloat)}, mpfr_strtofr returns {ret} at: {location}");
                 }
             }
@@ -1788,7 +1788,7 @@ public unsafe class MpfrFloat : IDisposable
     public static bool operator <=(GmpFloat op1, MpfrFloat op2) => Compare(op2, op1) >= 0;
     #endregion
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj switch
         {
@@ -3703,7 +3703,155 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    // TODO: https://www.mpfr.org/mpfr-current/mpfr.html#index-mpfr_005fmodf
+    public static int ModFractionalInplace(MpfrFloat iop, MpfrFloat fop, MpfrFloat op, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* fi = &iop.Raw)
+        fixed (Mpfr_t* ff = &fop.Raw)
+        fixed (Mpfr_t* fo = &op.Raw)
+        {
+            return MpfrLib.mpfr_modf((IntPtr)fi, (IntPtr)ff, (IntPtr)fo, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static (MpfrFloat iop, MpfrFloat fop, int round) ModFractional(MpfrFloat op, int? precision = null, MpfrRounding ? rounding = null)
+    {
+        MpfrFloat iop = new(precision ?? op.Precision);
+        MpfrFloat fop = new(precision ?? op.Precision);
+        int round = ModFractionalInplace(iop, fop, op, rounding);
+        return (iop, fop, round);
+    }
+
+    /// <summary>
+    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// </summary>
+    public static int ModInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* px = &x.Raw)
+        fixed (Mpfr_t* py = &y.Raw)
+        {
+            return MpfrLib.mpfr_fmod((IntPtr)pr, (IntPtr)px, (IntPtr)py, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// </summary>
+    public static MpfrFloat Mod(MpfrFloat x, MpfrFloat y, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        ModInplace(rop, x, y, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// </summary>
+    public static MpfrFloat operator %(MpfrFloat x, MpfrFloat y) => Mod(x, y, x.Precision);
+
+    /// <summary>
+    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// </summary>
+    public static int ModInplace(MpfrFloat rop, MpfrFloat x, uint y, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* px = &x.Raw)
+        {
+            return MpfrLib.mpfr_fmod_ui((IntPtr)pr, (IntPtr)px, y, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// </summary>
+    public static MpfrFloat Mod(MpfrFloat x, uint y, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        ModInplace(rop, x, y, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// </summary>
+    public static MpfrFloat operator %(MpfrFloat x, uint y) => Mod(x, y, x.Precision);
+
+    /// <summary>
+    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// </summary>
+    public static (int quotient, int round) ModQuotientInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* px = &x.Raw)
+        fixed (Mpfr_t* py = &y.Raw)
+        {
+            int q;
+            int round = MpfrLib.mpfr_fmodquo((IntPtr)pr, (IntPtr)(&q), (IntPtr)px, (IntPtr)py, rounding ?? DefaultRounding);
+            return (q, round);
+        }
+    }
+
+    /// <summary>
+    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// </summary>
+    public static (MpfrFloat rop, int quotient, int round) ModQuotient(MpfrFloat x, MpfrFloat y, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        (int quotient, int round) = ModQuotientInplace(rop, x, y, rounding);
+        return (rop, quotient, round);
+    }
+
+    /// <summary>
+    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y,
+    /// rounded to the nearest integer (ties rounded to even)
+    /// </summary>
+    public static int ReminderInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* px = &x.Raw)
+        fixed (Mpfr_t* py = &y.Raw)
+        {
+            return MpfrLib.mpfr_remainder((IntPtr)pr, (IntPtr)px, (IntPtr)py, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y,
+    /// rounded to the nearest integer (ties rounded to even)
+    /// </summary>
+    public static MpfrFloat Reminder(MpfrFloat x, MpfrFloat y, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        ReminderInplace(rop, x, y, rounding);
+        return rop;
+    }
+
+    /// <summary>
+    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y,
+    /// rounded to the nearest integer (ties rounded to even)
+    /// </summary>
+    public static (int quotient, int round) ReminderQuotientInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* px = &x.Raw)
+        fixed (Mpfr_t* py = &y.Raw)
+        {
+            int q;
+            int round = MpfrLib.mpfr_remquo((IntPtr)pr, (IntPtr)(&q), (IntPtr)px, (IntPtr)py, rounding ?? DefaultRounding);
+            return (q, round);
+        }
+    }
+
+    /// <summary>
+    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y,
+    /// rounded to the nearest integer (ties rounded to even)
+    /// </summary>
+    public static (MpfrFloat rop, int quotient, int round) ReminderQuotient(MpfrFloat x, MpfrFloat y, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        (int quotient, int round) = ReminderQuotientInplace(rop, x, y, rounding);
+        return (rop, quotient, round);
+    }
 
     public bool IsInteger
     {
