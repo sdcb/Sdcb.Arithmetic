@@ -290,29 +290,59 @@ public class GmpRandom : IDisposable
         GmpRandomState state = new();
         if (GmpLib.__gmp_randinit_lc_2exp_size((IntPtr)(&state), size) == 0)
         {
-            throw new ArgumentOutOfRangeException("size");
+            throw new ArgumentOutOfRangeException(nameof(size));
         }
         return new GmpRandom(state, seed);
     }
     #endregion
 
     #region Generation functions
-    /// <summary>
-    /// Return a uniformly distributed random number of n bits, i.e. in the range 0 to 2^n-1 inclusive. n must be less than or equal to the number of bits in an unsigned long.
-    /// </summary>
-    public unsafe uint NextNBits(uint bitCount)
+
+    /// <returns>Returns a random integer, including positives, 0, and negatives</returns>
+    public unsafe int Next()
     {
         fixed (GmpRandomState* ptr = &Raw)
         {
-            return GmpLib.__gmp_urandomb_ui((IntPtr)ptr, bitCount);
+            const int bitCount = 32;
+            return (int)GmpLib.__gmp_urandomb_ui((IntPtr)ptr, bitCount);
+        }
+    }
+
+    public unsafe int Next(int maxValue)
+    {
+        if (maxValue < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maxValue), "Non-negative number required.");
+        }
+        fixed (GmpRandomState* ptr = &Raw)
+        {
+            return (int)GmpLib.__gmp_urandomm_ui((IntPtr)ptr, (uint)maxValue);
+        }
+    }
+
+    public unsafe int Next(int minValue, int maxValue)
+    {
+        if (minValue > maxValue)
+        {
+            throw new ArgumentOutOfRangeException(nameof(minValue), $"'{nameof(minValue)}' cannot be greater than maxValue.");
+        }
+        uint diff = (uint)(maxValue - minValue);
+        fixed (GmpRandomState* ptr = &Raw)
+        {
+            return (int)(minValue + GmpLib.__gmp_urandomm_ui((IntPtr)ptr, diff));
         }
     }
 
     /// <summary>
-    /// Generate a uniformly distributed random integer in the range 0 to 2n-1, inclusive.
+    /// Generate a uniformly distributed random integer in the range 0 to 2^(n-1), inclusive.
     /// </summary>
-    public unsafe void NextNBits(GmpInteger rop, uint bitCount)
+    public unsafe void NextGmpIntegerInplace(GmpInteger rop, uint bitCount)
     {
+        if (bitCount == 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(bitCount), $"'{nameof(bitCount)}' must not be zero.");
+        }
+
         fixed (Mpz_t* pr= &rop.Raw)
         fixed (GmpRandomState* prandom = &Raw)
         {
@@ -321,23 +351,28 @@ public class GmpRandom : IDisposable
     }
 
     /// <summary>
-    /// Generate a uniformly distributed random integer in the range 0 to 2n-1, inclusive.
+    /// Generate a uniformly distributed random integer in the range 0 to 2^(n-1), inclusive.
     /// </summary>
-    public unsafe GmpInteger NextGmpIntegerNBits(uint bitCount)
+    public unsafe GmpInteger NextGmpInteger(uint bitCount)
     {
         GmpInteger rop = new();
-        NextNBits(rop, bitCount);
+        NextGmpIntegerInplace(rop, bitCount);
         return rop;
     }
 
     /// <summary>
-    /// Generate a random integer with long strings of zeros and ones in the binary representation. 
-    /// Useful for testing functions and algorithms, 
-    /// since this kind of random numbers have proven to be more likely to trigger corner-case bugs. 
-    /// The random number will be in the range 2n-1 to 2n-1, inclusive.
+    /// Generate a random integer with long strings of zeros and ones in the binary representation.
+    /// Useful for testing functions and algorithms,
+    /// since this kind of random numbers have proven to be more likely to trigger corner-case bugs.
+    /// The random number will be in the range 2^(n-1) to 2^n-1, inclusive.
     /// </summary>
-    public unsafe void RNextNBits(GmpInteger rop, uint bitCount)
+    public unsafe void NextCornerGmpIntegerInplace(GmpInteger rop, uint bitCount)
     {
+        if (bitCount == 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(bitCount), $"'{nameof(bitCount)}' must not be zero.");
+        }
+
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (GmpRandomState* prandom = &Raw)
         {
@@ -346,71 +381,66 @@ public class GmpRandom : IDisposable
     }
 
     /// <summary>
-    /// Generate a uniformly distributed random integer in the range 0 to 2n-1, inclusive.
+    /// Generate a random integer with long strings of zeros and ones in the binary representation.
+    /// Useful for testing functions and algorithms, 
+    /// since this kind of random numbers have proven to be more likely to trigger corner-case bugs.
     /// </summary>
-    /// <returns>The random number will be in the range 2n-1 to 2n-1, inclusive.</returns>
-    public unsafe GmpInteger RNextNBits(uint bitCount)
+    /// <returns>The random number will be in the range 2^(n-1) to 2^n-1, inclusive.</returns>
+    public unsafe GmpInteger NextCornerGmpInteger(uint bitCount)
     {
         GmpInteger rop = new();
-        RNextNBits(rop, bitCount);
+        NextCornerGmpIntegerInplace(rop, bitCount);
         return rop;
     }
 
     /// <summary>
-    /// Return a uniformly distributed random number in the range 0 to n-1, inclusive.
+    /// Generate a uniform random integer in the range 0 to n-1, inclusive.
     /// </summary>
-    public unsafe uint Next(uint n)
+    public unsafe void NextGmpIntegerInplace(GmpInteger rop, GmpInteger maxValue)
     {
-        fixed (GmpRandomState* ptr = &Raw)
+        if (maxValue < 0)
         {
-            return GmpLib.__gmp_urandomm_ui((IntPtr)ptr, n);
+            throw new ArgumentOutOfRangeException(nameof(maxValue), "Non-negative number required.");
         }
-    }
-
-    /// <summary>
-    /// Generate a uniformly distributed random integer in the range 0 to 2n-1, inclusive.
-    /// </summary>
-    public unsafe void Next(GmpInteger rop, GmpInteger n)
-    {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (GmpRandomState* prandom = &Raw)
-        fixed (Mpz_t* pn = &n.Raw)
+        fixed (Mpz_t* pn = &maxValue.Raw)
         {
             GmpLib.__gmpz_urandomm((IntPtr)pr, (IntPtr)prandom, (IntPtr)pn);
         }
     }
 
     /// <summary>
-    /// Generate a uniformly distributed random integer in the range 0 to 2n-1, inclusive.
+    /// Generate a uniform random integer in the range 0 to n-1, inclusive.
     /// </summary>
-    public unsafe GmpInteger NextGmpInteger(GmpInteger n)
+    public unsafe GmpInteger NextGmpInteger(GmpInteger maxValue)
     {
         GmpInteger rop = new();
-        Next(rop, n);
+        NextGmpIntegerInplace(rop, maxValue);
         return rop;
     }
 
     /// <summary>
     /// Generate a uniformly distributed random float in rop, such that 0 &lt;= rop &lt; 1, 
-    /// with nbits significant bits in the mantissa or less if the precision of rop is smaller.
+    /// with bitCount significant bits in the mantissa or less if the precision of rop is smaller.
     /// </summary>
-    public unsafe void Next(GmpFloat rop, uint nbits)
+    public unsafe void NextGmpFloatInplace(GmpFloat rop, uint bitCount)
     {
         fixed (Mpf_t* pr = &rop.Raw)
         fixed (GmpRandomState* prandom = &Raw)
         {
-            GmpLib.__gmpf_urandomb((IntPtr)pr, (IntPtr)prandom, nbits);
+            GmpLib.__gmpf_urandomb((IntPtr)pr, (IntPtr)prandom, bitCount);
         }
     }
 
     /// <summary>
     /// Generate a uniformly distributed random float in rop, such that 0 &lt;= rop &lt; 1, 
-    /// with nbits significant bits in the mantissa or less if the precision of rop is smaller.
+    /// with bitCount significant bits in the mantissa or less if the precision of rop is smaller.
     /// </summary>
-    public unsafe GmpFloat NextGmpFloat(uint precision, uint nbits)
+    public unsafe GmpFloat NextGmpFloat(uint precision, uint bitCount)
     {
         GmpFloat rop = new(precision);
-        Next(rop, nbits);
+        NextGmpFloatInplace(rop, bitCount);
         return rop;
     }
     #endregion
