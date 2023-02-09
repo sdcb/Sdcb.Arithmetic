@@ -50,7 +50,7 @@ public class RandomTests
     public void NextExponentialDistributedMpfrFloatTest()
     {
         using GmpRandom r = new();
-        using MpfrFloat f = r.NextNMpfrFloat(precision: 100);
+        using MpfrFloat f = r.NextEMpfrFloat(precision: 100);
         Assert.True(f < 20u);
     }
 }
