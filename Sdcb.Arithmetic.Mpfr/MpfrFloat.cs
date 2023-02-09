@@ -3980,6 +3980,46 @@ public unsafe class MpfrFloat : IDisposable
         MaxInplace(rop, op1, op2, rounding);
         return rop;
     }
+
+    /// <summary>Get/set the exponent of value to e if x is a non-zero ordinary number and e is in the current exponent range.</summary>
+    public int Exponent
+    {
+        get
+        {
+            fixed (Mpfr_t* pthis = &Raw)
+            {
+                return MpfrLib.mpfr_get_exp((IntPtr)pthis);
+            }
+        }
+        set
+        {
+            fixed (Mpfr_t* pthis = &Raw)
+            {
+                MpfrLib.mpfr_set_exp((IntPtr)pthis, value);
+            }
+        }
+    }
+
+    /// <summary>Return a true if op has its sign bit set (i.e., if it is negative, -0, or a NaN whose representation has its sign bit set).</summary>
+    public bool SignBit
+    {
+        get
+        {
+            fixed (Mpfr_t* pthis = &Raw)
+            {
+                return MpfrLib.mpfr_signbit((IntPtr)pthis) != 0;
+            }
+        }
+    }
+
+    //public static int SetSignInplace(MpfrFloat rop, MpfrFloat op, bool sign, MpfrRounding? rounding = null)
+    //{
+    //    fixed (Mpfr_t* pr = &rop.Raw)
+    //    fixed (Mpfr_t* pop = &op.Raw)
+    //    {
+    //        return MpfrLib.mpfr_setsign((IntPtr))
+    //    }
+    //}
     #endregion
 
     #region 15. Compatibility With MPF

@@ -60,4 +60,13 @@ public class MiscTests
         op1.NextBelow();
         Assert.Equal(3, op1.ToDouble());
     }
+
+    [Fact]
+    public void ExpTest()
+    {
+        using MpfrFloat op1 = MpfrFloat.From(3.14);
+        Assert.Equal(2, op1.Exponent);
+        op1.Exponent *= 2;
+        Assert.Equal(3.14 * 2 * 2, op1.ToDouble());
+    }
 }
