@@ -4010,16 +4010,52 @@ public unsafe class MpfrFloat : IDisposable
                 return MpfrLib.mpfr_signbit((IntPtr)pthis) != 0;
             }
         }
+        set
+        {
+            CopySetSignInplace(this, this, value);
+        }
     }
 
-    //public static int SetSignInplace(MpfrFloat rop, MpfrFloat op, bool sign, MpfrRounding? rounding = null)
-    //{
-    //    fixed (Mpfr_t* pr = &rop.Raw)
-    //    fixed (Mpfr_t* pop = &op.Raw)
-    //    {
-    //        return MpfrLib.mpfr_setsign((IntPtr))
-    //    }
-    //}
+    /// <summary>
+    /// Set the value of rop from op, rounded toward the given direction rnd, then set (resp. clear) its sign bit if s is non-zero (resp. zero), even when op is a NaN.
+    /// </summary>
+    public static int CopySetSignInplace(MpfrFloat rop, MpfrFloat op, bool sign, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        {
+            return MpfrLib.mpfr_setsign((IntPtr)pr, (IntPtr)pop, sign ? 1 : 0, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>
+    /// Set the value of rop from op, rounded toward the given direction rnd, then set (resp. clear) its sign bit if s is non-zero (resp. zero), even when op is a NaN.
+    /// </summary>
+    public static MpfrFloat CopySetSign(MpfrFloat op, bool sign, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        CopySetSignInplace(rop, op, sign, rounding);
+        return rop;
+    }
+
+    /// <summary>Set the value of rop from op1, rounded toward the given direction rnd, then set its sign bit to that of op2 (even when op1 or op2 is a NaN).</summary>
+    public static int CopySetSignInplace(MpfrFloat rop, MpfrFloat op, MpfrFloat signOp, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (Mpfr_t* psop = &signOp.Raw)
+        {
+            return MpfrLib.mpfr_copysign((IntPtr)pr, (IntPtr)pop, (IntPtr)psop, rounding ?? DefaultRounding);
+        }
+    }
+
+    /// <summary>Set the value of rop from op1, rounded toward the given direction rnd, then set its sign bit to that of op2 (even when op1 or op2 is a NaN).</summary>
+    public static MpfrFloat CopySetSign(MpfrFloat op, MpfrFloat signOp, int? precision = null, MpfrRounding? rounding = null)
+    {
+        MpfrFloat rop = new(precision ?? op.Precision);
+        CopySetSignInplace(rop, op, signOp, rounding);
+        return rop;
+    }
     #endregion
 
     #region 15. Compatibility With MPF
