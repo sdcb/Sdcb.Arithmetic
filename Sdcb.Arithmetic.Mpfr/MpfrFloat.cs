@@ -3723,7 +3723,7 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
-    public static (MpfrFloat iop, MpfrFloat fop, int round) ModFractional(MpfrFloat op, int? precision = null, MpfrRounding ? rounding = null)
+    public static (MpfrFloat iop, MpfrFloat fop, int round) ModFractional(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat iop = new(precision ?? op.Precision);
         MpfrFloat fop = new(precision ?? op.Precision);
@@ -4056,6 +4056,29 @@ public unsafe class MpfrFloat : IDisposable
         CopySetSignInplace(rop, op, signOp, rounding);
         return rop;
     }
+    #endregion
+
+    #region 13 Exception Related Functions
+
+    /// <summary>Get/set the smallest exponents allowed for a floating-point variable.</summary>
+    public static int EMin
+    {
+        get => MpfrLib.mpfr_get_emin();
+        set => MpfrLib.mpfr_set_emin(value);
+    }
+
+    /// <summary>Get/set the largest exponents allowed for a floating-point variable.</summary>
+    public static int EMax
+    {
+        get => MpfrLib.mpfr_get_emax();
+        set => MpfrLib.mpfr_set_emax(value);
+    }
+
+    public static int MinimumEMin => MpfrLib.mpfr_get_emin_min();
+    public static int MaximumEMin => MpfrLib.mpfr_get_emin_max();
+    public static int MinimumEMax => MpfrLib.mpfr_get_emax_min();
+    public static int MaximumEMax => MpfrLib.mpfr_get_emax_max();
+
     #endregion
 
     #region 15. Compatibility With MPF
