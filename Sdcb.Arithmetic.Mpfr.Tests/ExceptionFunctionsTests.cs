@@ -46,10 +46,102 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         [Fact]
         public void MinMaxE()
         {
-            _console.WriteLine($"Min-EMin: {MpfrFloat.MinimumEMin}");
-            _console.WriteLine($"Min-EMax: {MpfrFloat.MinimumEMax}");
-            _console.WriteLine($"Max-EMax: {MpfrFloat.MaximumEMin}");
-            _console.WriteLine($"Max-EMax: {MpfrFloat.MaximumEMax}");
+            _console.WriteLine($"Min-EMin: {MpfrFloat.MinEMin}");
+            _console.WriteLine($"Min-EMax: {MpfrFloat.MinEMax}");
+            _console.WriteLine($"Max-EMax: {MpfrFloat.MaxEMin}");
+            _console.WriteLine($"Max-EMax: {MpfrFloat.MaxEMax}");
+        }
+
+        [Fact]
+        public void SubNormalizeTest()
+        {
+            int org = MpfrFloat.EMin;
+            using MpfrFloat a = MpfrFloat.Parse("0.00001111000011110101010101", @base: 2, precision: 24);
+
+            MpfrFloat.EMin = -23;
+            a.SubNormalize(0);
+            Assert.Equal("0.000011110000111101010101", a.ToString(2));
+
+            MpfrFloat.EMin = -22;
+            a.SubNormalize(0);
+            Assert.Equal("0.0000111100001111010101", a.ToString(2));
+
+            MpfrFloat.EMin = org;
+        }
+
+        [Fact]
+        public void FlagsTest()
+        {
+            MpfrFloat.ErrorFlags = 0;
+            Assert.False(MpfrKnownErrorFlags.ERange);
+
+            MpfrFloat.ErrorFlags |= MpfrErrorFlags.ERange;
+            Assert.True(MpfrKnownErrorFlags.ERange);
+        }
+
+        [Fact]
+        public void UnderflowTest()
+        {
+            int org = MpfrFloat.EMin;
+
+            using MpfrFloat a = MpfrFloat.Parse("0.00001111000011110101010101", @base: 2, precision: 24);
+            MpfrFloat.EMin = -23;
+            a.SubNormalize(0);
+            _console.WriteLine(MpfrFloat.ErrorFlags.ToString());
+            Assert.True(MpfrFloat.ErrorFlags.HasFlag(MpfrErrorFlags.Underflow));
+
+            MpfrFloat.EMin = org;
+        }
+
+        [Fact]
+        public void OverflowTest()
+        {
+            int emax = MpfrFloat.EMax;
+
+            MpfrFloat.EMax = 2000;
+            using MpfrFloat a = MpfrFloat.From(double.MaxValue);
+            MpfrFloat.MultiplyInplace(a, a, double.MaxValue);
+            Assert.True(MpfrFloat.ErrorFlags.HasFlag(MpfrErrorFlags.Overflow));
+
+            MpfrFloat.EMax = emax;
+        }
+
+        [Fact]
+        public void InexactTest()
+        {
+            MpfrFloat.ErrorFlags = 0;
+            using MpfrFloat f = MpfrFloat.From(double.MinValue);
+            MpfrFloat.SubtractInplace(f, f, 1);
+            Assert.True(MpfrFloat.ErrorFlags.HasFlag(MpfrErrorFlags.Inexact));
+            _console.WriteLine(MpfrFloat.ErrorFlags.ToString());
+        }
+
+        [Fact]
+        public void DivideByZeroTest()
+        {
+            MpfrFloat.ErrorFlags = 0;
+            using MpfrFloat f = MpfrFloat.From(double.MinValue);
+            MpfrFloat.DivideInplace(f, f, 0);
+            Assert.True(MpfrFloat.ErrorFlags.HasFlag(MpfrErrorFlags.DivideByZero));
+        }
+
+        [Fact]
+        public void NaNTest()
+        {
+            MpfrFloat.ErrorFlags = 0;
+            using MpfrFloat f = MpfrFloat.From(double.NaN);
+            f.NextAbove();
+            Assert.True(MpfrFloat.ErrorFlags.HasFlag(MpfrErrorFlags.NaN));
+        }
+
+        [Fact]
+        public void ERangeTest()
+        {
+            MpfrFloat.ErrorFlags = 0;
+            using MpfrFloat f1 = MpfrFloat.From(double.MinValue);
+            using MpfrFloat f2 = MpfrFloat.From(double.NaN);
+            MpfrFloat.Compare(f1, f2);
+            Assert.True(MpfrFloat.ErrorFlags.HasFlag(MpfrErrorFlags.ERange));
         }
     }
 }

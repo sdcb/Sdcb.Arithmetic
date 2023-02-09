@@ -4074,11 +4074,25 @@ public unsafe class MpfrFloat : IDisposable
         set => MpfrLib.mpfr_set_emax(value);
     }
 
-    public static int MinimumEMin => MpfrLib.mpfr_get_emin_min();
-    public static int MaximumEMin => MpfrLib.mpfr_get_emin_max();
-    public static int MinimumEMax => MpfrLib.mpfr_get_emax_min();
-    public static int MaximumEMax => MpfrLib.mpfr_get_emax_max();
+    public static int MinEMin => MpfrLib.mpfr_get_emin_min();
+    public static int MaxEMin => MpfrLib.mpfr_get_emin_max();
+    public static int MinEMax => MpfrLib.mpfr_get_emax_min();
+    public static int MaxEMax => MpfrLib.mpfr_get_emax_max();
 
+    /// <summary>This function rounds x emulating subnormal number arithmetic</summary>
+    public int SubNormalize(int t = 0, MpfrRounding? rounding = null)
+    {
+        fixed (Mpfr_t* pthis = &Raw)
+        {
+            return MpfrLib.mpfr_subnormalize((IntPtr)pthis, t, rounding ?? DefaultRounding);
+        }
+    }
+
+    public static MpfrErrorFlags ErrorFlags
+    {
+        get => (MpfrErrorFlags)MpfrLib.mpfr_flags_save();
+        set => MpfrLib.mpfr_flags_restore((uint)value, 0b_0011_1111);
+    }
     #endregion
 
     #region 15. Compatibility With MPF
