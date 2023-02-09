@@ -13,13 +13,44 @@ public class RandomTests
     }
 
     [Fact]
-    public void FastRandom5()
+    public void NextMpfrFloatTest()
+    {
+        using GmpRandom r = new(0);
+        using MpfrFloat f = r.NextMpfrFloat(precision: 100);
+        Assert.True(f >= 0);
+        Assert.True(f < 1);
+    }
+
+    [Fact]
+    public void NextMpfrFloatRoundTest()
+    {
+        using GmpRandom r = new(0);
+        using MpfrFloat f = r.NextMpfrFloatRound(precision: 100);
+        Assert.True(f >= 0);
+        Assert.True(f < 1);
+    }
+
+    [Fact]
+    public void NextNormalDistributedMpfrFloatTest()
     {
         using GmpRandom r = new();
-        for (int i = 0; i < 5; ++i)
-        {
-            using MpfrFloat f = r.NextMpfrFloat(precision: 100);
-            _console.WriteLine(f.ToString());
-        }
+        using MpfrFloat f = r.NextNMpfrFloat(precision: 100);
+        Assert.True(f < 7.0);
+    }
+
+    [Fact]
+    public void Next2NormalDistributedMpfrFloatTest()
+    {
+        using GmpRandom r = new();
+        (MpfrFloat f1, MpfrFloat f2) = r.Next2NMpfrFloat(precision: 100);
+        Assert.NotEqual(f1, f2);
+    }
+
+    [Fact]
+    public void NextExponentialDistributedMpfrFloatTest()
+    {
+        using GmpRandom r = new();
+        using MpfrFloat f = r.NextNMpfrFloat(precision: 100);
+        Assert.True(f < 20u);
     }
 }
