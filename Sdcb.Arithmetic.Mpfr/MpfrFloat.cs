@@ -944,7 +944,7 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    public static MpfrFloat operator *(MpfrFloat op1, MpfrFloat op2) => Add(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(MpfrFloat op1, MpfrFloat op2) => Multiply(op1, op2, op1.Precision);
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
@@ -962,8 +962,8 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    public static MpfrFloat operator *(MpfrFloat op1, uint op2) => Add(op1, op2, op1.Precision);
-    public static MpfrFloat operator *(uint op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+    public static MpfrFloat operator *(MpfrFloat op1, uint op2) => Multiply(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(uint op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
@@ -981,8 +981,8 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    public static MpfrFloat operator *(MpfrFloat op1, int op2) => Add(op1, op2, op1.Precision);
-    public static MpfrFloat operator *(int op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+    public static MpfrFloat operator *(MpfrFloat op1, int op2) => Multiply(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(int op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
@@ -1000,8 +1000,8 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    public static MpfrFloat operator *(MpfrFloat op1, double op2) => Add(op1, op2, op1.Precision);
-    public static MpfrFloat operator *(double op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+    public static MpfrFloat operator *(MpfrFloat op1, double op2) => Multiply(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(double op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
@@ -1020,8 +1020,8 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    public static MpfrFloat operator *(MpfrFloat op1, GmpInteger op2) => Add(op1, op2, op1.Precision);
-    public static MpfrFloat operator *(GmpInteger op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+    public static MpfrFloat operator *(MpfrFloat op1, GmpInteger op2) => Multiply(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(GmpInteger op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
@@ -1040,8 +1040,8 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    public static MpfrFloat operator *(MpfrFloat op1, GmpRational op2) => Add(op1, op2, op1.Precision);
-    public static MpfrFloat operator *(GmpRational op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+    public static MpfrFloat operator *(MpfrFloat op1, GmpRational op2) => Multiply(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(GmpRational op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
     #endregion
 
     public static void SquareInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
