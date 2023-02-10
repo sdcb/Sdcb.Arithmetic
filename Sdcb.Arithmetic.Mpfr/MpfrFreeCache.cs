@@ -1,8 +1,11 @@
-﻿namespace Sdcb.Arithmetic.Mpfr
+﻿using System;
+
+namespace Sdcb.Arithmetic.Mpfr
 {
     /// <summary>
     /// Free cache policy
     /// </summary>
+    [Flags]
     public enum MpfrFreeCache
     {
         /// <summary>

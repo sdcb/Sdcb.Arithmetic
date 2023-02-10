@@ -38,4 +38,16 @@ public class RawTest
         Marshal.FreeHGlobal(f3);
         GmpMemory.Free(str);
     }
+
+    [Fact]
+    public void MemoryTest()
+    {
+        GmpMemory.SetMemoryFunctions(
+            malloc: n => Marshal.AllocHGlobal(n),
+            realloc: (ptr, size) => Marshal.ReAllocHGlobal(ptr, size),
+            free: (ptr, size) => Marshal.FreeHGlobal(ptr));
+
+        using GmpFloat a = new(precision: 10086);
+        _console.WriteLine(a.ToString());
+    }
 }

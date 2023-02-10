@@ -4095,6 +4095,28 @@ public unsafe class MpfrFloat : IDisposable
     }
     #endregion
 
+    #region 14. Memory Handling Functions
+    /// <summary>
+    /// Free all caches and pools used by MPFR internally (those local to the current thread and those shared by all threads).
+    /// You should call this function before terminating a thread, even if you did not call mpfr_const_* functions directly (they could have been called internally).
+    /// </summary>
+    public static void FreeCache(MpfrFreeCache way = MpfrFreeCache.Local | MpfrFreeCache.Global)
+    {
+        MpfrLib.mpfr_free_cache2(way);
+    }
+
+    /// <summary>
+    /// Free the pools used by MPFR internally.
+    /// Note: This function is automatically called after the thread-local caches are freed.
+    /// </summary>
+    public static void FreePool() => MpfrLib.mpfr_free_pool();
+
+    /// <summary>
+    /// This function should be called before calling <see cref="GmpMemory.__gmp_set_memory_functions"/>.
+    /// </summary>
+    public static void MemoryCleanup() => MpfrLib.mpfr_mp_memory_cleanup();
+    #endregion
+
     #region 15. Compatibility With MPF
     /// <summary>
     /// Reset the precision of x to be exactly prec bits.
