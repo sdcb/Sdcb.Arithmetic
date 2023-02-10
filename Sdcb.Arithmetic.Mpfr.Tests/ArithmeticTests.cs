@@ -105,5 +105,20 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             using GmpFloat f = (GmpFloat)r;
             Assert.Equal(1.5, f.ToDouble());
         }
+
+        [Fact]
+        public void CloneTest()
+        {
+            using MpfrFloat r = new (precision: 998);
+            r.Assign(-3.14);
+            using MpfrFloat r2 = r.Clone();
+
+            Assert.Equal(-3.14, r2.ToDouble());
+            Assert.Equal(r.Precision, r2.Precision);
+
+            r2.Assign(2.718);
+            Assert.Equal(2.718, r2.ToDouble());
+            Assert.Equal(-3.14, r.ToDouble());
+        }
     }
 }

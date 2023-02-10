@@ -261,4 +261,17 @@ public class GmpFloatOpTest
         Assert.Equal(2147483647u, (uint)ui);
         Assert.Equal(new string('9', 999), z.ToString());
     }
+
+    [Fact]
+    public void CloneTest()
+    {
+        using GmpFloat f = GmpFloat.From(3.14, 108);
+        using GmpFloat f2 = f.Clone();
+        Assert.Equal(3.14, f2.ToDouble());
+        Assert.Equal(f.Precision, f2.Precision);
+
+        f2.Assign(2.718);
+        Assert.Equal(2.718, f2.ToDouble());
+        Assert.Equal(3.14, f.ToDouble());
+    }
 }

@@ -304,6 +304,8 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
+    public MpfrFloat Clone() => From(this, Precision);
+
     public static MpfrFloat From(uint op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);

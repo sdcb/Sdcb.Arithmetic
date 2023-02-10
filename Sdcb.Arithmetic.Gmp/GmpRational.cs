@@ -43,6 +43,8 @@ public class GmpRational : IDisposable
         return r;
     }
 
+    public GmpRational Clone() => From(this);
+
     public static GmpRational From(GmpInteger op)
     {
         GmpRational r = new();
@@ -224,13 +226,6 @@ public class GmpRational : IDisposable
         {
             GmpLib.__gmpq_swap((IntPtr)p1, (IntPtr)p2);
         }
-    }
-
-    public unsafe GmpRational Clone()
-    {
-        GmpRational r = new();
-        r.Assign(this);
-        return r;
     }
     #endregion
     #endregion

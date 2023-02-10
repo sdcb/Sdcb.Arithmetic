@@ -158,6 +158,8 @@ public class GmpInteger : IDisposable
         return new GmpInteger(raw);
     }
 
+    public GmpInteger Clone() => From(this);
+
     public static unsafe GmpInteger From(uint op)
     {
         Mpz_t raw = new();

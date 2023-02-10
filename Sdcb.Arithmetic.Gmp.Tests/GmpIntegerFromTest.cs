@@ -156,4 +156,16 @@ public class GmpIntegerFromTest
         Assert.Equal(4u, ui.ToUInt32());
         Assert.Equal(3, (double)d);
     }
+
+    [Fact]
+    public void CloneTest()
+    {
+        using GmpInteger z = GmpInteger.From(-10086);
+        using GmpInteger z2 = z.Clone();
+        Assert.Equal(-10086, z2.ToDouble());
+
+        z2.Assign(10086);
+        Assert.Equal(10086, z2.ToDouble());
+        Assert.Equal(-10086, z.ToDouble());
+    }
 }

@@ -50,4 +50,16 @@ public class GmpRationalIOTest
         Assert.Equal(99, z.ToDouble());
         Assert.Equal(99, f.ToDouble());
     }
+
+    [Fact]
+    public void CloneTest()
+    {
+        using GmpRational q = GmpRational.From(3, 4);
+        using GmpRational q2 = q.Clone();
+        Assert.Equal(0.75, q2.ToDouble());
+
+        q2.Den.Assign(8);
+        Assert.Equal(0.125, q2.ToDouble());
+        Assert.Equal(0.75, q.ToDouble());
+    }
 }

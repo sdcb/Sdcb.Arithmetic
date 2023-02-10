@@ -53,6 +53,12 @@ public class GmpFloat : IDisposable
     #endregion
 
     #region Combined Initialization and Assignment Functions
+    public GmpFloat Clone()
+    {
+        GmpFloat rop = new(Precision);
+        rop.Assign(this);
+        return rop;
+    }
 
     public unsafe static GmpFloat From(int val)
     {
