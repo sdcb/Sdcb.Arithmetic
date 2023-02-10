@@ -120,5 +120,39 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             Assert.Equal(2.718, r2.ToDouble());
             Assert.Equal(-3.14, r.ToDouble());
         }
+
+        [Fact]
+        public void ExplicitConvertFromTest()
+        {
+            using MpfrFloat r = new(precision: 998);
+            r.Assign(3.14);
+            using GmpInteger z = (GmpInteger)r;
+            using GmpFloat f = (GmpFloat)r;
+            using GmpRational q = (GmpRational)r;
+
+            Assert.Equal(3, z.ToInt32());
+            Assert.Equal(3.14, f.ToDouble());
+            Assert.Equal(3.14, q.ToDouble());
+        }
+
+        [Fact]
+        public void ExplicitConvertToTest()
+        {
+            {
+                using GmpInteger z = -99;
+                using MpfrFloat zr = (MpfrFloat)z;
+                Assert.Equal(-99, zr.ToInt32());
+            }
+            {
+                using GmpFloat f = -99;
+                using MpfrFloat fr = (MpfrFloat)f;
+                Assert.Equal(-99, fr.ToDouble());
+            }
+            {
+                using GmpRational q = -99;
+                using MpfrFloat qr = (MpfrFloat)q;
+                Assert.Equal(-99, qr.ToInt32());
+            }
+        }
     }
 }
