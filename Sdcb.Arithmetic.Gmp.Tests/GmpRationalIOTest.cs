@@ -59,7 +59,7 @@ public class GmpRationalIOTest
         Assert.Equal(0.75, q2.ToDouble());
 
         q2.Den.Assign(8);
-        Assert.Equal(0.125, q2.ToDouble());
+        Assert.Equal(0.375, q2.ToDouble());
         Assert.Equal(0.75, q.ToDouble());
     }
 }
