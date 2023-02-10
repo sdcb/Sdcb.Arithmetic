@@ -71,7 +71,7 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         }
 
         [Fact]
-        public void OperatorConvertTest()
+        public void OperatorConvertFromTest()
         {
             using MpfrFloat rsi = 3;
             using MpfrFloat rui = 3u;
@@ -86,6 +86,24 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             Assert.Equal(3, rz.ToInt32());
             Assert.Equal(3, rq.ToInt32());
             Assert.Equal(3.14, rf.ToDouble());
+        }
+
+        [Fact]
+        public void OperatorConvertToTest()
+        {
+            using MpfrFloat r = 1.5;
+            Assert.Equal(1, (int)r);
+            Assert.Equal(1u, (uint)r);
+            Assert.Equal(1.5, (double)r);
+
+            using GmpInteger z = (GmpInteger)r;
+            Assert.Equal(1, z.ToInt32());
+
+            using GmpRational q = (GmpRational)r;
+            Assert.Equal(1.5, q.ToDouble());
+
+            using GmpFloat f = (GmpFloat)r;
+            Assert.Equal(1.5, f.ToDouble());
         }
     }
 }

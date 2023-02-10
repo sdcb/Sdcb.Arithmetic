@@ -412,21 +412,21 @@ public unsafe class MpfrFloat : IDisposable
 
     public static explicit operator float(MpfrFloat op) => op.ToFloat();
 
-    public int ToInt32(MpfrRounding? rounding = null)
+    public int ToInt32(MpfrRounding rounding = MpfrRounding.ToZero)
     {
         fixed (Mpfr_t* pthis = &Raw)
         {
-            return MpfrLib.mpfr_get_si((IntPtr)pthis, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_get_si((IntPtr)pthis, rounding);
         }
     }
 
     public static explicit operator int(MpfrFloat op) => op.ToInt32();
 
-    public uint ToUInt32(MpfrRounding? rounding = null)
+    public uint ToUInt32(MpfrRounding rounding = MpfrRounding.ToZero)
     {
         fixed (Mpfr_t* pthis = &Raw)
         {
-            return MpfrLib.mpfr_get_ui((IntPtr)pthis, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_get_ui((IntPtr)pthis, rounding);
         }
     }
 
@@ -508,7 +508,7 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
-    public GmpInteger ToGmpInteger(MpfrRounding? rounding = null)
+    public GmpInteger ToGmpInteger(MpfrRounding rounding = MpfrRounding.ToZero)
     {
         GmpInteger rop = new();
         ToGmpIntegerInplace(rop, rounding);
