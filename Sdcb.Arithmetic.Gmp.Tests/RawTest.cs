@@ -42,12 +42,13 @@ public class RawTest
     [Fact]
     public void MemoryTest()
     {
-        GmpMemory.SetMemoryFunctions(
+        GmpMemory.SetAllocator(
             malloc: n => Marshal.AllocHGlobal(n),
             realloc: (ptr, size) => Marshal.ReAllocHGlobal(ptr, size),
             free: (ptr, size) => Marshal.FreeHGlobal(ptr));
 
         using GmpFloat a = new(precision: 100);
         _console.WriteLine(a.ToString());
+        GmpMemory.ResetAllocator();
     }
 }

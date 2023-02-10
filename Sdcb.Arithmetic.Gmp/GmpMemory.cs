@@ -20,10 +20,13 @@ namespace Sdcb.Arithmetic.Gmp
         static GmpMemory()
         {
             GmpNativeLoader.Init();
-            __gmp_get_memory_functions(out MallocFp, out ReallocFp, out FreeFp);
+            __gmp_get_memory_functions(out _nativeMallocFp, out _nativeReallocFp, out _nativeFreeFp);
+            _mallocFp = _nativeMallocFp;
+            _reallocFp = _nativeReallocFp;
+            _freeFp= _nativeFreeFp;
         }
 
-        public static void SetMemoryFunctions(
+        public static void SetAllocator(
             GmpMalloc malloc,
             GmpRealloc realloc,
             GmpFree free)
@@ -35,16 +38,26 @@ namespace Sdcb.Arithmetic.Gmp
                 (delegate* unmanaged[Cdecl]<nint, IntPtr>)mallocPtr, 
                 (delegate* unmanaged[Cdecl]<IntPtr, nint, nint, IntPtr>)reallocPtr,
                 (delegate* unmanaged[Cdecl]<IntPtr, nint, void>) freePtr);
-            __gmp_get_memory_functions(out MallocFp, out ReallocFp, out FreeFp);
+            __gmp_get_memory_functions(out _mallocFp, out _reallocFp, out _freeFp);
         }
 
-        private static delegate* unmanaged[Cdecl]<nint, IntPtr> MallocFp;
-        private static delegate* unmanaged[Cdecl]<IntPtr, nint, nint, IntPtr> ReallocFp;
-        private static delegate* unmanaged[Cdecl]<IntPtr, nint, void> FreeFp;
+        public static void ResetAllocator()
+        {
+            __gmp_set_memory_functions(_nativeMallocFp, _nativeReallocFp, _nativeFreeFp);
+            __gmp_get_memory_functions(out _mallocFp, out _reallocFp, out _freeFp);
+        }
 
-        public static IntPtr Malloc(nint size) => MallocFp(size);
-        public static IntPtr Realloc(IntPtr ptr, nint oldSize, nint newSize) => ReallocFp(ptr, oldSize, newSize);
-        public static void Free(IntPtr ptr, nint size = 0) => FreeFp(ptr, size);
+        private static delegate* unmanaged[Cdecl]<nint, IntPtr> _nativeMallocFp;
+        private static delegate* unmanaged[Cdecl]<IntPtr, nint, nint, IntPtr> _nativeReallocFp;
+        private static delegate* unmanaged[Cdecl]<IntPtr, nint, void> _nativeFreeFp;
+
+        private static delegate* unmanaged[Cdecl]<nint, IntPtr> _mallocFp;
+        private static delegate* unmanaged[Cdecl]<IntPtr, nint, nint, IntPtr> _reallocFp;
+        private static delegate* unmanaged[Cdecl]<IntPtr, nint, void> _freeFp;
+
+        public static IntPtr Malloc(nint size) => _mallocFp(size);
+        public static IntPtr Realloc(IntPtr ptr, nint oldSize, nint newSize) => _reallocFp(ptr, oldSize, newSize);
+        public static void Free(IntPtr ptr, nint size = 0) => _freeFp(ptr, size);
     }
 
     public delegate IntPtr GmpMalloc(nint size);
