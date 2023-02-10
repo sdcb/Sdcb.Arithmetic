@@ -14,26 +14,23 @@ public class GmpFloat : IDisposable
     }
 
     public readonly Mpf_t Raw = new();
-    private readonly bool _isOwner;
 
     #region Initialization functions
 
-    public unsafe GmpFloat(bool isOwner = true)
+    public unsafe GmpFloat()
     {
         fixed (Mpf_t* ptr = &Raw)
         {
             GmpLib.__gmpf_init((IntPtr)ptr);
         }
-        _isOwner = isOwner;
     }
 
-    public GmpFloat(Mpf_t raw, bool isOwner = true)
+    public GmpFloat(Mpf_t raw)
     {
         Raw = raw;
-        _isOwner = isOwner;
     }
 
-    public unsafe GmpFloat(uint precision, bool isOwner = true)
+    public unsafe GmpFloat(uint precision)
     {
         fixed (Mpf_t* ptr = &Raw)
         {
@@ -46,7 +43,6 @@ public class GmpFloat : IDisposable
                 GmpLib.__gmpf_init2((IntPtr)ptr, precision);
             }
         }
-        _isOwner = isOwner;
     }
 
     internal static GmpFloat CreateWithNullablePrecision(uint? precision) => precision switch
@@ -1055,7 +1051,7 @@ public class GmpFloat : IDisposable
             {
             }
 
-            if (_isOwner) Clear();
+            Clear();
             _disposed = true;
         }
     }

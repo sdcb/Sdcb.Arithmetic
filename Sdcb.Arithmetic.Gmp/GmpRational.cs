@@ -8,22 +8,19 @@ namespace Sdcb.Arithmetic.Gmp;
 public class GmpRational : IDisposable
 {
     public readonly Mpq_t Raw = new();
-    private readonly bool _isOwner;
 
     #region Initialization and Assignment Functions
-    public unsafe GmpRational(bool isOwner = true)
+    public unsafe GmpRational()
     {
         fixed (Mpq_t* ptr = &Raw)
         {
             GmpLib.__gmpq_init((IntPtr)ptr);
         }
-        _isOwner = isOwner;
     }
 
-    public GmpRational(Mpq_t raw, bool isOwner = true)
+    public GmpRational(Mpq_t raw)
     {
         Raw = raw;
-        _isOwner = isOwner;
     }
 
     /// <summary>
@@ -299,7 +296,7 @@ public class GmpRational : IDisposable
                 // TODO: 释放托管状态(托管对象)
             }
 
-            if (_isOwner) Clear();
+            Clear();
             _disposed = true;
         }
     }
