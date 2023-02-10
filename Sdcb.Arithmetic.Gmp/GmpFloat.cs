@@ -62,6 +62,8 @@ public class GmpFloat : IDisposable
         return new GmpFloat(raw);
     }
 
+    public static implicit operator GmpFloat(int val) => From(val);
+
     public unsafe static GmpFloat From(int val, uint precision)
     {
         GmpFloat f = new(precision);
@@ -77,6 +79,8 @@ public class GmpFloat : IDisposable
         return new GmpFloat(raw);
     }
 
+    public static implicit operator GmpFloat(uint val) => From(val);
+
     public unsafe static GmpFloat From(uint val, uint precision)
     {
         GmpFloat f = new(precision);
@@ -91,6 +95,8 @@ public class GmpFloat : IDisposable
         GmpLib.__gmpf_init_set_d((IntPtr)ptr, val);
         return new GmpFloat(raw);
     }
+
+    public static implicit operator GmpFloat(double val) => From(val);
 
     public unsafe static GmpFloat From(double val, uint precision)
     {
@@ -115,6 +121,8 @@ public class GmpFloat : IDisposable
         f.Assign(val);
         return f;
     }
+
+    public static implicit operator GmpFloat(GmpInteger val) => From(val);
 
     public unsafe static GmpFloat Parse(string val, int @base = 10)
     {

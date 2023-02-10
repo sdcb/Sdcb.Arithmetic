@@ -50,6 +50,8 @@ public class GmpRational : IDisposable
         return r;
     }
 
+    public static implicit operator GmpRational(GmpInteger op) => From(op);
+
     public static GmpRational From(uint num, uint den)
     {
         GmpRational r = new();
@@ -70,6 +72,8 @@ public class GmpRational : IDisposable
         r.Assign(num, 1);
         return r;
     }
+
+    public static implicit operator GmpRational(int op) => From(op);
 
     /// <summary>
     /// <para>Set rop from a null-terminated string str in the given base.</para>
@@ -120,6 +124,8 @@ public class GmpRational : IDisposable
         return r;
     }
 
+    public static explicit operator GmpRational(double op) => From(op);
+
     /// <summary>
     /// Set rop to the value of op. There is no rounding, this conversion is exact.
     /// </summary>
@@ -129,6 +135,8 @@ public class GmpRational : IDisposable
         r.Assign(val);
         return r;
     }
+
+    public static explicit operator GmpRational(GmpFloat op) => From(op);
     #endregion
 
     #region Assign
