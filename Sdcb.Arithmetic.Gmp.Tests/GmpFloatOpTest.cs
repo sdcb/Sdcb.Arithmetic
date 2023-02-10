@@ -263,6 +263,40 @@ public class GmpFloatOpTest
     }
 
     [Fact]
+    public void OperatorExplicitXtoXTest()
+    {
+        {
+            using GmpInteger z = 5;
+            using GmpFloat f = (GmpFloat)z;
+            using GmpRational q = (GmpRational)z;
+        }
+        {
+            using GmpFloat f = 5;
+            using GmpInteger z = (GmpInteger)f;
+            using GmpRational q = (GmpRational)f;
+        }
+        {
+            using GmpInteger q = 5;
+            using GmpFloat f = (GmpFloat)q;
+            using GmpInteger z = (GmpInteger)q;
+        }
+    }
+
+    [Fact]
+    public void FloatToIntegerTest()
+    {
+        using GmpFloat f = 1.5;
+        using GmpInteger z = (GmpInteger)f;
+        Assert.Equal(1, z.ToInt32());
+
+        using GmpInteger z2 = GmpInteger.From(f);
+        Assert.Equal(1, z2.ToInt32());
+
+        using GmpInteger z3 = f.ToGmpInteger();
+        Assert.Equal(1, z3.ToInt32());
+    }
+
+    [Fact]
     public void CloneTest()
     {
         using GmpFloat f = GmpFloat.From(3.14, 108);

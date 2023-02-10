@@ -406,6 +406,7 @@ public class GmpFloat : IDisposable
         });
     }
 
+    public GmpInteger ToGmpInteger() => GmpInteger.From(this);
     #endregion
 
     #region Arithmetic Functions
