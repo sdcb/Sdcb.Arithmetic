@@ -154,5 +154,14 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
                 Assert.Equal(-99, qr.ToInt32());
             }
         }
+
+        [Fact]
+        public void FromBigIntegerTest()
+        {
+            string str = "2399668902200934240538265661362538479646144714727726081987941826880160606384643329140253260934807552";
+            using GmpInteger d = GmpInteger.Parse(str);
+            using MpfrFloat f = MpfrFloat.From(d);
+            Assert.Equal(str, f.ToString());
+        }
     }
 }

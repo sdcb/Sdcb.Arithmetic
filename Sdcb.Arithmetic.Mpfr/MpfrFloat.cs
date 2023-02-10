@@ -335,7 +335,7 @@ public unsafe class MpfrFloat : IDisposable
 
     public static MpfrFloat From(GmpInteger op, int? precision = null, MpfrRounding? rounding = null)
     {
-        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        MpfrFloat rop = new(precision ?? (int)(Math.Abs(op.Raw.Size) * GmpLib.LimbBitSize));
         rop.Assign(op, rounding);
         return rop;
     }
