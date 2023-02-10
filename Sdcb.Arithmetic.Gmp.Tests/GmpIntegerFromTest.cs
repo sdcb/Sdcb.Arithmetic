@@ -144,4 +144,16 @@ public class GmpIntegerFromTest
         b.Assign(num);
         Assert.Equal(num, b.ToString());
     }
+
+    [Fact]
+    public void OperatorFromTest()
+    {
+        using GmpInteger si = -3;
+        using GmpInteger ui = 4;
+        using GmpInteger d = (GmpInteger)3.14;
+
+        Assert.Equal(-3, si.ToInt32());
+        Assert.Equal(4u, ui.ToUInt32());
+        Assert.Equal(3, (double)d);
+    }
 }

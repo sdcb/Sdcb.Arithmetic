@@ -165,6 +165,8 @@ public class GmpInteger : IDisposable
         return new GmpInteger(raw);
     }
 
+    public static implicit operator GmpInteger(uint op) => From(op);
+
     public static unsafe GmpInteger From(int op)
     {
         Mpz_t raw = new();
@@ -172,12 +174,16 @@ public class GmpInteger : IDisposable
         return new GmpInteger(raw);
     }
 
+    public static implicit operator GmpInteger(int op) => From(op);
+
     public static unsafe GmpInteger From(double op)
     {
         Mpz_t raw = new();
         GmpLib.__gmpz_init_set_d((IntPtr)(&raw), op);
         return new GmpInteger(raw);
     }
+
+    public static explicit operator GmpInteger(double op) => From(op);
 
     /// <summary>
     /// The base may vary from 2 to 62, or if base is 0, then the leading characters are used: 0x and 0X for hexadecimal, 0b and 0B for binary, 0 for octal, or decimal otherwise.

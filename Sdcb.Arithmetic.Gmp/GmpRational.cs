@@ -67,6 +67,13 @@ public class GmpRational : IDisposable
         return r;
     }
 
+    public static GmpRational From(int num)
+    {
+        GmpRational r = new();
+        r.Assign(num, 1);
+        return r;
+    }
+
     /// <summary>
     /// <para>Set rop from a null-terminated string str in the given base.</para>
     /// <para>The string can be an integer like “41” or a fraction like “41/152”. The fraction must be in canonical form (see Rational Number Functions), or if not then mpq_canonicalize must be called.</para>
@@ -569,7 +576,7 @@ public class GmpRational : IDisposable
     #region Applying Integer Functions to Rationals
     public unsafe GmpInteger Num
     {
-        get => new GmpInteger(Raw.Num, isOwner: false);
+        get => new(Raw.Num, isOwner: false);
         set
         {
             fixed (Mpq_t* pthis = &Raw)
@@ -582,7 +589,7 @@ public class GmpRational : IDisposable
 
     public unsafe GmpInteger Den
     {
-        get => new GmpInteger(Raw.Den, isOwner: false);
+        get => new(Raw.Den, isOwner: false);
         set
         {
             fixed (Mpq_t* pthis = &Raw)
