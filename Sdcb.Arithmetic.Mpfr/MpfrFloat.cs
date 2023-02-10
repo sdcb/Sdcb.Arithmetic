@@ -467,10 +467,9 @@ public unsafe class MpfrFloat : IDisposable
         return (rop, exp, overflowed);
     }
 
-    /// <summary>
-    /// z * 2^exp = x
-    /// </summary>
-    public int GetZ2ExpInplace(GmpInteger z)
+    /// <summary>z * 2^exp = x</summary>
+    /// <returns>2exp</returns>
+    public int GetIntegerAnd2ExpInplace(GmpInteger z)
     {
         fixed (Mpfr_t* pthis = &Raw)
         fixed (Mpz_t* pz = &z.Raw)
@@ -479,17 +478,13 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
-    /// <summary>
-    /// y * 2^exp = x
-    /// </summary>
-    public (GmpInteger z, int exp) Z2Exp
+    /// <summary>z * 2^exp = x</summary>
+    /// <returns>the integer and 2exp.</returns>
+    public (GmpInteger z, int exp) GetIntegerAnd2Exp()
     {
-        get
-        {
-            GmpInteger z = new();
-            int exp = GetZ2ExpInplace(z);
-            return (z, exp);
-        }
+        GmpInteger z = new();
+        int exp = GetIntegerAnd2ExpInplace(z);
+        return (z, exp);
     }
 
     public int ToGmpIntegerInplace(GmpInteger z, MpfrRounding? rounding = null)
