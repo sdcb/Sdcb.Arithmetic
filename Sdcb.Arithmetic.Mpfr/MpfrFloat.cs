@@ -311,12 +311,16 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
+    public static implicit operator MpfrFloat(uint op) => From(op);
+
     public static MpfrFloat From(int op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
         rop.Assign(op, rounding);
         return rop;
     }
+
+    public static implicit operator MpfrFloat(int op) => From(op);
 
     public static MpfrFloat From(double op, int? precision = null, MpfrRounding? rounding = null)
     {
@@ -325,12 +329,16 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
+    public static implicit operator MpfrFloat(double op) => From(op);
+
     public static MpfrFloat From(GmpInteger op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
         rop.Assign(op, rounding);
         return rop;
     }
+
+    public static explicit operator MpfrFloat(GmpInteger op) => From(op);
 
     public static MpfrFloat From(GmpRational op, int? precision = null, MpfrRounding? rounding = null)
     {
@@ -339,12 +347,16 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
+    public static explicit operator MpfrFloat(GmpRational op) => From(op);
+
     public static MpfrFloat From(GmpFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
         rop.Assign(op, rounding);
         return rop;
     }
+
+    public static implicit operator MpfrFloat(GmpFloat op) => From(op, (int)op.Precision);
 
     /// <exception cref="FormatException" />
     public static MpfrFloat Parse(string s, int @base = 0, int? precision = null, MpfrRounding? rounding = null)

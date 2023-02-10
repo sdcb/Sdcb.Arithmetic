@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sdcb.Arithmetic.Gmp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -67,6 +68,24 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         {
             using MpfrFloat r = MpfrFloat.Factorial(5);
             Assert.Equal(120, r.ToInt32());
+        }
+
+        [Fact]
+        public void OperatorConvertTest()
+        {
+            using MpfrFloat rsi = 3;
+            using MpfrFloat rui = 3u;
+            using MpfrFloat rd = 3.14;
+            using MpfrFloat rz = (MpfrFloat)GmpInteger.From(3);
+            using MpfrFloat rq = (MpfrFloat)GmpRational.From(3);
+            using MpfrFloat rf = GmpFloat.From(3.14);
+
+            Assert.Equal(3, rsi.ToInt32());
+            Assert.Equal(3u, rui.ToUInt32());
+            Assert.Equal(3.14, rd.ToDouble());
+            Assert.Equal(3, rz.ToInt32());
+            Assert.Equal(3, rq.ToInt32());
+            Assert.Equal(3.14, rf.ToDouble());
         }
     }
 }
