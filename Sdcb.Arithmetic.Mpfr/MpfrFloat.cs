@@ -58,8 +58,8 @@ public unsafe class MpfrFloat : IDisposable
         set => MpfrLib.mpfr_set_default_prec(value);
     }
 
-    public const int MaximalSupportedPrecision = int.MaxValue - 256;
-    public const int MinimalSupportedPrecision = 1;
+    public const int MaxSupportedPrecision = int.MaxValue - 256;
+    public const int MinSupportedPrecision = 1;
 
     /// <summary>
     /// The number of bits used to store its significand.
@@ -81,8 +81,8 @@ public unsafe class MpfrFloat : IDisposable
 
     private static void CheckPrecision(int precision)
     {
-        if (precision < 1 || precision > MaximalSupportedPrecision)
-            throw new ArgumentOutOfRangeException(nameof(Precision), $"Precision should in range of [{MinimalSupportedPrecision}..{MaximalSupportedPrecision}].");
+        if (precision < 1 || precision > MaxSupportedPrecision)
+            throw new ArgumentOutOfRangeException(nameof(Precision), $"Precision should in range of [{MinSupportedPrecision}..{MaxSupportedPrecision}].");
     }
 
     /// <remarks>Note: reset precision will clear the value.</remarks>
