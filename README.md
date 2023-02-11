@@ -1,8 +1,52 @@
 # Sdcb.Arithmetic
 
+`Sdcb.Arithmetic` is a modern `.NET` library that can PInvoke to `gmp` and `mpfr`, that enable both high performance and best .NET convenience.
+
+Known classes in `Sdcb.Arithmetic`:
+
+| Class       | Native name     | Library              |
+| ----------- | --------------- | -------------------- |
+| GmpInteger  | mpz_t           | Sdcb.Arithmetic.Gmp  |
+| GmpFloat    | mpf_t           | Sdcb.Arithmetic.Gmp  |
+| GmpRational | mpq_t           | Sdcb.Arithmetic.Gmp  |
+| GmpRandom   | gmp_randstate_t | Sdcb.Arithmetic.Gmp  |
+| MpfrFloat   | mpfr_t          | Sdcb.Arithmetic.Mpfr |
+
+## NuGet Packages
+
+* libgmp
+
+  | Package Id                        | Version                                                                                                                                        | License | Notes                     |
+  | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+  | Sdcb.Arithmetic.Gmp               | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Gmp.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Gmp)                             | MIT     | .NET binding for `libgmp` |
+  | Sdcb.Arithmetic.Gmp.runtime.win64 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Gmp.runtime.win64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Gmp.runtime.win64) | LGPL    | native lib in windows x64 |
+  | Sdcb.Arithmetic.Gmp.runtime.win32 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Gmp.runtime.win32.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Gmp.runtime.win32) | LGPL    | native lib in windows x86 |
+
+* mpfr
+
+  | Package Id                         | Version                                                                                                                                          | License | Notes                      |
+  | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+  | Sdcb.Arithmetic.Mpfr               | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpfr.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpfr)                             | MIT     | .NET binding for `libmpfr` |
+  | Sdcb.Arithmetic.Mpfr.runtime.win64 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpfr.runtime.win64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpfr.runtime.win64) | LGPL    | native lib in windows x64  |
+  | Sdcb.Arithmetic.Mpfr.runtime.win32 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpfr.runtime.win32.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpfr.runtime.win32) | LGPL    | native lib in windows x86  |
+
+### Why not provide Linux/MacOS nuget package?
+    
+Linux & macos is **supported**, because most Linux distribution already contains a native library installed, so native binding NuGet package for Linux/MacOS is typically **not needed**.
+
+This is the all native dynamic library name in case you wondering(defined in `GmpNativeLoader.cs` and `MpfrNativeLoader.cs`):
+
+| OS      | gmp dynamic lib | mpfr dynamic lib |
+| ------- | --------------- | ---------------- |
+| Windows | gmp-10.dll      | mpfr-6.dll       |
+| Linux   | libgmp.so.10    | libmpfr.so.6     |
+| MacOS   | libgmp.10.dylib | libmpfr.6.dylib  |
+| Others  | gmp.10          | mpfr.6           |
+
+
 ## Examples
 
-Calculate 1,000,000 length of π using `Sdcb.Arithmetic.Gmp`:
+### Calculate 1,000,000 length of π using `Sdcb.Arithmetic.Gmp`:
 
 ```csharp
 // Install NuGet package: Sdcb.Arithmetic.Gmp
