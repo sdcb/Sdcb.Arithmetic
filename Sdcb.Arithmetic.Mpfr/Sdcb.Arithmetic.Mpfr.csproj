@@ -28,7 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Condition="'$(Configuration)' == 'Debug'" Include="..\Sdcb.Arithmetic.Gmp\Sdcb.Arithmetic.Gmp.csproj" />
-    <PackageReference Condition="'$(Configuration)' != 'Debug'" Include="Sdcb.Arithmetic.Gmp" Version="6.2.1-preview.7" />
+    <PackageReference Condition="'$(Configuration)' != 'Debug'" Include="Sdcb.Arithmetic.Gmp" Version="6.2.1-preview.9" />
   </ItemGroup>
 
 </Project>
