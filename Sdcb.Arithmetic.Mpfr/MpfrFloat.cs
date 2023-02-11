@@ -66,18 +66,9 @@ public unsafe class MpfrFloat : IDisposable
     /// </summary>
     public int Precision
     {
-        get
-        {
-            fixed (Mpfr_t* ptr = &Raw)
-            {
-                return MpfrLib.mpfr_get_prec((IntPtr)ptr);
-            }
+        get => Raw.Precision;
+        set => RoundToPrecision(Precision, DefaultRounding);
         }
-        set
-        {
-            RoundToPrecision(Precision, DefaultRounding);
-        }
-    }
 
     private static void CheckPrecision(int precision)
     {
@@ -635,7 +626,7 @@ public unsafe class MpfrFloat : IDisposable
     }
     #endregion
 
-    #region 5.  Arithmetic Functions
+    #region 5. Arithmetic Functions
     #region Add
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
@@ -3995,10 +3986,7 @@ public unsafe class MpfrFloat : IDisposable
     {
         get
         {
-            fixed (Mpfr_t* pthis = &Raw)
-            {
-                return MpfrLib.mpfr_get_exp((IntPtr)pthis);
-            }
+            return Raw.Exponent;
         }
         set
         {
