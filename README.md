@@ -16,19 +16,19 @@ Known classes in `Sdcb.Arithmetic`:
 
 * libgmp
 
-  | Package Id                        | Version                                                                                                                                        | License | Notes                     |
-  | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-  | Sdcb.Arithmetic.Gmp               | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Gmp.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Gmp)                             | MIT     | .NET binding for `libgmp` |
-  | Sdcb.Arithmetic.Gmp.runtime.win64 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Gmp.runtime.win64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Gmp.runtime.win64) | LGPL    | native lib in windows x64 |
-  | Sdcb.Arithmetic.Gmp.runtime.win32 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Gmp.runtime.win32.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Gmp.runtime.win32) | LGPL    | native lib in windows x86 |
+| Package Id                        | Version                                                                                                                                        | License | Notes                     |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Sdcb.Arithmetic.Gmp               | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Gmp.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Gmp)                             | MIT     | .NET binding for `libgmp` |
+| Sdcb.Arithmetic.Gmp.runtime.win64 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Gmp.runtime.win64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Gmp.runtime.win64) | LGPL    | native lib in windows x64 |
+| Sdcb.Arithmetic.Gmp.runtime.win32 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Gmp.runtime.win32.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Gmp.runtime.win32) | LGPL    | native lib in windows x86 |
 
 * mpfr
 
-  | Package Id                         | Version                                                                                                                                          | License | Notes                      |
-  | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
-  | Sdcb.Arithmetic.Mpfr               | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpfr.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpfr)                             | MIT     | .NET binding for `libmpfr` |
-  | Sdcb.Arithmetic.Mpfr.runtime.win64 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpfr.runtime.win64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpfr.runtime.win64) | LGPL    | native lib in windows x64  |
-  | Sdcb.Arithmetic.Mpfr.runtime.win32 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpfr.runtime.win32.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpfr.runtime.win32) | LGPL    | native lib in windows x86  |
+| Package Id                         | Version                                                                                                                                          | License | Notes                      |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| Sdcb.Arithmetic.Mpfr               | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpfr.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpfr)                             | MIT     | .NET binding for `libmpfr` |
+| Sdcb.Arithmetic.Mpfr.runtime.win64 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpfr.runtime.win64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpfr.runtime.win64) | LGPL    | native lib in windows x64  |
+| Sdcb.Arithmetic.Mpfr.runtime.win32 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpfr.runtime.win32.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpfr.runtime.win32) | LGPL    | native lib in windows x86  |
 
 ### Why not provide Linux/MacOS nuget package?
     
