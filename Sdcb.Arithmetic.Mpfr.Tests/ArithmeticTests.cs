@@ -163,5 +163,13 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
             using MpfrFloat f = MpfrFloat.From(d);
             Assert.Equal(str, f.ToString());
         }
+
+        [Fact]
+        public void NegateTest()
+        {
+            using MpfrFloat f = 998;
+            using MpfrFloat fn = -f;
+            Assert.Equal(-998, fn.ToInt32());
+        }
     }
 }

@@ -1347,12 +1347,14 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
-    public static MpfrFloat Negate(MpfrFloat op, int? precision, MpfrRounding? rounding = null)
+    public static MpfrFloat Negate(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
         NegateInplace(rop, op, rounding);
         return rop;
     }
+
+    public static MpfrFloat operator -(MpfrFloat op) => Negate(op);
 
     public static int AbsInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
