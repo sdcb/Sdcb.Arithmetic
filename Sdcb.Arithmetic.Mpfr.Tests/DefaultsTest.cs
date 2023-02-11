@@ -13,10 +13,10 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         }
 
         [Fact]
-        public void DefaultValueShouldBeNan()
+        public void DefaultValueShouldBeZero()
         {
             using MpfrFloat r = new();
-            Assert.Equal(double.NaN, r.ToDouble());
+            Assert.Equal(0, r.ToDouble());
         }
 
         [Fact]
