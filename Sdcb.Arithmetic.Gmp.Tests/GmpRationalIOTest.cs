@@ -36,4 +36,30 @@ public class GmpRationalIOTest
         op.Canonicalize();
         Assert.Equal(res, op.ToString());
     }
+
+    [Fact]
+    public void ConvertFromTest()
+    {
+        using GmpRational si = -5;
+        using GmpRational d = (GmpRational)1.25;
+        using GmpRational z = (GmpInteger)99;
+        using GmpRational f = (GmpRational)(GmpFloat)99;
+
+        Assert.Equal(-5, si.ToDouble());
+        Assert.Equal(1.25, d.ToDouble());
+        Assert.Equal(99, z.ToDouble());
+        Assert.Equal(99, f.ToDouble());
+    }
+
+    [Fact]
+    public void CloneTest()
+    {
+        using GmpRational q = GmpRational.From(3, 4);
+        using GmpRational q2 = q.Clone();
+        Assert.Equal(0.75, q2.ToDouble());
+
+        q2.Den.Assign(8);
+        Assert.Equal(0.375, q2.ToDouble());
+        Assert.Equal(0.75, q.ToDouble());
+    }
 }

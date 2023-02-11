@@ -8,22 +8,19 @@ namespace Sdcb.Arithmetic.Gmp;
 public class GmpRational : IDisposable
 {
     public readonly Mpq_t Raw = new();
-    private readonly bool _isOwner;
 
     #region Initialization and Assignment Functions
-    public unsafe GmpRational(bool isOwner = true)
+    public unsafe GmpRational()
     {
         fixed (Mpq_t* ptr = &Raw)
         {
             GmpLib.__gmpq_init((IntPtr)ptr);
         }
-        _isOwner = isOwner;
     }
 
-    public GmpRational(Mpq_t raw, bool isOwner = true)
+    public GmpRational(Mpq_t raw)
     {
         Raw = raw;
-        _isOwner = isOwner;
     }
 
     /// <summary>
@@ -46,12 +43,16 @@ public class GmpRational : IDisposable
         return r;
     }
 
+    public GmpRational Clone() => From(this);
+
     public static GmpRational From(GmpInteger op)
     {
         GmpRational r = new();
         r.Assign(op);
         return r;
     }
+
+    public static implicit operator GmpRational(GmpInteger op) => From(op);
 
     public static GmpRational From(uint num, uint den)
     {
@@ -66,6 +67,15 @@ public class GmpRational : IDisposable
         r.Assign(num, den);
         return r;
     }
+
+    public static GmpRational From(int num)
+    {
+        GmpRational r = new();
+        r.Assign(num, 1);
+        return r;
+    }
+
+    public static implicit operator GmpRational(int op) => From(op);
 
     /// <summary>
     /// <para>Set rop from a null-terminated string str in the given base.</para>
@@ -116,6 +126,8 @@ public class GmpRational : IDisposable
         return r;
     }
 
+    public static explicit operator GmpRational(double op) => From(op);
+
     /// <summary>
     /// Set rop to the value of op. There is no rounding, this conversion is exact.
     /// </summary>
@@ -125,6 +137,8 @@ public class GmpRational : IDisposable
         r.Assign(val);
         return r;
     }
+
+    public static explicit operator GmpRational(GmpFloat op) => From(op);
     #endregion
 
     #region Assign
@@ -213,13 +227,6 @@ public class GmpRational : IDisposable
             GmpLib.__gmpq_swap((IntPtr)p1, (IntPtr)p2);
         }
     }
-
-    public unsafe GmpRational Clone()
-    {
-        GmpRational r = new();
-        r.Assign(this);
-        return r;
-    }
     #endregion
     #endregion
 
@@ -292,7 +299,7 @@ public class GmpRational : IDisposable
                 // TODO: 释放托管状态(托管对象)
             }
 
-            if (_isOwner) Clear();
+            Clear();
             _disposed = true;
         }
     }
@@ -569,7 +576,7 @@ public class GmpRational : IDisposable
     #region Applying Integer Functions to Rationals
     public unsafe GmpInteger Num
     {
-        get => new GmpInteger(Raw.Num, isOwner: false);
+        get => new(Raw.Num, isOwner: false);
         set
         {
             fixed (Mpq_t* pthis = &Raw)
@@ -582,7 +589,7 @@ public class GmpRational : IDisposable
 
     public unsafe GmpInteger Den
     {
-        get => new GmpInteger(Raw.Den, isOwner: false);
+        get => new(Raw.Den, isOwner: false);
         set
         {
             fixed (Mpq_t* pthis = &Raw)

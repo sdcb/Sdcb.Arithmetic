@@ -14,63 +14,63 @@ public class GmpFloatOpTest
     [Fact]
     public void Add()
     {
-        GmpFloat r = GmpFloat.Parse("1.5") + GmpFloat.Parse("3.25");
+        using GmpFloat r = GmpFloat.Parse("1.5") + GmpFloat.Parse("3.25");
         Assert.Equal(4.75, r.ToDouble());
     }
 
     [Fact]
     public void AddInt32()
     {
-        GmpFloat r = GmpFloat.Parse("1.5") + 100;
+        using GmpFloat r = GmpFloat.Parse("1.5") + 100;
         Assert.Equal(101.5, r.ToDouble());
     }
 
     [Fact]
     public void Subtract()
     {
-        GmpFloat r = GmpFloat.From(7.25) - GmpFloat.From(3.125);
+        using GmpFloat r = GmpFloat.From(7.25) - GmpFloat.From(3.125);
         Assert.Equal(4.125, r.ToDouble());
     }
 
     [Fact]
     public void SubtractInt32()
     {
-        GmpFloat r = GmpFloat.From(7.25) - 10;
+        using GmpFloat r = GmpFloat.From(7.25) - 10;
         Assert.Equal(-2.75, r.ToDouble());
     }
 
     [Fact]
     public void SubtractInt32Reverse()
     {
-        GmpFloat r = 10 - GmpFloat.From(7.25);
+        using GmpFloat r = 10 - GmpFloat.From(7.25);
         Assert.Equal(2.75, r.ToDouble());
     }
 
     [Fact]
     public void Multiply()
     {
-        GmpFloat r = GmpFloat.From(2.5) * GmpFloat.From(2.5);
+        using GmpFloat r = GmpFloat.From(2.5) * GmpFloat.From(2.5);
         Assert.Equal(6.25, r.ToDouble());
     }
 
     [Fact]
     public void MultiplyInt32()
     {
-        GmpFloat r = GmpFloat.From(2.5) * 2147483647;
+        using GmpFloat r = GmpFloat.From(2.5) * 2147483647;
         Assert.Equal(5368709117.5, r.ToDouble());
     }
 
     [Fact]
     public void Divide()
     {
-        GmpFloat r = GmpFloat.Parse(long.MinValue.ToString()) / GmpFloat.From(int.MinValue);
+        using GmpFloat r = GmpFloat.Parse(long.MinValue.ToString()) / GmpFloat.From(int.MinValue);
         Assert.Equal(1L << 32, r.ToDouble());
     }
 
     [Fact]
     public void DivideUInt32()
     {
-        GmpFloat r = GmpFloat.Parse((1L << 57).ToString()) / (1u << 31);
+        using GmpFloat r = GmpFloat.Parse((1L << 57).ToString()) / (1u << 31);
         _console.WriteLine(r.ToString());
         Assert.Equal(1 << 26, r.ToDouble());
     }
@@ -78,29 +78,29 @@ public class GmpFloatOpTest
     [Fact]
     public void DivideUInt32Reverse()
     {
-        GmpFloat r = 5 / GmpFloat.From(1 << 10);
+        using GmpFloat r = 5 / GmpFloat.From(1 << 10);
         Assert.Equal(0.0048828125, r.ToDouble());
     }
 
     [Fact]
     public void PowerInt32()
     {
-        GmpFloat r = GmpFloat.From(2.5) ^ 10;
+        using GmpFloat r = GmpFloat.From(2.5) ^ 10;
         Assert.Equal(9536.7431640625, r.ToDouble());
     }
 
     [Fact]
     public void Negate()
     {
-        GmpFloat r = -GmpFloat.From(2.5);
+        using GmpFloat r = -GmpFloat.From(2.5);
         Assert.Equal(-2.5, r.ToDouble());
     }
 
     [Fact]
     public void AddEasier()
     {
-        GmpFloat op1 = GmpFloat.From(1.5);
-        GmpFloat op2 = GmpFloat.From(3.25);
+        using GmpFloat op1 = GmpFloat.From(1.5);
+        using GmpFloat op2 = GmpFloat.From(3.25);
         uint precision = 64;
         Assert.Equal(4.75, GmpFloat.Add(op1, op2, precision).ToDouble());
     }
@@ -117,8 +117,8 @@ public class GmpFloatOpTest
     [Fact]
     public void SubtractEasier()
     {
-        GmpFloat op1 = GmpFloat.From(4.75);
-        GmpFloat op2 = GmpFloat.From(3.25);
+        using GmpFloat op1 = GmpFloat.From(4.75);
+        using GmpFloat op2 = GmpFloat.From(3.25);
         uint precision = 64;
         Assert.Equal(1.5, GmpFloat.Subtract(op1, op2, precision).ToDouble());
     }
@@ -126,7 +126,7 @@ public class GmpFloatOpTest
     [Fact]
     public void SubtractEasier2()
     {
-        GmpFloat op1 = GmpFloat.From(4.75);
+        using GmpFloat op1 = GmpFloat.From(4.75);
         uint op2 = 3;
         uint precision = 64;
         Assert.Equal(1.75, GmpFloat.Subtract(op1, op2, precision).ToDouble());
@@ -136,7 +136,7 @@ public class GmpFloatOpTest
     public void SubtractEasier3()
     {
         uint op1 = 7;
-        GmpFloat op2 = GmpFloat.From(4.75);
+        using GmpFloat op2 = GmpFloat.From(4.75);
         uint precision = 64;
         Assert.Equal(2.25, GmpFloat.Subtract(op1, op2, precision).ToDouble());
     }
@@ -144,8 +144,8 @@ public class GmpFloatOpTest
     [Fact]
     public void MultiplyEasier()
     {
-        GmpFloat op1 = GmpFloat.From(4.75);
-        GmpFloat op2 = GmpFloat.From(3.25);
+        using GmpFloat op1 = GmpFloat.From(4.75);
+        using GmpFloat op2 = GmpFloat.From(3.25);
         uint precision = 64;
         Assert.Equal(15.4375, GmpFloat.Multiply(op1, op2, precision).ToDouble());
     }
@@ -153,7 +153,7 @@ public class GmpFloatOpTest
     [Fact]
     public void MultiplyEasier2()
     {
-        GmpFloat op1 = GmpFloat.From(4.75);
+        using GmpFloat op1 = GmpFloat.From(4.75);
         uint op2 = 3;
         uint precision = 64;
         Assert.Equal(14.25, GmpFloat.Multiply(op1, op2, precision).ToDouble());
@@ -162,8 +162,8 @@ public class GmpFloatOpTest
     [Fact]
     public void DivideEasier()
     {
-        GmpFloat op1 = GmpFloat.From(4.75);
-        GmpFloat op2 = GmpFloat.From(3.25);
+        using GmpFloat op1 = GmpFloat.From(4.75);
+        using GmpFloat op2 = GmpFloat.From(3.25);
         uint precision = 64;
         Assert.Equal(1.4615384615384615, GmpFloat.Divide(op1, op2, precision).ToDouble());
     }
@@ -171,7 +171,7 @@ public class GmpFloatOpTest
     [Fact]
     public void DivideEasier2()
     {
-        GmpFloat op1 = GmpFloat.From(4.75);
+        using GmpFloat op1 = GmpFloat.From(4.75);
         uint op2 = 3;
         uint precision = 64;
         Assert.Equal(1.5833333333333333, GmpFloat.Divide(op1, op2, precision).ToDouble());
@@ -181,7 +181,7 @@ public class GmpFloatOpTest
     public void DivideEasier3()
     {
         uint op1 = 6;
-        GmpFloat op2 = GmpFloat.From(4.75);
+        using GmpFloat op2 = GmpFloat.From(4.75);
         uint precision = 64;
         Assert.Equal(1.263157894736842, GmpFloat.Divide(op1, op2, precision).ToDouble());
     }
@@ -189,7 +189,7 @@ public class GmpFloatOpTest
     [Fact]
     public void PowerEasier()
     {
-        GmpFloat op1 = GmpFloat.From(4.75);
+        using GmpFloat op1 = GmpFloat.From(4.75);
         uint op2 = 3;
         uint precision = 64;
         Assert.Equal(107.171875, GmpFloat.Power(op1, op2, precision).ToDouble());
@@ -198,7 +198,7 @@ public class GmpFloatOpTest
     [Fact]
     public void NegateEasier()
     {
-        GmpFloat op1 = GmpFloat.From(1.2345);
+        using GmpFloat op1 = GmpFloat.From(1.2345);
         uint precision = 64;
         Assert.Equal(-1.2345, GmpFloat.Negate(op1, precision).ToDouble());
     }
@@ -206,7 +206,7 @@ public class GmpFloatOpTest
     [Fact]
     public void SqrtEasier()
     {
-        GmpFloat op1 = GmpFloat.From(1.2345);
+        using GmpFloat op1 = GmpFloat.From(1.2345);
         uint precision = 64;
         Assert.Equal(1.1110805551354051, GmpFloat.Sqrt(op1, precision).ToDouble());
     }
@@ -226,17 +226,17 @@ public class GmpFloatOpTest
         uint precision = 64;
         Assert.Equal(1.2345, GmpFloat.Abs(op1, precision).ToDouble());
 
-        op1 = GmpFloat.From(1.2345);
+        op1.Assign(1.2345);
         Assert.Equal(1.2345, GmpFloat.Abs(op1, precision).ToDouble());
 
-        op1 = GmpFloat.From(0);
+        op1.Assign(0);
         Assert.Equal(0, GmpFloat.Abs(op1, precision).ToDouble());
     }
 
     [Fact]
     public void Mul2ExpEasier()
     {
-        GmpFloat op1 = GmpFloat.From(4.75);
+        using GmpFloat op1 = GmpFloat.From(4.75);
         uint op2 = 3;
         uint precision = 64;
         Assert.Equal(38, GmpFloat.Mul2Exp(op1, op2, precision).ToDouble());
@@ -245,9 +245,67 @@ public class GmpFloatOpTest
     [Fact]
     public void Div2ExpEasier()
     {
-        GmpFloat op1 = GmpFloat.From(4.75);
+        using GmpFloat op1 = GmpFloat.From(4.75);
         uint op2 = 3;
         uint precision = 64;
         Assert.Equal(0.59375, GmpFloat.Div2Exp(op1, op2, precision).ToDouble());
+    }
+
+    [Fact]
+    public void OperatorFromTest()
+    {
+        using GmpFloat si = -65535;
+        using GmpFloat ui = 2147483647;
+        using GmpFloat z = GmpInteger.Parse(new string('9', 999));
+        Assert.Equal(-65535, (int)si);
+        Assert.Equal(2147483647u, (uint)ui);
+        Assert.Equal(new string('9', 999), z.ToString());
+    }
+
+    [Fact]
+    public void OperatorExplicitXtoXTest()
+    {
+        {
+            using GmpInteger z = 5;
+            using GmpFloat f = (GmpFloat)z;
+            using GmpRational q = (GmpRational)z;
+        }
+        {
+            using GmpFloat f = 5;
+            using GmpInteger z = (GmpInteger)f;
+            using GmpRational q = (GmpRational)f;
+        }
+        {
+            using GmpInteger q = 5;
+            using GmpFloat f = (GmpFloat)q;
+            using GmpInteger z = (GmpInteger)q;
+        }
+    }
+
+    [Fact]
+    public void FloatToIntegerTest()
+    {
+        using GmpFloat f = 1.5;
+        using GmpInteger z = (GmpInteger)f;
+        Assert.Equal(1, z.ToInt32());
+
+        using GmpInteger z2 = GmpInteger.From(f);
+        Assert.Equal(1, z2.ToInt32());
+
+        using GmpInteger z3 = f.ToGmpInteger();
+        Assert.Equal(1, z3.ToInt32());
+    }
+
+    [Fact]
+    public void CloneTest()
+    {
+        using GmpFloat f = GmpFloat.From(3.14, 108);
+        using GmpFloat f2 = f.Clone();
+        Assert.Equal(3.14, f2.ToDouble());
+        Assert.Equal(f.Precision, f2.Precision);
+
+        f2.Assign(2.718);
+        Assert.Equal(2.718, f2.ToDouble());
+        Assert.Equal(3.14, f.ToDouble());
     }
 }

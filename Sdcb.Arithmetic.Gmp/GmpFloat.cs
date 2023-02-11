@@ -14,26 +14,23 @@ public class GmpFloat : IDisposable
     }
 
     public readonly Mpf_t Raw = new();
-    private readonly bool _isOwner;
 
     #region Initialization functions
 
-    public unsafe GmpFloat(bool isOwner = true)
+    public unsafe GmpFloat()
     {
         fixed (Mpf_t* ptr = &Raw)
         {
             GmpLib.__gmpf_init((IntPtr)ptr);
         }
-        _isOwner = isOwner;
     }
 
-    public GmpFloat(Mpf_t raw, bool isOwner = true)
+    public GmpFloat(Mpf_t raw)
     {
         Raw = raw;
-        _isOwner = isOwner;
     }
 
-    public unsafe GmpFloat(uint precision, bool isOwner = true)
+    public unsafe GmpFloat(uint precision)
     {
         fixed (Mpf_t* ptr = &Raw)
         {
@@ -46,7 +43,6 @@ public class GmpFloat : IDisposable
                 GmpLib.__gmpf_init2((IntPtr)ptr, precision);
             }
         }
-        _isOwner = isOwner;
     }
 
     internal static GmpFloat CreateWithNullablePrecision(uint? precision) => precision switch
@@ -57,6 +53,12 @@ public class GmpFloat : IDisposable
     #endregion
 
     #region Combined Initialization and Assignment Functions
+    public GmpFloat Clone()
+    {
+        GmpFloat rop = new(Precision);
+        rop.Assign(this);
+        return rop;
+    }
 
     public unsafe static GmpFloat From(int val)
     {
@@ -65,6 +67,8 @@ public class GmpFloat : IDisposable
         GmpLib.__gmpf_init_set_si((IntPtr)ptr, val);
         return new GmpFloat(raw);
     }
+
+    public static implicit operator GmpFloat(int val) => From(val);
 
     public unsafe static GmpFloat From(int val, uint precision)
     {
@@ -81,6 +85,8 @@ public class GmpFloat : IDisposable
         return new GmpFloat(raw);
     }
 
+    public static implicit operator GmpFloat(uint val) => From(val);
+
     public unsafe static GmpFloat From(uint val, uint precision)
     {
         GmpFloat f = new(precision);
@@ -95,6 +101,8 @@ public class GmpFloat : IDisposable
         GmpLib.__gmpf_init_set_d((IntPtr)ptr, val);
         return new GmpFloat(raw);
     }
+
+    public static implicit operator GmpFloat(double val) => From(val);
 
     public unsafe static GmpFloat From(double val, uint precision)
     {
@@ -119,6 +127,8 @@ public class GmpFloat : IDisposable
         f.Assign(val);
         return f;
     }
+
+    public static implicit operator GmpFloat(GmpInteger val) => From(val);
 
     public unsafe static GmpFloat Parse(string val, int @base = 10)
     {
@@ -396,6 +406,7 @@ public class GmpFloat : IDisposable
         });
     }
 
+    public GmpInteger ToGmpInteger() => GmpInteger.From(this);
     #endregion
 
     #region Arithmetic Functions
@@ -1055,7 +1066,7 @@ public class GmpFloat : IDisposable
             {
             }
 
-            if (_isOwner) Clear();
+            Clear();
             _disposed = true;
         }
     }

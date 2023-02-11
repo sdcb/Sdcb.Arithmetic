@@ -158,12 +158,25 @@ public class GmpInteger : IDisposable
         return new GmpInteger(raw);
     }
 
+    public GmpInteger Clone() => From(this);
+
+    public static unsafe GmpInteger From(GmpFloat op)
+    {
+        GmpInteger rop = new();
+        rop.Assign(op);
+        return rop;
+    }
+
+    public static explicit operator GmpInteger(GmpFloat op) => From(op);
+
     public static unsafe GmpInteger From(uint op)
     {
         Mpz_t raw = new();
         GmpLib.__gmpz_init_set_ui((IntPtr)(&raw), op);
         return new GmpInteger(raw);
     }
+
+    public static implicit operator GmpInteger(uint op) => From(op);
 
     public static unsafe GmpInteger From(int op)
     {
@@ -172,12 +185,16 @@ public class GmpInteger : IDisposable
         return new GmpInteger(raw);
     }
 
+    public static implicit operator GmpInteger(int op) => From(op);
+
     public static unsafe GmpInteger From(double op)
     {
         Mpz_t raw = new();
         GmpLib.__gmpz_init_set_d((IntPtr)(&raw), op);
         return new GmpInteger(raw);
     }
+
+    public static explicit operator GmpInteger(double op) => From(op);
 
     /// <summary>
     /// The base may vary from 2 to 62, or if base is 0, then the leading characters are used: 0x and 0X for hexadecimal, 0b and 0B for binary, 0 for octal, or decimal otherwise.
@@ -546,7 +563,6 @@ public class GmpInteger : IDisposable
     public static explicit operator uint(GmpInteger op) => op.ToUInt32();
     public static explicit operator int(GmpInteger op) => op.ToInt32();
     public static explicit operator double(GmpInteger op) => op.ToDouble();
-    public static explicit operator GmpFloat(GmpInteger op) => GmpFloat.From(op);
 
     public unsafe ExpDouble ToExpDouble()
     {

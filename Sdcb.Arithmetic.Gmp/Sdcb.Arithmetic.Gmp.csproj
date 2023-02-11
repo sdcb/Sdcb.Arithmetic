@@ -7,12 +7,15 @@
     <Nullable>enable</Nullable>
     <PackageIcon>Sdcb.Arithmetic.Gmp.png</PackageIcon>
     <Authors>sdcb</Authors>
-    <Description>A better GMP library dotnet binding</Description>
+    <Description>A modern GMP arithmetic library dotnet binding</Description>
     <PackageProjectUrl>https://github.com/sdcb/sdcb.math.gmp</PackageProjectUrl>
     
     <RepositoryUrl>https://github.com/sdcb/Sdcb.Math.Gmp.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>GMP;multi-precision;arithmetic;BigInteger;BigRational;BigInt;BigFloat;BigNum;linqpad-samples</PackageTags>
+    <PackageTags>
+      GMP;BigInteger;BigRational;BigFloat;GmpInteger;GmpRational;GmpFloat;GmpRandom;
+      multi-precision;arithmetic;linqpad-samples
+    </PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 

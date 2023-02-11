@@ -7,12 +7,15 @@
     <Nullable>enable</Nullable>
     <PackageIcon>Sdcb.Arithmetic.Mpfr.png</PackageIcon>
     <Authors>sdcb</Authors>
-    <Description>A better MPFR library dotnet binding</Description>
+    <Description>A modern MPFR arithmetic library dotnet binding</Description>
     <PackageProjectUrl>https://github.com/sdcb/sdcb.arithmetic</PackageProjectUrl>
 
     <RepositoryUrl>https://github.com/sdcb/Sdcb.Arithmetic.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>GMP;multi-precision;arithmetic;BigInteger;BigRational;BigInt;BigFloat;BigNum;linqpad-samples</PackageTags>
+    <PackageTags>
+      GMP;MPFR;BigInteger;BigRational;BigFloat;GmpInteger;GmpRational;GmpFloat;MpfrFloat;
+      linqpad-samples;multi-precision;arithmetic;
+    </PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
@@ -24,7 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sdcb.Arithmetic.Gmp\Sdcb.Arithmetic.Gmp.csproj" />
+    <ProjectReference Condition="'$(Configuration)' == 'Debug'" Include="..\Sdcb.Arithmetic.Gmp\Sdcb.Arithmetic.Gmp.csproj" />
+    <PackageReference Condition="'$(Configuration)' != 'Debug'" Include="Sdcb.Arithmetic.Gmp" Version="6.2.1-preview.7" />
   </ItemGroup>
 
 </Project>

@@ -58,8 +58,8 @@ public unsafe class MpfrFloat : IDisposable
         set => MpfrLib.mpfr_set_default_prec(value);
     }
 
-    public const int MaximalSupportedPrecision = int.MaxValue - 256;
-    public const int MinimalSupportedPrecision = 1;
+    public const int MaxSupportedPrecision = int.MaxValue - 256;
+    public const int MinSupportedPrecision = 1;
 
     /// <summary>
     /// The number of bits used to store its significand.
@@ -81,8 +81,8 @@ public unsafe class MpfrFloat : IDisposable
 
     private static void CheckPrecision(int precision)
     {
-        if (precision < 1 || precision > MaximalSupportedPrecision)
-            throw new ArgumentOutOfRangeException(nameof(Precision), $"Precision should in range of [{MinimalSupportedPrecision}..{MaximalSupportedPrecision}].");
+        if (precision < 1 || precision > MaxSupportedPrecision)
+            throw new ArgumentOutOfRangeException(nameof(Precision), $"Precision should in range of [{MinSupportedPrecision}..{MaxSupportedPrecision}].");
     }
 
     /// <remarks>Note: reset precision will clear the value.</remarks>
@@ -304,12 +304,16 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
+    public MpfrFloat Clone() => From(this, Precision);
+
     public static MpfrFloat From(uint op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
         rop.Assign(op, rounding);
         return rop;
     }
+
+    public static implicit operator MpfrFloat(uint op) => From(op);
 
     public static MpfrFloat From(int op, int? precision = null, MpfrRounding? rounding = null)
     {
@@ -318,6 +322,8 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
+    public static implicit operator MpfrFloat(int op) => From(op);
+
     public static MpfrFloat From(double op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -325,12 +331,16 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
+    public static implicit operator MpfrFloat(double op) => From(op);
+
     public static MpfrFloat From(GmpInteger op, int? precision = null, MpfrRounding? rounding = null)
     {
-        MpfrFloat rop = CreateWithNullablePrecision(precision);
+        MpfrFloat rop = new(precision ?? (int)(Math.Abs(op.Raw.Size) * GmpLib.LimbBitSize));
         rop.Assign(op, rounding);
         return rop;
     }
+
+    public static explicit operator MpfrFloat(GmpInteger op) => From(op);
 
     public static MpfrFloat From(GmpRational op, int? precision = null, MpfrRounding? rounding = null)
     {
@@ -339,12 +349,16 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
+    public static explicit operator MpfrFloat(GmpRational op) => From(op);
+
     public static MpfrFloat From(GmpFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
         rop.Assign(op, rounding);
         return rop;
     }
+
+    public static implicit operator MpfrFloat(GmpFloat op) => From(op, (int)op.Precision);
 
     /// <exception cref="FormatException" />
     public static MpfrFloat Parse(string s, int @base = 0, int? precision = null, MpfrRounding? rounding = null)
@@ -400,21 +414,21 @@ public unsafe class MpfrFloat : IDisposable
 
     public static explicit operator float(MpfrFloat op) => op.ToFloat();
 
-    public int ToInt32(MpfrRounding? rounding = null)
+    public int ToInt32(MpfrRounding rounding = MpfrRounding.ToZero)
     {
         fixed (Mpfr_t* pthis = &Raw)
         {
-            return MpfrLib.mpfr_get_si((IntPtr)pthis, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_get_si((IntPtr)pthis, rounding);
         }
     }
 
     public static explicit operator int(MpfrFloat op) => op.ToInt32();
 
-    public uint ToUInt32(MpfrRounding? rounding = null)
+    public uint ToUInt32(MpfrRounding rounding = MpfrRounding.ToZero)
     {
         fixed (Mpfr_t* pthis = &Raw)
         {
-            return MpfrLib.mpfr_get_ui((IntPtr)pthis, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_get_ui((IntPtr)pthis, rounding);
         }
     }
 
@@ -467,10 +481,9 @@ public unsafe class MpfrFloat : IDisposable
         return (rop, exp, overflowed);
     }
 
-    /// <summary>
-    /// z * 2^exp = x
-    /// </summary>
-    public int GetZ2ExpInplace(GmpInteger z)
+    /// <summary>z * 2^exp = x</summary>
+    /// <returns>2exp</returns>
+    public int GetIntegerAnd2ExpInplace(GmpInteger z)
     {
         fixed (Mpfr_t* pthis = &Raw)
         fixed (Mpz_t* pz = &z.Raw)
@@ -479,17 +492,13 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
-    /// <summary>
-    /// y * 2^exp = x
-    /// </summary>
-    public (GmpInteger z, int exp) Z2Exp
+    /// <summary>z * 2^exp = x</summary>
+    /// <returns>the integer and 2exp.</returns>
+    public (GmpInteger z, int exp) GetIntegerAnd2Exp()
     {
-        get
-        {
-            GmpInteger z = new();
-            int exp = GetZ2ExpInplace(z);
-            return (z, exp);
-        }
+        GmpInteger z = new();
+        int exp = GetIntegerAnd2ExpInplace(z);
+        return (z, exp);
     }
 
     public int ToGmpIntegerInplace(GmpInteger z, MpfrRounding? rounding = null)
@@ -501,7 +510,7 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
-    public GmpInteger ToGmpInteger(MpfrRounding? rounding = null)
+    public GmpInteger ToGmpInteger(MpfrRounding rounding = MpfrRounding.ToZero)
     {
         GmpInteger rop = new();
         ToGmpIntegerInplace(rop, rounding);
@@ -949,7 +958,7 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    public static MpfrFloat operator *(MpfrFloat op1, MpfrFloat op2) => Add(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(MpfrFloat op1, MpfrFloat op2) => Multiply(op1, op2, op1.Precision);
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
@@ -967,8 +976,8 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    public static MpfrFloat operator *(MpfrFloat op1, uint op2) => Add(op1, op2, op1.Precision);
-    public static MpfrFloat operator *(uint op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+    public static MpfrFloat operator *(MpfrFloat op1, uint op2) => Multiply(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(uint op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
@@ -986,8 +995,8 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    public static MpfrFloat operator *(MpfrFloat op1, int op2) => Add(op1, op2, op1.Precision);
-    public static MpfrFloat operator *(int op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+    public static MpfrFloat operator *(MpfrFloat op1, int op2) => Multiply(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(int op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
@@ -1005,8 +1014,8 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    public static MpfrFloat operator *(MpfrFloat op1, double op2) => Add(op1, op2, op1.Precision);
-    public static MpfrFloat operator *(double op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+    public static MpfrFloat operator *(MpfrFloat op1, double op2) => Multiply(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(double op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
@@ -1025,8 +1034,8 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    public static MpfrFloat operator *(MpfrFloat op1, GmpInteger op2) => Add(op1, op2, op1.Precision);
-    public static MpfrFloat operator *(GmpInteger op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+    public static MpfrFloat operator *(MpfrFloat op1, GmpInteger op2) => Multiply(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(GmpInteger op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
@@ -1045,8 +1054,8 @@ public unsafe class MpfrFloat : IDisposable
         return rop;
     }
 
-    public static MpfrFloat operator *(MpfrFloat op1, GmpRational op2) => Add(op1, op2, op1.Precision);
-    public static MpfrFloat operator *(GmpRational op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
+    public static MpfrFloat operator *(MpfrFloat op1, GmpRational op2) => Multiply(op1, op2, op1.Precision);
+    public static MpfrFloat operator *(GmpRational op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
     #endregion
 
     public static void SquareInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
@@ -4093,6 +4102,28 @@ public unsafe class MpfrFloat : IDisposable
         get => (MpfrErrorFlags)MpfrLib.mpfr_flags_save();
         set => MpfrLib.mpfr_flags_restore((uint)value, 0b_0011_1111);
     }
+    #endregion
+
+    #region 14. Memory Handling Functions
+    /// <summary>
+    /// Free all caches and pools used by MPFR internally (those local to the current thread and those shared by all threads).
+    /// You should call this function before terminating a thread, even if you did not call mpfr_const_* functions directly (they could have been called internally).
+    /// </summary>
+    public static void FreeCache(MpfrFreeCache way = MpfrFreeCache.Local | MpfrFreeCache.Global)
+    {
+        MpfrLib.mpfr_free_cache2(way);
+    }
+
+    /// <summary>
+    /// Free the pools used by MPFR internally.
+    /// Note: This function is automatically called after the thread-local caches are freed.
+    /// </summary>
+    public static void FreePool() => MpfrLib.mpfr_free_pool();
+
+    /// <summary>
+    /// This function should be called before calling <see cref="GmpMemory.__gmp_set_memory_functions"/>.
+    /// </summary>
+    public static void MemoryCleanup() => MpfrLib.mpfr_mp_memory_cleanup();
     #endregion
 
     #region 15. Compatibility With MPF

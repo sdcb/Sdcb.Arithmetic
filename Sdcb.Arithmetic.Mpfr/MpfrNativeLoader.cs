@@ -22,18 +22,22 @@ namespace Sdcb.Arithmetic.Mpfr
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
+                    NativeLibrary.Load("gmp-10.dll", assembly, searchPath);
                     return NativeLibrary.Load("mpfr-6.dll", assembly, searchPath);
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
+                    NativeLibrary.Load("libgmp.so.10", assembly, searchPath);
                     return NativeLibrary.Load("libmpfr.so.6", assembly, searchPath);
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
+                    NativeLibrary.Load("libgmp.10.dylib", assembly, searchPath);
                     return NativeLibrary.Load("libmpfr.6.dylib", assembly, searchPath);
                 }
                 else
                 {
+                    NativeLibrary.Load("gmp.10", assembly, searchPath);
                     return NativeLibrary.Load("mpfr.6", assembly, searchPath);
                 }
             }
