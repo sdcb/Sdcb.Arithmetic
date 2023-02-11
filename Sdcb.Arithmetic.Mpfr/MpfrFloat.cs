@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -11,7 +10,7 @@ namespace Sdcb.Arithmetic.Mpfr;
 
 public unsafe class MpfrFloat : IDisposable
 {
-    public readonly Mpfr_t Raw;
+    internal readonly Mpfr_t Raw;
 
     #region 1. Initialization Functions
     /// <summary>
@@ -26,7 +25,7 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
-    public MpfrFloat(Mpfr_t raw)
+    private MpfrFloat(Mpfr_t raw)
     {
         Raw = raw;
     }
@@ -68,7 +67,7 @@ public unsafe class MpfrFloat : IDisposable
     {
         get => Raw.Precision;
         set => RoundToPrecision(Precision, DefaultRounding);
-        }
+    }
 
     private static void CheckPrecision(int precision)
     {
@@ -4275,7 +4274,7 @@ public unsafe class MpfrFloat : IDisposable
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public record struct Mpfr_t
+internal record struct Mpfr_t
 {
     public int Precision;
     public int Sign;

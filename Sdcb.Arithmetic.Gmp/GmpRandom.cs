@@ -6,23 +6,23 @@ namespace Sdcb.Arithmetic.Gmp;
 
 public class GmpRandom : IDisposable
 {
-    public readonly GmpRandomState Raw;
+    internal readonly GmpRandomState Raw;
 
     #region Random State Initialization
 
-    public GmpRandom(GmpRandomState raw)
+    private GmpRandom(GmpRandomState raw)
     {
         Raw = raw;
         SetRandomSeed();
     }
 
-    public GmpRandom(GmpRandomState raw, uint seed)
+    private GmpRandom(GmpRandomState raw, uint seed)
     {
         Raw = raw;
         SetSeed(seed);
     }
 
-    public GmpRandom(GmpRandomState raw, GmpInteger seed)
+    private GmpRandom(GmpRandomState raw, GmpInteger seed)
     {
         Raw = raw;
         SetSeed(seed);
@@ -68,7 +68,7 @@ public class GmpRandom : IDisposable
     {
         fixed (GmpRandomState* ptr = &Raw)
         {
-            GmpLib.__gmp_randseed_ui((IntPtr)ptr, (uint)seed);
+            GmpLib.__gmp_randseed_ui((IntPtr)ptr, seed);
         }
     }
 
@@ -486,7 +486,7 @@ public class GmpRandom : IDisposable
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct GmpRandomState
+internal struct GmpRandomState
 {
     public Mpz_t Seed;
     public GmpRandomAlgorithm Algorithm;

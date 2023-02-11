@@ -7,7 +7,7 @@ namespace Sdcb.Arithmetic.Gmp;
 
 public class GmpRational : IDisposable
 {
-    public readonly Mpq_t Raw = new();
+    internal readonly Mpq_t Raw = new();
 
     #region Initialization and Assignment Functions
     public unsafe GmpRational()
@@ -18,7 +18,7 @@ public class GmpRational : IDisposable
         }
     }
 
-    public GmpRational(Mpq_t raw)
+    internal GmpRational(Mpq_t raw)
     {
         Raw = raw;
     }
@@ -603,7 +603,7 @@ public class GmpRational : IDisposable
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct Mpq_t
+internal struct Mpq_t
 {
     public Mpz_t Num, Den;
 

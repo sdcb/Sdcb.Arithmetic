@@ -13,7 +13,7 @@ public class GmpInteger : IDisposable
         set => GmpLib.__gmpf_set_default_prec(value);
     }
 
-    public readonly Mpz_t Raw = new();
+    internal readonly Mpz_t Raw = new();
     private readonly bool _isOwner;
 
     #region Initializing Integers
@@ -26,7 +26,7 @@ public class GmpInteger : IDisposable
         _isOwner = isOwner;
     }
 
-    public unsafe GmpInteger(Mpz_t raw, bool isOwner = true)
+    internal unsafe GmpInteger(Mpz_t raw, bool isOwner = true)
     {
         Raw = raw;
         _isOwner = isOwner;
@@ -2392,7 +2392,7 @@ public enum PrimePossibility
     Yes = 2,
 }
 
-public record struct Mpz_t
+internal record struct Mpz_t
 {
     public int Allocated;
     public int Size;
