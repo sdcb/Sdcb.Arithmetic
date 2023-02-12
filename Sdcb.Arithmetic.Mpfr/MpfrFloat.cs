@@ -22,6 +22,7 @@ public unsafe class MpfrFloat : IDisposable
         fixed (Mpfr_t* ptr = &Raw)
         {
             MpfrLib.mpfr_init2((IntPtr)ptr, precision);
+            MpfrLib.mpfr_set_ui((IntPtr)ptr, 0, MpfrRounding.ToEven);
         }
     }
 

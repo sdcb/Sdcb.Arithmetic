@@ -20,6 +20,13 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         }
 
         [Fact]
+        public void DefaultWithPrecisionShouldBeZero()
+        {
+            using MpfrFloat r = new(64);
+            Assert.Equal(0, r.ToDouble());
+        }
+
+        [Fact]
         public void MpfrRoundingDefault()
         {
             Assert.Equal(MpfrRounding.ToEven, MpfrFloat.DefaultRounding);
