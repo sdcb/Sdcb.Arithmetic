@@ -18,7 +18,7 @@ public class GmpRational : IDisposable
         }
     }
 
-    internal GmpRational(Mpq_t raw)
+    public GmpRational(Mpq_t raw)
     {
         Raw = raw;
     }
@@ -603,7 +603,7 @@ public class GmpRational : IDisposable
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct Mpq_t
+public struct Mpq_t
 {
     public Mpz_t Num, Den;
 

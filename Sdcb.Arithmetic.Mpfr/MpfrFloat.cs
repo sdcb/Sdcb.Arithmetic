@@ -26,7 +26,7 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
-    private MpfrFloat(Mpfr_t raw)
+    public MpfrFloat(Mpfr_t raw)
     {
         Raw = raw;
     }
@@ -4278,7 +4278,7 @@ public unsafe class MpfrFloat : IDisposable
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal record struct Mpfr_t
+public record struct Mpfr_t
 {
     public int Precision;
     public int Sign;

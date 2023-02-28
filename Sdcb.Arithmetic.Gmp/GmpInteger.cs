@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Sdcb.Arithmetic.Gmp;
 
-public class GmpInteger : IDisposable
+public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEquatable<GmpInteger>
 {
     public static uint DefaultPrecision
     {
@@ -26,7 +26,7 @@ public class GmpInteger : IDisposable
         _isOwner = isOwner;
     }
 
-    internal unsafe GmpInteger(Mpz_t raw, bool isOwner = true)
+    public GmpInteger(Mpz_t raw, bool isOwner = true)
     {
         Raw = raw;
         _isOwner = isOwner;
@@ -2016,6 +2016,29 @@ public class GmpInteger : IDisposable
         }
     }
 
+    public int CompareTo(object? obj) => obj switch
+    {
+        null => 1,
+        GmpInteger z => Compare(this, z),
+        double d => Compare(this, d),
+        int i => Compare(this, i),
+        uint ui => Compare(this, ui),
+        GmpFloat f => -GmpFloat.Compare(f, this),
+        _ => throw new ArgumentException($"obj must be GmpInteger, int, uint, double, GmpFloat"),
+    };
+
+    public int CompareTo([AllowNull] GmpInteger other) => other switch
+    {
+        null => 1,
+        _ => Compare(this, other)
+    };
+
+    public bool Equals([AllowNull] GmpInteger other) => other switch
+    {
+        null => false,
+        _ => Compare(this, other) == 0,
+    };
+
     public static bool operator ==(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) == 0;
     public static bool operator !=(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) != 0;
     public static bool operator >(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) > 0;
@@ -2392,7 +2415,7 @@ public enum PrimePossibility
     Yes = 2,
 }
 
-internal record struct Mpz_t
+public record struct Mpz_t
 {
     public int Allocated;
     public int Size;

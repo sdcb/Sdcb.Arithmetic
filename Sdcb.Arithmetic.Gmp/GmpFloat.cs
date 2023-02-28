@@ -13,7 +13,7 @@ public class GmpFloat : IDisposable
         set => GmpLib.__gmpf_set_default_prec(value);
     }
 
-    internal readonly Mpf_t Raw = new();
+    internal readonly Mpf_t Raw;
 
     #region Initialization functions
 
