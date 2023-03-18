@@ -1,4 +1,6 @@
-﻿namespace Sdcb.Arithmetic.Gmp.Tests
+﻿using System.Globalization;
+
+namespace Sdcb.Arithmetic.Gmp.Tests
 {
     public class NumberFormatterTests
     {
@@ -69,7 +71,7 @@
             // Arrange
 
             // Act
-            string actual = NumberFormatter.FormatAsGroupedInteger(isNegative, integerPart, decimalPart, decimalLength);
+            string actual = NumberFormatter.FormatAsGroupedInteger(isNegative, integerPart, decimalPart, decimalLength, NumberFormatInfo.InvariantInfo);
 
             // Assert
             Assert.Equal(expected, actual);
@@ -84,7 +86,7 @@
         {
             // Act and Assert
             Assert.ThrowsAny<ArgumentException>(() => 
-                NumberFormatter.FormatAsGroupedInteger(isNegative, integerPart, decimalPart, decimalLength));
+                NumberFormatter.FormatAsGroupedInteger(isNegative, integerPart, decimalPart, decimalLength, NumberFormatInfo.InvariantInfo));
         }
     }
 }

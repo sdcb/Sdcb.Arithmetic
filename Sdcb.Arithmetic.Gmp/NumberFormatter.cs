@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 
 namespace Sdcb.Arithmetic.Gmp
@@ -71,7 +72,7 @@ namespace Sdcb.Arithmetic.Gmp
             }
         }
 
-        public static string FormatAsGroupedInteger(bool isNegative, string integerPart, string decimalPart, int decimalLength)
+        public static string FormatAsGroupedInteger(bool isNegative, string integerPart, string decimalPart, int decimalLength, NumberFormatInfo formatInfo)
         {
             if (string.IsNullOrWhiteSpace(integerPart)) throw new ArgumentException(nameof(integerPart));
             if (decimalPart == null) throw new ArgumentNullException(nameof(decimalPart));
@@ -80,15 +81,15 @@ namespace Sdcb.Arithmetic.Gmp
 
             if (isNegative)
             {
-                sb.Append("-");
+                sb.Append(formatInfo.NegativeSign);
             }
 
             for (int i = 0; i < integerPart.Length; ++i)
             {
                 sb.Append(integerPart[i]);
-                if ((integerPart.Length - i - 1) % 3 == 0 && i != integerPart.Length - 1)
+                if ((integerPart.Length - i - 1) % formatInfo.NumberGroupSizes[0] == 0 && i != integerPart.Length - 1)
                 {
-                    sb.Append(",");
+                    sb.Append(formatInfo.NumberGroupSeparator);
                 }
             }
 
@@ -96,13 +97,13 @@ namespace Sdcb.Arithmetic.Gmp
             {
                 if (decimalPart.Length <= decimalLength)
                 {
-                    sb.Append('.');
+                    sb.Append(formatInfo.NumberDecimalSeparator);
                     sb.Append(decimalPart);
                     sb.Append('0', decimalLength - decimalPart.Length);
                 }
                 else if (decimalPart.Length > decimalLength)
                 {
-                    sb.Append('.');
+                    sb.Append(formatInfo.NumberDecimalSeparator);
                     sb.Append(decimalPart.Substring(0, decimalLength));
                 }
             }
