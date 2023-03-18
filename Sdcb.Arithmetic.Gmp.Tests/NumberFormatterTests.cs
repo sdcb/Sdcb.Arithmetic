@@ -30,6 +30,7 @@ namespace Sdcb.Arithmetic.Gmp.Tests
         [InlineData("-0012345600", 2, true, "0", "123456")]
         [InlineData("000123456000", 6, false, "123", "456")]
         [InlineData("-000123456000", 6, true, "123", "456")]
+        [InlineData("7", 4, false, "7000", "")]
         public void TestSplitNumberString(string numberString, int decimalPosition, bool expectedIsNegative, string expectedIntegerPart, string expectedDecimalPart)
         {
             DecimalStringParts result = NumberFormatter.SplitNumberString(numberString, decimalPosition);
@@ -39,13 +40,10 @@ namespace Sdcb.Arithmetic.Gmp.Tests
         }
 
         [Theory]
-        [InlineData("12.3456", 2)]
-        [InlineData("-12.3456", 2)]
-        [InlineData("12a3456", 0)]
-        [InlineData("123456", -1)]
+        [InlineData(null, 2)]
         public void TestSplitNumberString_ThrowsArgumentException(string numberString, int decimalPosition)
         {
-            Assert.Throws<ArgumentException>(() => NumberFormatter.SplitNumberString(numberString, decimalPosition));
+            Assert.Throws<ArgumentNullException>(() => NumberFormatter.SplitNumberString(numberString, decimalPosition));
         }
 
         [Theory]

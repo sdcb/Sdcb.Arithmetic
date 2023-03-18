@@ -41,10 +41,7 @@ namespace Sdcb.Arithmetic.Gmp
         /// <exception cref="ArgumentException"></exception>
         public static DecimalStringParts SplitNumberString(string numberString, int decimalPosition)
         {
-            if (numberString == null || decimalPosition < 0)
-            {
-                throw new ArgumentException("Invalid input.");
-            }
+            if (numberString == null) throw new ArgumentNullException(nameof(numberString));
 
             bool isNegative = false;
             if (numberString.StartsWith("-"))
@@ -53,9 +50,15 @@ namespace Sdcb.Arithmetic.Gmp
                 numberString = numberString.Substring(1);
             }
 
-            if (numberString.Length > 0 && !IsAllDigits(numberString))
+            if (numberString.Length < decimalPosition)
             {
-                throw new ArgumentException("Invalid input: not all characters are digits.");
+                numberString = numberString + new string('0', decimalPosition - numberString.Length);
+            }
+
+            if (decimalPosition < 0)
+            {
+                numberString = new string('0', -decimalPosition) + numberString;
+                decimalPosition = 0;
             }
 
             string integerPart = numberString.Substring(0, decimalPosition).TrimStart('0');
@@ -67,18 +70,6 @@ namespace Sdcb.Arithmetic.Gmp
             }
 
             return new (isNegative, integerPart, decimalPart);
-
-            static bool IsAllDigits(string str)
-            {
-                foreach (char c in str)
-                {
-                    if (!char.IsDigit(c))
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
         }
     }
 
@@ -109,6 +100,9 @@ namespace Sdcb.Arithmetic.Gmp
     {
         public string Format0(NumberFormatInfo formatInfo)
         {
+            if (DecimalPart == "@Inf@") return IsNegative ? formatInfo.NegativeInfinitySymbol : formatInfo.PositiveInfinitySymbol;
+            if (DecimalPart == "@NaN@") return formatInfo.NaNSymbol;
+
             StringBuilder sb = new StringBuilder((IsNegative ? 1 : 0) + IntegerPart.Length + DecimalPart.Length + 1);
 
             if (IsNegative)
@@ -124,6 +118,9 @@ namespace Sdcb.Arithmetic.Gmp
 
         public string FormatN(int decimalLength, NumberFormatInfo formatInfo)
         {
+            if (DecimalPart == "@Inf@") return IsNegative ? formatInfo.NegativeInfinitySymbol : formatInfo.PositiveInfinitySymbol;
+            if (DecimalPart == "@NaN@") return formatInfo.NaNSymbol;
+
             if (string.IsNullOrWhiteSpace(IntegerPart)) throw new ArgumentException(nameof(IntegerPart));
             if (DecimalPart == null) throw new ArgumentNullException(nameof(DecimalPart));
 
@@ -163,6 +160,9 @@ namespace Sdcb.Arithmetic.Gmp
 
         public string FormatF(int decimalLength, NumberFormatInfo formatInfo)
         {
+            if (DecimalPart == "@Inf@") return IsNegative ? formatInfo.NegativeInfinitySymbol : formatInfo.PositiveInfinitySymbol;
+            if (DecimalPart == "@NaN@") return formatInfo.NaNSymbol;
+
             if (string.IsNullOrWhiteSpace(IntegerPart)) throw new ArgumentException(nameof(IntegerPart));
             if (DecimalPart == null) throw new ArgumentNullException(nameof(DecimalPart));
 

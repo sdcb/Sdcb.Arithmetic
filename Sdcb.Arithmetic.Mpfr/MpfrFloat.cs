@@ -596,7 +596,7 @@ public unsafe class MpfrFloat : IDisposable
             }
 
             string s = Marshal.PtrToStringAnsi(ret)!;
-            return GmpFloat.ToString(s, Sign, exp);
+            return GmpFloat.ToString(s, exp);
         }
     }
 

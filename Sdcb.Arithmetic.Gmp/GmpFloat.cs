@@ -358,34 +358,15 @@ public class GmpFloat : IDisposable, IFormattable
 
     public unsafe string ToString(int @base = 10)
     {
-        const nint srcptr = 0;
-        const int digits = 0;
-        fixed (Mpf_t* ptr = &Raw)
-        {
-            int exp;
-            IntPtr ret = default;
-            try
-            {
-                ret = GmpLib.__gmpf_get_str(srcptr, (IntPtr)(&exp), @base, digits, (IntPtr)ptr);
-                if (ret == IntPtr.Zero)
-                {
-                    throw new ArgumentException($"Unable to convert BigInteger to string.");
-                }
-
-                string s = Marshal.PtrToStringAnsi(ret)!;
-                return ToString(s, Sign, exp);
-            }
-            finally
-            {
-                if (ret != IntPtr.Zero)
-                {
-                    GmpMemory.Free(ret);
-                }
-            }
-        }
+        return NumberFormatter.SplitNumberString(Prepare(@base)).Format0(Thread.CurrentThread.CurrentCulture.NumberFormat);
     }
 
-    private unsafe (string, int) Prepare10()
+    internal static string ToString(string s, int exp)
+    {
+        return NumberFormatter.SplitNumberString(s, exp).Format0(Thread.CurrentThread.CurrentCulture.NumberFormat);
+    }
+
+    private unsafe (string, int) Prepare(int @base)
     {
         const nint srcptr = 0;
         const int digits = 0;
@@ -414,46 +395,21 @@ public class GmpFloat : IDisposable, IFormattable
         }
     }
 
-    internal static string ToString(string s, int sign, int exp)
-    {
-        s = s.TrimEnd('0');
-
-        bool isNegative = sign == -1 || (s.Length > 0 && s[0] == '-');
-        string pre = isNegative ? "-" : "";
-        s = isNegative ? s[1..] : s;
-
-        return pre + (exp switch
-        {
-            > 0 => s.Length.CompareTo(exp) switch
-            {
-                > 0 => (s + new string('0', Math.Max(0, exp - s.Length + 1))) switch { var ss => ss[..exp] + "." + ss[exp..] },
-                < 0 => s + new string('0', Math.Max(0, exp - s.Length)),
-                0 => s
-            },
-            _ => s switch
-            {
-                "" => 0,
-                var x when x[0] == '@' => x[1..^1], 
-                _ => "0." + new string('0', -exp) + s
-            }
-        });
-    }
-
     public string ToString(string? format, IFormatProvider? formatProvider = null)
     {
         NumberFormatInfo numberFormat = (NumberFormatInfo)(formatProvider ?? Thread.CurrentThread.CurrentCulture).GetFormat(typeof(NumberFormatInfo))!;
 
         return format switch
         {
-            null or "" => NumberFormatter.SplitNumberString(Prepare10()).Format0(numberFormat),
+            null or "" => NumberFormatter.SplitNumberString(Prepare(10)).Format0(numberFormat),
             { Length: > 0 } x => x switch 
             {
                 [char c, .. var rest] => (type: char.ToUpperInvariant(c), len: int.TryParse(rest, out int r) ? new int?(r) : null)
             } switch
             {
-                ('N', var len) => NumberFormatter.SplitNumberString(Prepare10()).FormatN(len ?? 2, numberFormat),
-                ('F', var len) => NumberFormatter.SplitNumberString(Prepare10()).FormatF(len ?? 2, numberFormat),
-                ('E', var len) => NumberFormatter.SplitNumberString(Prepare10()).ToExpParts().FormatE(len ?? 6, numberFormat),
+                ('N', var len) => NumberFormatter.SplitNumberString(Prepare(10)).FormatN(len ?? 2, numberFormat),
+                ('F', var len) => NumberFormatter.SplitNumberString(Prepare(10)).FormatF(len ?? 2, numberFormat),
+                ('E', var len) => NumberFormatter.SplitNumberString(Prepare(10)).ToExpParts().FormatE(len ?? 6, numberFormat),
                 //('E' or 'G', var rest) c => ToStringBase10(format, numberFormat),
                 //('C', var rest) => ToStringBase10(format, numberFormat),
                 //('D', var rest) => ToStringBase10(format, numberFormat),
