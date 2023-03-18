@@ -59,7 +59,8 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
 
             int exp;
             IntPtr strptr = MpfrLib.mpfr_get_str(IntPtr.Zero, (IntPtr)(&exp), 10, 0, (IntPtr)(&s), MpfrRounding.ToNegativeInfinity);
-            Assert.Equal("2.7182818284590452353602874713526624977572470936999595749669131", GmpFloat.ToString(strptr, s.Sign, exp));
+            string str = Marshal.PtrToStringAnsi(strptr)!;
+            Assert.Equal("2.7182818284590452353602874713526624977572470936999595749669131", GmpFloat.ToString(str, s.Sign, exp));
             MpfrLib.mpfr_free_str(strptr);
             MpfrLib.mpfr_clear((IntPtr)(&s));
             MpfrLib.mpfr_clear((IntPtr)(&t));

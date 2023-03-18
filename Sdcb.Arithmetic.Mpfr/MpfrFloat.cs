@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -561,6 +562,26 @@ public unsafe class MpfrFloat : IDisposable
 
     public override string ToString() => ToString(10);
 
+    public string ToString(string format)
+    {
+        return ToString(format, CultureInfo.CurrentCulture);
+    }
+
+    public string ToString(string format, IFormatProvider formatProvider)
+    {
+        if (string.IsNullOrEmpty(format))
+        {
+            format = "G";
+        }
+
+        if (formatProvider == null)
+        {
+            formatProvider = CultureInfo.CurrentCulture;
+        }
+
+        throw new NotImplementedException();
+    }
+
     public string ToString(int @base = 10, MpfrRounding? rounding = null)
     {
         byte[] resbuf = new byte[GetMaxStringLength(Raw.Precision, @base)];
@@ -574,7 +595,8 @@ public unsafe class MpfrFloat : IDisposable
                 throw new ArgumentException($"Unable to convert {nameof(MpfrFloat)} to string.");
             }
 
-            return GmpFloat.ToString(ret, Sign, exp);
+            string s = Marshal.PtrToStringAnsi(ret)!;
+            return GmpFloat.ToString(s, Sign, exp);
         }
     }
 

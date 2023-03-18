@@ -370,7 +370,8 @@ public class GmpFloat : IDisposable
                     throw new ArgumentException($"Unable to convert BigInteger to string.");
                 }
 
-                return ToString(ret, Sign, exp);
+                string s = Marshal.PtrToStringAnsi(ret)!;
+                return ToString(s, Sign, exp);
             }
             finally
             {
@@ -382,12 +383,14 @@ public class GmpFloat : IDisposable
         }
     }
 
-    internal static string ToString(IntPtr ret, int sign, int exp)
+    internal static string ToString(string s, int sign, int exp)
     {
-        string s = Marshal.PtrToStringUTF8(ret)!.TrimEnd('0');
+        //string s = Marshal.PtrToStringUTF8(ret)!.TrimEnd('0');
+        s = s.TrimEnd('0');
 
-        string pre = sign == -1 ? "-" : "";
-        s = sign == -1 ? s[1..] : s;
+        bool isNegative = sign == -1 || s[0] == '-';
+        string pre = isNegative ? "-" : "";
+        s = isNegative ? s[1..] : s;
 
         return pre + (exp switch
         {

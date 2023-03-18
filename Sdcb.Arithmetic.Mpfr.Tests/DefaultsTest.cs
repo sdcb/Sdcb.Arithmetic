@@ -83,9 +83,10 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         [InlineData("NaN", "NaN")]
         [InlineData("-inf", "-Inf")]
         [InlineData("+iNf", "Inf")]
+        [InlineData("-0", "-0")]
         public void ToStringTest(string val, string expected)
         {
-            MpfrFloat flt = MpfrFloat.Parse(val);
+            using MpfrFloat flt = MpfrFloat.Parse(val);
             Assert.Equal(expected, flt.ToString());
         }
     }
