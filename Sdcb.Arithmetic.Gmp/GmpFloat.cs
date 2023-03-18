@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace Sdcb.Arithmetic.Gmp;
 
-public class GmpFloat : IDisposable
+public class GmpFloat : IDisposable, IFormattable
 {
     public static uint DefaultPrecision
     {
@@ -352,9 +354,9 @@ public class GmpFloat : IDisposable
 
     public static explicit operator uint(GmpFloat op) => op.ToUInt32();
 
-    public unsafe override string? ToString() => ToString(@base: 10);
+    public override string ToString() => ToString(@base: 10);
 
-    public unsafe string? ToString(int @base = 10)
+    public unsafe string ToString(int @base = 10)
     {
         const nint srcptr = 0;
         const int digits = 0;
@@ -372,6 +374,35 @@ public class GmpFloat : IDisposable
 
                 string s = Marshal.PtrToStringAnsi(ret)!;
                 return ToString(s, Sign, exp);
+            }
+            finally
+            {
+                if (ret != IntPtr.Zero)
+                {
+                    GmpMemory.Free(ret);
+                }
+            }
+        }
+    }
+
+    private unsafe (string, int) Prepare10()
+    {
+        const nint srcptr = 0;
+        const int digits = 0;
+        fixed (Mpf_t* ptr = &Raw)
+        {
+            int exp;
+            IntPtr ret = default;
+            try
+            {
+                ret = GmpLib.__gmpf_get_str(srcptr, (IntPtr)(&exp), 10, digits, (IntPtr)ptr);
+                if (ret == IntPtr.Zero)
+                {
+                    throw new ArgumentException($"Unable to convert BigInteger to string.");
+                }
+
+                string s = Marshal.PtrToStringAnsi(ret)!;
+                return (s, exp);
             }
             finally
             {
@@ -407,6 +438,38 @@ public class GmpFloat : IDisposable
             }
         });
     }
+
+    public string ToString(string? format, IFormatProvider? formatProvider = null)
+    {
+        NumberFormatInfo numberFormat = (NumberFormatInfo)(formatProvider ?? Thread.CurrentThread.CurrentCulture).GetFormat(typeof(NumberFormatInfo))!;
+
+        return format switch
+        {
+            null or "" => ToString(@base: 10),
+            { Length: > 0 } x => x switch 
+            {
+                [char c, .. var rest] => (type: char.ToUpperInvariant(c), len: int.TryParse(rest, out int r) ? new int?(r) : null)
+            } switch
+            {
+                ('N', var len) => NumberFormatter.SplitNumberString(Prepare10()).FormatN(len ?? 2, numberFormat),
+                ('F', var len) => NumberFormatter.SplitNumberString(Prepare10()).FormatF(len ?? 2, numberFormat),
+                //('E' or 'G', var rest) c => ToStringBase10(format, numberFormat),
+                //('C', var rest) => ToStringBase10(format, numberFormat),
+                //('D', var rest) => ToStringBase10(format, numberFormat),
+                //('P', var rest) => ToStringBase10(format, numberFormat),
+                //('R', var rest) => ToStringBase10(format, numberFormat),
+                //('X', var rest) => ToStringBase10(format, numberFormat),
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(format), "Supported: C, D, E, F, G, N, P, R, X"),
+        };
+    }
+
+    internal static string ToStringBase10(char type, int? length, string str, int decimalPosition, NumberFormatInfo numberFormat) => type switch
+    {
+        'N' => NumberFormatter.SplitNumberString(str, decimalPosition).FormatN(length ?? 2, numberFormat),
+        'F' => NumberFormatter.SplitNumberString(str, decimalPosition).FormatF(length ?? 2, numberFormat),
+        _ => throw new NotImplementedException(),
+    };
 
     public GmpInteger ToGmpInteger() => GmpInteger.From(this);
     #endregion

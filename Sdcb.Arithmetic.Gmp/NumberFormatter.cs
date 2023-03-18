@@ -30,9 +30,11 @@ namespace Sdcb.Arithmetic.Gmp
             return (letter, number);
         }
 
-        public static (bool isNegative, string integerPart, string decimalPart) SplitNumberString(string numberString, int decimalPosition)
+        public static DecimalStringParts SplitNumberString((string numberString, int decimalPosition) v) => SplitNumberString(v.numberString, v.decimalPosition);
+
+        public static DecimalStringParts SplitNumberString(string numberString, int decimalPosition)
         {
-            if (string.IsNullOrEmpty(numberString) || decimalPosition < 0)
+            if (numberString == null || decimalPosition < 0)
             {
                 throw new ArgumentException("Invalid input.");
             }
@@ -44,7 +46,7 @@ namespace Sdcb.Arithmetic.Gmp
                 numberString = numberString.Substring(1);
             }
 
-            if (numberString.Length == 0 || !IsAllDigits(numberString))
+            if (numberString.Length > 0 && !IsAllDigits(numberString))
             {
                 throw new ArgumentException("Invalid input: not all characters are digits.");
             }
@@ -57,7 +59,7 @@ namespace Sdcb.Arithmetic.Gmp
                 integerPart = "0";
             }
 
-            return (isNegative, integerPart, decimalPart);
+            return new (isNegative, integerPart, decimalPart);
 
             static bool IsAllDigits(string str)
             {
@@ -71,23 +73,26 @@ namespace Sdcb.Arithmetic.Gmp
                 return true;
             }
         }
+    }
 
-        public static string FormatAsGroupedInteger(bool isNegative, string integerPart, string decimalPart, int decimalLength, NumberFormatInfo formatInfo)
+    internal record struct DecimalStringParts(bool IsNegative, string IntegerPart, string DecimalPart)
+    {
+        public string FormatN(int decimalLength, NumberFormatInfo formatInfo)
         {
-            if (string.IsNullOrWhiteSpace(integerPart)) throw new ArgumentException(nameof(integerPart));
-            if (decimalPart == null) throw new ArgumentNullException(nameof(decimalPart));
+            if (string.IsNullOrWhiteSpace(IntegerPart)) throw new ArgumentException(nameof(IntegerPart));
+            if (DecimalPart == null) throw new ArgumentNullException(nameof(DecimalPart));
 
-            StringBuilder sb = new StringBuilder(1 + integerPart.Length + integerPart.Length / 3 + decimalLength + 1);
+            StringBuilder sb = new StringBuilder(1 + IntegerPart.Length + IntegerPart.Length / 3 + decimalLength + 1);
 
-            if (isNegative)
+            if (IsNegative)
             {
                 sb.Append(formatInfo.NegativeSign);
             }
 
-            for (int i = 0; i < integerPart.Length; ++i)
+            for (int i = 0; i < IntegerPart.Length; ++i)
             {
-                sb.Append(integerPart[i]);
-                if ((integerPart.Length - i - 1) % formatInfo.NumberGroupSizes[0] == 0 && i != integerPart.Length - 1)
+                sb.Append(IntegerPart[i]);
+                if ((IntegerPart.Length - i - 1) % formatInfo.NumberGroupSizes[0] == 0 && i != IntegerPart.Length - 1)
                 {
                     sb.Append(formatInfo.NumberGroupSeparator);
                 }
@@ -95,20 +100,56 @@ namespace Sdcb.Arithmetic.Gmp
 
             if (decimalLength != 0)
             {
-                if (decimalPart.Length <= decimalLength)
+                if (DecimalPart.Length <= decimalLength)
                 {
                     sb.Append(formatInfo.NumberDecimalSeparator);
-                    sb.Append(decimalPart);
-                    sb.Append('0', decimalLength - decimalPart.Length);
+                    sb.Append(DecimalPart);
+                    sb.Append('0', decimalLength - DecimalPart.Length);
                 }
-                else if (decimalPart.Length > decimalLength)
+                else if (DecimalPart.Length > decimalLength)
                 {
                     sb.Append(formatInfo.NumberDecimalSeparator);
-                    sb.Append(decimalPart.Substring(0, decimalLength));
+                    sb.Append(DecimalPart.Substring(0, decimalLength));
                 }
             }
 
             return sb.ToString();
+        }
+
+        public string FormatF(int decimalLength, NumberFormatInfo formatInfo)
+        {
+            if (string.IsNullOrWhiteSpace(IntegerPart)) throw new ArgumentException(nameof(IntegerPart));
+            if (DecimalPart == null) throw new ArgumentNullException(nameof(DecimalPart));
+
+            StringBuilder sb = new StringBuilder(1 + IntegerPart.Length + decimalLength + 1);
+
+            if (IsNegative)
+            {
+                sb.Append(formatInfo.NegativeSign);
+            }
+
+            sb.Append(IntegerPart);
+            AppendDecimalPart(decimalLength, formatInfo, sb);
+
+            return sb.ToString();
+        }
+
+        private readonly void AppendDecimalPart(int decimalLength, NumberFormatInfo formatInfo, StringBuilder sb)
+        {
+            if (decimalLength != 0)
+            {
+                if (DecimalPart.Length <= decimalLength)
+                {
+                    sb.Append(formatInfo.NumberDecimalSeparator);
+                    sb.Append(DecimalPart);
+                    sb.Append('0', decimalLength - DecimalPart.Length);
+                }
+                else if (DecimalPart.Length > decimalLength)
+                {
+                    sb.Append(formatInfo.NumberDecimalSeparator);
+                    sb.Append(DecimalPart.Substring(0, decimalLength));
+                }
+            }
         }
     }
 }

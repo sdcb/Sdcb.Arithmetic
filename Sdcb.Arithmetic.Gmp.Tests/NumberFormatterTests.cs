@@ -23,6 +23,7 @@ namespace Sdcb.Arithmetic.Gmp.Tests
         [InlineData("-123456", 2, true, "12", "3456")]
         [InlineData("123456", 0, false, "0", "123456")]
         [InlineData("-123456", 0, true, "0", "123456")]
+        [InlineData("0", 0, false, "0", "")]
         [InlineData("123456", 6, false, "123456", "")]
         [InlineData("-123456", 6, true, "123456", "")]
         [InlineData("0012345600", 2, false, "0", "123456")]
@@ -31,10 +32,10 @@ namespace Sdcb.Arithmetic.Gmp.Tests
         [InlineData("-000123456000", 6, true, "123", "456")]
         public void TestSplitNumberString(string numberString, int decimalPosition, bool expectedIsNegative, string expectedIntegerPart, string expectedDecimalPart)
         {
-            var result = NumberFormatter.SplitNumberString(numberString, decimalPosition);
-            Assert.Equal(expectedIsNegative, result.isNegative);
-            Assert.Equal(expectedIntegerPart, result.integerPart);
-            Assert.Equal(expectedDecimalPart, result.decimalPart);
+            DecimalStringParts result = NumberFormatter.SplitNumberString(numberString, decimalPosition);
+            Assert.Equal(expectedIsNegative, result.IsNegative);
+            Assert.Equal(expectedIntegerPart, result.IntegerPart);
+            Assert.Equal(expectedDecimalPart, result.DecimalPart);
         }
 
         [Theory]
@@ -69,9 +70,10 @@ namespace Sdcb.Arithmetic.Gmp.Tests
         public void TestFormatAsGroupedInteger(bool isNegative, string integerPart, string decimalPart, int decimalLength, string expected)
         {
             // Arrange
+            DecimalStringParts parts = new DecimalStringParts(isNegative, integerPart, decimalPart);
 
             // Act
-            string actual = NumberFormatter.FormatAsGroupedInteger(isNegative, integerPart, decimalPart, decimalLength, NumberFormatInfo.InvariantInfo);
+            string actual = parts.FormatN(decimalLength, NumberFormatInfo.InvariantInfo);
 
             // Assert
             Assert.Equal(expected, actual);
@@ -84,9 +86,12 @@ namespace Sdcb.Arithmetic.Gmp.Tests
         [InlineData(false, "123", null, 2)]
         public void TestFormatAsGroupedInteger_ThrowsException(bool isNegative, string integerPart, string decimalPart, int decimalLength)
         {
+            // Arrange
+            DecimalStringParts parts = new DecimalStringParts(isNegative, integerPart, decimalPart);
+
             // Act and Assert
             Assert.ThrowsAny<ArgumentException>(() => 
-                NumberFormatter.FormatAsGroupedInteger(isNegative, integerPart, decimalPart, decimalLength, NumberFormatInfo.InvariantInfo));
+                parts.FormatN(decimalLength, NumberFormatInfo.InvariantInfo));
         }
     }
 }
