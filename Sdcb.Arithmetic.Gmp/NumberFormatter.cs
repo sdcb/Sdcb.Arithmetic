@@ -32,6 +32,13 @@ namespace Sdcb.Arithmetic.Gmp
 
         public static DecimalStringParts SplitNumberString((string numberString, int decimalPosition) v) => SplitNumberString(v.numberString, v.decimalPosition);
 
+        /// <summary>
+        /// Split number into integer part, decimal part and sign.
+        /// </summary>
+        /// <param name="numberString">the whole string, might starts with '-' means negative, without decimal point</param>
+        /// <param name="decimalPosition">the decimal point position</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public static DecimalStringParts SplitNumberString(string numberString, int decimalPosition)
         {
             if (numberString == null || decimalPosition < 0)
@@ -75,8 +82,46 @@ namespace Sdcb.Arithmetic.Gmp
         }
     }
 
+    internal record struct DecimalExpParts(bool IsNegative, string IntegerPart, string DecimalPart, int Exp)
+    {
+        public string FormatE(int decimalLength, NumberFormatInfo formatInfo)
+        {
+            // 截取所需的小数位数
+            string adjustedDecimalPart = decimalLength > 0
+                ? (DecimalPart.Length > decimalLength ? DecimalPart.Substring(0, decimalLength) : DecimalPart.PadRight(decimalLength, '0'))
+                : "";
+
+            // 构建科学计数法字符串
+            string sign = IsNegative ? formatInfo.NegativeSign : "";
+            string formattedNumber = $"{sign}{IntegerPart}";
+            if (decimalLength > 0)
+            {
+                formattedNumber += $"{formatInfo.NumberDecimalSeparator}{adjustedDecimalPart}";
+            }
+            string exponentSign = Exp >= 0 ? formatInfo.PositiveSign : formatInfo.NegativeSign;
+            string formattedExponent = $"E{exponentSign}{Math.Abs(Exp):000}";
+
+            return formattedNumber + formattedExponent;
+        }
+    }
+
     internal record struct DecimalStringParts(bool IsNegative, string IntegerPart, string DecimalPart)
     {
+        public string Format0(NumberFormatInfo formatInfo)
+        {
+            StringBuilder sb = new StringBuilder((IsNegative ? 1 : 0) + IntegerPart.Length + DecimalPart.Length + 1);
+
+            if (IsNegative)
+            {
+                sb.Append(formatInfo.NegativeSign);
+            }
+
+            sb.Append(IntegerPart);
+            AppendDecimalPart(DecimalPart.Length, formatInfo, sb);
+
+            return sb.ToString();
+        }
+
         public string FormatN(int decimalLength, NumberFormatInfo formatInfo)
         {
             if (string.IsNullOrWhiteSpace(IntegerPart)) throw new ArgumentException(nameof(IntegerPart));
@@ -132,6 +177,38 @@ namespace Sdcb.Arithmetic.Gmp
             AppendDecimalPart(decimalLength, formatInfo, sb);
 
             return sb.ToString();
+        }
+
+        public DecimalExpParts ToExpParts()
+        {
+            string combinedNumber = IntegerPart + DecimalPart;
+            int exp = IntegerPart.Length - 1;
+
+            // 如果整数部分为0，需要找到第一个非零数字来计算指数
+            if (IntegerPart == "0")
+            {
+                int firstNonZeroIndex = -1;
+                for (int i = 0; i < DecimalPart.Length; i++)
+                {
+                    if (DecimalPart[i] != '0')
+                    {
+                        firstNonZeroIndex = i;
+                        break;
+                    }
+                }
+
+                if (firstNonZeroIndex != -1)
+                {
+                    exp = -firstNonZeroIndex - 1;
+                    combinedNumber = DecimalPart.Substring(firstNonZeroIndex);
+                }
+            }
+
+            // 找到整数部分的第一个非零数字
+            string integerPartInExp = combinedNumber.Substring(0, 1);
+            string decimalPartInExp = combinedNumber.Substring(1);
+
+            return new DecimalExpParts(IsNegative, integerPartInExp, decimalPartInExp, exp);
         }
 
         private readonly void AppendDecimalPart(int decimalLength, NumberFormatInfo formatInfo, StringBuilder sb)
