@@ -385,7 +385,6 @@ public class GmpFloat : IDisposable
 
     internal static string ToString(string s, int sign, int exp)
     {
-        //string s = Marshal.PtrToStringUTF8(ret)!.TrimEnd('0');
         s = s.TrimEnd('0');
 
         bool isNegative = sign == -1 || (s.Length > 0 && s[0] == '-');
