@@ -388,7 +388,7 @@ public class GmpFloat : IDisposable
         //string s = Marshal.PtrToStringUTF8(ret)!.TrimEnd('0');
         s = s.TrimEnd('0');
 
-        bool isNegative = sign == -1 || s[0] == '-';
+        bool isNegative = sign == -1 || (s.Length > 0 && s[0] == '-');
         string pre = isNegative ? "-" : "";
         s = isNegative ? s[1..] : s;
 
