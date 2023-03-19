@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace Sdcb.Arithmetic.Mpfr;
 
-public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
+public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>, IComparable, IComparable<MpfrFloat>
 {
     internal readonly Mpfr_t Raw;
 
@@ -1668,6 +1668,24 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     #region 6. Comparison Functions
     #region Compares
+    public int CompareTo(object? obj)
+    {
+        return obj switch
+        {
+            null => 1,
+            uint ui => Compare(this, ui), 
+            int i => Compare(this, i),
+            double d => Compare(this, d), 
+            GmpFloat f => Compare(this, f),
+            MpfrFloat f => Compare(this, f),
+            GmpInteger z => Compare(this, z),
+            GmpRational r => Compare(this, r),
+            _ => throw new ArgumentException("Invalid type", nameof(obj))
+        };
+    }
+
+    public int CompareTo([AllowNull] MpfrFloat other) => other is null ? 1 : Compare(this, other);
+
     public static int Compare(MpfrFloat op1, MpfrFloat op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1721,6 +1739,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
             return MpfrLib.mpfr_equal_p((IntPtr)p1, (IntPtr)p2) != 0;
         }
     }
+
+    public bool Equals(MpfrFloat? other) => (other is not null) && CompareEquals(this, other);
 
     public static bool operator ==(MpfrFloat op1, MpfrFloat op2) => CompareEquals(op1, op2);
     public static bool operator !=(MpfrFloat op1, MpfrFloat op2) => !CompareEquals(op1, op2);
@@ -4331,11 +4351,6 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
-    }
-
-    public bool Equals([AllowNull] MpfrFloat other)
-    {
-        throw new NotImplementedException();
     }
     #endregion
 }
