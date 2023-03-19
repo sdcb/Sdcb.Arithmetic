@@ -75,7 +75,7 @@ namespace Sdcb.Arithmetic.Gmp
 
     internal record struct DecimalExpParts(bool IsNegative, string IntegerPart, string DecimalPart, int Exp)
     {
-        public string FormatE(int decimalLength, NumberFormatInfo formatInfo)
+        public string FormatE(char E, int pad0, int decimalLength, NumberFormatInfo formatInfo)
         {
             // 截取所需的小数位数
             string adjustedDecimalPart = decimalLength > 0
@@ -90,7 +90,8 @@ namespace Sdcb.Arithmetic.Gmp
                 formattedNumber += $"{formatInfo.NumberDecimalSeparator}{adjustedDecimalPart}";
             }
             string exponentSign = Exp >= 0 ? formatInfo.PositiveSign : formatInfo.NegativeSign;
-            string formattedExponent = $"E{exponentSign}{Math.Abs(Exp):000}";
+            string exp = Math.Abs(Exp).ToString(new string('0', pad0));
+            string formattedExponent = $"{E}{exponentSign}{exp}";
 
             return formattedNumber + formattedExponent;
         }
@@ -177,6 +178,45 @@ namespace Sdcb.Arithmetic.Gmp
             AppendDecimalPart(decimalLength, formatInfo, sb);
 
             return sb.ToString();
+        }
+
+        public string FormatC(int decimalLength, NumberFormatInfo formatInfo)
+        {
+            if (DecimalPart == "@Inf@") return IsNegative ? formatInfo.NegativeInfinitySymbol : formatInfo.PositiveInfinitySymbol;
+            if (DecimalPart == "@NaN@") return formatInfo.NaNSymbol;
+
+            if (string.IsNullOrWhiteSpace(IntegerPart)) throw new ArgumentException(nameof(IntegerPart));
+            if (DecimalPart == null) throw new ArgumentNullException(nameof(DecimalPart));
+
+            StringBuilder sb = new StringBuilder(1 + IntegerPart.Length + IntegerPart.Length / 3 + decimalLength + 1);
+
+            sb.Append(formatInfo.CurrencySymbol);
+
+            for (int i = 0; i < IntegerPart.Length; ++i)
+            {
+                sb.Append(IntegerPart[i]);
+                if ((IntegerPart.Length - i - 1) % formatInfo.NumberGroupSizes[0] == 0 && i != IntegerPart.Length - 1)
+                {
+                    sb.Append(formatInfo.CurrencyGroupSeparator);
+                }
+            }
+
+            if (decimalLength != 0)
+            {
+                if (DecimalPart.Length <= decimalLength)
+                {
+                    sb.Append(formatInfo.CurrencyDecimalSeparator);
+                    sb.Append(DecimalPart);
+                    sb.Append('0', decimalLength - DecimalPart.Length);
+                }
+                else if (DecimalPart.Length > decimalLength)
+                {
+                    sb.Append(formatInfo.CurrencyDecimalSeparator);
+                    sb.Append(DecimalPart.Substring(0, decimalLength));
+                }
+            }
+
+            return IsNegative ? $"({sb})" : sb.ToString();
         }
 
         public DecimalExpParts ToExpParts()

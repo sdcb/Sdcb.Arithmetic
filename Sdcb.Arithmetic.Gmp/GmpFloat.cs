@@ -15,7 +15,7 @@ public class GmpFloat : IDisposable, IFormattable
         set => GmpLib.__gmpf_set_default_prec(value);
     }
 
-    internal readonly Mpf_t Raw;
+    internal Mpf_t Raw;
 
     #region Initialization functions
 
@@ -409,9 +409,14 @@ public class GmpFloat : IDisposable, IFormattable
             {
                 ('N', var len) => NumberFormatter.SplitNumberString(Prepare(10)).FormatN(len ?? 2, numberFormat),
                 ('F', var len) => NumberFormatter.SplitNumberString(Prepare(10)).FormatF(len ?? 2, numberFormat),
-                ('E', var len) => NumberFormatter.SplitNumberString(Prepare(10)).ToExpParts().FormatE(len ?? 6, numberFormat),
-                //('E' or 'G', var rest) c => ToStringBase10(format, numberFormat),
-                //('C', var rest) => ToStringBase10(format, numberFormat),
+                ('E', var len) c => NumberFormatter.SplitNumberString(Prepare(10)).ToExpParts().FormatE(c.type, 3, len ?? 6, numberFormat),
+                ('G', var len) => this switch
+                {
+                    var _ when CompareAbs(this, 1e-5) < 0 || CompareAbs(this, 1e16) > 0 
+                        => NumberFormatter.SplitNumberString(Prepare(10)).ToExpParts().FormatE('e', 2, len ?? 6, numberFormat),
+                    _ => NumberFormatter.SplitNumberString(Prepare(10)).FormatF(len ?? 2, numberFormat), 
+                },
+                //('C', var len) => NumberFormatter.SplitNumberString(Prepare(10)).FormatC(len ?? 2, numberFormat),
                 //('D', var rest) => ToStringBase10(format, numberFormat),
                 //('P', var rest) => ToStringBase10(format, numberFormat),
                 //('R', var rest) => ToStringBase10(format, numberFormat),
@@ -419,6 +424,20 @@ public class GmpFloat : IDisposable, IFormattable
             },
             _ => throw new ArgumentOutOfRangeException(nameof(format), "Supported: C, D, E, F, G, N, P, R, X"),
         };
+    }
+
+    public static int CompareAbs(GmpFloat op1, double op2)
+    {
+        int raw = op1.Raw.Size;
+        try
+        {            
+            op1.Raw.Size = Math.Abs(op1.Raw.Size);
+            return Compare(op1, op2);
+        }
+        finally
+        {
+            op1.Raw.Size = raw;
+        }
     }
 
     public GmpInteger ToGmpInteger() => GmpInteger.From(this);

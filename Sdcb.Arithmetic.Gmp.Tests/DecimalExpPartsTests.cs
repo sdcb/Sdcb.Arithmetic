@@ -24,7 +24,7 @@ namespace Sdcb.Arithmetic.Gmp.Tests
             var formatInfo = CultureInfo.InvariantCulture.NumberFormat;
 
             // Act
-            string result = decimalExpParts.FormatE(decimalLength, formatInfo);
+            string result = decimalExpParts.FormatE('E', 3, decimalLength, formatInfo);
 
             // Assert
             Assert.Equal(expectedResult, result);
