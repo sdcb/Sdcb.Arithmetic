@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace Sdcb.Arithmetic.Gmp;
 
-public class GmpFloat : IDisposable, IFormattable
+public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, IComparable, IComparable<GmpFloat>
 {
     public static uint DefaultPrecision
     {
@@ -768,6 +768,30 @@ public class GmpFloat : IDisposable, IFormattable
     #endregion
 
     #region Comparison Functions
+    public bool Equals([AllowNull] GmpFloat other)
+    {
+        return other is not null && Compare(this, other) == 0;
+    }
+
+    public int CompareTo(object? obj)
+    {
+        return obj switch
+        {
+            null => 1,
+            uint ui => Compare(this, ui),
+            int i => Compare(this, i),
+            double d => Compare(this, d),
+            GmpFloat f => Compare(this, f),
+            GmpInteger z => Compare(this, z),
+            _ => throw new ArgumentException("Invalid type", nameof(obj))
+        };
+    }
+
+    public int CompareTo([AllowNull] GmpFloat other)
+    {
+        return other is null ? 1 : Compare(this, other);
+    }
+
     /// <summary>
     /// Compare op1 and op2. Return a positive value if op1 > op2, zero if op1 = op2, and a negative value if op1 < op2.
     /// </summary>
