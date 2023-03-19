@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Sdcb.Arithmetic.Gmp;
 
-public class GmpRational : IDisposable
+public class GmpRational : IDisposable, IComparable, IComparable<GmpInteger>, IEquatable<GmpInteger>
 {
     internal readonly Mpq_t Raw = new();
 
@@ -487,6 +487,29 @@ public class GmpRational : IDisposable
     #endregion
 
     #region Comparison Functions
+    public bool Equals([AllowNull] GmpInteger other)
+    {
+        return other is not null && Compare(this, other) == 0;
+    }
+
+    public int CompareTo(object? obj)
+    {
+        return obj switch
+        {
+            null => 1,
+            GmpInteger z => Compare(this, z),
+            int i => Compare(this, i),
+            uint ui => Compare(this, ui),
+            GmpRational r => Compare(this, r), 
+            _ => throw new ArgumentException($"obj type must be null, int, uint, GmpInteger, GmpRational"),
+        };
+    }
+
+    public int CompareTo([AllowNull] GmpInteger other)
+    {
+        return other is null ? 1 : Compare(this, other);
+    }
+
     /// <summary>
     /// <para>Compare op1 and op2. Return a positive value if op1 &gt; op2, zero if op1 = op2, and a negative value if op1 &lt; op2.</para>
     /// <para>To determine if two rationals are equal, mpq_equal is faster than mpq_cmp.</para>
