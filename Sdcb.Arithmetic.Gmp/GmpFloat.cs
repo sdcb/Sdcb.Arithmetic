@@ -399,6 +399,7 @@ public class GmpFloat : IDisposable, IFormattable
     {
         NumberFormatInfo numberFormat = (NumberFormatInfo)(formatProvider ?? Thread.CurrentThread.CurrentCulture).GetFormat(typeof(NumberFormatInfo))!;
 
+#pragma warning disable CS8509 // switch 表达式不会处理属于其输入类型的所有可能值(它并非详尽无遗)。
         return format switch
         {
             null or "" => Prepare(10).SplitNumberString().Format0(numberFormat),
@@ -422,8 +423,9 @@ public class GmpFloat : IDisposable, IFormattable
                 //('R', var rest) => ToStringBase10(format, numberFormat),
                 //('X', var rest) => ToStringBase10(format, numberFormat),
             },
-            _ => throw new ArgumentOutOfRangeException(nameof(format), "Supported: C, D, E, F, G, N, P, R, X"),
+            _ => throw new ArgumentOutOfRangeException(nameof(format), "Supported: N, F, E, G"),
         };
+#pragma warning restore CS8509 // switch 表达式不会处理属于其输入类型的所有可能值(它并非详尽无遗)。
     }
 
     public static int CompareAbs(GmpFloat op1, double op2)

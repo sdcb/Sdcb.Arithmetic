@@ -6,10 +6,11 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace Sdcb.Arithmetic.Mpfr;
 
-public unsafe class MpfrFloat : IDisposable
+public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 {
     internal readonly Mpfr_t Raw;
 
@@ -560,26 +561,44 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
-    public override string ToString() => ToString(10);
+    public override string ToString() => ToString(format: null);
 
-    public string ToString(string format)
+    public string ToString(string? format)
     {
         return ToString(format, CultureInfo.CurrentCulture);
     }
 
-    public string ToString(string format, IFormatProvider formatProvider)
+    public string ToString(string? format, IFormatProvider? formatProvider = null)
     {
-        if (string.IsNullOrEmpty(format))
-        {
-            format = "G";
-        }
+        NumberFormatInfo numberFormat = (NumberFormatInfo)(formatProvider ?? Thread.CurrentThread.CurrentCulture).GetFormat(typeof(NumberFormatInfo))!;
 
-        if (formatProvider == null)
+#pragma warning disable CS8509 // switch 表达式不会处理属于其输入类型的所有可能值(它并非详尽无遗)。
+        return format switch
         {
-            formatProvider = CultureInfo.CurrentCulture;
-        }
-
-        throw new NotImplementedException();
+            null or "" => Prepare(10).SplitNumberString().Format0(numberFormat),
+            { Length: > 0 } x => x switch
+            {
+                [char c, .. var rest] => (type: char.ToUpperInvariant(c), len: int.TryParse(rest, out int r) ? new int?(r) : null)
+            } switch
+            {
+                ('N', var len) => Prepare(10).SplitNumberString().FormatN(len ?? 2, numberFormat),
+                ('F', var len) => Prepare(10).SplitNumberString().FormatF(len ?? 2, numberFormat),
+                ('E', var len) c => Prepare(10).SplitNumberString().ToExpParts().FormatE(c.type, 3, len ?? 6, numberFormat),
+                ('G', var len) => this switch
+                {
+                    var _ when CompareAbs(this, 1e-5) < 0 || CompareAbs(this, 1e16) > 0
+                        => Prepare(10).SplitNumberString().ToExpParts().FormatE('e', 2, len ?? 6, numberFormat),
+                    _ => Prepare(10).SplitNumberString().FormatF(len ?? 2, numberFormat),
+                },
+                //('C', var len) => NumberFormatter.SplitNumberString(Prepare(10)).FormatC(len ?? 2, numberFormat),
+                //('D', var rest) => ToStringBase10(format, numberFormat),
+                //('P', var rest) => ToStringBase10(format, numberFormat),
+                //('R', var rest) => ToStringBase10(format, numberFormat),
+                //('X', var rest) => ToStringBase10(format, numberFormat),
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(format), "Supported: N, F, E, G"),
+        };
+#pragma warning restore CS8509 // switch 表达式不会处理属于其输入类型的所有可能值(它并非详尽无遗)。
     }
 
     public string ToString(int @base = 10, MpfrRounding? rounding = null)
@@ -597,6 +616,23 @@ public unsafe class MpfrFloat : IDisposable
 
             string s = Marshal.PtrToStringAnsi(ret)!;
             return GmpFloat.ToString(s, exp);
+        }
+    }
+
+    private unsafe DecimalNumberString Prepare(int @base = 10, MpfrRounding? rounding = null)
+    {
+        byte[] resbuf = new byte[GetMaxStringLength(Raw.Precision, @base)];
+        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* srcptr = &resbuf[0])
+        {
+            int exp;
+            IntPtr ret = MpfrLib.mpfr_get_str((IntPtr)srcptr, (IntPtr)(&exp), @base, resbuf.Length, (IntPtr)pthis, rounding ?? DefaultRounding);
+            if (ret == IntPtr.Zero)
+            {
+                throw new ArgumentException($"Unable to convert {nameof(MpfrFloat)} to string.");
+            }
+
+            return new(Marshal.PtrToStringAnsi(ret)!, exp);
         }
     }
 
@@ -4295,6 +4331,11 @@ public unsafe class MpfrFloat : IDisposable
         // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+
+    public bool Equals([AllowNull] MpfrFloat other)
+    {
+        throw new NotImplementedException();
     }
     #endregion
 }
