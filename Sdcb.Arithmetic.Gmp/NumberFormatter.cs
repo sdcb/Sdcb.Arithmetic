@@ -24,14 +24,15 @@ namespace Sdcb.Arithmetic.Gmp
                 {
                     endIndex++;
                 }
-                number = int.Parse(input.Substring(startIndex, endIndex - startIndex));
+                number = int.Parse(input[startIndex..endIndex]);
             }
 
             return (letter, number);
         }
+    }
 
-        public static DecimalStringParts SplitNumberString((string numberString, int decimalPosition) v) => SplitNumberString(v.numberString, v.decimalPosition);
-
+    internal record struct DecimalNumberString(string NumberString, int DecimalPosition)
+    {
         /// <summary>
         /// Split number into integer part, decimal part and sign.
         /// </summary>
@@ -39,37 +40,37 @@ namespace Sdcb.Arithmetic.Gmp
         /// <param name="decimalPosition">the decimal point position</param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public static DecimalStringParts SplitNumberString(string numberString, int decimalPosition)
+        public DecimalStringParts SplitNumberString()
         {
-            if (numberString == null) throw new ArgumentNullException(nameof(numberString));
+            if (NumberString == null) throw new ArgumentNullException(nameof(DecimalPosition));
 
             bool isNegative = false;
-            if (numberString.StartsWith("-"))
+            if (NumberString.StartsWith("-"))
             {
                 isNegative = true;
-                numberString = numberString.Substring(1);
+                NumberString = NumberString[1..];
             }
 
-            if (numberString.Length < decimalPosition)
+            if (NumberString.Length < DecimalPosition)
             {
-                numberString = numberString + new string('0', decimalPosition - numberString.Length);
+                NumberString += new string('0', DecimalPosition - NumberString.Length);
             }
 
-            if (decimalPosition < 0)
+            if (DecimalPosition < 0)
             {
-                numberString = new string('0', -decimalPosition) + numberString;
-                decimalPosition = 0;
+                NumberString = new string('0', -DecimalPosition) + NumberString;
+                DecimalPosition = 0;
             }
 
-            string integerPart = numberString.Substring(0, decimalPosition).TrimStart('0');
-            string decimalPart = numberString.Substring(decimalPosition).TrimEnd('0');
+            string integerPart = NumberString[..DecimalPosition].TrimStart('0');
+            string decimalPart = NumberString[DecimalPosition..].TrimEnd('0');
 
             if (integerPart.Length == 0)
             {
                 integerPart = "0";
             }
 
-            return new (isNegative, integerPart, decimalPart);
+            return new(isNegative, integerPart, decimalPart);
         }
     }
 
@@ -79,7 +80,7 @@ namespace Sdcb.Arithmetic.Gmp
         {
             // 截取所需的小数位数
             string adjustedDecimalPart = decimalLength > 0
-                ? (DecimalPart.Length > decimalLength ? DecimalPart.Substring(0, decimalLength) : DecimalPart.PadRight(decimalLength, '0'))
+                ? (DecimalPart.Length > decimalLength ? DecimalPart[..decimalLength] : DecimalPart.PadRight(decimalLength, '0'))
                 : "";
 
             // 构建科学计数法字符串
@@ -104,7 +105,7 @@ namespace Sdcb.Arithmetic.Gmp
             if (DecimalPart == "@Inf@") return IsNegative ? formatInfo.NegativeInfinitySymbol : formatInfo.PositiveInfinitySymbol;
             if (DecimalPart == "@NaN@") return formatInfo.NaNSymbol;
 
-            StringBuilder sb = new StringBuilder((IsNegative ? 1 : 0) + IntegerPart.Length + DecimalPart.Length + 1);
+            StringBuilder sb = new((IsNegative ? 1 : 0) + IntegerPart.Length + DecimalPart.Length + 1);
 
             if (IsNegative)
             {
@@ -125,7 +126,7 @@ namespace Sdcb.Arithmetic.Gmp
             if (string.IsNullOrWhiteSpace(IntegerPart)) throw new ArgumentException(nameof(IntegerPart));
             if (DecimalPart == null) throw new ArgumentNullException(nameof(DecimalPart));
 
-            StringBuilder sb = new StringBuilder(1 + IntegerPart.Length + IntegerPart.Length / 3 + decimalLength + 1);
+            StringBuilder sb = new(1 + IntegerPart.Length + IntegerPart.Length / 3 + decimalLength + 1);
 
             if (IsNegative)
             {
@@ -152,7 +153,7 @@ namespace Sdcb.Arithmetic.Gmp
                 else if (DecimalPart.Length > decimalLength)
                 {
                     sb.Append(formatInfo.NumberDecimalSeparator);
-                    sb.Append(DecimalPart.Substring(0, decimalLength));
+                    sb.Append(DecimalPart[..decimalLength]);
                 }
             }
 
@@ -167,7 +168,7 @@ namespace Sdcb.Arithmetic.Gmp
             if (string.IsNullOrWhiteSpace(IntegerPart)) throw new ArgumentException(nameof(IntegerPart));
             if (DecimalPart == null) throw new ArgumentNullException(nameof(DecimalPart));
 
-            StringBuilder sb = new StringBuilder(1 + IntegerPart.Length + decimalLength + 1);
+            StringBuilder sb = new(1 + IntegerPart.Length + decimalLength + 1);
 
             if (IsNegative)
             {
@@ -188,7 +189,7 @@ namespace Sdcb.Arithmetic.Gmp
             if (string.IsNullOrWhiteSpace(IntegerPart)) throw new ArgumentException(nameof(IntegerPart));
             if (DecimalPart == null) throw new ArgumentNullException(nameof(DecimalPart));
 
-            StringBuilder sb = new StringBuilder(1 + IntegerPart.Length + IntegerPart.Length / 3 + decimalLength + 1);
+            StringBuilder sb = new(1 + IntegerPart.Length + IntegerPart.Length / 3 + decimalLength + 1);
 
             sb.Append(formatInfo.CurrencySymbol);
 
@@ -212,7 +213,7 @@ namespace Sdcb.Arithmetic.Gmp
                 else if (DecimalPart.Length > decimalLength)
                 {
                     sb.Append(formatInfo.CurrencyDecimalSeparator);
-                    sb.Append(DecimalPart.Substring(0, decimalLength));
+                    sb.Append(DecimalPart[..decimalLength]);
                 }
             }
 
@@ -240,13 +241,13 @@ namespace Sdcb.Arithmetic.Gmp
                 if (firstNonZeroIndex != -1)
                 {
                     exp = -firstNonZeroIndex - 1;
-                    combinedNumber = DecimalPart.Substring(firstNonZeroIndex);
+                    combinedNumber = DecimalPart[firstNonZeroIndex..];
                 }
             }
 
             // 找到整数部分的第一个非零数字
-            string integerPartInExp = combinedNumber.Substring(0, 1);
-            string decimalPartInExp = combinedNumber.Substring(1);
+            string integerPartInExp = combinedNumber[..1];
+            string decimalPartInExp = combinedNumber[1..];
 
             return new DecimalExpParts(IsNegative, integerPartInExp, decimalPartInExp, exp);
         }
@@ -264,7 +265,7 @@ namespace Sdcb.Arithmetic.Gmp
                 else if (DecimalPart.Length > decimalLength)
                 {
                     sb.Append(formatInfo.NumberDecimalSeparator);
-                    sb.Append(DecimalPart.Substring(0, decimalLength));
+                    sb.Append(DecimalPart[..decimalLength]);
                 }
             }
         }

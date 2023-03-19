@@ -358,15 +358,15 @@ public class GmpFloat : IDisposable, IFormattable
 
     public unsafe string ToString(int @base = 10)
     {
-        return NumberFormatter.SplitNumberString(Prepare(@base)).Format0(Thread.CurrentThread.CurrentCulture.NumberFormat);
+        return Prepare(@base).SplitNumberString().Format0(Thread.CurrentThread.CurrentCulture.NumberFormat);
     }
 
     internal static string ToString(string s, int exp)
     {
-        return NumberFormatter.SplitNumberString(s, exp).Format0(Thread.CurrentThread.CurrentCulture.NumberFormat);
+        return new DecimalNumberString(s, exp).SplitNumberString().Format0(Thread.CurrentThread.CurrentCulture.NumberFormat);
     }
 
-    private unsafe (string, int) Prepare(int @base)
+    private unsafe DecimalNumberString Prepare(int @base)
     {
         const nint srcptr = 0;
         const int digits = 0;
@@ -383,7 +383,7 @@ public class GmpFloat : IDisposable, IFormattable
                 }
 
                 string s = Marshal.PtrToStringAnsi(ret)!;
-                return (s, exp);
+                return new(s, exp);
             }
             finally
             {
@@ -401,20 +401,20 @@ public class GmpFloat : IDisposable, IFormattable
 
         return format switch
         {
-            null or "" => NumberFormatter.SplitNumberString(Prepare(10)).Format0(numberFormat),
-            { Length: > 0 } x => x switch 
+            null or "" => Prepare(10).SplitNumberString().Format0(numberFormat),
+            { Length: > 0 } x => x switch
             {
                 [char c, .. var rest] => (type: char.ToUpperInvariant(c), len: int.TryParse(rest, out int r) ? new int?(r) : null)
             } switch
             {
-                ('N', var len) => NumberFormatter.SplitNumberString(Prepare(10)).FormatN(len ?? 2, numberFormat),
-                ('F', var len) => NumberFormatter.SplitNumberString(Prepare(10)).FormatF(len ?? 2, numberFormat),
-                ('E', var len) c => NumberFormatter.SplitNumberString(Prepare(10)).ToExpParts().FormatE(c.type, 3, len ?? 6, numberFormat),
+                ('N', var len) => Prepare(10).SplitNumberString().FormatN(len ?? 2, numberFormat),
+                ('F', var len) => Prepare(10).SplitNumberString().FormatF(len ?? 2, numberFormat),
+                ('E', var len) c => Prepare(10).SplitNumberString().ToExpParts().FormatE(c.type, 3, len ?? 6, numberFormat),
                 ('G', var len) => this switch
                 {
-                    var _ when CompareAbs(this, 1e-5) < 0 || CompareAbs(this, 1e16) > 0 
-                        => NumberFormatter.SplitNumberString(Prepare(10)).ToExpParts().FormatE('e', 2, len ?? 6, numberFormat),
-                    _ => NumberFormatter.SplitNumberString(Prepare(10)).FormatF(len ?? 2, numberFormat), 
+                    var _ when CompareAbs(this, 1e-5) < 0 || CompareAbs(this, 1e16) > 0
+                        => Prepare(10).SplitNumberString().ToExpParts().FormatE('e', 2, len ?? 6, numberFormat),
+                    _ => Prepare(10).SplitNumberString().FormatF(len ?? 2, numberFormat),
                 },
                 //('C', var len) => NumberFormatter.SplitNumberString(Prepare(10)).FormatC(len ?? 2, numberFormat),
                 //('D', var rest) => ToStringBase10(format, numberFormat),
@@ -430,7 +430,7 @@ public class GmpFloat : IDisposable, IFormattable
     {
         int raw = op1.Raw.Size;
         try
-        {            
+        {
             op1.Raw.Size = Math.Abs(op1.Raw.Size);
             return Compare(op1, op2);
         }
