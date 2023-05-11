@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{974528A9
 		build\01-build-native.linq = build\01-build-native.linq
 		build\02-build-packages.linq = build\02-build-packages.linq
 		build\03-publish-proget-nuget.linq = build\03-publish-proget-nuget.linq
+		build\04-parse-code.linq = build\04-parse-code.linq
 		build\icon.png = build\icon.png
 		build\Sdcb.Arithmetic.Gmp.runtime.nuspec = build\Sdcb.Arithmetic.Gmp.runtime.nuspec
 		build\Sdcb.Arithmetic.Gmp.runtime.props = build\Sdcb.Arithmetic.Gmp.runtime.props
@@ -23,9 +24,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决�
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdcb.Arithmetic.Mpfr", "Sdcb.Arithmetic.Mpfr\Sdcb.Arithmetic.Mpfr.csproj", "{81B70A39-36EE-4A51-B89A-3B685A3B5E0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Arithmetic.Mpfr", "Sdcb.Arithmetic.Mpfr\Sdcb.Arithmetic.Mpfr.csproj", "{81B70A39-36EE-4A51-B89A-3B685A3B5E0C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdcb.Arithmetic.Mpfr.Tests", "Sdcb.Arithmetic.Mpfr.Tests\Sdcb.Arithmetic.Mpfr.Tests.csproj", "{6BEB1651-ED6A-4D7E-B1C1-CF2F06B41DBF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Arithmetic.Mpfr.Tests", "Sdcb.Arithmetic.Mpfr.Tests\Sdcb.Arithmetic.Mpfr.Tests.csproj", "{6BEB1651-ED6A-4D7E-B1C1-CF2F06B41DBF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
