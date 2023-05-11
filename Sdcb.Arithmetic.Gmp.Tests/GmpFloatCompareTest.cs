@@ -59,7 +59,7 @@ public class GmpFloatCompareTest
     [Fact]
     public void EqualsNullTest()
     {
-        GmpFloat equals = new GmpFloat();
+        using GmpFloat equals = new GmpFloat();
         Assert.False(equals.Equals(null));
     }
 
@@ -67,7 +67,7 @@ public class GmpFloatCompareTest
     [InlineData(3.14)]
     public void EqualsFloatAndDoubleTest(double val)
     {
-        GmpFloat equals = GmpFloat.From(val);
+        using GmpFloat equals = GmpFloat.From(val);
         Assert.True(equals.Equals(GmpFloat.From(val)));
     }
 
@@ -76,7 +76,7 @@ public class GmpFloatCompareTest
     [InlineData(3.14)]
     public void EqualsIntegerAndIntTest(double val)
     {
-        GmpInteger equals = GmpInteger.From(val);
+        using GmpInteger equals = GmpInteger.From(val);
         Assert.True(equals.Equals(GmpInteger.From(val)));
         Assert.True(equals.Equals((int)val));
         Assert.True(equals.Equals((uint)val));
@@ -87,7 +87,7 @@ public class GmpFloatCompareTest
     [InlineData("233")]
     public void EqualsStringTest(string val)
     {
-        GmpFloat equals = GmpFloat.Parse(val);
+        using GmpFloat equals = GmpFloat.Parse(val);
         Assert.False(equals.Equals(val));
     }
 
@@ -307,7 +307,7 @@ public class GmpFloatCompareTest
     [InlineData(80, 100, 0.25)]
     public void RelDiffInplaceTest(double op1, double op2, double check)
     {
-        GmpFloat rop = new GmpFloat();
+        using GmpFloat rop = new GmpFloat();
         GmpFloat.RelDiffInplace(rop, GmpFloat.From(op1), GmpFloat.From(op2));
         double res = Math.Abs((double)rop) - check;
         Assert.True(Math.Abs(res) < 0.000001);
@@ -319,7 +319,7 @@ public class GmpFloatCompareTest
     [InlineData(80, 100, 0.25)]
     public void RelDiffTest(double op1, double op2, double check)
     {
-        GmpFloat res = GmpFloat.RelDiff(GmpFloat.From(op1), GmpFloat.From(op2));
+        using GmpFloat res = GmpFloat.RelDiff(GmpFloat.From(op1), GmpFloat.From(op2));
         double resAbs = System.Math.Abs((double)res) - check;
         Assert.True(System.Math.Abs(resAbs) < 0.000001);
     }
@@ -330,10 +330,22 @@ public class GmpFloatCompareTest
     [InlineData("0", 0)]
     public void SignTest(string val, int expectedValue)
     {
-        GmpFloat f = GmpFloat.Parse(val);
+        using GmpFloat f = GmpFloat.Parse(val);
         Assert.Equal(expectedValue, f.Sign);
     }
 
-
-
+    [Theory]
+    [InlineData(3.0, 2.0, 1)]
+    [InlineData(-3.0, 2.0, 1)]
+    [InlineData(1.5, 3.0, -1)]
+    [InlineData(-1.5, 3.0, -1)]
+    [InlineData(2.5, 2.5, 0)]
+    [InlineData(-2.5, 2.5, 0)]
+    [InlineData(0.0, 0.0, 0)]
+    public void TestCompareAbs(double op1, double op2, int expected)
+    {
+        using GmpFloat f = GmpFloat.From(op1);
+        int actuall = GmpFloat.CompareAbs(op1, op2);
+        Assert.Equal(expected, actuall);
+    }
 }

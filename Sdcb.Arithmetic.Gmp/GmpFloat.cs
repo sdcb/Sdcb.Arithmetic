@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace Sdcb.Arithmetic.Gmp;
 
-public class GmpFloat : IDisposable
+public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, IComparable, IComparable<GmpFloat>
 {
     public static uint DefaultPrecision
     {
@@ -13,7 +15,7 @@ public class GmpFloat : IDisposable
         set => GmpLib.__gmpf_set_default_prec(value);
     }
 
-    internal readonly Mpf_t Raw;
+    internal Mpf_t Raw;
 
     #region Initialization functions
 
@@ -352,9 +354,19 @@ public class GmpFloat : IDisposable
 
     public static explicit operator uint(GmpFloat op) => op.ToUInt32();
 
-    public unsafe override string? ToString() => ToString(@base: 10);
+    public override string ToString() => ToString(format: null);
 
-    public unsafe string? ToString(int @base = 10)
+    public unsafe string ToString(int @base = 10)
+    {
+        return Prepare(@base).SplitNumberString().Format0(Thread.CurrentThread.CurrentCulture.NumberFormat);
+    }
+
+    internal static string ToString(string s, int exp)
+    {
+        return new DecimalNumberString(s, exp).SplitNumberString().Format0(Thread.CurrentThread.CurrentCulture.NumberFormat);
+    }
+
+    private unsafe DecimalNumberString Prepare(int @base)
     {
         const nint srcptr = 0;
         const int digits = 0;
@@ -364,13 +376,14 @@ public class GmpFloat : IDisposable
             IntPtr ret = default;
             try
             {
-                ret = GmpLib.__gmpf_get_str(srcptr, (IntPtr)(&exp), @base, digits, (IntPtr)ptr);
+                ret = GmpLib.__gmpf_get_str(srcptr, (IntPtr)(&exp), 10, digits, (IntPtr)ptr);
                 if (ret == IntPtr.Zero)
                 {
                     throw new ArgumentException($"Unable to convert BigInteger to string.");
                 }
 
-                return ToString(ret, Sign, exp);
+                string s = Marshal.PtrToStringAnsi(ret)!;
+                return new(s, exp);
             }
             finally
             {
@@ -382,28 +395,51 @@ public class GmpFloat : IDisposable
         }
     }
 
-    internal static string ToString(IntPtr ret, int sign, int exp)
+    public string ToString(string? format, IFormatProvider? formatProvider = null)
     {
-        string s = Marshal.PtrToStringUTF8(ret)!.TrimEnd('0');
+        NumberFormatInfo numberFormat = (NumberFormatInfo)(formatProvider ?? Thread.CurrentThread.CurrentCulture).GetFormat(typeof(NumberFormatInfo))!;
 
-        string pre = sign == -1 ? "-" : "";
-        s = sign == -1 ? s[1..] : s;
-
-        return pre + (exp switch
+#pragma warning disable CS8509 // switch 表达式不会处理属于其输入类型的所有可能值(它并非详尽无遗)。
+        return format switch
         {
-            > 0 => s.Length.CompareTo(exp) switch
+            null or "" => Prepare(10).SplitNumberString().Format0(numberFormat),
+            { Length: > 0 } x => x switch
             {
-                > 0 => (s + new string('0', Math.Max(0, exp - s.Length + 1))) switch { var ss => ss[..exp] + "." + ss[exp..] },
-                < 0 => s + new string('0', Math.Max(0, exp - s.Length)),
-                0 => s
+                [char c, .. var rest] => (type: char.ToUpperInvariant(c), len: int.TryParse(rest, out int r) ? new int?(r) : null)
+            } switch
+            {
+                ('N', var len) => Prepare(10).SplitNumberString().FormatN(len ?? 2, numberFormat),
+                ('F', var len) => Prepare(10).SplitNumberString().FormatF(len ?? 2, numberFormat),
+                ('E', var len) c => Prepare(10).SplitNumberString().ToExpParts().FormatE(c.type, 3, len ?? 6, numberFormat),
+                ('G', var len) => this switch
+                {
+                    var _ when CompareAbs(this, 1e-5) < 0 || CompareAbs(this, 1e16) > 0
+                        => Prepare(10).SplitNumberString().ToExpParts().FormatE('e', 2, len ?? 6, numberFormat),
+                    _ => Prepare(10).SplitNumberString().FormatF(len ?? 2, numberFormat),
+                },
+                //('C', var len) => NumberFormatter.SplitNumberString(Prepare(10)).FormatC(len ?? 2, numberFormat),
+                //('D', var rest) => ToStringBase10(format, numberFormat),
+                //('P', var rest) => ToStringBase10(format, numberFormat),
+                //('R', var rest) => ToStringBase10(format, numberFormat),
+                //('X', var rest) => ToStringBase10(format, numberFormat),
             },
-            _ => s switch
-            {
-                "" => 0,
-                var x when x[0] == '@' => x[1..^1], 
-                _ => "0." + new string('0', -exp) + s
-            }
-        });
+            _ => throw new ArgumentOutOfRangeException(nameof(format), "Supported: N, F, E, G"),
+        };
+#pragma warning restore CS8509 // switch 表达式不会处理属于其输入类型的所有可能值(它并非详尽无遗)。
+    }
+
+    public static int CompareAbs(GmpFloat op1, double op2)
+    {
+        int raw = op1.Raw.Size;
+        try
+        {
+            op1.Raw.Size = Math.Abs(op1.Raw.Size);
+            return Compare(op1, op2);
+        }
+        finally
+        {
+            op1.Raw.Size = raw;
+        }
     }
 
     public GmpInteger ToGmpInteger() => GmpInteger.From(this);
@@ -732,6 +768,30 @@ public class GmpFloat : IDisposable
     #endregion
 
     #region Comparison Functions
+    public bool Equals([AllowNull] GmpFloat other)
+    {
+        return other is not null && Compare(this, other) == 0;
+    }
+
+    public int CompareTo(object? obj)
+    {
+        return obj switch
+        {
+            null => 1,
+            uint ui => Compare(this, ui),
+            int i => Compare(this, i),
+            double d => Compare(this, d),
+            GmpFloat f => Compare(this, f),
+            GmpInteger z => Compare(this, z),
+            _ => throw new ArgumentException("Invalid type", nameof(obj))
+        };
+    }
+
+    public int CompareTo([AllowNull] GmpFloat other)
+    {
+        return other is null ? 1 : Compare(this, other);
+    }
+
     /// <summary>
     /// Compare op1 and op2. Return a positive value if op1 > op2, zero if op1 = op2, and a negative value if op1 < op2.
     /// </summary>

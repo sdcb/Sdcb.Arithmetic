@@ -2,13 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace Sdcb.Arithmetic.Mpfr;
 
-public unsafe class MpfrFloat : IDisposable
+public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>, IComparable, IComparable<MpfrFloat>
 {
     internal readonly Mpfr_t Raw;
 
@@ -559,7 +561,45 @@ public unsafe class MpfrFloat : IDisposable
         }
     }
 
-    public override string ToString() => ToString(10);
+    public override string ToString() => ToString(format: null);
+
+    public string ToString(string? format)
+    {
+        return ToString(format, CultureInfo.CurrentCulture);
+    }
+
+    public string ToString(string? format, IFormatProvider? formatProvider = null)
+    {
+        NumberFormatInfo numberFormat = (NumberFormatInfo)(formatProvider ?? Thread.CurrentThread.CurrentCulture).GetFormat(typeof(NumberFormatInfo))!;
+
+#pragma warning disable CS8509 // switch 表达式不会处理属于其输入类型的所有可能值(它并非详尽无遗)。
+        return format switch
+        {
+            null or "" => Prepare(10).SplitNumberString().Format0(numberFormat),
+            { Length: > 0 } x => x switch
+            {
+                [char c, .. var rest] => (type: char.ToUpperInvariant(c), len: int.TryParse(rest, out int r) ? new int?(r) : null)
+            } switch
+            {
+                ('N', var len) => Prepare(10).SplitNumberString().FormatN(len ?? 2, numberFormat),
+                ('F', var len) => Prepare(10).SplitNumberString().FormatF(len ?? 2, numberFormat),
+                ('E', var len) c => Prepare(10).SplitNumberString().ToExpParts().FormatE(c.type, 3, len ?? 6, numberFormat),
+                ('G', var len) => this switch
+                {
+                    var _ when CompareAbs(this, 1e-5) < 0 || CompareAbs(this, 1e16) > 0
+                        => Prepare(10).SplitNumberString().ToExpParts().FormatE('e', 2, len ?? 6, numberFormat),
+                    _ => Prepare(10).SplitNumberString().FormatF(len ?? 2, numberFormat),
+                },
+                //('C', var len) => NumberFormatter.SplitNumberString(Prepare(10)).FormatC(len ?? 2, numberFormat),
+                //('D', var rest) => ToStringBase10(format, numberFormat),
+                //('P', var rest) => ToStringBase10(format, numberFormat),
+                //('R', var rest) => ToStringBase10(format, numberFormat),
+                //('X', var rest) => ToStringBase10(format, numberFormat),
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(format), "Supported: N, F, E, G"),
+        };
+#pragma warning restore CS8509 // switch 表达式不会处理属于其输入类型的所有可能值(它并非详尽无遗)。
+    }
 
     public string ToString(int @base = 10, MpfrRounding? rounding = null)
     {
@@ -574,7 +614,25 @@ public unsafe class MpfrFloat : IDisposable
                 throw new ArgumentException($"Unable to convert {nameof(MpfrFloat)} to string.");
             }
 
-            return GmpFloat.ToString(ret, Sign, exp);
+            string s = Marshal.PtrToStringAnsi(ret)!;
+            return GmpFloat.ToString(s, exp);
+        }
+    }
+
+    private unsafe DecimalNumberString Prepare(int @base = 10, MpfrRounding? rounding = null)
+    {
+        byte[] resbuf = new byte[GetMaxStringLength(Raw.Precision, @base)];
+        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* srcptr = &resbuf[0])
+        {
+            int exp;
+            IntPtr ret = MpfrLib.mpfr_get_str((IntPtr)srcptr, (IntPtr)(&exp), @base, resbuf.Length, (IntPtr)pthis, rounding ?? DefaultRounding);
+            if (ret == IntPtr.Zero)
+            {
+                throw new ArgumentException($"Unable to convert {nameof(MpfrFloat)} to string.");
+            }
+
+            return new(Marshal.PtrToStringAnsi(ret)!, exp);
         }
     }
 
@@ -1610,6 +1668,24 @@ public unsafe class MpfrFloat : IDisposable
 
     #region 6. Comparison Functions
     #region Compares
+    public int CompareTo(object? obj)
+    {
+        return obj switch
+        {
+            null => 1,
+            uint ui => Compare(this, ui), 
+            int i => Compare(this, i),
+            double d => Compare(this, d), 
+            GmpFloat f => Compare(this, f),
+            MpfrFloat f => Compare(this, f),
+            GmpInteger z => Compare(this, z),
+            GmpRational r => Compare(this, r),
+            _ => throw new ArgumentException("Invalid type", nameof(obj))
+        };
+    }
+
+    public int CompareTo([AllowNull] MpfrFloat other) => other is null ? 1 : Compare(this, other);
+
     public static int Compare(MpfrFloat op1, MpfrFloat op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1663,6 +1739,8 @@ public unsafe class MpfrFloat : IDisposable
             return MpfrLib.mpfr_equal_p((IntPtr)p1, (IntPtr)p2) != 0;
         }
     }
+
+    public bool Equals(MpfrFloat? other) => (other is not null) && CompareEquals(this, other);
 
     public static bool operator ==(MpfrFloat op1, MpfrFloat op2) => CompareEquals(op1, op2);
     public static bool operator !=(MpfrFloat op1, MpfrFloat op2) => !CompareEquals(op1, op2);

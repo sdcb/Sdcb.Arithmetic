@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using Xunit.Abstractions;
 
 namespace Sdcb.Arithmetic.Mpfr.Tests
@@ -9,6 +10,7 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
 
         public DefaultsTest(ITestOutputHelper console)
         {
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
             _console = console;
         }
 
@@ -81,11 +83,12 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         [Theory]
         [InlineData("1.625", "1.625")]
         [InlineData("NaN", "NaN")]
-        [InlineData("-inf", "-Inf")]
-        [InlineData("+iNf", "Inf")]
+        [InlineData("-inf", "-Infinity")]
+        [InlineData("+iNf", "Infinity")]
+        [InlineData("-0", "-0")]
         public void ToStringTest(string val, string expected)
         {
-            MpfrFloat flt = MpfrFloat.Parse(val);
+            using MpfrFloat flt = MpfrFloat.Parse(val);
             Assert.Equal(expected, flt.ToString());
         }
     }
