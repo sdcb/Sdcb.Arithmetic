@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sdcb.Arithmetic.Gmp;
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -7,6 +8,8 @@ using System.Runtime.InteropServices;
 [assembly: InternalsVisibleTo("Sdcb.Arithmetic.Mpfr.Tests")]
 
 namespace Sdcb.Arithmetic.Gmp;
+
+using gmp_randalg_t = GmpRandomAlgorithm;
 
 public static class GmpLib
 {
@@ -33,7 +36,7 @@ public static class GmpLib
     /// <param name="p0">(C type: gmp_randstate_t) </param>
     /// <param name="p1">(C type: gmp_randalg_t) </param>
     [DllImport(Dll)]
-    public static extern void __gmp_randinit(IntPtr p0, gmp_randalg_t p1);
+    public static extern void __gmp_randinit(IntPtr p0, GmpRandomAlgorithm p1);
 
     /// <param name="p0">(C type: gmp_randstate_t) </param>
     [DllImport(Dll)]
