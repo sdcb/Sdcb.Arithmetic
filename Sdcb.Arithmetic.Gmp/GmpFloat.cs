@@ -733,15 +733,14 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
 
     /// <summary>
     /// Multiplies two <see cref="GmpFloat"/> instances <paramref name="op1"/> and <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// <seealso cref="GmpFloat"/>
+    /// <seealso cref="GmpLib"/>
     /// </summary>
     /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result of multiplication.</param>
     /// <param name="op1">The first <see cref="GmpFloat"/> instance to multiply.</param>
     /// <param name="op2">The second <see cref="GmpFloat"/> instance to multiply.</param>
     /// <exception cref="ArgumentNullException">Thrown when any of the input parameters is null.</exception>
     /// <remarks>The input parameters are fixed to avoid garbage collection during the operation.</remarks>
-    /// <seealso cref="GmpFloat"/>
-    /// <seealso cref="GmpLib"/>
-    /// </summary>
     public static unsafe void MultiplyInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -760,14 +759,6 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// <param name="op2">The unsigned integer value to multiply by.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op1"/> is null.</exception>
     /// <remarks>The multiplication is performed in-place, meaning the value of <paramref name="op1"/> is modified.</remarks>
-    /// <seealso cref="GmpFloat.Multiply(GmpFloat, uint)"/>
-    /// <seealso cref="GmpFloat.Multiply(GmpFloat, GmpFloat)"/>
-    /// <seealso cref="GmpFloat.Multiply(GmpFloat, GmpFloat, GmpFloat)"/>
-    /// <seealso cref="GmpFloat.Divide(GmpFloat, GmpFloat)"/>
-    /// <seealso cref="GmpFloat.Divide(GmpFloat, GmpFloat, GmpFloat)"/>
-    /// <seealso cref="GmpFloat.Divide(GmpFloat, uint)"/>
-    /// <seealso cref="GmpFloat.Divide(GmpFloat, GmpFloat, GmpFloat)"/>
-    /// </summary>
     public static unsafe void MultiplyInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
