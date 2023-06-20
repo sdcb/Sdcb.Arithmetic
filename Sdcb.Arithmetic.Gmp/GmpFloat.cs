@@ -946,7 +946,6 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// <remarks>The precision of <paramref name="rop"/> will be the same as the precision of <paramref name="op1"/>.</remarks>
     /// <remarks>The operation is performed in-place, meaning the value of <paramref name="rop"/> will be modified.</remarks>
     /// <remarks>The function is unsafe because it uses pointers.</remarks>
-    /// </summary>
     public static unsafe void Mul2ExpInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -1016,7 +1015,6 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// <param name="op2">The <see cref="GmpFloat"/> instance to subtract.</param>
     /// <param name="precision">The precision of the result in bits. If set to 0, the precision will be set to the default precision.</param>
     /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the subtraction.</returns>
-    /// </summary>
     public static unsafe GmpFloat Subtract(GmpFloat op1, GmpFloat op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1214,7 +1212,6 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="op1"/> is null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="op2"/> is negative.</exception>
     /// <remarks>The result precision is determined by <paramref name="precision"/>. If it is 0, the precision of <paramref name="op1"/> is used.</remarks>
-    /// </summary>
     public static unsafe GmpFloat Div2Exp(GmpFloat op1, uint op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1571,7 +1568,6 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// </remarks>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/>, <paramref name="op1"/> or <paramref name="op2"/> is null.</exception>
     /// <exception cref="ObjectDisposedException">Thrown when <paramref name="rop"/>, <paramref name="op1"/> or <paramref name="op2"/> has already been disposed.</exception>
-    /// </summary>
     public static unsafe void RelDiffInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -1671,7 +1667,6 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// <remarks>
     /// This method modifies the <paramref name="rop"/> instance in place.
     /// </remarks>
-    /// </summary>
     public static unsafe void RoundInplace(GmpFloat rop, GmpFloat op)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -1855,9 +1850,9 @@ public record struct Mpf_t
     public static int RawSize => Marshal.SizeOf<Mpf_t>();
 
 
-    private unsafe Span<int> GetLimbData() => new((void*)Limbs, Precision - 1);
+    private readonly unsafe Span<int> GetLimbData() => new((void*)Limbs, Precision - 1);
 
-    public override int GetHashCode()
+    public override readonly int GetHashCode()
     {
         HashCode c = new();
         c.Add(Precision);

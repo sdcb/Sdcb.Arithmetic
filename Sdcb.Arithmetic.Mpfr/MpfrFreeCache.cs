@@ -9,12 +9,12 @@ namespace Sdcb.Arithmetic.Mpfr
     public enum MpfrFreeCache
     {
         /// <summary>
-        /// 1 << 0
+        /// 1 &lt;&lt; 0
         /// </summary>
         Local = 1,
         
         /// <summary>
-        /// 1 << 1
+        /// 1 &lt;&lt; 1
         /// </summary>
         Global = 2, 
     }

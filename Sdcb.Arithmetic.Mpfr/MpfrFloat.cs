@@ -4190,7 +4190,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     public static void FreePool() => MpfrLib.mpfr_free_pool();
 
     /// <summary>
-    /// This function should be called before calling <see cref="GmpMemory.__gmp_set_memory_functions"/>.
+    /// This function should be called before calling <see cref="GmpMemory.SetAllocator(GmpMalloc, GmpRealloc, GmpFree)"/>.
     /// </summary>
     public static void MemoryCleanup() => MpfrLib.mpfr_mp_memory_cleanup();
     #endregion
@@ -4365,7 +4365,7 @@ public record struct Mpfr_t
 
     public static unsafe int RawSize => sizeof(Mpfr_t);
 
-    private int LimbCount => (Precision - 1) / (IntPtr.Size * 8) + 1;
+    private readonly int LimbCount => (Precision - 1) / (IntPtr.Size * 8) + 1;
 
     private unsafe Span<nint> GetLimbData() => new((void*)Limbs, LimbCount);
 

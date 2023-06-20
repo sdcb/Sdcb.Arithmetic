@@ -31,13 +31,13 @@ namespace Sdcb.Arithmetic.Gmp
         }
     }
 
+    /// <param name="NumberString">the whole string, might starts with '-' means negative, without decimal point</param>
+    /// <param name="DecimalPosition">the decimal point position</param>
     internal record struct DecimalNumberString(string NumberString, int DecimalPosition)
     {
         /// <summary>
         /// Split number into integer part, decimal part and sign.
         /// </summary>
-        /// <param name="numberString">the whole string, might starts with '-' means negative, without decimal point</param>
-        /// <param name="decimalPosition">the decimal point position</param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
         public DecimalStringParts SplitNumberString()
@@ -76,7 +76,7 @@ namespace Sdcb.Arithmetic.Gmp
 
     internal record struct DecimalExpParts(bool IsNegative, string IntegerPart, string DecimalPart, int Exp)
     {
-        public string FormatE(char E, int pad0, int decimalLength, NumberFormatInfo formatInfo)
+        public readonly string FormatE(char E, int pad0, int decimalLength, NumberFormatInfo formatInfo)
         {
             // 截取所需的小数位数
             string adjustedDecimalPart = decimalLength > 0
@@ -100,7 +100,7 @@ namespace Sdcb.Arithmetic.Gmp
 
     internal record struct DecimalStringParts(bool IsNegative, string IntegerPart, string DecimalPart)
     {
-        public string Format0(NumberFormatInfo formatInfo)
+        public readonly string Format0(NumberFormatInfo formatInfo)
         {
             if (DecimalPart == "@Inf@") return IsNegative ? formatInfo.NegativeInfinitySymbol : formatInfo.PositiveInfinitySymbol;
             if (DecimalPart == "@NaN@") return formatInfo.NaNSymbol;
@@ -118,7 +118,7 @@ namespace Sdcb.Arithmetic.Gmp
             return sb.ToString();
         }
 
-        public string FormatN(int decimalLength, NumberFormatInfo formatInfo)
+        public readonly string FormatN(int decimalLength, NumberFormatInfo formatInfo)
         {
             if (DecimalPart == "@Inf@") return IsNegative ? formatInfo.NegativeInfinitySymbol : formatInfo.PositiveInfinitySymbol;
             if (DecimalPart == "@NaN@") return formatInfo.NaNSymbol;
@@ -160,7 +160,7 @@ namespace Sdcb.Arithmetic.Gmp
             return sb.ToString();
         }
 
-        public string FormatF(int decimalLength, NumberFormatInfo formatInfo)
+        public readonly string FormatF(int decimalLength, NumberFormatInfo formatInfo)
         {
             if (DecimalPart == "@Inf@") return IsNegative ? formatInfo.NegativeInfinitySymbol : formatInfo.PositiveInfinitySymbol;
             if (DecimalPart == "@NaN@") return formatInfo.NaNSymbol;
@@ -181,7 +181,7 @@ namespace Sdcb.Arithmetic.Gmp
             return sb.ToString();
         }
 
-        public string FormatC(int decimalLength, NumberFormatInfo formatInfo)
+        public readonly string FormatC(int decimalLength, NumberFormatInfo formatInfo)
         {
             if (DecimalPart == "@Inf@") return IsNegative ? formatInfo.NegativeInfinitySymbol : formatInfo.PositiveInfinitySymbol;
             if (DecimalPart == "@NaN@") return formatInfo.NaNSymbol;
@@ -220,7 +220,7 @@ namespace Sdcb.Arithmetic.Gmp
             return IsNegative ? $"({sb})" : sb.ToString();
         }
 
-        public DecimalExpParts ToExpParts()
+        public readonly DecimalExpParts ToExpParts()
         {
             string combinedNumber = IntegerPart + DecimalPart;
             int exp = IntegerPart.Length - 1;
