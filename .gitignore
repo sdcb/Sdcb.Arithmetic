@@ -365,3 +365,5 @@ win32-gmp-10/
 win32-mpfr-6/
 win64-gmp-10/
 win64-mpfr-6/
+/build/linux64-libgmp.so
+/build/linux64-libmpfr.so

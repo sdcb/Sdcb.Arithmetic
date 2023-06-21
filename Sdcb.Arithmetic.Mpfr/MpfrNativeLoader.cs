@@ -27,8 +27,8 @@ namespace Sdcb.Arithmetic.Mpfr
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    NativeLibrary.Load("libgmp.so.10", assembly, searchPath);
-                    return NativeLibrary.Load("libmpfr.so.6", assembly, searchPath);
+                    NativeLibrary.Load("gmp.so.10", assembly, searchPath);
+                    return NativeLibrary.Load("mpfr.so.6", assembly, searchPath);
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
