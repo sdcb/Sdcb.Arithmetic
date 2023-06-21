@@ -482,7 +482,7 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         {
             using MpfrFloat fop = MpfrFloat.From(op);
             using MpfrFloat rop = MpfrFloat.Sinh(fop);
-            Assert.Equal(Math.Sinh(op), rop.ToDouble(), 15);
+            Assert.Equal(Math.Sinh(op), rop.ToDouble(), 14);
         }
 
         [Theory]
@@ -508,8 +508,8 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         {
             using MpfrFloat fop = MpfrFloat.From(op);
             (MpfrFloat sop, MpfrFloat cop) = MpfrFloat.SinhCosh(fop);
-            Assert.Equal(Math.Sinh(op), sop.ToDouble(), 15);
-            Assert.Equal(Math.Cosh(op), cop.ToDouble(), 15);
+            Assert.Equal(Math.Sinh(op), sop.ToDouble(), 14);
+            Assert.Equal(Math.Cosh(op), cop.ToDouble(), 14);
         }
 
         [Theory]

@@ -69,7 +69,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public int Precision
     {
-        get => Raw.Precision;
+        get => (int)Raw.Precision;
         set => RoundToPrecision(Precision, DefaultRounding);
     }
 
@@ -603,7 +603,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public string ToString(int @base = 10, MpfrRounding? rounding = null)
     {
-        byte[] resbuf = new byte[GetMaxStringLength(Raw.Precision, @base)];
+        byte[] resbuf = new byte[GetMaxStringLength((int)Raw.Precision, @base)];
         fixed (Mpfr_t* pthis = &Raw)
         fixed (byte* srcptr = &resbuf[0])
         {
@@ -621,7 +621,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     private unsafe DecimalNumberString Prepare(int @base = 10, MpfrRounding? rounding = null)
     {
-        byte[] resbuf = new byte[GetMaxStringLength(Raw.Precision, @base)];
+        byte[] resbuf = new byte[GetMaxStringLength((int)Raw.Precision, @base)];
         fixed (Mpfr_t* pthis = &Raw)
         fixed (byte* srcptr = &resbuf[0])
         {
@@ -4067,7 +4067,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         get
         {
-            return Raw.Exponent;
+            return (int)Raw.Exponent;
         }
         set
         {
@@ -4320,7 +4320,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         fixed (Mpfr_t* ptr = &Raw)
         {
-            MpfrLib.mpfr_clear((IntPtr)ptr);
+            //MpfrLib.mpfr_clear((IntPtr)ptr);
         }
     }
 
@@ -4358,14 +4358,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 [StructLayout(LayoutKind.Sequential)]
 public record struct Mpfr_t
 {
-    public int Precision;
-    public int Sign;
-    public int Exponent;
+    public long Precision;
+    public long Sign;
+    public long Exponent;
     public IntPtr Limbs;
 
     public static unsafe int RawSize => sizeof(Mpfr_t);
 
-    private readonly int LimbCount => (Precision - 1) / (IntPtr.Size * 8) + 1;
+    private readonly int LimbCount => (int)((Precision - 1) / (IntPtr.Size * 8) + 1);
 
     private unsafe Span<nint> GetLimbData() => new((void*)Limbs, LimbCount);
 

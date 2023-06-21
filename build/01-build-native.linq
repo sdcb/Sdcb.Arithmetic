@@ -75,7 +75,7 @@ static string BuildNuspec(string[] libs, string rid, string titleRid, string fol
         <version>2.2.1</version>
         <title>{masterName} native bindings for {titleRid}</title>
         <authors>sdcb</authors>
-        <license type="expression">(LGPL-2.1-only OR CDDL-1.0)</license>
+        <license type="expression">LGPL-3.0-or-later</license>
         <projectUrl>https://github.com/sdcb/{pkgName}</projectUrl>
         <icon>images\icon.png</icon>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
