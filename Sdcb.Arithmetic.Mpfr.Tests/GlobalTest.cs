@@ -42,30 +42,35 @@ namespace Sdcb.Arithmetic.Mpfr.Tests
         {
 #pragma warning disable CA1806 // 不要忽略方法结果
             // https://www.mpfr.org/sample.html
-            Mpfr_t s, t, u;
-            MpfrLib.mpfr_init2((IntPtr)(&t), 200);
-            MpfrLib.mpfr_set_d((IntPtr)(&t), 1.0, MpfrRounding.ToNegativeInfinity);
-            MpfrLib.mpfr_init2((IntPtr)(&s), 200);
-            MpfrLib.mpfr_set_d((IntPtr)(&s), 1.0, MpfrRounding.ToNegativeInfinity);
-            MpfrLib.mpfr_init2((IntPtr)(&u), 200);
-
-            for (uint i = 1; i <= 100; ++i)
+            byte[] s = new byte[MpfrFloat.RawSize], t = new byte[MpfrFloat.RawSize], u = new byte[MpfrFloat.RawSize];
+            fixed (byte* ps = &s[0])
+            fixed (byte* pt = &t[0])
+            fixed (byte* pu = &u[0])
             {
-                MpfrLib.mpfr_mul_ui((IntPtr)(&t), (IntPtr)(&t), i, MpfrRounding.ToPositiveInfinity);
-                MpfrLib.mpfr_set_d((IntPtr)(&u), 1.0, MpfrRounding.ToNegativeInfinity);
-                MpfrLib.mpfr_div((IntPtr)(&u), (IntPtr)(&u), (IntPtr)(&t), MpfrRounding.ToNegativeInfinity);
-                MpfrLib.mpfr_add((IntPtr)(&s), (IntPtr)(&s), (IntPtr)(&u), MpfrRounding.ToNegativeInfinity);
-            }
+                MpfrLib.mpfr_init2((IntPtr)pt, 200);
+                MpfrLib.mpfr_set_d((IntPtr)pt, 1.0, MpfrRounding.ToNegativeInfinity);
+                MpfrLib.mpfr_init2((IntPtr)ps, 200);
+                MpfrLib.mpfr_set_d((IntPtr)ps, 1.0, MpfrRounding.ToNegativeInfinity);
+                MpfrLib.mpfr_init2((IntPtr)pu, 200);
 
-            int exp;
-            IntPtr strptr = MpfrLib.mpfr_get_str(IntPtr.Zero, (IntPtr)(&exp), 10, 0, (IntPtr)(&s), MpfrRounding.ToNegativeInfinity);
-            string str = Marshal.PtrToStringAnsi(strptr)!;
-            Assert.Equal("2.7182818284590452353602874713526624977572470936999595749669131", GmpFloat.ToString(str, exp));
-            MpfrLib.mpfr_free_str(strptr);
-            MpfrLib.mpfr_clear((IntPtr)(&s));
-            MpfrLib.mpfr_clear((IntPtr)(&t));
-            MpfrLib.mpfr_clear((IntPtr)(&u));
-            MpfrLib.mpfr_free_cache();
+                for (uint i = 1; i <= 100; ++i)
+                {
+                    MpfrLib.mpfr_mul_ui((IntPtr)pt, (IntPtr)pt, i, MpfrRounding.ToPositiveInfinity);
+                    MpfrLib.mpfr_set_d((IntPtr)pu, 1.0, MpfrRounding.ToNegativeInfinity);
+                    MpfrLib.mpfr_div((IntPtr)pu, (IntPtr)pu, (IntPtr)pt, MpfrRounding.ToNegativeInfinity);
+                    MpfrLib.mpfr_add((IntPtr)ps, (IntPtr)ps, (IntPtr)pu, MpfrRounding.ToNegativeInfinity);
+                }
+
+                int exp;
+                IntPtr strptr = MpfrLib.mpfr_get_str(IntPtr.Zero, (IntPtr)(&exp), 10, 0, (IntPtr)ps, MpfrRounding.ToNegativeInfinity);
+                string str = Marshal.PtrToStringAnsi(strptr)!;
+                Assert.Equal("2.7182818284590452353602874713526624977572470936999595749669131", GmpFloat.ToString(str, exp));
+                MpfrLib.mpfr_free_str(strptr);
+                MpfrLib.mpfr_clear((IntPtr)ps);
+                MpfrLib.mpfr_clear((IntPtr)pt);
+                MpfrLib.mpfr_clear((IntPtr)pu);
+                MpfrLib.mpfr_free_cache();
+            }
 #pragma warning restore CA1806 // 不要忽略方法结果
         }
     }

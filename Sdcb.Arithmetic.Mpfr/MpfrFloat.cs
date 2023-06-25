@@ -1,5 +1,6 @@
 ﻿using Sdcb.Arithmetic.Gmp;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -12,7 +13,13 @@ namespace Sdcb.Arithmetic.Mpfr;
 
 public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>, IComparable, IComparable<MpfrFloat>
 {
-    internal readonly Mpfr_t Raw;
+    public static readonly int RawSize = Environment.OSVersion.Platform switch
+    {
+        PlatformID.Win32NT => sizeof(WindowsMpfr_t),
+        _ => sizeof(LinuxMpfr_t),
+    };
+
+    internal readonly byte[] Raw = ArrayPool<byte>.Shared.Rent(RawSize);
 
     #region 1. Initialization Functions
     /// <summary>
@@ -21,16 +28,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public MpfrFloat(int precision)
     {
-        fixed (Mpfr_t* ptr = &Raw)
+        fixed (byte* ptr = &Raw[0])
         {
             MpfrLib.mpfr_init2((IntPtr)ptr, precision);
             MpfrLib.mpfr_set_ui((IntPtr)ptr, 0, MpfrRounding.ToEven);
         }
-    }
-
-    public MpfrFloat(Mpfr_t raw)
-    {
-        Raw = raw;
     }
 
     /// <summary>
@@ -39,7 +41,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public MpfrFloat()
     {
-        fixed (Mpfr_t* ptr = &Raw)
+        fixed (byte* ptr = &Raw[0])
         {
             MpfrLib.mpfr_init((IntPtr)ptr);
             MpfrLib.mpfr_set_ui((IntPtr)ptr, 0, MpfrRounding.ToEven);
@@ -69,7 +71,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public int Precision
     {
-        get => (int)Raw.Precision;
+        get
+        {
+            fixed (byte* pthis = &Raw[0])
+            {
+                return MpfrLib.mpfr_get_prec((IntPtr)pthis);
+            }
+        }
         set => RoundToPrecision(Precision, DefaultRounding);
     }
 
@@ -83,7 +91,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     public void ResetPrecision(int precision)
     {
         CheckPrecision(precision);
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             MpfrLib.mpfr_set_prec((IntPtr)pthis, precision);
         }
@@ -93,8 +101,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #region 2. Assignment Functions
     public int Assign(MpfrFloat val, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
-        fixed (Mpfr_t* pval = &val.Raw)
+        fixed (byte* pthis = &Raw[0])
+        fixed (byte* pval = &val.Raw[0])
         {
             return MpfrLib.mpfr_set((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
         }
@@ -102,7 +110,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public int Assign(uint val, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_set_ui((IntPtr)pthis, val, rounding ?? DefaultRounding);
         }
@@ -110,7 +118,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public int Assign(int val, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_set_si((IntPtr)pthis, val, rounding ?? DefaultRounding);
         }
@@ -118,7 +126,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public int Assign(float val, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_set_flt((IntPtr)pthis, val, rounding ?? DefaultRounding);
         }
@@ -126,7 +134,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public int Assign(double val, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_set_d((IntPtr)pthis, val, rounding ?? DefaultRounding);
         }
@@ -134,7 +142,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public int Assign(GmpInteger val, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         fixed (Mpz_t* pval = &val.Raw)
         {
             return MpfrLib.mpfr_set_z((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
@@ -143,7 +151,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public int Assign(GmpRational val, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         fixed (Mpq_t* pval = &val.Raw)
         {
             return MpfrLib.mpfr_set_q((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
@@ -152,7 +160,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public int Assign(GmpFloat val, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         fixed (Mpf_t* pval = &val.Raw)
         {
             return MpfrLib.mpfr_set_f((IntPtr)pthis, (IntPtr)pval, rounding ?? DefaultRounding);
@@ -166,7 +174,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public int Assign2Exp(uint op, int e, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_set_ui_2exp((IntPtr)pthis, op, e, rounding ?? DefaultRounding);
         }
@@ -179,7 +187,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public int Assign2Exp(int op, int e, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_set_si_2exp((IntPtr)pthis, op, e, rounding ?? DefaultRounding);
         }
@@ -192,7 +200,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public int Assign2Exp(GmpInteger op, int e, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         fixed (Mpz_t* pop = &op.Raw)
         {
             return MpfrLib.mpfr_set_z_2exp((IntPtr)pthis, (IntPtr)pop, e, rounding ?? DefaultRounding);
@@ -203,7 +211,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <exception cref="FormatException" />
     public void Assign(string s, int @base = 0, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             byte[] opBytes = Encoding.UTF8.GetBytes(s);
             fixed (byte* opPtr = opBytes)
@@ -222,7 +230,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>Set to the value of the string s in base base, rounded in the direction rnd.</summary>
     public bool TryAssign(string s, int @base = 0, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             byte[] opBytes = Encoding.UTF8.GetBytes(s);
             fixed (byte* opPtr = opBytes)
@@ -239,7 +247,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public void AssignNaN()
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             MpfrLib.mpfr_set_nan((IntPtr)pthis);
         }
@@ -250,7 +258,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public void AssignInfinity(int sign)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             MpfrLib.mpfr_set_inf((IntPtr)pthis, sign);
         }
@@ -262,7 +270,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="sign"></param>
     public void AssignZero(int sign = 0)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             MpfrLib.mpfr_set_zero((IntPtr)pthis, sign);
         }
@@ -275,8 +283,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static void Swap(MpfrFloat x, MpfrFloat y)
     {
-        fixed (Mpfr_t* p1 = &x.Raw)
-        fixed (Mpfr_t* p2 = &y.Raw)
+        fixed (byte* p1 = &x.Raw[0])
+        fixed (byte* p2 = &y.Raw[0])
         {
             MpfrLib.mpfr_swap((IntPtr)p1, (IntPtr)p2);
         }
@@ -390,7 +398,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #region 4. Conversion Functions
     public double ToDouble(MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_get_d((IntPtr)pthis, rounding ?? DefaultRounding);
         }
@@ -400,7 +408,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public float ToFloat(MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_get_flt((IntPtr)pthis, rounding ?? DefaultRounding);
         }
@@ -410,7 +418,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public int ToInt32(MpfrRounding rounding = MpfrRounding.ToZero)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_get_si((IntPtr)pthis, rounding);
         }
@@ -420,7 +428,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public uint ToUInt32(MpfrRounding rounding = MpfrRounding.ToZero)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_get_ui((IntPtr)pthis, rounding);
         }
@@ -443,7 +451,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public ExpDouble ToExpDouble(MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             int exp;
             double d = MpfrLib.mpfr_get_d_2exp((IntPtr)(&exp), (IntPtr)pthis, rounding ?? DefaultRounding);
@@ -456,8 +464,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public (int exp, bool overflowed) FrexpInplace(MpfrFloat y, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
-        fixed (Mpfr_t* py = &y.Raw)
+        fixed (byte* pthis = &Raw[0])
+        fixed (byte* py = &y.Raw[0])
         {
             int exp;
             bool overflowed = MpfrLib.mpfr_frexp((IntPtr)(&exp), (IntPtr)py, (IntPtr)pthis, rounding ?? DefaultRounding) != 0;
@@ -479,7 +487,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <returns>2exp</returns>
     public int GetIntegerAnd2ExpInplace(GmpInteger z)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         fixed (Mpz_t* pz = &z.Raw)
         {
             return MpfrLib.mpfr_get_z_2exp((IntPtr)pz, (IntPtr)pthis);
@@ -497,7 +505,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public int ToGmpIntegerInplace(GmpInteger z, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         fixed (Mpz_t* pz = &z.Raw)
         {
             return MpfrLib.mpfr_get_z((IntPtr)pz, (IntPtr)pthis, rounding ?? DefaultRounding);
@@ -515,7 +523,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public void ToGmpRationalInplace(GmpRational q, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         fixed (Mpq_t* pq = &q.Raw)
         {
             MpfrLib.mpfr_get_q((IntPtr)pq, (IntPtr)pthis);
@@ -533,7 +541,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public int ToGmpFloatInplace(GmpFloat f, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         fixed (Mpf_t* pf = &f.Raw)
         {
             return MpfrLib.mpfr_get_f((IntPtr)pf, (IntPtr)pthis, rounding ?? DefaultRounding);
@@ -603,8 +611,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public string ToString(int @base = 10, MpfrRounding? rounding = null)
     {
-        byte[] resbuf = new byte[GetMaxStringLength((int)Raw.Precision, @base)];
-        fixed (Mpfr_t* pthis = &Raw)
+        byte[] resbuf = new byte[GetMaxStringLength(Precision, @base)];
+        fixed (byte* pthis = &Raw[0])
         fixed (byte* srcptr = &resbuf[0])
         {
             int exp;
@@ -621,8 +629,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     private unsafe DecimalNumberString Prepare(int @base = 10, MpfrRounding? rounding = null)
     {
-        byte[] resbuf = new byte[GetMaxStringLength((int)Raw.Precision, @base)];
-        fixed (Mpfr_t* pthis = &Raw)
+        byte[] resbuf = new byte[GetMaxStringLength(Precision, @base)];
+        fixed (byte* pthis = &Raw[0])
         fixed (byte* srcptr = &resbuf[0])
         {
             int exp;
@@ -638,7 +646,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public bool FitsUInt32(MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_fits_ulong_p((IntPtr)pthis, rounding ?? DefaultRounding) != 0;
         }
@@ -646,7 +654,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public bool FitsInt32(MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_fits_slong_p((IntPtr)pthis, rounding ?? DefaultRounding) != 0;
         }
@@ -654,7 +662,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public bool FitsUInt16(MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_fits_ushort_p((IntPtr)pthis, rounding ?? DefaultRounding) != 0;
         }
@@ -662,7 +670,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public bool FitsInt16(MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_fits_sshort_p((IntPtr)pthis, rounding ?? DefaultRounding) != 0;
         }
@@ -670,7 +678,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public bool FitsUInt64(MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_fits_uintmax_p((IntPtr)pthis, rounding ?? DefaultRounding) != 0;
         }
@@ -678,7 +686,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public bool FitsInt64(MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_fits_intmax_p((IntPtr)pthis, rounding ?? DefaultRounding) != 0;
         }
@@ -689,9 +697,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #region Add
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_add((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -708,8 +716,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_add_ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -727,8 +735,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_add_si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -746,8 +754,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_add_d((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -765,8 +773,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         fixed (Mpz_t* p2 = &op2.Raw)
         {
             return MpfrLib.mpfr_add_z((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
@@ -785,8 +793,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         fixed (Mpq_t* p2 = &op2.Raw)
         {
             return MpfrLib.mpfr_add_q((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
@@ -807,9 +815,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #region Subtract
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_sub((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -826,8 +834,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SubtractInplace(MpfrFloat rop, uint op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_ui_sub((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -844,8 +852,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_sub_ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -862,8 +870,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SubtractInplace(MpfrFloat rop, int op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_si_sub((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -880,8 +888,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_sub_si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -898,8 +906,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SubtractInplace(MpfrFloat rop, double op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_d_sub((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -916,8 +924,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_sub_d((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -934,8 +942,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         fixed (Mpz_t* p2 = &op2.Raw)
         {
             return MpfrLib.mpfr_sub_z((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
@@ -953,9 +961,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SubtractInplace(MpfrFloat rop, GmpInteger op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (byte* pr = &rop.Raw[0])
         fixed (Mpz_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_z_sub((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -972,8 +980,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         fixed (Mpq_t* p2 = &op2.Raw)
         {
             return MpfrLib.mpfr_sub_q((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
@@ -993,9 +1001,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #region Multiply
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_mul((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -1012,8 +1020,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_mul_ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -1031,8 +1039,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_mul_si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -1050,8 +1058,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_mul_d((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -1069,8 +1077,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         fixed (Mpz_t* p2 = &op2.Raw)
         {
             return MpfrLib.mpfr_mul_z((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
@@ -1089,8 +1097,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         fixed (Mpq_t* p2 = &op2.Raw)
         {
             return MpfrLib.mpfr_mul_q((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
@@ -1110,8 +1118,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static void SquareInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             MpfrLib.mpfr_sqr((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
         }
@@ -1127,9 +1135,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #region Divide
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_div((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -1146,8 +1154,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int DivideInplace(MpfrFloat rop, uint op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_ui_div((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -1164,8 +1172,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_div_ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -1182,8 +1190,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int DivideInplace(MpfrFloat rop, int op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_si_div((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -1200,8 +1208,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_div_si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -1218,8 +1226,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int DivideInplace(MpfrFloat rop, double op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_d_div((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -1236,8 +1244,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_div_d((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -1254,8 +1262,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         fixed (Mpz_t* p2 = &op2.Raw)
         {
             return MpfrLib.mpfr_div_z((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
@@ -1273,8 +1281,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         fixed (Mpq_t* p2 = &op2.Raw)
         {
             return MpfrLib.mpfr_div_q((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
@@ -1293,8 +1301,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static void SqrtInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             MpfrLib.mpfr_sqrt((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
         }
@@ -1309,7 +1317,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static void SqrtInplace(MpfrFloat rop, uint op1, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (byte* pr = &rop.Raw[0])
         {
             MpfrLib.mpfr_sqrt_ui((IntPtr)pr, op1, rounding ?? DefaultRounding);
         }
@@ -1327,8 +1335,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static void ReciprocalSquareInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op.Raw[0])
         {
             MpfrLib.mpfr_rec_sqrt((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
         }
@@ -1344,8 +1352,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static void CubicRootInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op.Raw[0])
         {
             MpfrLib.mpfr_cbrt((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
         }
@@ -1360,8 +1368,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static void RootNInplace(MpfrFloat rop, MpfrFloat op, uint n, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op.Raw[0])
         {
             MpfrLib.mpfr_rootn_ui((IntPtr)pr, (IntPtr)p1, n, rounding ?? DefaultRounding);
         }
@@ -1382,8 +1390,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     [Obsolete("use RootN")]
     public static void RootInplace(MpfrFloat rop, MpfrFloat op, uint n, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op.Raw[0])
         {
             MpfrLib.mpfr_rootn_ui((IntPtr)pr, (IntPtr)p1, n, rounding ?? DefaultRounding);
         }
@@ -1399,8 +1407,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int NegateInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_neg((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -1417,8 +1425,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int AbsInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_abs((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -1434,9 +1442,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = op1 - op2(if op1 > op2), +0 (otherwise)</summary>
     public static int DimInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_dim((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -1452,8 +1460,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int Multiply2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_mul_2ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -1468,8 +1476,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int Multiply2ExpInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_mul_2si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -1484,8 +1492,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int Divide2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_div_2ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -1500,8 +1508,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int Divide2ExpInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_div_2si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -1516,7 +1524,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int FactorialInplace(MpfrFloat rop, uint op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (byte* pr = &rop.Raw[0])
         {
             return MpfrLib.mpfr_fac_ui((IntPtr)pr, op, rounding ?? DefaultRounding);
         }
@@ -1534,10 +1542,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int FMAInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
-        fixed (Mpfr_t* p3 = &op3.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
+        fixed (byte* p3 = &op3.Raw[0])
         {
             return MpfrLib.mpfr_fma((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, (IntPtr)p3, rounding ?? DefaultRounding);
         }
@@ -1556,10 +1564,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int FMSInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
-        fixed (Mpfr_t* p3 = &op3.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
+        fixed (byte* p3 = &op3.Raw[0])
         {
             return MpfrLib.mpfr_fms((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, (IntPtr)p3, rounding ?? DefaultRounding);
         }
@@ -1578,11 +1586,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int FMMAInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
-        fixed (Mpfr_t* p3 = &op3.Raw)
-        fixed (Mpfr_t* p4 = &op4.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
+        fixed (byte* p3 = &op3.Raw[0])
+        fixed (byte* p4 = &op4.Raw[0])
         {
             return MpfrLib.mpfr_fmma((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, (IntPtr)p3, (IntPtr)p4, rounding ?? DefaultRounding);
         }
@@ -1601,11 +1609,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int FMMSInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
-        fixed (Mpfr_t* p3 = &op3.Raw)
-        fixed (Mpfr_t* p4 = &op4.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
+        fixed (byte* p3 = &op3.Raw[0])
+        fixed (byte* p4 = &op4.Raw[0])
         {
             return MpfrLib.mpfr_fmms((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, (IntPtr)p3, (IntPtr)p4, rounding ?? DefaultRounding);
         }
@@ -1622,9 +1630,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>set rop to sqrt(op1 * op2 + op2 * op2)</summary>
     public static int HypotInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_hypot((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -1640,7 +1648,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SumInplace(MpfrFloat rop, IEnumerable<MpfrFloat> tab, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (byte* pr = &rop.Raw[0])
         {
             GCHandle[] handles = tab.Select(x => GCHandle.Alloc(x.Raw, GCHandleType.Pinned)).ToArray();
             try
@@ -1673,9 +1681,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return obj switch
         {
             null => 1,
-            uint ui => Compare(this, ui), 
+            uint ui => Compare(this, ui),
             int i => Compare(this, i),
-            double d => Compare(this, d), 
+            double d => Compare(this, d),
             GmpFloat f => Compare(this, f),
             MpfrFloat f => Compare(this, f),
             GmpInteger z => Compare(this, z),
@@ -1688,8 +1696,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int Compare(MpfrFloat op1, MpfrFloat op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_cmp((IntPtr)p1, (IntPtr)p2);
         }
@@ -1697,8 +1705,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static bool CompareGreater(MpfrFloat op1, MpfrFloat op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_greater_p((IntPtr)p1, (IntPtr)p2) != 0;
         }
@@ -1706,8 +1714,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static bool CompareGreaterOrEquals(MpfrFloat op1, MpfrFloat op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_greaterequal_p((IntPtr)p1, (IntPtr)p2) != 0;
         }
@@ -1715,8 +1723,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static bool CompareLess(MpfrFloat op1, MpfrFloat op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_less_p((IntPtr)p1, (IntPtr)p2) != 0;
         }
@@ -1724,8 +1732,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static bool CompareLessOrEquals(MpfrFloat op1, MpfrFloat op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_lessequal_p((IntPtr)p1, (IntPtr)p2) != 0;
         }
@@ -1733,8 +1741,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static bool CompareEquals(MpfrFloat op1, MpfrFloat op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_equal_p((IntPtr)p1, (IntPtr)p2) != 0;
         }
@@ -1751,7 +1759,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int Compare(MpfrFloat op1, uint op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_cmp_ui((IntPtr)p1, op2);
         }
@@ -1772,7 +1780,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int Compare(MpfrFloat op1, int op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_cmp_si((IntPtr)p1, op2);
         }
@@ -1793,7 +1801,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int Compare(MpfrFloat op1, double op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_cmp_d((IntPtr)p1, op2);
         }
@@ -1814,7 +1822,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int Compare(MpfrFloat op1, GmpInteger op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
         fixed (Mpz_t* p2 = &op2.Raw)
         {
             return MpfrLib.mpfr_cmp_z((IntPtr)p1, (IntPtr)p2);
@@ -1836,7 +1844,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int Compare(MpfrFloat op1, GmpRational op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
         fixed (Mpq_t* p2 = &op2.Raw)
         {
             return MpfrLib.mpfr_cmp_q((IntPtr)p1, (IntPtr)p2);
@@ -1858,7 +1866,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int Compare(MpfrFloat op1, GmpFloat op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
         fixed (Mpf_t* p2 = &op2.Raw)
         {
             return MpfrLib.mpfr_cmp_f((IntPtr)p1, (IntPtr)p2);
@@ -1897,13 +1905,23 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public override int GetHashCode()
     {
-        return Raw.GetHashCode();
+        fixed (byte* pthis = &Raw[0])
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return ((WindowsMpfr_t*)pthis)->GetHashCode();
+            }
+            else
+            {
+                return ((LinuxMpfr_t*)pthis)->GetHashCode();
+            }
+        }
     }
 
     /// <summary> compare op1 and op2 * 2 ^ e</summary>
     public static int Compare2Exp(MpfrFloat op1, uint op2, int e)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_cmp_ui_2exp((IntPtr)p1, op2, e);
         }
@@ -1912,7 +1930,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary> compare op1 and op2 * 2 ^ e</summary>
     public static int Compare2Exp(MpfrFloat op1, int op2, int e)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_cmp_si_2exp((IntPtr)p1, op2, e);
         }
@@ -1920,8 +1938,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int CompareAbs(MpfrFloat op1, MpfrFloat op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_cmpabs((IntPtr)p1, (IntPtr)p2);
         }
@@ -1929,7 +1947,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int CompareAbs(MpfrFloat op1, uint op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_cmpabs_ui((IntPtr)p1, op2);
         }
@@ -1939,7 +1957,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         get
         {
-            fixed (Mpfr_t* pthis = &Raw)
+            fixed (byte* pthis = &Raw[0])
             {
                 return MpfrLib.mpfr_nan_p((IntPtr)pthis) != 0;
             }
@@ -1950,7 +1968,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         get
         {
-            fixed (Mpfr_t* pthis = &Raw)
+            fixed (byte* pthis = &Raw[0])
             {
                 return MpfrLib.mpfr_inf_p((IntPtr)pthis) != 0;
             }
@@ -1961,7 +1979,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         get
         {
-            fixed (Mpfr_t* pthis = &Raw)
+            fixed (byte* pthis = &Raw[0])
             {
                 return MpfrLib.mpfr_number_p((IntPtr)pthis) != 0;
             }
@@ -1972,7 +1990,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         get
         {
-            fixed (Mpfr_t* pthis = &Raw)
+            fixed (byte* pthis = &Raw[0])
             {
                 return MpfrLib.mpfr_zero_p((IntPtr)pthis) != 0;
             }
@@ -1984,7 +2002,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         get
         {
-            fixed (Mpfr_t* pthis = &Raw)
+            fixed (byte* pthis = &Raw[0])
             {
                 return MpfrLib.mpfr_regular_p((IntPtr)pthis) != 0;
             }
@@ -1995,7 +2013,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         get
         {
-            fixed (Mpfr_t* pthis = &Raw)
+            fixed (byte* pthis = &Raw[0])
             {
                 return MpfrLib.mpfr_sgn((IntPtr)pthis);
             }
@@ -2005,8 +2023,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <returns>true if (op1 &lt; op2) or (op1 &gt; op2), false otherwise(NaN, or equals)</returns>
     public static bool IsLessOrGreater(MpfrFloat op1, MpfrFloat op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_lessequal_p((IntPtr)p1, (IntPtr)p2) != 0;
         }
@@ -2015,8 +2033,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <returns>true if op1 or op2 is NaN, false otherwise</returns>
     public static bool IsUnordered(MpfrFloat op1, MpfrFloat op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_unordered_p((IntPtr)p1, (IntPtr)p2) != 0;
         }
@@ -2029,8 +2047,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <returns>true when x is smaller than or equal to y for this order relation, false otherwise.</returns>
     public static bool TotalOrderLessOrEquals(MpfrFloat op1, MpfrFloat op2)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_total_order_p((IntPtr)p1, (IntPtr)p2) != 0;
         }
@@ -2040,8 +2058,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #region 7. Transcendental Functions
     public static int LogInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_log((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2056,7 +2074,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int LogInplace(MpfrFloat rop, uint op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (byte* pr = &rop.Raw[0])
         {
             return MpfrLib.mpfr_log_ui((IntPtr)pr, op, rounding ?? DefaultRounding);
         }
@@ -2071,8 +2089,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int Log2Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_log2((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2087,8 +2105,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int Log10Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_log10((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2104,8 +2122,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = log(op + 1)</summary>
     public static int LogP1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_log1p((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2122,8 +2140,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = log2(op + 1)</summary>
     public static int Log2P1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_log2p1((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2140,8 +2158,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = log10(op + 1)</summary>
     public static int Log10P1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_log10p1((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2158,8 +2176,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = e ^ op</summary>
     public static int ExpInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_exp((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2176,8 +2194,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = 2 ^ op</summary>
     public static int Exp2Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_exp2((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2194,8 +2212,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = 10 ^ op</summary>
     public static int Exp10Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_exp10((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2212,8 +2230,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = e ^ op - 1</summary>
     public static int ExpM1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_expm1((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2230,8 +2248,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = e ^ op - 1</summary>
     public static int Exp2M1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_exp2m1((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2248,8 +2266,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = e ^ op - 1</summary>
     public static int Exp10M1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_exp10m1((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2266,9 +2284,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #region Power
     public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_pow((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -2290,9 +2308,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int PowerRInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_powr((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -2312,8 +2330,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_pow_ui((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -2330,8 +2348,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             return MpfrLib.mpfr_pow_si((IntPtr)pr, (IntPtr)p1, op2, rounding ?? DefaultRounding);
         }
@@ -2348,8 +2366,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         fixed (Mpz_t* p2 = &op2.Raw)
         {
             return MpfrLib.mpfr_pow_z((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
@@ -2367,7 +2385,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int PowerInplace(MpfrFloat rop, uint op1, uint op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (byte* pr = &rop.Raw[0])
         {
             return MpfrLib.mpfr_ui_pow_ui((IntPtr)pr, op1, op2, rounding ?? DefaultRounding);
         }
@@ -2382,8 +2400,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int PowerInplace(MpfrFloat rop, uint op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_ui_pow((IntPtr)pr, op1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -2402,8 +2420,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = (1 + op) * 2 ^ n</summary>
     public static int CompoundInplace(MpfrFloat rop, MpfrFloat op, int n, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_compound_si((IntPtr)pr, (IntPtr)pop, n, rounding ?? DefaultRounding);
         }
@@ -2420,8 +2438,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #region Trigonometric function
     public static int CosInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_cos((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2436,8 +2454,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SinInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_sin((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2452,8 +2470,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int TanInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_tan((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2469,8 +2487,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = cos(op * 2𝝿 / u)</summary>
     public static int CosUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_cosu((IntPtr)pr, (IntPtr)pop, u, rounding ?? DefaultRounding);
         }
@@ -2487,8 +2505,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = sin(op * 2𝝿 / u)</summary>
     public static int SinUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_sinu((IntPtr)pr, (IntPtr)pop, u, rounding ?? DefaultRounding);
         }
@@ -2505,8 +2523,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = tan(op * 2𝝿 / u)</summary>
     public static int TanUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_tanu((IntPtr)pr, (IntPtr)pop, u, rounding ?? DefaultRounding);
         }
@@ -2523,8 +2541,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = cos(op * 𝝿)</summary>
     public static int CosPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_cospi((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2541,8 +2559,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = sin(op * 𝝿)</summary>
     public static int SinPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_sinpi((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2559,8 +2577,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = tan(op * 𝝿)</summary>
     public static int TanPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_tanpi((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2576,9 +2594,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SinCosInplace(MpfrFloat sop, MpfrFloat cop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* psin = &sop.Raw)
-        fixed (Mpfr_t* pcos = &cop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* psin = &sop.Raw[0])
+        fixed (byte* pcos = &cop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_sin_cos((IntPtr)psin, (IntPtr)pcos, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2595,8 +2613,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = 1 / cos(op)</summary>
     public static int SecInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_sec((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2613,8 +2631,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = 1/ sin(op)</summary>
     public static int CscInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_csc((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2631,8 +2649,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = 1 / tan(op)</summary>
     public static int CotInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_cot((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2649,8 +2667,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = acos(op)</summary>
     public static int AcosInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_acos((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2667,8 +2685,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = asin(op)</summary>
     public static int AsinInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_asin((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2685,8 +2703,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = atan(op)</summary>
     public static int AtanInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_atan((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2703,8 +2721,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = acos(op) / 2𝝿 * u</summary>
     public static int AcosUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_acosu((IntPtr)pr, (IntPtr)pop, u, rounding ?? DefaultRounding);
         }
@@ -2721,8 +2739,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = asin(op) / 2𝝿 * u</summary>
     public static int AsinUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_asinu((IntPtr)pr, (IntPtr)pop, u, rounding ?? DefaultRounding);
         }
@@ -2739,8 +2757,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = atan(op) / 2𝝿 * u</summary>
     public static int AtanUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_atanu((IntPtr)pr, (IntPtr)pop, u, rounding ?? DefaultRounding);
         }
@@ -2757,8 +2775,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = acos(op) / 𝝿</summary>
     public static int AcosPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_acospi((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2775,8 +2793,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = asin(op) / 𝝿</summary>
     public static int AsinPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_asinpi((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2793,8 +2811,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = atan(op) / 𝝿</summary>
     public static int AtanPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_atanpi((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2811,9 +2829,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = atan2(y, x)</summary>
     public static int Atan2Inplace(MpfrFloat rop, MpfrFloat y, MpfrFloat x, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* py = &y.Raw)
-        fixed (Mpfr_t* px = &x.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* py = &y.Raw[0])
+        fixed (byte* px = &x.Raw[0])
         {
             return MpfrLib.mpfr_atan2((IntPtr)pr, (IntPtr)py, (IntPtr)px, rounding ?? DefaultRounding);
         }
@@ -2830,9 +2848,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = atan2(y, x) / 2𝝿 * u</summary>
     public static int Atan2UInplace(MpfrFloat rop, MpfrFloat y, MpfrFloat x, uint u = 360, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* py = &y.Raw)
-        fixed (Mpfr_t* px = &x.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* py = &y.Raw[0])
+        fixed (byte* px = &x.Raw[0])
         {
             return MpfrLib.mpfr_atan2u((IntPtr)pr, (IntPtr)py, (IntPtr)px, u, rounding ?? DefaultRounding);
         }
@@ -2849,9 +2867,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = atan2(y, x) / 𝝿</summary>
     public static int Atan2PiInplace(MpfrFloat rop, MpfrFloat y, MpfrFloat x, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* py = &y.Raw)
-        fixed (Mpfr_t* px = &x.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* py = &y.Raw[0])
+        fixed (byte* px = &x.Raw[0])
         {
             return MpfrLib.mpfr_atan2pi((IntPtr)pr, (IntPtr)py, (IntPtr)px, rounding ?? DefaultRounding);
         }
@@ -2867,8 +2885,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int CoshInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_cosh((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2883,8 +2901,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SinhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_sinh((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2899,8 +2917,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int TanhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_tanh((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2915,9 +2933,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int SinhCoshInplace(MpfrFloat sop, MpfrFloat cop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* psin = &sop.Raw)
-        fixed (Mpfr_t* pcos = &cop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* psin = &sop.Raw[0])
+        fixed (byte* pcos = &cop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_sinh_cosh((IntPtr)psin, (IntPtr)pcos, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2934,8 +2952,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = 1 / cosh(op)</summary>
     public static int SechInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_sech((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2952,8 +2970,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = 1/ sinh(op)</summary>
     public static int CschInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_csch((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2970,8 +2988,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = 1 / tanh(op)</summary>
     public static int CothInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_coth((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -2988,8 +3006,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = acosh(op)</summary>
     public static int AcoshInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_acosh((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3006,8 +3024,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = asinh(op)</summary>
     public static int AsinhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_asinh((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3024,8 +3042,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rop = atanh(op)</summary>
     public static int AtanhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_atanh((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3042,8 +3060,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int EintInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_eint((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3062,8 +3080,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int Li2Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_li2((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3083,8 +3101,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>Set rop to the value of the Gamma function on op.</summary>
     public static int GammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_gamma((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3101,9 +3119,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>upper incomplete Gamma function</summary>
     public static int GammaIncInplace(MpfrFloat rop, MpfrFloat op, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
-        fixed (Mpfr_t* pop2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
+        fixed (byte* pop2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_gamma_inc((IntPtr)pr, (IntPtr)pop, (IntPtr)pop2, rounding ?? DefaultRounding);
         }
@@ -3120,8 +3138,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>Set rop to the value of the logarithm of the Gamma function on op, rounded in the direction rnd.</summary>
     public static int LogGammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_lngamma((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3138,8 +3156,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>Set rop to the value of the logarithm of the absolute value of the Gamma function on op</summary>
     public static (int sign, int round) LGammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             int sign;
             int round = MpfrLib.mpfr_lgamma((IntPtr)pr, (IntPtr)(&sign), (IntPtr)pop, rounding ?? DefaultRounding);
@@ -3161,8 +3179,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int DigammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_digamma((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3183,9 +3201,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <remarks>Note: the current code does not try to avoid internal overflow or underflow, and might use a huge internal precision in some cases.</remarks>
     public static int BetaInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_beta((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -3203,8 +3221,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>Set rop to the value of the Riemann Zeta function on op, rounded in the direction rnd.</summary>
     public static int ZetaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_zeta((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3221,7 +3239,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>Set rop to the value of the Riemann Zeta function on op, rounded in the direction rnd.</summary>
     public static int ZetaInplace(MpfrFloat rop, uint op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (byte* pr = &rop.Raw[0])
         {
             return MpfrLib.mpfr_zeta_ui((IntPtr)pr, op, rounding ?? DefaultRounding);
         }
@@ -3238,8 +3256,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>Set rop to the value of the error function on op, rounded in the direction rnd.</summary>
     public static int ErrorFunctionInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_erf((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3256,8 +3274,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>Set rop to the value of the complementary error function on op, rounded in the direction rnd.</summary>
     public static int ComplementaryErrorFunctionInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_erfc((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3280,8 +3298,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int J0Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_j0((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3310,8 +3328,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int J1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_j1((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3340,8 +3358,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int JNInplace(MpfrFloat rop, int n, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_jn((IntPtr)pr, n, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3371,8 +3389,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int Y0Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_y0((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3403,8 +3421,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int Y1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_y1((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3435,8 +3453,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int YNInplace(MpfrFloat rop, int n, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_yn((IntPtr)pr, n, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3460,9 +3478,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>Set rop to the arithmetic-geometric mean of op1 and op2, rounded in the direction rnd.</summary>
     public static int AGMInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_agm((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -3486,8 +3504,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </remarks>
     public static int AiryInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_ai((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3510,7 +3528,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int ConstLog2Inplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (byte* pr = &rop.Raw[0])
         {
             return MpfrLib.mpfr_const_log2((IntPtr)pr, rounding ?? DefaultRounding);
         }
@@ -3525,7 +3543,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int ConstPiInplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (byte* pr = &rop.Raw[0])
         {
             return MpfrLib.mpfr_const_pi((IntPtr)pr, rounding ?? DefaultRounding);
         }
@@ -3540,7 +3558,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int ConstEulerInplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (byte* pr = &rop.Raw[0])
         {
             return MpfrLib.mpfr_const_euler((IntPtr)pr, rounding ?? DefaultRounding);
         }
@@ -3555,7 +3573,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int ConstCatalanInplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
+        fixed (byte* pr = &rop.Raw[0])
         {
             return MpfrLib.mpfr_const_catalan((IntPtr)pr, rounding ?? DefaultRounding);
         }
@@ -3573,8 +3591,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>rounds to the nearest representable integer in the given direction rnd.</summary>
     public static int RIntInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_rint((IntPtr)pr, (IntPtr)pop, rounding);
         }
@@ -3591,8 +3609,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>to the next higher or equal representable integer (like mpfr_rint with MPFR_RNDU)</summary>
     public static int CeilingInplace(MpfrFloat rop, MpfrFloat op)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_ceil((IntPtr)pr, (IntPtr)pop);
         }
@@ -3609,8 +3627,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>to the next lower or equal representable integer (like mpfr_rint with MPFR_RNDD)</summary>
     public static int FloorInplace(MpfrFloat rop, MpfrFloat op)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_floor((IntPtr)pr, (IntPtr)pop);
         }
@@ -3627,8 +3645,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>to the nearest representable integer, rounding halfway cases away from zero (as in the roundTiesToAway mode of IEEE 754)</summary>
     public static int RoundInplace(MpfrFloat rop, MpfrFloat op)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_round((IntPtr)pr, (IntPtr)pop);
         }
@@ -3645,8 +3663,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>to the nearest representable integer, rounding halfway cases with the even-rounding rule (like mpfr_rint with MPFR_RNDN)</summary>
     public static int RoundEvenInplace(MpfrFloat rop, MpfrFloat op)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_roundeven((IntPtr)pr, (IntPtr)pop);
         }
@@ -3663,8 +3681,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>to the next representable integer toward zero (like mpfr_rint with MPFR_RNDZ).</summary>
     public static int TruncateInplace(MpfrFloat rop, MpfrFloat op)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_trunc((IntPtr)pr, (IntPtr)pop);
         }
@@ -3682,8 +3700,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
     public static int RIntCeilingInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_rint_ceil((IntPtr)pr, (IntPtr)pop, rounding);
         }
@@ -3702,8 +3720,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
     public static int RIntFloorInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_rint_floor((IntPtr)pr, (IntPtr)pop, rounding);
         }
@@ -3722,8 +3740,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
     public static int RIntRoundInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_rint_round((IntPtr)pr, (IntPtr)pop, rounding);
         }
@@ -3742,8 +3760,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
     public static int RIntRoundEvenInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_rint_roundeven((IntPtr)pr, (IntPtr)pop, rounding);
         }
@@ -3762,8 +3780,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
     public static int RIntTruncateInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_rint_trunc((IntPtr)pr, (IntPtr)pop, rounding);
         }
@@ -3780,8 +3798,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int FractionalInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_frac((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
@@ -3796,9 +3814,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int ModFractionalInplace(MpfrFloat iop, MpfrFloat fop, MpfrFloat op, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* fi = &iop.Raw)
-        fixed (Mpfr_t* ff = &fop.Raw)
-        fixed (Mpfr_t* fo = &op.Raw)
+        fixed (byte* fi = &iop.Raw[0])
+        fixed (byte* ff = &fop.Raw[0])
+        fixed (byte* fo = &op.Raw[0])
         {
             return MpfrLib.mpfr_modf((IntPtr)fi, (IntPtr)ff, (IntPtr)fo, rounding ?? DefaultRounding);
         }
@@ -3817,9 +3835,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int ModInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* px = &x.Raw)
-        fixed (Mpfr_t* py = &y.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* px = &x.Raw[0])
+        fixed (byte* py = &y.Raw[0])
         {
             return MpfrLib.mpfr_fmod((IntPtr)pr, (IntPtr)px, (IntPtr)py, rounding ?? DefaultRounding);
         }
@@ -3845,8 +3863,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int ModInplace(MpfrFloat rop, MpfrFloat x, uint y, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* px = &x.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* px = &x.Raw[0])
         {
             return MpfrLib.mpfr_fmod_ui((IntPtr)pr, (IntPtr)px, y, rounding ?? DefaultRounding);
         }
@@ -3872,9 +3890,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static (int quotient, int round) ModQuotientInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* px = &x.Raw)
-        fixed (Mpfr_t* py = &y.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* px = &x.Raw[0])
+        fixed (byte* py = &y.Raw[0])
         {
             int q;
             int round = MpfrLib.mpfr_fmodquo((IntPtr)pr, (IntPtr)(&q), (IntPtr)px, (IntPtr)py, rounding ?? DefaultRounding);
@@ -3898,9 +3916,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int ReminderInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* px = &x.Raw)
-        fixed (Mpfr_t* py = &y.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* px = &x.Raw[0])
+        fixed (byte* py = &y.Raw[0])
         {
             return MpfrLib.mpfr_remainder((IntPtr)pr, (IntPtr)px, (IntPtr)py, rounding ?? DefaultRounding);
         }
@@ -3923,9 +3941,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static (int quotient, int round) ReminderQuotientInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* px = &x.Raw)
-        fixed (Mpfr_t* py = &y.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* px = &x.Raw[0])
+        fixed (byte* py = &y.Raw[0])
         {
             int q;
             int round = MpfrLib.mpfr_remquo((IntPtr)pr, (IntPtr)(&q), (IntPtr)px, (IntPtr)py, rounding ?? DefaultRounding);
@@ -3948,7 +3966,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         get
         {
-            fixed (Mpfr_t* pthis = &Raw)
+            fixed (byte* pthis = &Raw[0])
             {
                 return MpfrLib.mpfr_integer_p((IntPtr)pthis) != 0;
             }
@@ -3973,7 +3991,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     public int RoundToPrecision(int precision, MpfrRounding? rounding = null)
     {
         CheckPrecision(precision);
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_prec_round((IntPtr)pthis, precision, rounding ?? DefaultRounding);
         }
@@ -3984,7 +4002,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public bool CanRound(int error, MpfrRounding round1, MpfrRounding round2, int precision)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_can_round((IntPtr)pthis, error, round1, round2, precision) != 0;
         }
@@ -3994,7 +4012,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         get
         {
-            fixed (Mpfr_t* pthis = &Raw)
+            fixed (byte* pthis = &Raw[0])
             {
                 return MpfrLib.mpfr_min_prec((IntPtr)pthis);
             }
@@ -4005,8 +4023,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #region 12. Miscellaneous Functions
     public void NextToward(MpfrFloat y)
     {
-        fixed (Mpfr_t* pthis = &Raw)
-        fixed (Mpfr_t* py = &y.Raw)
+        fixed (byte* pthis = &Raw[0])
+        fixed (byte* py = &y.Raw[0])
         {
             MpfrLib.mpfr_nexttoward((IntPtr)pthis, (IntPtr)py);
         }
@@ -4014,7 +4032,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public void NextAbove()
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             MpfrLib.mpfr_nextabove((IntPtr)pthis);
         }
@@ -4022,7 +4040,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public void NextBelow()
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             MpfrLib.mpfr_nextbelow((IntPtr)pthis);
         }
@@ -4030,9 +4048,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int MinInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_min((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -4047,9 +4065,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     public static int MaxInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_max((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding ?? DefaultRounding);
         }
@@ -4067,11 +4085,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         get
         {
-            return (int)Raw.Exponent;
+            fixed (byte* pthis = &Raw[0])
+            {
+                return MpfrLib.mpfr_get_exp((IntPtr)pthis);
+            }
         }
         set
         {
-            fixed (Mpfr_t* pthis = &Raw)
+            fixed (byte* pthis = &Raw[0])
             {
                 MpfrLib.mpfr_set_exp((IntPtr)pthis, value);
             }
@@ -4083,7 +4104,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         get
         {
-            fixed (Mpfr_t* pthis = &Raw)
+            fixed (byte* pthis = &Raw[0])
             {
                 return MpfrLib.mpfr_signbit((IntPtr)pthis) != 0;
             }
@@ -4099,8 +4120,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static int CopySetSignInplace(MpfrFloat rop, MpfrFloat op, bool sign, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
         {
             return MpfrLib.mpfr_setsign((IntPtr)pr, (IntPtr)pop, sign ? 1 : 0, rounding ?? DefaultRounding);
         }
@@ -4119,9 +4140,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>Set the value of rop from op1, rounded toward the given direction rnd, then set its sign bit to that of op2 (even when op1 or op2 is a NaN).</summary>
     public static int CopySetSignInplace(MpfrFloat rop, MpfrFloat op, MpfrFloat signOp, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* pop = &op.Raw)
-        fixed (Mpfr_t* psop = &signOp.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* pop = &op.Raw[0])
+        fixed (byte* psop = &signOp.Raw[0])
         {
             return MpfrLib.mpfr_copysign((IntPtr)pr, (IntPtr)pop, (IntPtr)psop, rounding ?? DefaultRounding);
         }
@@ -4160,7 +4181,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>This function rounds x emulating subnormal number arithmetic</summary>
     public int SubNormalize(int t = 0, MpfrRounding? rounding = null)
     {
-        fixed (Mpfr_t* pthis = &Raw)
+        fixed (byte* pthis = &Raw[0])
         {
             return MpfrLib.mpfr_subnormalize((IntPtr)pthis, t, rounding ?? DefaultRounding);
         }
@@ -4206,7 +4227,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public void SetRawPrecision(int precision)
     {
-        fixed (Mpfr_t* ptr = &Raw)
+        fixed (byte* ptr = &Raw[0])
         {
             MpfrLib.mpfr_set_prec_raw((IntPtr)ptr, precision);
         }
@@ -4225,8 +4246,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public int MpfEquals(MpfrFloat op1, MpfrFloat op2, uint op3)
     {
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             return MpfrLib.mpfr_eq((IntPtr)p1, (IntPtr)p2, op3);
         }
@@ -4241,9 +4262,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static unsafe void RelDiffInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding rounding)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
-        fixed (Mpfr_t* p2 = &op2.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
+        fixed (byte* p2 = &op2.Raw[0])
         {
             MpfrLib.mpfr_reldiff((IntPtr)pr, (IntPtr)p1, (IntPtr)p2, rounding);
         }
@@ -4270,8 +4291,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static void Multiply2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding rounding)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             MpfrLib.mpfr_mul_2exp((IntPtr)pr, (IntPtr)p1, op2, rounding);
         }
@@ -4283,8 +4304,8 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     public static void Divide2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding rounding)
     {
-        fixed (Mpfr_t* pr = &rop.Raw)
-        fixed (Mpfr_t* p1 = &op1.Raw)
+        fixed (byte* pr = &rop.Raw[0])
+        fixed (byte* p1 = &op1.Raw[0])
         {
             MpfrLib.mpfr_div_2exp((IntPtr)pr, (IntPtr)p1, op2, rounding);
         }
@@ -4318,10 +4339,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     private void Clear()
     {
-        fixed (Mpfr_t* ptr = &Raw)
+        fixed (byte* ptr = &Raw[0])
         {
-            //MpfrLib.mpfr_clear((IntPtr)ptr);
+            MpfrLib.mpfr_clear((IntPtr)ptr);
         }
+        ArrayPool<byte>.Shared.Return(Raw);
     }
 
     protected virtual void Dispose(bool disposing)
@@ -4353,32 +4375,4 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         GC.SuppressFinalize(this);
     }
     #endregion
-}
-
-[StructLayout(LayoutKind.Sequential)]
-public record struct Mpfr_t
-{
-    public long Precision;
-    public long Sign;
-    public long Exponent;
-    public IntPtr Limbs;
-
-    public static unsafe int RawSize => sizeof(Mpfr_t);
-
-    private readonly int LimbCount => (int)((Precision - 1) / (IntPtr.Size * 8) + 1);
-
-    private unsafe Span<nint> GetLimbData() => new((void*)Limbs, LimbCount);
-
-    public override int GetHashCode()
-    {
-        HashCode c = new();
-        c.Add(Precision);
-        c.Add(Sign);
-        c.Add(Exponent);
-        foreach (nint i in GetLimbData())
-        {
-            c.Add(i);
-        }
-        return c.ToHashCode();
-    }
 }

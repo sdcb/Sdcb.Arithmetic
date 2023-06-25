@@ -9,7 +9,9 @@ namespace Sdcb.Arithmetic.Mpfr.Tests;
 
 public class MiscTests
 {
+#pragma warning disable IDE0052 // 删除未读的私有成员
     private readonly ITestOutputHelper _console;
+#pragma warning restore IDE0052 // 删除未读的私有成员
 
     public MiscTests(ITestOutputHelper console)
     {

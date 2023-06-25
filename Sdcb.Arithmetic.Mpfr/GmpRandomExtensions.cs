@@ -10,7 +10,7 @@ namespace Sdcb.Arithmetic.Mpfr
         public static int NextMpfrFloatInplace(this GmpRandom random, MpfrFloat rop)
         {
             fixed (GmpRandomState* prandom = &random.Raw)
-            fixed (Mpfr_t* pop = &rop.Raw)
+            fixed (byte* pop = &rop.Raw[0])
             {
                 return MpfrLib.mpfr_urandomb((IntPtr)pop, (IntPtr)prandom);
             }
@@ -26,7 +26,7 @@ namespace Sdcb.Arithmetic.Mpfr
         public static int NextMpfrFloatRoundInplace(this GmpRandom random, MpfrFloat rop, MpfrRounding? rounding = null)
         {
             fixed (GmpRandomState* prandom = &random.Raw)
-            fixed (Mpfr_t* pr = &rop.Raw)
+            fixed (byte* pr = &rop.Raw[0])
             {
                 return MpfrLib.mpfr_urandom((IntPtr)pr, (IntPtr)prandom, rounding ?? MpfrFloat.DefaultRounding);
             }
@@ -43,7 +43,7 @@ namespace Sdcb.Arithmetic.Mpfr
         public static int NextNMpfrFloatInplace(this GmpRandom random, MpfrFloat rop, MpfrRounding? rounding = null)
         {
             fixed (GmpRandomState* prandom = &random.Raw)
-            fixed (Mpfr_t* pr = &rop.Raw)
+            fixed (byte* pr = &rop.Raw[0])
             {
                 return MpfrLib.mpfr_nrandom((IntPtr)pr, (IntPtr)prandom, rounding ?? MpfrFloat.DefaultRounding);
             }
@@ -61,8 +61,8 @@ namespace Sdcb.Arithmetic.Mpfr
         public static int Next2NMpfrFloatInplace(this GmpRandom random, MpfrFloat rop1, MpfrFloat rop2, MpfrRounding? rounding = null)
         {
             fixed (GmpRandomState* prandom = &random.Raw)
-            fixed (Mpfr_t* pr1 = &rop1.Raw)
-            fixed (Mpfr_t* pr2 = &rop2.Raw)
+            fixed (byte* pr1 = &rop1.Raw[0])
+            fixed (byte* pr2 = &rop2.Raw[0])
             {
                 return MpfrLib.mpfr_grandom((IntPtr)pr1, (IntPtr)pr2, (IntPtr)prandom, rounding ?? MpfrFloat.DefaultRounding);
             }
@@ -81,7 +81,7 @@ namespace Sdcb.Arithmetic.Mpfr
         public static int NextEMpfrFloatInplace(this GmpRandom random, MpfrFloat rop, MpfrRounding? rounding = null)
         {
             fixed (GmpRandomState* prandom = &random.Raw)
-            fixed (Mpfr_t* pr = &rop.Raw)
+            fixed (byte* pr = &rop.Raw[0])
             {
                 return MpfrLib.mpfr_erandom((IntPtr)pr, (IntPtr)prandom, rounding ?? MpfrFloat.DefaultRounding);
             }
