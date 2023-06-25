@@ -18,7 +18,9 @@ void PublishProGet(string path)
 {
 	string nugetApiKey = Util.GetPassword("proget-api-key");
 	string nugetApiUrl = Util.GetPassword("proget-api-test");
-	NuGetRun($@"push {path} {nugetApiKey} -Source {nugetApiUrl}");
+	//DotNetRun($@"nuget push {path} -s {nugetApiUrl} -k {nugetApiKey}");
+	// dotnet nuget add source -n proget -u zhoujie -p "xxxx"
+	DotNetRun($@"nuget push {path} -s proget");
 }
 
 void PublishNuGet(string path)

@@ -4,14 +4,14 @@ using System.Runtime.InteropServices;
 namespace Sdcb.Arithmetic.Mpfr;
 
 [StructLayout(LayoutKind.Sequential)]
-internal record struct LinuxMpfr_t
+internal record struct Mpfr_t
 {
     public long Precision;
     public long Sign;
     public long Exponent;
     public IntPtr Limbs;
 
-    public static unsafe int RawSize => sizeof(LinuxMpfr_t);
+    public static unsafe int RawSize => sizeof(Mpfr_t);
 
     private readonly int LimbCount => (int)((Precision - 1) / (IntPtr.Size * 8) + 1);
 

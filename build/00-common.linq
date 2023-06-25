@@ -18,11 +18,11 @@ async Task SetupAsync(CancellationToken cancellationToken = default)
 
 static void NuGetRun(string args) => Run(@".\nuget.exe", args, Encoding.GetEncoding("gb2312"));
 static void DotNetRun(string args) => Run("dotnet", args, Encoding.GetEncoding("utf-8"));
-static void Run(string exe, string args, Encoding encoding) => Util.Cmd(exe, args, encoding);
+static void Run(string exe, string args, Encoding encoding) => Util.Cmd(exe, args.Dump(), encoding);
 static ProjectVersion[] Projects = new[]
 {
 	new ProjectVersion("Sdcb.Arithmetic.Gmp", "6.2.1-preview.15"), 
-	new ProjectVersion("Sdcb.Arithmetic.Mpfr", "4.2.0-preview.15"), 
+	new ProjectVersion("Sdcb.Arithmetic.Mpfr", "4.2.0-preview.16"), 
 };
 
 static async Task DownloadFile(Uri uri, string localFile, CancellationToken cancellationToken = default)
