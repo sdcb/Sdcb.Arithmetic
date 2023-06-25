@@ -19,7 +19,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         _ => sizeof(LinuxMpfr_t),
     };
 
-    internal readonly byte[] Raw = ArrayPool<byte>.Shared.Rent(RawSize);
+    internal readonly byte[] Raw = new byte[RawSize];
 
     #region 1. Initialization Functions
     /// <summary>
@@ -4343,7 +4343,6 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         {
             MpfrLib.mpfr_clear((IntPtr)ptr);
         }
-        ArrayPool<byte>.Shared.Return(Raw);
     }
 
     protected virtual void Dispose(bool disposing)
