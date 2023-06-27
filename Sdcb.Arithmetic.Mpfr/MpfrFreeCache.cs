@@ -1,21 +1,20 @@
 ﻿using System;
 
-namespace Sdcb.Arithmetic.Mpfr
+namespace Sdcb.Arithmetic.Mpfr;
+
+/// <summary>
+/// Free cache policy
+/// </summary>
+[Flags]
+public enum MpfrFreeCache
 {
     /// <summary>
-    /// Free cache policy
+    /// 1 &lt;&lt; 0
     /// </summary>
-    [Flags]
-    public enum MpfrFreeCache
-    {
-        /// <summary>
-        /// 1 &lt;&lt; 0
-        /// </summary>
-        Local = 1,
-        
-        /// <summary>
-        /// 1 &lt;&lt; 1
-        /// </summary>
-        Global = 2, 
-    }
+    Local = 1,
+    
+    /// <summary>
+    /// 1 &lt;&lt; 1
+    /// </summary>
+    Global = 2, 
 }

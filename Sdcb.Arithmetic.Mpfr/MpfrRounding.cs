@@ -1,38 +1,37 @@
-﻿namespace Sdcb.Arithmetic.Mpfr
+﻿namespace Sdcb.Arithmetic.Mpfr;
+
+/// <summary>
+/// Definition of MPFR rounding modes
+/// </summary>
+public enum MpfrRounding
 {
     /// <summary>
-    /// Definition of MPFR rounding modes
+    /// MPFR_RNDN, round to nearest, with ties to even
     /// </summary>
-    public enum MpfrRounding
-    {
-        /// <summary>
-        /// MPFR_RNDN, round to nearest, with ties to even
-        /// </summary>
-        ToEven = 0,
+    ToEven = 0,
 
-        /// <summary>
-        /// MPFR_RNDZ, round toward zero
-        /// </summary>
-        ToZero,
+    /// <summary>
+    /// MPFR_RNDZ, round toward zero
+    /// </summary>
+    ToZero,
 
-        /// <summary>
-        /// MPFR_RNDU, round toward +Inf
-        /// </summary>
-        ToPositiveInfinity,
+    /// <summary>
+    /// MPFR_RNDU, round toward +Inf
+    /// </summary>
+    ToPositiveInfinity,
 
-        /// <summary>
-        /// MPFR_RNDD, round toward -Inf
-        /// </summary>
-        ToNegativeInfinity,
+    /// <summary>
+    /// MPFR_RNDD, round toward -Inf
+    /// </summary>
+    ToNegativeInfinity,
 
-        /// <summary>
-        /// MPFR_RNDA, round away from zero
-        /// </summary>
-        AwayFromZero,
+    /// <summary>
+    /// MPFR_RNDA, round away from zero
+    /// </summary>
+    AwayFromZero,
 
-        /// <summary>
-        /// MPFR_RNDF, faithful rounding
-        /// </summary>
-        Faithful,
-    }
+    /// <summary>
+    /// MPFR_RNDF, faithful rounding
+    /// </summary>
+    Faithful,
 }
