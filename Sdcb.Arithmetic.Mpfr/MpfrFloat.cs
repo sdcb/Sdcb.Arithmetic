@@ -4275,12 +4275,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// <para>
     /// Compute the relative difference between op1 and op2 and store the result in rop.
     /// This function does not guarantee the correct rounding on the relative difference;
-    /// it just computes |op1 - op2| / op1</para>
+    /// it just computes |op1 - op2| / op1
     /// </summary>
-    /// <param name="precision">the result precision</param>
+    /// <param name="op1">The first operand.</param>
+    /// <param name="op2">The second operand.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="precision">The result precision.</param>
     /// <returns>abs(op1-op2)/op1</returns>
     public static MpfrFloat RelDiff(MpfrFloat op1, MpfrFloat op2, MpfrRounding rounding, int precision = 0)
     {

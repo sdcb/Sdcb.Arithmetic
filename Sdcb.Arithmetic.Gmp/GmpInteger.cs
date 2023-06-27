@@ -17,6 +17,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     private readonly bool _isOwner;
 
     #region Initializing Integers
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GmpInteger"/> class using the default constructor with an optional ownership parameter.
+    /// </summary>
+    /// <param name="isOwner">
+    /// A <see cref="bool"/> value that indicates whether the current instance owns the memory for the underlying GMP integer.
+    /// Default value is true.
+    /// </param>
     public unsafe GmpInteger(bool isOwner = true)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -26,12 +33,32 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         _isOwner = isOwner;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GmpInteger"/> class from an existing <see cref="Mpz_t"/> structure, with an optional ownership parameter.
+    /// </summary>
+    /// <param name="raw">
+    /// The <see cref="Mpz_t"/> structure representing the underlying GMP integer value.
+    /// </param>
+    /// <param name="isOwner">
+    /// A <see cref="bool"/> value that indicates whether the current instance owns the memory for the underlying GMP integer.
+    /// Default value is true.
+    /// </param>
     public GmpInteger(Mpz_t raw, bool isOwner = true)
     {
         Raw = raw;
         _isOwner = isOwner;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GmpInteger"/> class and allocates memory for a GMP integer with the specified number of bits, with an optional ownership parameter.
+    /// </summary>
+    /// <param name="bitCount">
+    /// A <see cref="uint"/> value specifying the number of bits to allocate for the GMP integer.
+    /// </param>
+    /// <param name="isOwner">
+    /// A <see cref="bool"/> value that indicates whether the current instance owns the memory for the underlying GMP integer.
+    /// Default value is true.
+    /// </param>
     public unsafe GmpInteger(uint bitCount, bool isOwner = true)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -158,8 +185,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return new GmpInteger(raw);
     }
 
+    /// <summary>Clone the current <see cref="GmpInteger"/> instance.</summary>
     public GmpInteger Clone() => From(this);
 
+    /// <summary>Create a <see cref="GmpInteger"/> from the specific <see cref="GmpFloat"/>.</summary>
     public static unsafe GmpInteger From(GmpFloat op)
     {
         GmpInteger rop = new();
@@ -167,8 +196,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return rop;
     }
 
+    /// <summary>Explicitly Convert the specific <see cref="GmpFloat"/> into <see cref="GmpInteger"/>.</summary>
     public static explicit operator GmpInteger(GmpFloat op) => From(op);
 
+    /// <summary>Create a <see cref="GmpInteger"/> from the specific uint.</summary>
     public static unsafe GmpInteger From(uint op)
     {
         Mpz_t raw = new();
@@ -176,6 +207,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return new GmpInteger(raw);
     }
 
+    /// <summary>Implicitly Convert the specific uint into <see cref="GmpInteger"/>.</summary>
     public static implicit operator GmpInteger(uint op) => From(op);
 
     public static unsafe GmpInteger From(int op)
@@ -185,8 +217,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return new GmpInteger(raw);
     }
 
+    /// <summary>Implicitly Convert the specific int into <see cref="GmpInteger"/>.</summary>
     public static implicit operator GmpInteger(int op) => From(op);
 
+    /// <summary>Create a <see cref="GmpInteger"/> from the specific double.</summary>
     public static unsafe GmpInteger From(double op)
     {
         Mpz_t raw = new();
@@ -2426,9 +2460,9 @@ public record struct Mpz_t
 
     public static int RawSize => Marshal.SizeOf<Mpz_t>();
 
-    private unsafe Span<nint> GetLimbData() => new((void*)Limbs, Allocated);
+    private readonly unsafe Span<nint> GetLimbData() => new((void*)Limbs, Allocated);
 
-    public override int GetHashCode()
+    public override readonly int GetHashCode()
     {
         HashCode c = new();
         c.Add(Allocated);

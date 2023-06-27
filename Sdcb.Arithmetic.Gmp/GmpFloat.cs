@@ -25,6 +25,8 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
 
     #region Initialization functions
 
+
+    /// <summary>Initializes a new instance of the <see cref="GmpFloat"/> class.</summary>
     public unsafe GmpFloat()
     {
         fixed (Mpf_t* ptr = &Raw)
@@ -100,6 +102,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         return new GmpFloat(raw);
     }
 
+    /// <summary>
+    /// Converts the specified int value to a GmpFloat.
+    /// </summary>
+    /// <param name="val">The int value to convert.</param>
+    /// <returns>The GmpFloat result of the conversion.</returns>
     public static implicit operator GmpFloat(int val) => From(val);
 
     /// <summary>
@@ -128,6 +135,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         return new GmpFloat(raw);
     }
 
+    /// <summary>
+    /// Implicitly converts the specified uint value to a <see cref="GmpFloat"/>.
+    /// </summary>
     public static implicit operator GmpFloat(uint val) => From(val);
 
     /// <summary>
@@ -156,6 +166,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         return new GmpFloat(raw);
     }
 
+    /// <summary>
+    /// Implicitly converts the specified <see cref="double"/> value to a <see cref="GmpFloat"/>.
+    /// </summary>
     public static implicit operator GmpFloat(double val) => From(val);
 
     /// <summary>
@@ -196,6 +209,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         return f;
     }
 
+    /// <summary>Implicitly converts a GmpInteger value into a GmpFloat value.</summary>
     public static implicit operator GmpFloat(GmpInteger val) => From(val);
 
     /// <summary>
@@ -466,6 +480,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         }
     }
 
+    /// <summary>
+    /// Explicitly converts the given instance of <see cref="GmpFloat"/> to a <see cref="double"/>.
+    /// </summary>
+    /// <param name="op">The given instance to convert.</param>
+    /// <returns>The <see cref="double"/> resulting from the conversion.</returns>
     public static explicit operator double(GmpFloat op) => op.ToDouble();
 
     /// <summary>
@@ -494,6 +513,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         }
     }
 
+    /// <summary>
+    /// Explicitly converts the given instance of <see cref="GmpFloat"/> to a <see cref="int"/>.
+    /// </summary>
     public static explicit operator int(GmpFloat op) => op.ToInt32();
 
     /// <summary>
@@ -1236,28 +1258,37 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     #endregion
 
     #region Arithmetic Functions - Operators
-    public static unsafe GmpFloat operator +(GmpFloat op1, GmpFloat op2) => Add(op1, op2, op1.Precision);
-
+    /// <summary>Adds a <see cref="GmpFloat"/> value and a <see cref="uint"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
     public static unsafe GmpFloat operator +(GmpFloat op1, uint op2) => Add(op1, op2, op1.Precision);
 
+    /// <summary>Subtracts two <see cref="GmpFloat"/> values, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
     public static unsafe GmpFloat operator -(GmpFloat op1, GmpFloat op2) => Subtract(op1, op2, op1.Precision);
 
+    /// <summary>Subtracts a <see cref="uint"/> value from a <see cref="GmpFloat"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
     public static unsafe GmpFloat operator -(GmpFloat op1, uint op2) => Subtract(op1, op2, op1.Precision);
 
+    /// <summary>Subtracts a <see cref="GmpFloat"/> value from a <see cref="uint"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the second operand.</summary>
     public static unsafe GmpFloat operator -(uint op1, GmpFloat op2) => Subtract(op1, op2, op2.Precision);
 
+    /// <summary>Multiplies two <see cref="GmpFloat"/> values, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
     public static unsafe GmpFloat operator *(GmpFloat op1, GmpFloat op2) => Multiply(op1, op2, op1.Precision);
 
+    /// <summary>Multiplies a <see cref="GmpFloat"/> value by a <see cref="uint"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
     public static unsafe GmpFloat operator *(GmpFloat op1, uint op2) => Multiply(op1, op2, op1.Precision);
 
+    /// <summary>Divides a <see cref="GmpFloat"/> value by another <see cref="GmpFloat"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
     public static unsafe GmpFloat operator /(GmpFloat op1, GmpFloat op2) => Divide(op1, op2, op1.Precision);
 
+    /// <summary>Divides a <see cref="GmpFloat"/> value by a <see cref="uint"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
     public static unsafe GmpFloat operator /(GmpFloat op1, uint op2) => Divide(op1, op2, op1.Precision);
 
+    /// <summary>Divides a <see cref="uint"/> value by a <see cref="GmpFloat"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the second operand.</summary>
     public static unsafe GmpFloat operator /(uint op1, GmpFloat op2) => Divide(op1, op2, op2.Precision);
 
+    /// <summary>Raises a <see cref="GmpFloat"/> value to the power of a <see cref="uint"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
     public static unsafe GmpFloat operator ^(GmpFloat op1, uint op2) => Power(op1, op2, op1.Precision);
 
+    /// <summary>Negates a <see cref="GmpFloat"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the input.</summary>
     public static unsafe GmpFloat operator -(GmpFloat op1) => Negate(op1, op1.Precision);
 
     #endregion
@@ -1758,6 +1789,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         return rop;
     }
 
+    /// <summary>Indicates whether the value of this instance is an integer.</summary>
     public unsafe bool IsInteger
     {
         get
