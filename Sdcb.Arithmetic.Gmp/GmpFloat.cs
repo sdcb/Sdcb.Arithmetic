@@ -311,6 +311,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         }
     }
 
+    /// Gets or sets the precision of the <see cref="GmpFloat"/> instance.
     public unsafe uint Precision
     {
         get
@@ -1258,6 +1259,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     #endregion
 
     #region Arithmetic Functions - Operators
+    /// <summary>Adds two <see cref="GmpFloat"/> values and returns a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
+    public static unsafe GmpFloat operator +(GmpFloat op1, GmpFloat op2) => Add(op1, op2, op1.Precision);
+
     /// <summary>Adds a <see cref="GmpFloat"/> value and a <see cref="uint"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
     public static unsafe GmpFloat operator +(GmpFloat op1, uint op2) => Add(op1, op2, op1.Precision);
 
@@ -1692,6 +1696,10 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         return rop;
     }
 
+    /// <summary>Gets the sign of the <see cref="GmpFloat"/> instance. </summary>
+    /// <remarks>
+    /// The returned value is -1 if the <see cref="GmpFloat"/> instance is less than zero, 0 if the instance is zero, 1 otherwise.
+    /// </remarks>
     public int Sign => Raw.Size < 0 ? -1 : Raw.Size > 0 ? 1 : 0;
 
     #endregion
@@ -1881,6 +1889,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         }
     }
 
+    /// <summary>Finalizes an instance of the <see cref="GmpFloat"/> class.</summary>
     ~GmpFloat()
     {
         // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
