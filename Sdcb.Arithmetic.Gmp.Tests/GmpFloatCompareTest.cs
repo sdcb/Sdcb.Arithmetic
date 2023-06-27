@@ -4,7 +4,9 @@ namespace Sdcb.Arithmetic.Gmp.Tests;
 
 public class GmpFloatCompareTest
 {
+#pragma warning disable IDE0052 // 删除未读的私有成员
     private readonly ITestOutputHelper _console;
+#pragma warning restore IDE0052 // 删除未读的私有成员
 
     public GmpFloatCompareTest(ITestOutputHelper console)
     {
@@ -59,7 +61,7 @@ public class GmpFloatCompareTest
     [Fact]
     public void EqualsNullTest()
     {
-        using GmpFloat equals = new GmpFloat();
+        using GmpFloat equals = new();
         Assert.False(equals.Equals(null));
     }
 
@@ -295,7 +297,7 @@ public class GmpFloatCompareTest
     [InlineData("0", "-0", 0)]
     [InlineData("2", "3", -1)]
     [InlineData("5", "1", 1)]
-    [Obsolete]
+    [Obsolete("Because GmpFloat.MpfEquals is obsolete")]
     public void MpfEqualsTest(string op1, string op2, int check)
     {
         Assert.Equal(check, GmpFloat.MpfEquals(GmpFloat.Parse(op1), uint.Parse(op2)));
@@ -307,7 +309,7 @@ public class GmpFloatCompareTest
     [InlineData(80, 100, 0.25)]
     public void RelDiffInplaceTest(double op1, double op2, double check)
     {
-        using GmpFloat rop = new GmpFloat();
+        using GmpFloat rop = new();
         GmpFloat.RelDiffInplace(rop, GmpFloat.From(op1), GmpFloat.From(op2));
         double res = Math.Abs((double)rop) - check;
         Assert.True(Math.Abs(res) < 0.000001);

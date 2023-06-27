@@ -23,7 +23,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\.editorconfig" Link=".editorconfig" />
     <None Include="..\build\Sdcb.Arithmetic.Gmp.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

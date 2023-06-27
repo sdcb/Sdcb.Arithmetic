@@ -7,8 +7,14 @@ using System.Threading;
 
 namespace Sdcb.Arithmetic.Gmp;
 
+/// <summary>
+/// An arbitrary-precision floating point number using the GNU Multiple Precision Arithmetic Library.
+/// </summary>
 public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, IComparable, IComparable<GmpFloat>
 {
+    /// <summary>
+    /// The default precision for GmpFloat operations.
+    /// </summary>
     public static uint DefaultPrecision
     {
         get => GmpLib.__gmpf_get_default_prec();
@@ -27,11 +33,19 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GmpFloat"/> class with the specified <see cref="Mpf_t "/> structure.
+    /// </summary>
+    /// <param name="raw">The <see cref="Mpf_t "/> structure to initialize this instance with.</param>
     public GmpFloat(Mpf_t raw)
     {
         Raw = raw;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GmpFloat"/> class.
+    /// </summary>
+    /// <param name="precision">The number of bits to use for the float's mantissa.</param>
     public unsafe GmpFloat(uint precision)
     {
         fixed (Mpf_t* ptr = &Raw)
@@ -500,6 +514,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// <returns>A new instance of <see cref="GmpRational"/> representing the same value as the current <see cref="GmpFloat"/> instance.</returns>
     public GmpRational ToGmpRational() => GmpRational.From(this);
 
+    /// <summary>Explicitly converts a GmpFloat value to an unsigned 32-bit integer.</summary>
     public static explicit operator uint(GmpFloat op) => op.ToUInt32();
 
     /// <summary>
@@ -1335,112 +1350,166 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// <returns>An integer hash code.</returns>
     public override int GetHashCode() => Raw.GetHashCode();
 
+    /// <summary>Determines whether two <see cref="GmpFloat"/> instances are equal.</summary>
     public static bool operator ==(GmpFloat left, GmpFloat right) => Compare(left, right) == 0;
 
+    /// <summary>Determines whether two <see cref="GmpFloat"/> instances are not equal.</summary>
     public static bool operator !=(GmpFloat left, GmpFloat right) => Compare(left, right) != 0;
 
+    /// <summary>Determines whether one <see cref="GmpFloat"/> instance is greater than another.</summary>
     public static bool operator >(GmpFloat left, GmpFloat right) => Compare(left, right) > 0;
 
+    /// <summary>Determines whether one <see cref="GmpFloat"/> instance is less than another.</summary>
     public static bool operator <(GmpFloat left, GmpFloat right) => Compare(left, right) < 0;
 
+    /// <summary>Determines whether one <see cref="GmpFloat"/> instance is greater than or equal to another.</summary>
     public static bool operator >=(GmpFloat left, GmpFloat right) => Compare(left, right) >= 0;
 
+    /// <summary>Determines whether one <see cref="GmpFloat"/> instance is less than or equal to another.</summary>
     public static bool operator <=(GmpFloat left, GmpFloat right) => Compare(left, right) <= 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is equal to a double.</summary>
     public static bool operator ==(GmpFloat left, double right) => Compare(left, right) == 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is not equal to a double.</summary>
     public static bool operator !=(GmpFloat left, double right) => Compare(left, right) != 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than a double.</summary>
     public static bool operator >(GmpFloat left, double right) => Compare(left, right) > 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than a double.</summary>
     public static bool operator <(GmpFloat left, double right) => Compare(left, right) < 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than or equal to a double.</summary>
     public static bool operator >=(GmpFloat left, double right) => Compare(left, right) >= 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than or equal to a double.</summary>
     public static bool operator <=(GmpFloat left, double right) => Compare(left, right) <= 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is equal to an int.</summary>
     public static bool operator ==(GmpFloat left, int right) => Compare(left, right) == 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is not equal to an int.</summary>
     public static bool operator !=(GmpFloat left, int right) => Compare(left, right) != 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than an int.</summary>
     public static bool operator >(GmpFloat left, int right) => Compare(left, right) > 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than an int.</summary>
     public static bool operator <(GmpFloat left, int right) => Compare(left, right) < 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than or equal to an int.</summary>
     public static bool operator >=(GmpFloat left, int right) => Compare(left, right) >= 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than or equal to an int.</summary>
     public static bool operator <=(GmpFloat left, int right) => Compare(left, right) <= 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is equal to a uint.</summary>
     public static bool operator ==(GmpFloat left, uint right) => Compare(left, right) == 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is not equal to a uint.</summary>
     public static bool operator !=(GmpFloat left, uint right) => Compare(left, right) != 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than a uint.</summary>
     public static bool operator >(GmpFloat left, uint right) => Compare(left, right) > 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than a uint.</summary>
     public static bool operator <(GmpFloat left, uint right) => Compare(left, right) < 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than or equal to a uint.</summary>
     public static bool operator >=(GmpFloat left, uint right) => Compare(left, right) >= 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than or equal to a uint.</summary>
     public static bool operator <=(GmpFloat left, uint right) => Compare(left, right) <= 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is equal to a <see cref="GmpInteger"/>.</summary>
     public static bool operator ==(GmpFloat left, GmpInteger right) => Compare(left, right) == 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is not equal to a <see cref="GmpInteger"/>.</summary>
     public static bool operator !=(GmpFloat left, GmpInteger right) => Compare(left, right) != 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than a <see cref="GmpInteger"/>.</summary>
     public static bool operator >(GmpFloat left, GmpInteger right) => Compare(left, right) > 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than a <see cref="GmpInteger"/>.</summary>
     public static bool operator <(GmpFloat left, GmpInteger right) => Compare(left, right) < 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than or equal to a <see cref="GmpInteger"/>.</summary>
     public static bool operator >=(GmpFloat left, GmpInteger right) => Compare(left, right) >= 0;
 
+    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than or equal to a <see cref="GmpInteger"/>.</summary>
     public static bool operator <=(GmpFloat left, GmpInteger right) => Compare(left, right) <= 0;
 
+    /// <summary>Determines whether a double is equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator ==(double left, GmpFloat right) => right == left;
 
+    /// <summary>Determines whether a double is not equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator !=(double left, GmpFloat right) => right != left;
 
+    /// <summary>Determines whether a double is greater than a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator >(double left, GmpFloat right) => right < left;
 
+    /// <summary>Determines whether a double is less than a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator <(double left, GmpFloat right) => right > left;
 
+    /// <summary>Determines whether a double is greater than or equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator >=(double left, GmpFloat right) => right <= left;
 
+    /// <summary>Determines whether a double is less than or equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator <=(double left, GmpFloat right) => right >= left;
 
+    /// <summary>Determines whether an int is equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator ==(int left, GmpFloat right) => right == left;
 
+    /// <summary>Determines whether an int is not equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator !=(int left, GmpFloat right) => right != left;
 
+    /// <summary>Determines whether an int is greater than a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator >(int left, GmpFloat right) => right < left;
 
+    /// <summary>Determines whether an int is less than a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator <(int left, GmpFloat right) => right > left;
 
+    /// <summary>Determines whether an int is greater than or equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator >=(int left, GmpFloat right) => right <= left;
 
+    /// <summary>Determines whether an int is less than or equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator <=(int left, GmpFloat right) => right >= left;
 
+    /// <summary>Determines whether a uint is equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator ==(uint left, GmpFloat right) => right == left;
 
+    /// <summary>Determines whether a uint is not equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator !=(uint left, GmpFloat right) => right != left;
 
+    /// <summary>Determines whether a uint is greater than a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator >(uint left, GmpFloat right) => right < left;
 
+    /// <summary>Determines whether a uint is less than a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator <(uint left, GmpFloat right) => right > left;
 
+    /// <summary>Determines whether a uint is greater than or equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator >=(uint left, GmpFloat right) => right <= left;
 
+    /// <summary>Determines whether a uint is less than or equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator <=(uint left, GmpFloat right) => right >= left;
 
+    /// <summary>Determines whether a <see cref="GmpInteger"/> is equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator ==(GmpInteger left, GmpFloat right) => right == left;
 
+    /// <summary>Determines whether a <see cref="GmpInteger"/> is not equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator !=(GmpInteger left, GmpFloat right) => right != left;
 
+    /// <summary>Determines whether a <see cref="GmpInteger"/> is greater than a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator >(GmpInteger left, GmpFloat right) => right < left;
 
+    /// <summary>Determines whether a <see cref="GmpInteger"/> is less than a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator <(GmpInteger left, GmpFloat right) => right > left;
 
+    /// <summary>Determines whether a <see cref="GmpInteger"/> is greater than or equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator >=(GmpInteger left, GmpFloat right) => right <= left;
 
+    /// <summary>Determines whether a <see cref="GmpInteger"/> is less than or equal to a <see cref="GmpFloat"/> instance.</summary>
     public static bool operator <=(GmpInteger left, GmpFloat right) => right >= left;
 
     /// <summary>
@@ -1839,19 +1908,38 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
 }
 
 
+/// <summary>
+/// This struct represents a GMP floating-point number with arbitrary precision.
+/// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public record struct Mpf_t
 {
+    /// <summary>
+    /// The number of significant bits in the number.
+    /// </summary>
     public int Precision;
+    /// <summary>
+    /// The size of the data block in bytes.
+    /// </summary>
     public int Size;
+    /// <summary>
+    /// The exponent of the number.
+    /// </summary>
     public int Exponent;
+    /// <summary>
+    /// A pointer to the data block of the number.
+    /// </summary>
     public IntPtr Limbs;
 
+    /// <summary>
+    /// The size of the struct in bytes.
+    /// </summary>
     public static int RawSize => Marshal.SizeOf<Mpf_t>();
 
 
     private readonly unsafe Span<int> GetLimbData() => new((void*)Limbs, Precision - 1);
 
+    /// <inheritdoc/>
     public override readonly int GetHashCode()
     {
         HashCode c = new();
@@ -1866,4 +1954,7 @@ public record struct Mpf_t
     }
 }
 
+/// <summary>
+/// Represents a value consisting of an exponent and a double-precision floating-point number.
+/// </summary>
 public record struct ExpDouble(int Exp, double Value);
