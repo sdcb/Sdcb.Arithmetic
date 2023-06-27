@@ -31,7 +31,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         fixed (Mpfr_t* ptr = &Raw)
         {
             MpfrLib.mpfr_init2((IntPtr)ptr, precision);
-            MpfrLib.mpfr_set_ui((IntPtr)ptr, 0, MpfrRounding.ToEven);
+            _ = MpfrLib.mpfr_set_ui((IntPtr)ptr, 0, MpfrRounding.ToEven);
         }
     }
 
@@ -44,7 +44,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         fixed (Mpfr_t* ptr = &Raw)
         {
             MpfrLib.mpfr_init((IntPtr)ptr);
-            MpfrLib.mpfr_set_ui((IntPtr)ptr, 0, MpfrRounding.ToEven);
+            _ = MpfrLib.mpfr_set_ui((IntPtr)ptr, 0, MpfrRounding.ToEven);
         }
     }
 
@@ -84,7 +84,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     private static void CheckPrecision(int precision)
     {
         if (precision < 1 || precision > MaxSupportedPrecision)
-            throw new ArgumentOutOfRangeException(nameof(Precision), $"Precision should in range of [{MinSupportedPrecision}..{MaxSupportedPrecision}].");
+            throw new ArgumentOutOfRangeException(nameof(precision), $"Precision should in range of [{MinSupportedPrecision}..{MaxSupportedPrecision}].");
     }
 
     /// <remarks>Note: reset precision will clear the value.</remarks>
@@ -1116,12 +1116,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     public static MpfrFloat operator *(GmpRational op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
     #endregion
 
-    public static void SquareInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
+    public static int SquareInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* p1 = &op1.Raw)
         {
-            MpfrLib.mpfr_sqr((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_sqr((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
         }
     }
 
@@ -1299,12 +1299,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     public static MpfrFloat operator /(MpfrFloat op1, GmpRational op2) => Divide(op1, op2, op1.Precision);
     #endregion
 
-    public static void SqrtInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
+    public static int SqrtInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* p1 = &op1.Raw)
         {
-            MpfrLib.mpfr_sqrt((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_sqrt((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
         }
     }
 
@@ -1315,11 +1315,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    public static void SqrtInplace(MpfrFloat rop, uint op1, MpfrRounding? rounding = null)
+    public static int SqrtInplace(MpfrFloat rop, uint op1, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         {
-            MpfrLib.mpfr_sqrt_ui((IntPtr)pr, op1, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_sqrt_ui((IntPtr)pr, op1, rounding ?? DefaultRounding);
         }
     }
 
@@ -1333,12 +1333,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>
     /// set rop to 1/sqrt(op)
     /// </summary>
-    public static void ReciprocalSquareInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    public static int ReciprocalSquareInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* p1 = &op.Raw)
         {
-            MpfrLib.mpfr_rec_sqrt((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_rec_sqrt((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
         }
     }
 
@@ -1350,12 +1350,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    public static void CubicRootInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
+    public static int CubicRootInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* p1 = &op.Raw)
         {
-            MpfrLib.mpfr_cbrt((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_cbrt((IntPtr)pr, (IntPtr)p1, rounding ?? DefaultRounding);
         }
     }
 
@@ -1366,12 +1366,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    public static void RootNInplace(MpfrFloat rop, MpfrFloat op, uint n, MpfrRounding? rounding = null)
+    public static int RootNInplace(MpfrFloat rop, MpfrFloat op, uint n, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* p1 = &op.Raw)
         {
-            MpfrLib.mpfr_rootn_ui((IntPtr)pr, (IntPtr)p1, n, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_rootn_ui((IntPtr)pr, (IntPtr)p1, n, rounding ?? DefaultRounding);
         }
     }
 
@@ -1388,12 +1388,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// Said otherwise, if op is zero, set rop to op
     /// </summary>
     [Obsolete("use RootN")]
-    public static void RootInplace(MpfrFloat rop, MpfrFloat op, uint n, MpfrRounding? rounding = null)
+    public static int RootInplace(MpfrFloat rop, MpfrFloat op, uint n, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* p1 = &op.Raw)
         {
-            MpfrLib.mpfr_rootn_ui((IntPtr)pr, (IntPtr)p1, n, rounding ?? DefaultRounding);
+            return MpfrLib.mpfr_rootn_ui((IntPtr)pr, (IntPtr)p1, n, rounding ?? DefaultRounding);
         }
     }
 
@@ -4094,7 +4094,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         {
             fixed (Mpfr_t* pthis = &Raw)
             {
-                MpfrLib.mpfr_set_exp((IntPtr)pthis, value);
+                _ = MpfrLib.mpfr_set_exp((IntPtr)pthis, value);
             }
         }
     }
@@ -4163,14 +4163,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     public static int EMin
     {
         get => MpfrLib.mpfr_get_emin();
-        set => MpfrLib.mpfr_set_emin(value);
+        set => _ = MpfrLib.mpfr_set_emin(value);
     }
 
     /// <summary>Get/set the largest exponents allowed for a floating-point variable.</summary>
     public static int EMax
     {
         get => MpfrLib.mpfr_get_emax();
-        set => MpfrLib.mpfr_set_emax(value);
+        set => _ = MpfrLib.mpfr_set_emax(value);
     }
 
     public static int MinEMin => MpfrLib.mpfr_get_emin_min();
@@ -4213,7 +4213,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <summary>
     /// This function should be called before calling <see cref="GmpMemory.SetAllocator(GmpMalloc, GmpRealloc, GmpFree)"/>.
     /// </summary>
-    public static void MemoryCleanup() => MpfrLib.mpfr_mp_memory_cleanup();
+    public static void MemoryCleanup()
+    {
+        int ret = MpfrLib.mpfr_mp_memory_cleanup();
+        if (ret != 0) throw new Exception("Memory cleanup failed.");
+    }
     #endregion
 
     #region 15. Compatibility With MPF
@@ -4289,12 +4293,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// These functions are identical to mpfr_mul_2ui and mpfr_div_2ui respectively.
     /// These functions are only kept for compatibility with MPF, one should prefer mpfr_mul_2ui and mpfr_div_2ui otherwise.
     /// </summary>
-    public static void Multiply2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding rounding)
+    public static int Multiply2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding rounding)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* p1 = &op1.Raw)
         {
-            MpfrLib.mpfr_mul_2exp((IntPtr)pr, (IntPtr)p1, op2, rounding);
+            return MpfrLib.mpfr_mul_2exp((IntPtr)pr, (IntPtr)p1, op2, rounding);
         }
     }
 
@@ -4302,12 +4306,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// These functions are identical to mpfr_mul_2ui and mpfr_div_2ui respectively.
     /// These functions are only kept for compatibility with MPF, one should prefer mpfr_mul_2ui and mpfr_div_2ui otherwise.
     /// </summary>
-    public static void Divide2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding rounding)
+    public static int Divide2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding rounding)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* p1 = &op1.Raw)
         {
-            MpfrLib.mpfr_div_2exp((IntPtr)pr, (IntPtr)p1, op2, rounding);
+            return MpfrLib.mpfr_div_2exp((IntPtr)pr, (IntPtr)p1, op2, rounding);
         }
     }
 

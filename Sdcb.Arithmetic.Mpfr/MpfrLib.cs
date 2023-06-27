@@ -3,17 +3,23 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: InternalsVisibleTo("Sdcb.Arithmetic.Mpfr.Tests")]
+#pragma warning disable CA1401 // P/Invokes 应该是不可见的
+#pragma warning disable CS1591 // 缺少对公共可见类型或成员的 XML 注释
 
 namespace Sdcb.Arithmetic.Mpfr;
 
 using mpfr_rnd_t = MpfrRounding;
 using mpfr_free_cache_t = MpfrFreeCache;
 
+/// <summary>
+/// The MpfrLib class contains P/Invoke methods to work with the MPFR library, providing functions
+/// for multiprecision floating-point arithmetic with correct rounding in binary representation.
+/// </summary>
 public static class MpfrLib
 {
     static MpfrLib() => MpfrNativeLoader.Init();
 
-    public const string Dll = "mpfr-6.dll";
+    internal const string Dll = "mpfr-6.dll";
 
 
     [DllImport(Dll)]
