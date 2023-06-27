@@ -13,6 +13,7 @@
   <Namespace>Microsoft.EntityFrameworkCore</Namespace>
   <Namespace>System.Security.Cryptography</Namespace>
   <Namespace>System.ComponentModel.DataAnnotations</Namespace>
+  <Namespace>System.Threading.Tasks</Namespace>
 </Query>
 
 #nullable enable
@@ -20,7 +21,7 @@
 #load "work\opensource\sdcb.arithmetic\chatgpt-prompt-cache"
 
 string solutionRoot = GetParentDirectoryUntilContainsFile(new DirectoryInfo(Util.CurrentQueryPath), "Sdcb.Arithmetic.sln").ToString();
-string file = Path.Combine(solutionRoot, @"Sdcb.Arithmetic.Gmp/GmpFloat.cs");
+string file = Path.Combine(solutionRoot, @"Sdcb.Arithmetic.Gmp/GmpInteger.cs");
 string code = File.ReadAllText(file);
 
 SyntaxTree tree = CSharpSyntaxTree.ParseText(code, new CSharpParseOptions().WithDocumentationMode(DocumentationMode.Parse));
@@ -28,9 +29,9 @@ CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
 
 ClassDeclarationSyntax theClass = root.DescendantNodes()
 	.OfType<ClassDeclarationSyntax>()
-	.Single(x => x.Identifier.ToString() == "GmpFloat");
+	.Single(x => x.Identifier.ToString() == "GmpInteger");
 
-MethodReplacer.ReplaceMethods(theClass).ToFullString().Dump();
+(await MethodReplacer.ReplaceMethods(theClass, QueryCancelToken)).ToFullString().Dump();
 
 
 static DirectoryInfo GetParentDirectoryUntilContainsFile(DirectoryInfo? directory, string fileName)
@@ -109,21 +110,21 @@ class MethodReplacer : CSharpSyntaxRewriter
 	private string _dummyClassCode;
 	private int totalCount;
 	private int currentCount;
-	private readonly ChatgptCacheDb _chatgptDb;
+	private readonly ChatGPTAsker _gpt;
 
-	public MethodReplacer(ClassDeclarationSyntax classSyntax, ChatgptCacheDb chatgptDb)
+	public MethodReplacer(ClassDeclarationSyntax classSyntax, ChatGPTAsker gpt)
 	{
 		ClassDeclarationSyntax dummyClass = (ClassDeclarationSyntax)Formatter.Format(
 			CommentRemover.RemoveComments(
 			MethodRemover.RemoveMethodsAndOperators(classSyntax)), new AdhocWorkspace());
 		_dummyClassCode = dummyClass.ToFullString();
 		totalCount = classSyntax.ChildNodes().OfType<MethodDeclarationSyntax>().Count();
-		_chatgptDb = chatgptDb;
+		_gpt = gpt;
 	}
 
 	public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
 	{
-		Console.WriteLine($"Executing {++currentCount} of {totalCount}, name={node.Identifier.ToString()}...");
+		//Console.WriteLine($"Executing {++currentCount} of {totalCount}, name={node.Identifier.ToString()}...");
 
 		// Get the full text of the method declaration, including XML comments.
 		string comment = node.GetLeadingTrivia().ToFullString();
@@ -167,19 +168,48 @@ class MethodReplacer : CSharpSyntaxRewriter
 				""" },
 			new ChatMessage { Role = ChatMessageRole.User, Content = functionCode }
 		};
-		string raw = _chatgptDb.AskChatgptOrFromCache(new ChatgptRequest(prompts, ChatgptModels._35, 0.1)).GetAwaiter().GetResult();
+		string raw = _gpt(new ChatgptRequest(prompts, ChatgptModels._35, 0.1));
 		return string.Join("\n", raw.Split("\n").Where(x => x.StartsWith("///")));
 	}
 
-	public static ClassDeclarationSyntax ReplaceMethods(ClassDeclarationSyntax classDeclaration)
+	public static async Task<ClassDeclarationSyntax> ReplaceMethods(ClassDeclarationSyntax classDeclaration, CancellationToken cancellationToken = default)
 	{
 		string dbDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "chatgpt-cache");
 		Directory.CreateDirectory(dbDir);
 		using (ChatgptCacheDb db = new(Path.Combine(dbDir, "chatgpt-cache.db")))
 		{
 			db.Database.EnsureCreated();
-			var rewriter = new MethodReplacer(classDeclaration, db);
-			return (ClassDeclarationSyntax)rewriter.Visit(classDeclaration);
+		}
+		
+		List<ChatgptRequest> requests = new List<UserQuery.ChatgptRequest>();
+		var getter = new MethodReplacer(classDeclaration, req =>
+		{
+			requests.Add(req);
+			return "";
+		});
+		getter.Visit(classDeclaration);
+
+		// build cache
+		var dc = new DumpContainer().Dump("progress");
+		Console.WriteLine($"Req count: {requests.Count}");
+		int completed = 0;
+		await Parallel.ForEachAsync(requests, cancellationToken, async (req, ct) =>
+		{
+			using (ChatgptCacheDb db = new(Path.Combine(dbDir, "chatgpt-cache.db")))
+			{
+				await db.AskChatgptOrFromCache(req);
+			}
+
+			Interlocked.Increment(ref completed);
+			dc.Content = $"{completed} / {requests.Count}";
+		});
+
+		using (ChatgptCacheDb db = new(Path.Combine(dbDir, "chatgpt-cache.db")))
+		{
+			var rewritter = new MethodReplacer(classDeclaration, req => db.AskChatgptOrFromCache(req).GetAwaiter().GetResult());
+			return (ClassDeclarationSyntax)rewritter.Visit(classDeclaration);
 		}
 	}
 }
+
+delegate string ChatGPTAsker(ChatgptRequest req);

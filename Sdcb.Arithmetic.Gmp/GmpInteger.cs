@@ -69,8 +69,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Change the space for integer to new_alloc limbs. The value in integer is preserved if it fits, or is set to 0 if not.
+    /// Reallocate the memory of the <see cref="GmpInteger"/> instance to fit the specified number of limbs.
     /// </summary>
+    /// <param name="limbs">The number of limbs to allocate memory for.</param>
+    /// <remarks>
+    /// This method is used to resize the memory allocated for the <see cref="GmpInteger"/> instance to fit the specified number of limbs.
+    /// </remarks>
     public unsafe void ReallocByLimbs(int limbs)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -80,8 +84,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Change the space allocated for x to n bits. The value in x is preserved if it fits, or is set to 0 if not.
+    /// Reallocate the memory of the current <see cref="GmpInteger"/> instance to fit the specified number of bits.
     /// </summary>
+    /// <param name="bits">The number of bits to allocate memory for.</param>
+    /// <remarks>
+    /// This method reallocates the memory of the current <see cref="GmpInteger"/> instance to fit the specified number of bits.
+    /// </remarks>
     public unsafe void ReallocByBits(uint bits)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -90,10 +98,21 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Reallocates the memory block of the current <see cref="GmpInteger"/> instance to fit its current size in limbs.
+    /// </summary>
     public unsafe void ReallocToFit() => ReallocByLimbs(System.Math.Abs(Raw.Size));
     #endregion
 
     #region Assignment Functions
+
+    /// <summary>
+    /// Assigns the value of <paramref name="op"/> to this <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpInteger"/> instance to assign the value from.</param>
+    /// <remarks>
+    /// This method copies the value of <paramref name="op"/> to this <see cref="GmpInteger"/> instance.
+    /// </remarks>
     public unsafe void Assign(GmpInteger op)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -103,6 +122,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Assigns an unsigned integer value <paramref name="op"/> to this <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op">The unsigned integer value to assign.</param>
+    /// <remarks>
+    /// This method sets the value of this <see cref="GmpInteger"/> instance to the specified unsigned integer value <paramref name="op"/>.
+    /// </remarks>
     public unsafe void Assign(uint op)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -111,6 +137,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Assigns the integer value <paramref name="op"/> to this <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op">The integer value to assign.</param>
     public unsafe void Assign(int op)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -119,6 +149,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Assigns the value of a double-precision floating-point number to this <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op">The double-precision floating-point number to assign.</param>
+    /// <remarks>
+    /// The value of <paramref name="op"/> is converted to an integer and assigned to this <see cref="GmpInteger"/> instance.
+    /// </remarks>
     public unsafe void Assign(double op)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -127,6 +164,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Assigns the value of a <see cref="GmpRational"/> instance to this <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpRational"/> instance to assign from.</param>
     public unsafe void Assign(GmpRational op)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -136,6 +177,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Assigns the value of a <see cref="GmpFloat"/> instance to this <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpFloat"/> instance to assign from.</param>
     public unsafe void Assign(GmpFloat op)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -146,8 +191,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// The base may vary from 2 to 62, or if base is 0, then the leading characters are used: 0x and 0X for hexadecimal, 0b and 0B for binary, 0 for octal, or decimal otherwise.
+    /// Assigns the value of a string representation of a number in the specified base to this <see cref="GmpInteger"/> instance.
     /// </summary>
+    /// <param name="op">The string representation of the number to assign.</param>
+    /// <param name="opBase">The base of the number to assign. Default is 0, which means the base is determined by the prefix of the string (e.g. "0x" for hexadecimal).</param>
+    /// <exception cref="FormatException">Thrown when the string representation cannot be parsed as a valid number in the specified base.</exception>
     public unsafe void Assign(string op, int opBase = 0)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -164,6 +212,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Swaps the values of two <see cref="GmpInteger"/> instances.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpInteger"/> instance.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> instance.</param>
+    /// <remarks>
+    /// This method swaps the values of <paramref name="op1"/> and <paramref name="op2"/> in place.
+    /// </remarks>
     public static unsafe void Swap(GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pop1 = &op1.Raw)
@@ -175,6 +231,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     #endregion
 
     #region Combined Initialization and Assignment Functions
+
+    /// <summary>
+    /// Create a new <see cref="GmpInteger"/> instance from an existing <paramref name="op"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpInteger"/> instance to create a new instance from.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the same value as <paramref name="op"/>.</returns>
     public static unsafe GmpInteger From(GmpInteger op)
     {
         Mpz_t raw = new();
@@ -185,10 +247,17 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return new GmpInteger(raw);
     }
 
-    /// <summary>Clone the current <see cref="GmpInteger"/> instance.</summary>
+    /// <summary>
+    /// Creates a new instance of <see cref="GmpInteger"/> that is a copy of the current instance.
+    /// </summary>
+    /// <returns>A new instance of <see cref="GmpInteger"/> that is a copy of this instance.</returns>
     public GmpInteger Clone() => From(this);
 
-    /// <summary>Create a <see cref="GmpInteger"/> from the specific <see cref="GmpFloat"/>.</summary>
+    /// <summary>
+    /// Create a new <see cref="GmpInteger"/> instance from a <see cref="GmpFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpFloat"/> instance to convert.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the converted value.</returns>
     public static unsafe GmpInteger From(GmpFloat op)
     {
         GmpInteger rop = new();
@@ -199,7 +268,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     /// <summary>Explicitly Convert the specific <see cref="GmpFloat"/> into <see cref="GmpInteger"/>.</summary>
     public static explicit operator GmpInteger(GmpFloat op) => From(op);
 
-    /// <summary>Create a <see cref="GmpInteger"/> from the specific uint.</summary>
+    /// <summary>
+    /// Create a <see cref="GmpInteger"/> instance from an unsigned integer <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The unsigned integer value to convert.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the converted value.</returns>
     public static unsafe GmpInteger From(uint op)
     {
         Mpz_t raw = new();
@@ -210,6 +283,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     /// <summary>Implicitly Convert the specific uint into <see cref="GmpInteger"/>.</summary>
     public static implicit operator GmpInteger(uint op) => From(op);
 
+    /// <summary>
+    /// Create a <see cref="GmpInteger"/> instance from a integer <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The integer value to convert.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the converted value.</returns>
     public static unsafe GmpInteger From(int op)
     {
         Mpz_t raw = new();
@@ -220,7 +298,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     /// <summary>Implicitly Convert the specific int into <see cref="GmpInteger"/>.</summary>
     public static implicit operator GmpInteger(int op) => From(op);
 
-    /// <summary>Create a <see cref="GmpInteger"/> from the specific double.</summary>
+    /// <summary>
+    /// Create a <see cref="GmpInteger"/> instance from a double-precision floating-point number <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The double-precision floating-point number to convert.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the converted value.</returns>
     public static unsafe GmpInteger From(double op)
     {
         Mpz_t raw = new();
@@ -231,8 +313,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     public static explicit operator GmpInteger(double op) => From(op);
 
     /// <summary>
-    /// The base may vary from 2 to 62, or if base is 0, then the leading characters are used: 0x and 0X for hexadecimal, 0b and 0B for binary, 0 for octal, or decimal otherwise.
+    /// Parses the string representation of a number in the specified base and returns a new instance of <see cref="GmpInteger"/>.
     /// </summary>
+    /// <param name="val">The string representation of the number to parse.</param>
+    /// <param name="valBase">The base of the number to parse. Default is 0, which means the base is determined by the prefix of <paramref name="val"/> ("0x" for hexadecimal, "0" for octal, and "0b" for binary). If <paramref name="valBase"/> is not 0 and not in the range 2 to 62, an exception is thrown.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the parsed number.</returns>
+    /// <exception cref="FormatException">Thrown when <paramref name="val"/> is not in the correct format or <paramref name="valBase"/> is not in the valid range.</exception>
     public unsafe static GmpInteger Parse(string val, int valBase = 0)
     {
         Mpz_t raw = new();
@@ -250,8 +336,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// The base may vary from 2 to 62, or if base is 0, then the leading characters are used: 0x and 0X for hexadecimal, 0b and 0B for binary, 0 for octal, or decimal otherwise.
+    /// Tries to parse a string <paramref name="val"/> to a <see cref="GmpInteger"/> instance with the specified base <paramref name="valBase"/>.
     /// </summary>
+    /// <param name="val">The string to parse.</param>
+    /// <param name="result">When this method returns, contains the <see cref="GmpInteger"/> instance equivalent to the numeric value of <paramref name="val"/>, if the conversion succeeded, or <see langword="null"/> if the conversion failed. The conversion fails if the <paramref name="val"/> parameter is <see langword="null"/>, is not a number in a valid format, or represents a number less than <see cref="GmpInteger.MinValue"/> or greater than <see cref="GmpInteger.MaxValue"/>. This parameter is passed uninitialized.</param>
+    /// <param name="valBase">The base of the number in <paramref name="val"/>, which must be 2, 8, 10, or 16. The default is 10.</param>
+    /// <returns><see langword="true"/> if <paramref name="val"/> was converted successfully; otherwise, <see langword="false"/>.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="valBase"/> is not 2, 8, 10, or 16.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="val"/> is <see langword="null"/>.</exception>
     public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out GmpInteger result, int valBase = 10)
     {
         Mpz_t raw = new();
@@ -278,6 +370,9 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     #region Dispose and Clear
     private bool _disposed;
 
+    /// <summary>
+    /// Clears the memory allocated for the <see cref="GmpInteger"/> instance.
+    /// </summary>
     private unsafe void Clear()
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -286,6 +381,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Releases the unmanaged resources used by the <see cref="GmpInteger"/> and optionally releases the managed resources.
+    /// </summary>
+    /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -305,6 +404,9 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         Dispose(disposing: false);
     }
 
+    /// <summary>
+    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+    /// </summary>
     public void Dispose()
     {
         // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
@@ -314,6 +416,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     #endregion
 
     #region Arithmetic Functions
+
+    /// <summary>
+    /// Adds two <see cref="GmpInteger"/> values and stores the result in the first operand <paramref name="r"/>.
+    /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the result of the addition.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> operand to add.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand to add.</param>
+    /// <remarks>The result of the addition is stored in the first operand <paramref name="r"/>.</remarks>
     public static unsafe void AddInplace(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -324,6 +434,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Adds two <see cref="GmpInteger"/> values and returns the result as a new instance of <see cref="GmpInteger"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpInteger"/> operand.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static GmpInteger Add(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger r = new();
@@ -333,6 +449,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
 
     public static GmpInteger operator +(GmpInteger a, GmpInteger b) => Add(a, b);
 
+    /// <summary>
+    /// Adds an unsigned integer <paramref name="op2"/> to <paramref name="op1"/> and stores the result in <paramref name="r"/>.
+    /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> instance to add.</param>
+    /// <param name="op2">The unsigned integer value to add.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="r"/> or <paramref name="op1"/> is null.</exception>
+    /// <remarks>The result is stored in <paramref name="r"/> and <paramref name="op1"/> is not modified.</remarks>
     public static unsafe void AddInplace(GmpInteger r, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -342,6 +466,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Adds an unsigned integer <paramref name="op2"/> to a <paramref name="op1"/> <see cref="GmpInteger"/> and returns the result as a new <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> to add to.</param>
+    /// <param name="op2">The unsigned integer to add.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static GmpInteger Add(GmpInteger op1, uint op2)
     {
         GmpInteger r = new();
@@ -352,6 +482,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     public static GmpInteger operator +(GmpInteger a, uint b) => Add(a, b);
     public static GmpInteger operator +(uint a, GmpInteger b) => Add(b, a);
 
+    /// <summary>
+    /// Subtracts <paramref name="op2"/> from <paramref name="op1"/> and stores the result in <paramref name="r"/>.
+    /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> instance to subtract from.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> instance to subtract.</param>
+    /// <exception cref="ArgumentNullException">Thrown when any of the input parameters is null.</exception>
+    /// <remarks>The result is stored in <paramref name="r"/> and <paramref name="op1"/> and <paramref name="op2"/> are not modified.</remarks>
     public static unsafe void SubtractInplace(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -362,6 +500,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Subtract two <see cref="GmpInteger"/> values and return the result as a new instance of <see cref="GmpInteger"/>.
+    /// </summary>
+    /// <param name="op1">The first operand.</param>
+    /// <param name="op2">The second operand.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the subtraction.</returns>
     public static GmpInteger Subtract(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger r = new();
@@ -371,6 +515,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
 
     public static GmpInteger operator -(GmpInteger op1, GmpInteger op2) => Subtract(op1, op2);
 
+    /// <summary>
+    /// Subtracts an unsigned integer <paramref name="op2"/> from <paramref name="op1"/> and stores the result in <paramref name="r"/>.
+    /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the result of the subtraction.</param>
+    /// <param name="op1">The <see cref="GmpInteger"/> to subtract from.</param>
+    /// <param name="op2">The unsigned integer to subtract.</param>
+    /// <exception cref="NullReferenceException">Thrown when <paramref name="r"/> or <paramref name="op1"/> is null.</exception>
+    /// <remarks>The operation is performed in place, modifying the value of <paramref name="r"/>.</remarks>
     public static unsafe void SubtractInplace(GmpInteger r, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -380,6 +532,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Subtracts an unsigned integer <paramref name="op2"/> from a <paramref name="op1"/> <see cref="GmpInteger"/> and returns the result as a new <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> to subtract from.</param>
+    /// <param name="op2">The unsigned integer value to subtract.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the subtraction.</returns>
     public static GmpInteger Subtract(GmpInteger op1, uint op2)
     {
         GmpInteger r = new();
@@ -389,6 +547,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
 
     public static GmpInteger operator -(GmpInteger op1, uint op2) => Subtract(op1, op2);
 
+    /// <summary>
+    /// Subtracts <paramref name="op2"/> from <paramref name="op1"/> and stores the result in <paramref name="r"/>.
+    /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="op1">The unsigned integer value to subtract from.</param>
+    /// <param name="op2">The <see cref="GmpInteger"/> instance to subtract.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="r"/> or <paramref name="op2"/> is null.</exception>
+    /// <remarks>The result is stored in <paramref name="r"/> and <paramref name="op2"/> is not modified.</remarks>
     public static unsafe void SubtractInplace(GmpInteger r, uint op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -398,6 +564,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Subtract <paramref name="op2"/> from <paramref name="op1"/> and return the result as a new instance of <see cref="GmpInteger"/>.
+    /// </summary>
+    /// <param name="op1">The first operand.</param>
+    /// <param name="op2">The second operand.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the subtraction.</returns>
     public static GmpInteger Subtract(uint op1, GmpInteger op2)
     {
         GmpInteger r = new();
@@ -407,6 +579,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
 
     public static GmpInteger operator -(uint op1, GmpInteger op2) => Subtract(op1, op2);
 
+    /// <summary>
+    /// Multiplies two <see cref="GmpInteger"/> values and stores the result in the first operand.
+    /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the result of the multiplication.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> operand to multiply.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand to multiply.</param>
+    /// <remarks>The result of the multiplication is stored in <paramref name="r"/> and the original values of <paramref name="op1"/> and <paramref name="op2"/> are not modified.</remarks>
     public static unsafe void MultiplyInplace(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -417,6 +596,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Multiplies two <see cref="GmpInteger"/> values and returns the result as a new <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpInteger"/> operand.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the multiplication.</returns>
+    /// <remarks>The original operands are not modified.</remarks>
     public static GmpInteger Multiply(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger r = new();
@@ -426,6 +612,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
 
     public static GmpInteger operator *(GmpInteger op1, GmpInteger op2) => Multiply(op1, op2);
 
+    /// <summary>
+    /// Multiplies an integer <paramref name="op1"/> by an integer <paramref name="op2"/> and stores the result in <paramref name="r"/>.
+    /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> instance to multiply.</param>
+    /// <param name="op2">The second integer to multiply.</param>
+    /// <remarks>The result is stored in <paramref name="r"/> and <paramref name="op1"/> is not modified.</remarks>
     public static unsafe void MultiplyInplace(GmpInteger r, GmpInteger op1, int op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -435,6 +628,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Multiplies a <see cref="GmpInteger"/> <paramref name="op1"/> by an integer <paramref name="op2"/> and returns the result as a new <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> to multiply.</param>
+    /// <param name="op2">The integer to multiply by.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the multiplication.</returns>
     public static GmpInteger Multiply(GmpInteger op1, int op2)
     {
         GmpInteger r = new();
@@ -445,6 +644,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     public static GmpInteger operator *(GmpInteger op1, int op2) => Multiply(op1, op2);
     public static GmpInteger operator *(int op1, GmpInteger op2) => Multiply(op2, op1);
 
+    /// <summary>
+    /// Multiplies an <paramref name="op1"/> <see cref="GmpInteger"/> by an unsigned integer <paramref name="op2"/> and stores the result in <paramref name="r"/>.
+    /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the result of the multiplication.</param>
+    /// <param name="op1">The <see cref="GmpInteger"/> to be multiplied.</param>
+    /// <param name="op2">The unsigned integer to multiply with.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="r"/> or <paramref name="op1"/> is null.</exception>
+    /// <remarks>The result of the multiplication is stored in <paramref name="r"/>. The value of <paramref name="op1"/> is not changed.</remarks>
     public static unsafe void MultiplyInplace(GmpInteger r, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -454,6 +661,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Multiplies a <see cref="GmpInteger"/> <paramref name="op1"/> by an unsigned integer <paramref name="op2"/> and returns the result as a new <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> to be multiplied.</param>
+    /// <param name="op2">The unsigned integer to multiply by.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the multiplication.</returns>
     public static GmpInteger Multiply(GmpInteger op1, uint op2)
     {
         GmpInteger r = new();
@@ -465,8 +678,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     public static GmpInteger operator *(uint op1, GmpInteger op2) => Multiply(op2, op1);
 
     /// <summary>
-    /// r += op1 * op2
+    /// Adds the product of two <see cref="GmpInteger"/> values and stores the result in the first operand.
     /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> value to store the result.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> operand.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand.</param>
+    /// <remarks>The result of the operation is equivalent to <c>r += op1 * op2</c>.</remarks>
     public static unsafe void AddMultiply(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -478,8 +695,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r += op1 * op2
+    /// Adds the product of <paramref name="op1"/> and <paramref name="op2"/> to <paramref name="r"/>.
     /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to add the product to.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> instance to multiply.</param>
+    /// <param name="op2">The second operand to multiply.</param>
+    /// <remarks>The result is stored in <paramref name="r"/>.</remarks>
     public static unsafe void AddMultiply(GmpInteger r, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -490,8 +711,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r -= op1 * op2
+    /// Subtracts the product of two <see cref="GmpInteger"/> values from the first operand and stores the result in the first operand.
     /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> value to store the result.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> operand.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand.</param>
+    /// <remarks>The result of the operation is computed as <c>r - op1 * op2</c>.</remarks>
     public static unsafe void SubtractMultiply(GmpInteger r, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -503,8 +728,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r -= op1 * op2
+    /// Subtracts the product of <paramref name="op1"/> and <paramref name="op2"/> from <paramref name="r"/>.
     /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> to subtract from.</param>
+    /// <param name="op1">The <see cref="GmpInteger"/> to multiply with <paramref name="op2"/> and subtract from <paramref name="r"/>.</param>
+    /// <param name="op2">The unsigned integer to multiply with <paramref name="op1"/> and subtract from <paramref name="r"/>.</param>
+    /// <remarks>The result is stored in <paramref name="r"/>.</remarks>
     public static unsafe void SubtractMultiply(GmpInteger r, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -514,6 +743,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Multiply the <paramref name="op1"/> by 2 raised to the power of <paramref name="exp2"/> and store the result in <paramref name="r"/>.
+    /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="GmpInteger"/> instance to be multiplied.</param>
+    /// <param name="exp2">The exponent of 2.</param>
+    /// <remarks>The result will be stored in <paramref name="r"/> and <paramref name="op1"/> will not be modified.</remarks>
     public static unsafe void Multiply2ExpInplace(GmpInteger r, GmpInteger op1, uint exp2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -523,6 +759,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Multiplies a <see cref="GmpInteger"/> instance <paramref name="op1"/> by 2 raised to the power of <paramref name="exp2"/>.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> instance to multiply.</param>
+    /// <param name="exp2">The exponent of 2 to raise.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the multiplication.</returns>
+    /// <remarks>The original <paramref name="op1"/> instance is not modified.</remarks>
     public static unsafe GmpInteger Multiply2Exp(GmpInteger op1, uint exp2)
     {
         GmpInteger r = new();
@@ -530,10 +773,24 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return r;
     }
 
+    /// <summary>
+    /// Shifts the current <see cref="GmpInteger"/> instance to the left by the specified number of bits.
+    /// </summary>
+    /// <param name="bits">The number of bits to shift the current instance to the left.</param>
+    /// <remarks>
+    /// This method multiplies the current instance by 2 raised to the power of <paramref name="bits"/>.
+    /// </remarks>
     public void LeftShift(uint bits) => Multiply2ExpInplace(this, this, bits);
 
     public static GmpInteger operator <<(GmpInteger op1, uint exp2) => Multiply2Exp(op1, exp2);
 
+    /// <summary>
+    /// Negates the value of <paramref name="op1"/> and stores the result in <paramref name="r"/>.
+    /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="GmpInteger"/> instance to negate.</param>
+    /// <exception cref="ArgumentNullException">Thrown when either <paramref name="r"/> or <paramref name="op1"/> is null.</exception>
+    /// <remarks>The value of <paramref name="op1"/> is not changed.</remarks>
     public static unsafe void NegateInplace(GmpInteger r, GmpInteger op1)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -543,6 +800,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Negates the specified <paramref name="op1"/> and returns the result as a new <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> to negate.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the negated value of <paramref name="op1"/>.</returns>
     public static GmpInteger Negate(GmpInteger op1)
     {
         GmpInteger r = new();
@@ -552,6 +814,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
 
     public static GmpInteger operator -(GmpInteger op1) => Negate(op1);
 
+    /// <summary>
+    /// Computes the absolute value of a <see cref="GmpInteger"/> in place.
+    /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the result.</param>
+    /// <param name="op1">The <see cref="GmpInteger"/> to compute the absolute value of.</param>
+    /// <remarks>
+    /// The absolute value of a number is its value without regard to its sign. For example, the absolute value of both 2 and -2 is 2.
+    /// </remarks>
     public static unsafe void AbsInplace(GmpInteger r, GmpInteger op1)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -561,6 +831,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Computes the absolute value of a <see cref="GmpInteger"/>.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> to compute the absolute value of.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the absolute value of <paramref name="op1"/>.</returns>
     public static GmpInteger Abs(GmpInteger op1)
     {
         GmpInteger r = new();
@@ -570,6 +845,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     #endregion
 
     #region Conversion Functions
+
+    /// <summary>
+    /// Converts the current <see cref="GmpInteger"/> instance to an unsigned 32-bit integer.
+    /// </summary>
+    /// <returns>An unsigned 32-bit integer equivalent to the value of the current <see cref="GmpInteger"/> instance.</returns>
     public unsafe uint ToUInt32()
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -578,6 +858,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Converts the current <see cref="GmpInteger"/> instance to a 32-bit signed integer.
+    /// </summary>
+    /// <returns>A 32-bit signed integer representation of the current <see cref="GmpInteger"/> instance.</returns>
     public unsafe int ToInt32()
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -586,6 +870,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Converts the current <see cref="GmpInteger"/> instance to a double-precision floating-point number.
+    /// </summary>
+    /// <returns>A double-precision floating-point number that is equivalent to the current <see cref="GmpInteger"/> instance.</returns>
     public unsafe double ToDouble()
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -598,6 +886,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     public static explicit operator int(GmpInteger op) => op.ToInt32();
     public static explicit operator double(GmpInteger op) => op.ToDouble();
 
+    /// <summary>
+    /// Converts the current <see cref="GmpInteger"/> instance to an <see cref="ExpDouble"/> instance.
+    /// </summary>
+    /// <returns>An <see cref="ExpDouble"/> instance representing the converted value.</returns>
+    /// <remarks>
+    /// The conversion is done by extracting the double value and exponent from the current <see cref="GmpInteger"/> instance.
+    /// </remarks>
     public unsafe ExpDouble ToExpDouble()
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -608,8 +903,18 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Returns a string representation of the current <see cref="GmpFloat"/> object using base 10.
+    /// </summary>
+    /// <returns>A string representation of the current <see cref="GmpFloat"/> object using base 10.</returns>
     public override string ToString() => ToString(10);
 
+    /// <summary>
+    /// Converts the current <see cref="GmpInteger"/> to a string representation in the specified base.
+    /// </summary>
+    /// <param name="opBase">The base of the output string, which must be between 2 and 62.</param>
+    /// <returns>A string representation of the current <see cref="GmpInteger"/> in the specified base.</returns>
+    /// <exception cref="ArgumentException">Thrown when unable to convert <see cref="GmpInteger"/> to string.</exception>
     public unsafe string ToString(int opBase)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -634,9 +939,16 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
 
     #region Division Functions
     #region Ceililng
+
     /// <summary>
-    /// q = n / d (ceiling)
+    /// Calculates the ceiling division of <paramref name="n"/> by <paramref name="d"/> and stores the result in <paramref name="q"/>.
     /// </summary>
+    /// <param name="q">The <see cref="GmpInteger"/> instance to store the result of the ceiling division.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> instance to be divided.</param>
+    /// <param name="d">The <see cref="GmpInteger"/> instance to divide by.</param>
+    /// <remarks>
+    /// The ceiling division of two integers is the smallest integer that is greater than or equal to the exact division of the two integers.
+    /// </remarks>
     public static unsafe void CeilingDivideInplace(GmpInteger q, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -648,8 +960,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n / d (ceiling)
+    /// Calculates the ceiling division of two <see cref="GmpInteger"/>s and returns the result as a new <see cref="GmpInteger"/> instance.
     /// </summary>
+    /// <param name="n">The numerator.</param>
+    /// <param name="d">The denominator.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the ceiling division of <paramref name="n"/> and <paramref name="d"/>.</returns>
     public static unsafe GmpInteger CeilingDivide(GmpInteger n, GmpInteger d)
     {
         GmpInteger q = new();
@@ -658,8 +973,15 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = n mod d (ceiling)
+    /// Calculates the remainder of the division of <paramref name="n"/> by <paramref name="d"/> and stores the result in <paramref name="r"/>.
+    /// The result is rounded towards positive infinity.
     /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the result in.</param>
+    /// <param name="n">The dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <remarks>
+    /// This method modifies the value of <paramref name="r"/> in place.
+    /// </remarks>
     public static unsafe void CeilingReminderInplace(GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -671,8 +993,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n mod d (ceiling)
+    /// Computes the ceiling of the remainder of the division of <paramref name="n"/> by <paramref name="d"/> and returns the result as a new instance of <see cref="GmpInteger"/>.
     /// </summary>
+    /// <param name="n">The dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the ceiling of the remainder of the division of <paramref name="n"/> by <paramref name="d"/>.</returns>
     public static unsafe GmpInteger CeilingReminder(GmpInteger n, GmpInteger d)
     {
         GmpInteger q = new();
@@ -681,8 +1006,16 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// q = n / d + r (ceiling)
+    /// Computes the ceiling division of <paramref name="n"/> by <paramref name="d"/> and stores the quotient in <paramref name="q"/> and the remainder in <paramref name="r"/>.
     /// </summary>
+    /// <param name="q">The <see cref="GmpInteger"/> to store the quotient.</param>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the remainder.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The <see cref="GmpInteger"/> to divide by.</param>
+    /// <exception cref="DivideByZeroException">Thrown when <paramref name="d"/> is zero.</exception>
+    /// <remarks>
+    /// The ceiling division of two integers <c>n</c> and <c>d</c> is defined as the smallest integer <c>q</c> such that <c>n &lt;= q*d</c> and the remainder <c>r</c> is non-negative. 
+    /// </remarks>
     public static unsafe void CeilingDivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -695,8 +1028,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return (n / d, n mod d) (ceiling)
+    /// Computes the quotient and remainder of the division of <paramref name="n"/> by <paramref name="d"/>,
+    /// where the quotient is rounded towards positive infinity.
     /// </summary>
+    /// <param name="n">The dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A tuple containing the quotient and remainder of the division.</returns>
     public static unsafe (GmpInteger q, GmpInteger r) CeilingDivRem(GmpInteger n, GmpInteger d)
     {
         GmpInteger q = new(), r = new();
@@ -705,9 +1042,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// q = n / d (ceiling)
+    /// Divides <paramref name="n"/> by <paramref name="d"/> and rounds up to the nearest integer, storing the result in <paramref name="q"/>.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="q">The <see cref="GmpInteger"/> to store the result in.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>The remainder of the division.</returns>
     public static unsafe uint CeilingDivideInplace(GmpInteger q, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -718,8 +1058,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n mod d (ceiling)
+    /// Computes the ceiling division of <paramref name="n"/> by <paramref name="d"/> and returns the result as a new <see cref="GmpInteger"/> instance.
     /// </summary>
+    /// <param name="n">The dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the ceiling division of <paramref name="n"/> by <paramref name="d"/>.</returns>
     public static unsafe GmpInteger CeilingDivide(GmpInteger n, uint d)
     {
         GmpInteger q = new();
@@ -728,9 +1071,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = n mod d (ceiling)
+    /// Calculates the remainder of the division of <paramref name="n"/> by <paramref name="d"/> and stores the result in <paramref name="r"/>.
+    /// If the remainder is non-zero, it is rounded up to the nearest multiple of <paramref name="d"/>.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the result in.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>The remainder of the division of <paramref name="n"/> by <paramref name="d"/> rounded up to the nearest multiple of <paramref name="d"/>.</returns>
     public static unsafe uint CeilingReminderInplace(GmpInteger r, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -741,9 +1088,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// q = n / d + r (ceiling)
+    /// Divides a <paramref name="n"/> by an unsigned integer <paramref name="d"/> and returns the quotient and remainder as out parameters <paramref name="q"/> and <paramref name="r"/> respectively, rounded towards positive infinity.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="q">The quotient of the division.</param>
+    /// <param name="r">The remainder of the division.</param>
+    /// <param name="n">The dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>The remainder of the division.</returns>
     public static unsafe uint CeilingDivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -755,8 +1106,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return (n / d, n mod d) (ceiling)
+    /// Calculates the quotient and remainder of the division of a <paramref name="n"/> by a positive integer <paramref name="d"/>,
+    /// where the quotient is rounded towards positive infinity.
     /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The positive integer divisor.</param>
+    /// <returns>A tuple of two <see cref="GmpInteger"/> values representing the quotient and remainder of the division.</returns>
     public static unsafe (GmpInteger q, GmpInteger r) CeilingDivRem(GmpInteger n, uint d)
     {
         GmpInteger q = new(), r = new();
@@ -764,7 +1119,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return (q, r);
     }
 
-    /// <returns>n mod d (ceiling)</returns>
+    /// <summary>
+    /// Calculates the ceiling of the division of <paramref name="n"/> by <paramref name="d"/> and returns the remainder as an unsigned 32-bit integer.
+    /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>The remainder of the division as an unsigned 32-bit integer.</returns>
     public static unsafe uint CeilingReminderToUInt32(GmpInteger n, uint d)
     {
         fixed (Mpz_t* pn = &n.Raw)
@@ -773,7 +1133,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
-    /// <returns>n mod d (ceiling)</returns>
+    /// <summary>
+    /// Computes the ceiling of the remainder of <paramref name="n"/> divided by <paramref name="d"/> and returns the result as a new instance of <see cref="GmpInteger"/>.
+    /// </summary>
+    /// <param name="n">The dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the ceiling of the remainder of <paramref name="n"/> divided by <paramref name="d"/>.</returns>
     public static GmpInteger CeilingReminder(GmpInteger n, uint d)
     {
         GmpInteger r = new();
@@ -782,9 +1147,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// q = n / (2 ^ d) (ceiling)
+    /// Divides <paramref name="n"/> by 2 raised to the power of <paramref name="exp2"/> and rounds up to the nearest integer, and stores the result in <paramref name="q"/>.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="q">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> instance to be divided.</param>
+    /// <param name="exp2">The power of 2 to raise and divide <paramref name="n"/>.</param>
+    /// <remarks>
+    /// This method modifies <paramref name="q"/> in place.
+    /// </remarks>
     public static unsafe void CeilingDivide2ExpInplace(GmpInteger q, GmpInteger n, uint exp2)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -795,8 +1165,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n / (2 ^ d) (ceiling)
+    /// Computes the ceiling division of a <see cref="GmpInteger"/> by 2 raised to the power of <paramref name="exp2"/>.
     /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> to divide.</param>
+    /// <param name="exp2">The power of 2 to raise.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the ceiling division result.</returns>
+    /// <remarks>
+    /// The ceiling division of <paramref name="n"/> by 2 raised to the power of <paramref name="exp2"/> is defined as the smallest integer <c>q</c> such that <c>n &lt;= q * 2^<paramref name="exp2"/></c>.
+    /// </remarks>
     public static unsafe GmpInteger CeilingDivide2Exp(GmpInteger n, uint exp2)
     {
         GmpInteger q = new();
@@ -805,9 +1181,15 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = n mod (2 ^ d) (ceiling)
+    /// Computes the remainder of <paramref name="n"/> divided by 2 to the power of <paramref name="exp2"/> and stores the result in <paramref name="r"/>.
+    /// The result is rounded towards positive infinity.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the result in.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to compute the remainder of.</param>
+    /// <param name="exp2">The power of 2 to divide <paramref name="n"/> by.</param>
+    /// <remarks>
+    /// This method modifies <paramref name="r"/> in place.
+    /// </remarks>
     public static unsafe void CeilingReminder2ExpInplace(GmpInteger r, GmpInteger n, uint exp2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -818,8 +1200,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n mod (2 ^ d) (ceiling)
+    /// Calculates the ceiling of the remainder of <paramref name="n"/> divided by 2 raised to the power of <paramref name="exp2"/>.
     /// </summary>
+    /// <param name="n">The dividend.</param>
+    /// <param name="exp2">The power of 2 divisor.</param>
+    /// <returns>The ceiling of the remainder of <paramref name="n"/> divided by 2 raised to the power of <paramref name="exp2"/>.</returns>
     public static unsafe GmpInteger CeilingReminder2Exp(GmpInteger n, uint exp2)
     {
         GmpInteger q = new();
@@ -829,9 +1214,17 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     #endregion
 
     #region Floor
+
     /// <summary>
-    /// q = n / d (Floor)
+    /// Divides the numerator <paramref name="n"/> by the denominator <paramref name="d"/> and stores the result in <paramref name="q"/>.
+    /// The result is rounded towards zero (truncated).
     /// </summary>
+    /// <param name="q">The quotient of the division.</param>
+    /// <param name="n">The numerator of the division.</param>
+    /// <param name="d">The denominator of the division.</param>
+    /// <remarks>
+    /// This method modifies the value of <paramref name="q"/> in place.
+    /// </remarks>
     public static unsafe void FloorDivideInplace(GmpInteger q, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -843,8 +1236,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n / d (Floor)
+    /// Performs floor division of <paramref name="n"/> by <paramref name="d"/> and returns the result as a new <see cref="GmpInteger"/> instance.
     /// </summary>
+    /// <param name="n">The numerator <see cref="GmpInteger"/> instance.</param>
+    /// <param name="d">The denominator <see cref="GmpInteger"/> instance.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the floor division result of <paramref name="n"/> by <paramref name="d"/>.</returns>
     public static unsafe GmpInteger FloorDivide(GmpInteger n, GmpInteger d)
     {
         GmpInteger q = new();
@@ -853,8 +1249,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = n mod d (Floor)
+    /// Computes the floor reminder of <paramref name="n"/> divided by <paramref name="d"/> and stores the result in <paramref name="r"/>.
     /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the result in.</param>
+    /// <param name="n">The dividend <see cref="GmpInteger"/>.</param>
+    /// <param name="d">The divisor <see cref="GmpInteger"/>.</param>
+    /// <remarks>
+    /// The floor reminder is the difference between the dividend and the product of the divisor and the quotient rounded towards zero.
+    /// </remarks>
     public static unsafe void FloorReminderInplace(GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -866,8 +1268,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n mod d (Floor)
+    /// Computes the floor of the quotient and the remainder of the division of <paramref name="n"/> by <paramref name="d"/>.
     /// </summary>
+    /// <param name="n">The dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the floor of the quotient of <paramref name="n"/> divided by <paramref name="d"/>.</returns>
     public static unsafe GmpInteger FloorReminder(GmpInteger n, GmpInteger d)
     {
         GmpInteger q = new();
@@ -876,8 +1281,15 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// q = n / d + r (Floor)
+    /// Computes the quotient and remainder of the division of <paramref name="n"/> by <paramref name="d"/> and stores the results in <paramref name="q"/> and <paramref name="r"/> respectively.
     /// </summary>
+    /// <param name="q">The <see cref="GmpInteger"/> to store the quotient of the division.</param>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the remainder of the division.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The <see cref="GmpInteger"/> to divide by.</param>
+    /// <remarks>
+    /// This method modifies the values of <paramref name="q"/> and <paramref name="r"/> in place.
+    /// </remarks>
     public static unsafe void FloorDivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -890,8 +1302,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return (n / d, n mod d) (Floor)
+    /// Computes the quotient and remainder of the division of <paramref name="n"/> by <paramref name="d"/> and returns them as a tuple.
     /// </summary>
+    /// <param name="n">The dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A tuple containing the quotient and remainder of the division.</returns>
     public static unsafe (GmpInteger q, GmpInteger r) FloorDivRem(GmpInteger n, GmpInteger d)
     {
         GmpInteger q = new(), r = new();
@@ -900,9 +1315,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// q = n / d (Floor)
+    /// Divides <paramref name="n"/> by <paramref name="d"/> and stores the result in <paramref name="q"/>.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="q">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> instance to be divided.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>The remainder of the division.</returns>
     public static unsafe uint FloorDivideInplace(GmpInteger q, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -913,8 +1331,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n mod d (Floor)
+    /// Performs floor division of <paramref name="n"/> by <paramref name="d"/> and returns the result as a new <see cref="GmpInteger"/> instance.
     /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the floor division result.</returns>
     public static unsafe GmpInteger FloorDivide(GmpInteger n, uint d)
     {
         GmpInteger q = new();
@@ -923,9 +1344,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = n mod d (Floor)
+    /// Calculates the floor remainder of <paramref name="n"/> divided by <paramref name="d"/> and stores the result in <paramref name="r"/>.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> instance to be divided.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>The floor remainder of <paramref name="n"/> divided by <paramref name="d"/>.</returns>
     public static unsafe uint FloorReminderInplace(GmpInteger r, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -936,9 +1360,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// q = n / d + r (Floor)
+    /// Divides a <paramref name="n"/> by an unsigned integer <paramref name="d"/> and returns the quotient and remainder as out parameters <paramref name="q"/> and <paramref name="r"/> respectively.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="q">The quotient of the division.</param>
+    /// <param name="r">The remainder of the division.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The unsigned integer divisor.</param>
+    /// <returns>The unsigned integer remainder of the division.</returns>
     public static unsafe uint FloorDivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -950,8 +1378,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return (n / d, n mod d) (Floor)
+    /// Divides a <see cref="GmpInteger"/> by an unsigned integer <paramref name="d"/> and returns the quotient and remainder as a tuple.
     /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The unsigned integer divisor.</param>
+    /// <returns>A tuple containing the quotient and remainder as <see cref="GmpInteger"/> instances.</returns>
     public static unsafe (GmpInteger q, GmpInteger r) FloorDivRem(GmpInteger n, uint d)
     {
         GmpInteger q = new(), r = new();
@@ -959,7 +1390,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return (q, r);
     }
 
-    /// <returns>n mod d (Floor)</returns>
+    /// <summary>
+    /// Calculates the floor division remainder of <paramref name="n"/> by <paramref name="d"/> and returns the result as an unsigned 32-bit integer.
+    /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> to calculate the remainder of.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>The floor division remainder of <paramref name="n"/> by <paramref name="d"/> as an unsigned 32-bit integer.</returns>
     public static unsafe uint FloorReminderToUInt32(GmpInteger n, uint d)
     {
         fixed (Mpz_t* pn = &n.Raw)
@@ -968,7 +1404,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
-    /// <returns>n mod d (Floor)</returns>
+    /// <summary>
+    /// Computes the floor division remainder of <paramref name="n"/> by <paramref name="d"/> and stores the result in a new <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="n">The dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the floor division remainder of <paramref name="n"/> by <paramref name="d"/>.</returns>
     public static unsafe GmpInteger FloorReminder(GmpInteger n, uint d)
     {
         GmpInteger r = new();
@@ -977,9 +1418,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// q = n / (2 ^ d) (Floor)
+    /// Divides <paramref name="n"/> by 2 raised to the power of <paramref name="exp2"/> and stores the result in <paramref name="q"/>.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="q">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> instance to be divided.</param>
+    /// <param name="exp2">The power of 2 to divide by.</param>
+    /// <remarks>The operation is performed in place, modifying the value of <paramref name="q"/>.</remarks>
     public static unsafe void FloorDivide2ExpInplace(GmpInteger q, GmpInteger n, uint exp2)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -990,8 +1434,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n / (2 ^ d) (Floor)
+    /// Divide a <see cref="GmpInteger"/> by 2 raised to the power of <paramref name="exp2"/> and return the floor result as a new <see cref="GmpInteger"/> instance.
     /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="exp2">The power of 2 to divide by.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the floor result of the division.</returns>
     public static unsafe GmpInteger FloorDivide2Exp(GmpInteger n, uint exp2)
     {
         GmpInteger q = new();
@@ -1000,9 +1447,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = n mod (2 ^ d) (Floor)
+    /// Computes the floor remainder of <paramref name="n"/> divided by 2 to the power of <paramref name="exp2"/> and stores the result in <paramref name="r"/>.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the result in.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to compute the remainder of.</param>
+    /// <param name="exp2">The power of 2 to divide <paramref name="n"/> by.</param>
+    /// <remarks>
+    /// This method modifies the value of <paramref name="r"/> in place.
+    /// </remarks>
     public static unsafe void FloorReminder2ExpInplace(GmpInteger r, GmpInteger n, uint exp2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -1013,8 +1465,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n mod (2 ^ d) (Floor)
+    /// Computes the floor division of <paramref name="n"/> by 2 raised to the power of <paramref name="exp2"/> and stores the remainder in <paramref name="q"/>.
     /// </summary>
+    /// <param name="q">The <see cref="GmpInteger"/> to store the remainder.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="exp2">The power of 2 to raise.</param>
+    /// <returns>The floor division of <paramref name="n"/> by 2 raised to the power of <paramref name="exp2"/>.</returns>
     public static unsafe GmpInteger FloorReminder2Exp(GmpInteger n, uint exp2)
     {
         GmpInteger q = new();
@@ -1024,9 +1480,15 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     #endregion
 
     #region Truncate
+
     /// <summary>
-    /// q = n / d (Truncate)
+    /// Divides the numerator <paramref name="n"/> by the denominator <paramref name="d"/> and stores the result in <paramref name="q"/>.
     /// </summary>
+    /// <param name="q">The quotient of the division.</param>
+    /// <param name="n">The numerator of the division.</param>
+    /// <param name="d">The denominator of the division.</param>
+    /// <exception cref="DivideByZeroException">Thrown when <paramref name="d"/> is zero.</exception>
+    /// <remarks>The value of <paramref name="q"/> will be modified to store the result of the division.</remarks>
     public static unsafe void DivideInplace(GmpInteger q, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -1038,8 +1500,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n / d (Truncate)
+    /// Divides <paramref name="n"/> by <paramref name="d"/> and returns the quotient as a new instance of <see cref="GmpInteger"/>.
     /// </summary>
+    /// <param name="n">The dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the quotient of the division.</returns>
     public static unsafe GmpInteger Divide(GmpInteger n, GmpInteger d)
     {
         GmpInteger q = new();
@@ -1048,8 +1513,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = n mod d (Truncate)
+    /// Computes the remainder of the division of <paramref name="n"/> by <paramref name="d"/> and stores the result in <paramref name="r"/>.
     /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to store the remainder.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> instance to be divided.</param>
+    /// <param name="d">The <see cref="GmpInteger"/> instance to divide by.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="r"/>, <paramref name="n"/>, or <paramref name="d"/> is null.</exception>
+    /// <exception cref="DivideByZeroException">Thrown when <paramref name="d"/> is zero.</exception>
+    /// <remarks>The value of <paramref name="r"/> will be modified to the remainder of the division of <paramref name="n"/> by <paramref name="d"/>.</remarks>
     public static unsafe void ReminderInplace(GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -1061,8 +1532,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n mod d (Truncate)
+    /// Computes the remainder of the division of <paramref name="n"/> by <paramref name="d"/> and returns a new <see cref="GmpInteger"/> instance representing the result.
     /// </summary>
+    /// <param name="n">The dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the remainder of the division.</returns>
     public static unsafe GmpInteger Reminder(GmpInteger n, GmpInteger d)
     {
         GmpInteger q = new();
@@ -1071,8 +1545,16 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// q = n / d + r (Truncate)
+    /// Divides the <paramref name="n"/> by <paramref name="d"/> and stores the quotient in <paramref name="q"/> and the remainder in <paramref name="r"/>.
     /// </summary>
+    /// <param name="q">The <see cref="GmpInteger"/> to store the quotient.</param>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the remainder.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The <see cref="GmpInteger"/> to divide by.</param>
+    /// <exception cref="DivideByZeroException">Thrown when <paramref name="d"/> is zero.</exception>
+    /// <remarks>
+    /// This method modifies the values of <paramref name="q"/> and <paramref name="r"/> in place.
+    /// </remarks>
     public static unsafe void DivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -1085,8 +1567,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return (n / d, n mod d) (Truncate)
+    /// Divides two <see cref="GmpInteger"/> values and returns the quotient and remainder as a tuple.
     /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The <see cref="GmpInteger"/> to divide by.</param>
+    /// <returns>A tuple containing the quotient and remainder of the division.</returns>
     public static unsafe (GmpInteger q, GmpInteger r) DivRem(GmpInteger n, GmpInteger d)
     {
         GmpInteger q = new(), r = new();
@@ -1095,9 +1580,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// q = n / d (Truncate)
+    /// Divides a <paramref name="n"/> by an unsigned integer <paramref name="d"/> and stores the quotient in <paramref name="q"/>.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="q">The <see cref="GmpInteger"/> to store the quotient.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The unsigned integer divisor.</param>
+    /// <returns>The remainder of the division.</returns>
     public static unsafe uint DivideInplace(GmpInteger q, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -1108,8 +1596,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n mod d (Truncate)
+    /// Divides a <see cref="GmpInteger"/> <paramref name="n"/> by an unsigned integer <paramref name="d"/> and returns the quotient as a new <see cref="GmpInteger"/> instance.
     /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The unsigned integer to divide by.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the quotient of the division.</returns>
     public static unsafe GmpInteger Divide(GmpInteger n, uint d)
     {
         GmpInteger q = new();
@@ -1118,9 +1609,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = n mod d (Truncate)
+    /// Calculates the remainder of the division of <paramref name="n"/> by <paramref name="d"/> and stores the result in <paramref name="r"/>.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the remainder.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>The remainder of the division.</returns>
     public static unsafe uint ReminderInplace(GmpInteger r, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -1131,9 +1625,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// q = n / d + r (Truncate)
+    /// Divides a <paramref name="n"/> by an unsigned integer <paramref name="d"/> and stores the quotient in <paramref name="q"/> and the remainder in <paramref name="r"/>.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="q">The <see cref="GmpInteger"/> to store the quotient.</param>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the remainder.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The unsigned integer divisor.</param>
+    /// <returns>The remainder of the division.</returns>
     public static unsafe uint DivRemInplace(GmpInteger q, GmpInteger r, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -1145,8 +1643,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return (n / d, n mod d) (Truncate)
+    /// Divides a <see cref="GmpInteger"/> by a <paramref name="d"/> and returns the quotient and remainder as a tuple.
     /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A tuple containing the quotient and remainder as <see cref="GmpInteger"/> instances.</returns>
     public static unsafe (GmpInteger q, GmpInteger r) DivRem(GmpInteger n, uint d)
     {
         GmpInteger q = new(), r = new();
@@ -1154,7 +1655,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return (q, r);
     }
 
-    /// <returns>n mod d (Truncate)</returns>
+    /// <summary>
+    /// Computes the remainder of the division of a <see cref="GmpInteger"/> by a <see cref="uint"/>.
+    /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The <see cref="uint"/> divisor.</param>
+    /// <returns>The remainder of the division of <paramref name="n"/> by <paramref name="d"/>.</returns>
     public static unsafe uint ReminderToUInt32(GmpInteger n, uint d)
     {
         fixed (Mpz_t* pn = &n.Raw)
@@ -1163,7 +1669,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
-    /// <returns>n mod d (Truncate)</returns>
+    /// <summary>
+    /// Computes the remainder of the division of <paramref name="n"/> by <paramref name="d"/> and returns the result as a new instance of <see cref="GmpInteger"/>.
+    /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the remainder of the division.</returns>
     public static unsafe GmpInteger Reminder(GmpInteger n, uint d)
     {
         GmpInteger r = new();
@@ -1172,9 +1683,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// q = n / (2 ^ d) (Truncate)
+    /// Divide a <paramref name="n"/> by 2 raised to the power of <paramref name="exp2"/> and store the result in <paramref name="q"/>.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="q">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> instance to be divided.</param>
+    /// <param name="exp2">The power of 2 to raise.</param>
+    /// <remarks>The result is stored in <paramref name="q"/> and <paramref name="n"/> is not modified.</remarks>
     public static unsafe void Divide2ExpInplace(GmpInteger q, GmpInteger n, uint exp2)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -1185,8 +1699,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n / (2 ^ d) (Truncate)
+    /// Divides a <see cref="GmpInteger"/> by 2 raised to the power of <paramref name="exp2"/>.
     /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> to divide.</param>
+    /// <param name="exp2">The power of 2 to raise to.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the division.</returns>
+    /// <remarks>The original <paramref name="n"/> is not modified.</remarks>
     public static unsafe GmpInteger Divide2Exp(GmpInteger n, uint exp2)
     {
         GmpInteger q = new();
@@ -1195,9 +1713,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = n mod (2 ^ d) (Truncate)
+    /// Calculates the remainder of <paramref name="n"/> divided by 2 to the power of <paramref name="exp2"/> and stores the result in <paramref name="r"/>.
     /// </summary>
-    /// <returns>the remainder</returns>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to store the remainder.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> instance to be divided.</param>
+    /// <param name="exp2">The power of 2 to divide <paramref name="n"/> by.</param>
+    /// <remarks>
+    /// This method modifies the value of <paramref name="r"/> in place.
+    /// </remarks>
     public static unsafe void Reminder2ExpInplace(GmpInteger r, GmpInteger n, uint exp2)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -1208,8 +1731,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n mod (2 ^ d) (Truncate)
+    /// Computes the remainder of <paramref name="n"/> divided by 2 raised to the power of <paramref name="exp2"/>.
     /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> to compute the remainder of.</param>
+    /// <param name="exp2">The power of 2 to divide <paramref name="n"/> by.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the remainder of <paramref name="n"/> divided by 2 raised to the power of <paramref name="exp2"/>.</returns>
     public static unsafe GmpInteger Reminder2Exp(GmpInteger n, uint exp2)
     {
         GmpInteger q = new();
@@ -1229,9 +1755,15 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     #endregion
 
     #region Others
+
     /// <summary>
-    /// Set r to n mod d. The sign of the divisor is ignored; the result is always non-negative.
+    /// Computes the remainder of the division of <paramref name="n"/> by <paramref name="d"/> and stores the result in <paramref name="r"/>.
     /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the remainder of the division.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The <see cref="GmpInteger"/> to divide by.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="r"/>, <paramref name="n"/> or <paramref name="d"/> is null.</exception>
+    /// <remarks>The value of <paramref name="r"/> will be the smallest non-negative integer congruent to <paramref name="n"/> modulo <paramref name="d"/>. The sign of <paramref name="r"/> will be the same as the sign of <paramref name="n"/>. </remarks>
     public static unsafe void ModInplace(GmpInteger r, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -1243,8 +1775,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// return n mod d. The sign of the divisor is ignored; the result is always non-negative.
+    /// Computes the modulo of <paramref name="n"/> by <paramref name="d"/> and returns the result as a new instance of <see cref="GmpInteger"/>.
     /// </summary>
+    /// <param name="n">The dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the modulo operation.</returns>
     public static unsafe GmpInteger Mod(GmpInteger n, GmpInteger d)
     {
         GmpInteger r = new();
@@ -1253,21 +1788,32 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>Set r to n mod d. The sign of the divisor is ignored; the result is always non-negative.</para>
-    /// <para>is identical to mpz_fdiv_r_ui above, returning the remainder as well as setting r</para>
+    /// Computes the remainder of the division of <paramref name="n"/> by <paramref name="d"/> and stores the result in <paramref name="r"/>.
     /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to store the result in.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> instance to compute the remainder of.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>The remainder of the division of <paramref name="n"/> by <paramref name="d"/>.</returns>
     public static unsafe uint ModInplace(GmpInteger r, GmpInteger n, uint d) => FloorReminderInplace(r, n, d);
 
     /// <summary>
-    /// <para>return n mod d. The sign of the divisor is ignored; the result is always non-negative.</para>
-    /// <para>is identical to mpz_fdiv_r_ui above, returning the remainder as well as setting r</para>
+    /// Computes the modulo of a <see cref="GmpInteger"/> instance <paramref name="n"/> by a positive integer <paramref name="d"/>.
     /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> instance to compute the modulo of.</param>
+    /// <param name="d">The positive integer to compute the modulo with.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the modulo of <paramref name="n"/> by <paramref name="d"/>.</returns>
     public static unsafe GmpInteger Mod(GmpInteger n, uint d) => FloorReminder(n, d);
 
     /// <summary>
-    /// <para>Set q to n/d. These functions produce correct results only when it is known in advance that d divides n.</para>
-    /// <para>Much faster than the other division functions, and are the best choice when exact division is known to occur, for example reducing a rational to lowest terms.</para>
+    /// Divides <paramref name="n"/> by <paramref name="d"/> and stores the exact quotient in <paramref name="q"/>.
     /// </summary>
+    /// <param name="q">The <see cref="GmpInteger"/> to store the exact quotient.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The <see cref="GmpInteger"/> to divide by.</param>
+    /// <exception cref="DivideByZeroException">Thrown when <paramref name="d"/> is zero.</exception>
+    /// <remarks>
+    /// This function is equivalent to calling <see cref="GmpInteger.DivideInplace"/> and throwing an exception if the remainder is not zero.
+    /// </remarks>
     public static unsafe void DivExactInplace(GmpInteger q, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -1279,9 +1825,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>return n/d. These functions produce correct results only when it is known in advance that d divides n.</para>
-    /// <para>Much faster than the other division functions, and are the best choice when exact division is known to occur, for example reducing a rational to lowest terms.</para>
+    /// Divides <paramref name="n"/> by <paramref name="d"/> and returns the quotient as a new <see cref="GmpInteger"/> instance.
     /// </summary>
+    /// <param name="n">The dividend.</param>
+    /// <param name="d">The divisor.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the quotient of the division.</returns>
     public static unsafe GmpInteger DivExact(GmpInteger n, GmpInteger d)
     {
         GmpInteger q = new();
@@ -1290,9 +1838,16 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>Set q to n/d. These functions produce correct results only when it is known in advance that d divides n.</para>
-    /// <para>Much faster than the other division functions, and are the best choice when exact division is known to occur, for example reducing a rational to lowest terms.</para>
+    /// Divides <paramref name="n"/> by <paramref name="d"/> and stores the exact quotient in <paramref name="q"/>.
     /// </summary>
+    /// <param name="q">The <see cref="GmpInteger"/> to store the exact quotient.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The divisor.</param>
+    /// <exception cref="DivideByZeroException">Thrown when <paramref name="d"/> is zero.</exception>
+    /// <remarks>
+    /// This method computes the quotient <paramref name="q"/> such that <paramref name="n"/> = <paramref name="q"/> * <paramref name="d"/>.
+    /// If <paramref name="d"/> does not divide <paramref name="n"/> exactly, an exception is thrown.
+    /// </remarks>
     public static unsafe void DivExactInplace(GmpInteger q, GmpInteger n, uint d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -1303,9 +1858,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>return n/d. These functions produce correct results only when it is known in advance that d divides n.</para>
-    /// <para>Much faster than the other division functions, and are the best choice when exact division is known to occur, for example reducing a rational to lowest terms.</para>
+    /// Divides a <see cref="GmpInteger"/> <paramref name="n"/> by an unsigned integer <paramref name="d"/> and returns the quotient as a new <see cref="GmpInteger"/> instance.
     /// </summary>
+    /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
+    /// <param name="d">The unsigned integer divisor.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the quotient of the division.</returns>
     public static unsafe GmpInteger DivExact(GmpInteger n, uint d)
     {
         GmpInteger q = new();
@@ -1314,10 +1871,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>n is congruent to c mod d if there exists an integer q satisfying n = c + q*d.</para>
-    /// <para>Unlike the other division functions, d=0 is accepted and following the rule it can be seen that n and c are considered congruent mod 0 only when exactly equal.</para>
+    /// Determines whether the integer <paramref name="n"/> is congruent to <paramref name="c"/> modulo <paramref name="d"/>.
     /// </summary>
-    /// <returns>true if n = c mod d</returns>
+    /// <param name="n">The integer to check for congruence.</param>
+    /// <param name="c">The integer to compare with.</param>
+    /// <param name="d">The modulus.</param>
+    /// <returns><c>true</c> if <paramref name="n"/> is congruent to <paramref name="c"/> modulo <paramref name="d"/>; otherwise, <c>false</c>.</returns>
     public static unsafe bool Congruent(GmpInteger n, GmpInteger c, GmpInteger d)
     {
         fixed (Mpz_t* pn = &n.Raw)
@@ -1329,10 +1888,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>n is congruent to c mod d if there exists an integer q satisfying n = c + q*d.</para>
-    /// <para>Unlike the other division functions, d=0 is accepted and following the rule it can be seen that n and c are considered congruent mod 0 only when exactly equal.</para>
+    /// Determines whether the <paramref name="n"/> is congruent to <paramref name="c"/> modulo <paramref name="d"/>.
     /// </summary>
-    /// <returns>true if n = c mod d</returns>
+    /// <param name="n">The <see cref="GmpInteger"/> to check for congruence.</param>
+    /// <param name="c">The integer to compare with.</param>
+    /// <param name="d">The modulus to compare with.</param>
+    /// <returns><c>true</c> if <paramref name="n"/> is congruent to <paramref name="c"/> modulo <paramref name="d"/>; otherwise, <c>false</c>.</returns>
     public static unsafe bool Congruent(GmpInteger n, uint c, uint d)
     {
         fixed (Mpz_t* pn = &n.Raw)
@@ -1342,9 +1903,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>n is congruent to c mod (2^b) if there exists an integer q satisfying n = c + q*(2^b).</para>
+    /// Determines whether the <paramref name="n"/> is congruent to <paramref name="c"/> modulo 2 to the power of <paramref name="b"/>.
     /// </summary>
-    /// <returns>true if n = c mod (2^b)</returns>
+    /// <param name="n">The <see cref="GmpInteger"/> to check for congruence.</param>
+    /// <param name="c">The <see cref="GmpInteger"/> to compare with.</param>
+    /// <param name="b">The power of 2 to use as the modulus.</param>
+    /// <returns><c>true</c> if <paramref name="n"/> is congruent to <paramref name="c"/> modulo 2 to the power of <paramref name="b"/>; otherwise, <c>false</c>.</returns>
     public static unsafe bool Congruent2Exp(GmpInteger n, GmpInteger c, uint b)
     {
         fixed (Mpz_t* pn = &n.Raw)
@@ -1357,9 +1921,18 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     #endregion
 
     #region Exponentiation Functions
+
     /// <summary>
-    /// r = (@base ^ exp) % mod
+    /// Computes the modular exponentiation of a base integer <paramref name="base"/> raised to the power of an exponent integer <paramref name="exp"/> modulo a modulus integer <paramref name="mod"/> and stores the result in the provided <paramref name="r"/> integer.
     /// </summary>
+    /// <param name="r">The integer to store the result of the modular exponentiation.</param>
+    /// <param name="base">The base integer.</param>
+    /// <param name="exp">The exponent integer.</param>
+    /// <param name="mod">The modulus integer.</param>
+    /// <exception cref="ArgumentNullException">Thrown when any of the input integers is null.</exception>
+    /// <remarks>
+    /// This method modifies the value of <paramref name="r"/> in place.
+    /// </remarks>
     public static unsafe void PowerModInplace(GmpInteger r, GmpInteger @base, GmpInteger exp, GmpInteger mod)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -1371,7 +1944,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
-    /// <returns>(@base ^ exp) % mod</returns>
+    /// <summary>
+    /// Computes the modular exponentiation of a <paramref name="base"/> raised to the power of an <paramref name="exp"/> modulo a <paramref name="mod"/>.
+    /// </summary>
+    /// <param name="base">The base integer.</param>
+    /// <param name="exp">The exponent integer.</param>
+    /// <param name="mod">The modulo integer.</param>
+    /// <returns>The result of the modular exponentiation.</returns>
     public static GmpInteger PowerMod(GmpInteger @base, GmpInteger exp, GmpInteger mod)
     {
         GmpInteger r = new();
@@ -1380,8 +1959,16 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = (@base ^ exp) % mod
+    /// Computes the modular exponentiation of a <paramref name="base"/> raised to the power of an <paramref name="exp"/> and stores the result in <paramref name="r"/>.
     /// </summary>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="base">The <see cref="GmpInteger"/> instance representing the base.</param>
+    /// <param name="exp">The exponent to raise the <paramref name="base"/> to.</param>
+    /// <param name="mod">The <see cref="GmpInteger"/> instance representing the modulus.</param>
+    /// <remarks>
+    /// This method computes the modular exponentiation of a <paramref name="base"/> raised to the power of an <paramref name="exp"/> and stores the result in <paramref name="r"/>.
+    /// The result is computed as <c>r = base^exp mod mod</c>.
+    /// </remarks>
     public static unsafe void PowerModInplace(GmpInteger r, GmpInteger @base, uint exp, GmpInteger mod)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -1392,7 +1979,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
-    /// <returns>(@base ^ exp) % mod</returns>
+    /// <summary>
+    /// Computes the modular exponentiation of a <paramref name="base"/> raised to the power of an unsigned integer <paramref name="exp"/> modulo a <paramref name="mod"/>.
+    /// </summary>
+    /// <param name="base">The base <see cref="GmpInteger"/> to raise to the power of <paramref name="exp"/>.</param>
+    /// <param name="exp">The unsigned integer exponent to raise the <paramref name="base"/> to.</param>
+    /// <param name="mod">The modulus <see cref="GmpInteger"/> to apply to the result.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the modular exponentiation.</returns>
     public static GmpInteger PowerMod(GmpInteger @base, uint exp, GmpInteger mod)
     {
         GmpInteger r = new();
@@ -1401,14 +1994,15 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = (@base ^ exp) % mod
+    /// Computes the modular exponentiation of a base integer <paramref name="base"/> raised to the power of an exponent integer <paramref name="exp"/> modulo a modulus integer <paramref name="mod"/>.
     /// </summary>
+    /// <param name="r">The result of the modular exponentiation.</param>
+    /// <param name="base">The base integer.</param>
+    /// <param name="exp">The exponent integer.</param>
+    /// <param name="mod">The modulus integer.</param>
+    /// <exception cref="ArgumentNullException">Thrown when any of the input parameters is null.</exception>
     /// <remarks>
-    /// <para>
-    /// This function is designed to take the same time and have the same cache access patterns for any two same-size arguments,
-    /// assuming that function arguments are placed at the same position and that the machine state is identical upon function entry. 
-    /// </para>
-    /// <para>This function is intended for cryptographic purposes, where resilience to side-channel attacks is desired.</para>
+    /// This method uses the secure variant of the modular exponentiation algorithm, which is resistant to some side-channel attacks.
     /// </remarks>
     public static unsafe void PowerModSecureInplace(GmpInteger r, GmpInteger @base, GmpInteger exp, GmpInteger mod)
     {
@@ -1421,14 +2015,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
-    /// <returns>(@base ^ exp) % mod</returns>
-    /// <remarks>
-    /// <para>
-    /// This function is designed to take the same time and have the same cache access patterns for any two same-size arguments,
-    /// assuming that function arguments are placed at the same position and that the machine state is identical upon function entry. 
-    /// </para>
-    /// <para>This function is intended for cryptographic purposes, where resilience to side-channel attacks is desired.</para>
-    /// </remarks>
+    /// <summary>
+    /// Computes the modular exponentiation of a base integer <paramref name="base"/> raised to the power of an exponent integer <paramref name="exp"/> with respect to a modulus integer <paramref name="mod"/>.
+    /// </summary>
+    /// <param name="base">The base integer.</param>
+    /// <param name="exp">The exponent integer.</param>
+    /// <param name="mod">The modulus integer.</param>
+    /// <returns>The result of modular exponentiation.</returns>
     public static GmpInteger PowerModSecure(GmpInteger @base, GmpInteger exp, GmpInteger mod)
     {
         GmpInteger r = new();
@@ -1437,9 +2030,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = base ^ exp
+    /// Computes the power of a <paramref name="base"/> to the specified <paramref name="exp"/> and stores the result in the <paramref name="r"/> parameter.
     /// </summary>
-    /// <remarks>The case 0^0 yields 1</remarks>
+    /// <param name="r">The <see cref="GmpInteger"/> to store the result.</param>
+    /// <param name="base">The <see cref="GmpInteger"/> base.</param>
+    /// <param name="exp">The exponent to raise the <paramref name="base"/> to.</param>
+    /// <remarks>The result is stored in the <paramref name="r"/> parameter.</remarks>
     public static unsafe void PowerInplace(GmpInteger r, GmpInteger @base, uint exp)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -1449,8 +2045,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
-    /// <returns>base ^ exp</returns>
-    /// <remarks>The case 0^0 yields 1</remarks>
+    /// <summary>
+    /// Computes the power of a <paramref name="base"/> to the specified <paramref name="exp"/> and returns the result as a new <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="base">The base value.</param>
+    /// <param name="exp">The exponent value.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the power operation.</returns>
     public static GmpInteger Power(GmpInteger @base, uint exp)
     {
         GmpInteger r = new();
@@ -1459,9 +2059,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = base ^ exp
+    /// Raises an unsigned integer <paramref name="base"/> to the power of another unsigned integer <paramref name="exp"/> and stores the result in the <paramref name="r"/> instance.
     /// </summary>
-    /// <remarks>The case 0^0 yields 1</remarks>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="base">The base value to raise.</param>
+    /// <param name="exp">The exponent value to raise.</param>
+    /// <remarks>The result is stored in the <paramref name="r"/> instance.</remarks>
     public static unsafe void PowerInplace(GmpInteger r, uint @base, uint exp)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -1470,8 +2073,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
-    /// <returns>base ^ exp</returns>
-    /// <remarks>The case 0^0 yields 1</remarks>
+    /// <summary>
+    /// Computes the power of a given unsigned integer <paramref name="base"/> raised to a given unsigned integer <paramref name="exp"/>.
+    /// </summary>
+    /// <param name="base">The base value.</param>
+    /// <param name="exp">The exponent value.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the power operation.</returns>
     public static GmpInteger Power(uint @base, uint exp)
     {
         GmpInteger r = new();
@@ -1486,10 +2093,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     #endregion
 
     #region Root Extraction Functions
+
     /// <summary>
-    /// r = sqrt(op, n)
+    /// Compute the <paramref name="n"/>-th root of <paramref name="op"/> and store the result in <paramref name="r"/>.
     /// </summary>
-    /// <returns>true if computation was exact</returns>
+    /// <param name="r">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="GmpInteger"/> instance to compute the root.</param>
+    /// <param name="n">The root degree.</param>
+    /// <returns><c>true</c> if the operation succeeded; otherwise, <c>false</c>.</returns>
     public static unsafe bool RootInplace(GmpInteger r, GmpInteger op, uint n)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -1499,7 +2110,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
-    /// <returns>sqsrt(op, n)</returns>
+    /// <summary>
+    /// Computes the <paramref name="n"/>th root of a <see cref="GmpInteger"/> <paramref name="op"/> and returns a new instance of <see cref="GmpInteger"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpInteger"/> to compute the root of.</param>
+    /// <param name="n">The root degree.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the computed root.</returns>
     public static GmpInteger Root(GmpInteger op, uint n)
     {
         GmpInteger r = new();
@@ -1508,8 +2124,15 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// r = sqrt(op, n) + reminder
-    /// </summary>\
+    /// Calculates the integer n-th root of <paramref name="op"/> and its remainder, and stores the results in <paramref name="r"/> and <paramref name="reminder"/> respectively.
+    /// </summary>
+    /// <param name="r">The output integer n-th root.</param>
+    /// <param name="reminder">The output remainder.</param>
+    /// <param name="op">The input integer to calculate the n-th root.</param>
+    /// <param name="n">The root degree.</param>
+    /// <remarks>
+    /// This method calculates the integer n-th root of <paramref name="op"/> and its remainder, and stores the results in <paramref name="r"/> and <paramref name="reminder"/> respectively.
+    /// </remarks>
     public static unsafe void RootReminderInplace(GmpInteger r, GmpInteger reminder, GmpInteger op, uint n)
     {
         fixed (Mpz_t* pr = &r.Raw)
@@ -1520,7 +2143,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
-    /// <returns>(root, reminder)</returns>
+    /// <summary>
+    /// Computes the integer square root and remainder of <paramref name="op"/> divided by <paramref name="n"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpInteger"/> to compute the square root and remainder of.</param>
+    /// <param name="n">The divisor.</param>
+    /// <returns>A tuple containing the integer square root and remainder of <paramref name="op"/> divided by <paramref name="n"/>.</returns>
     public static (GmpInteger root, GmpInteger reminder) RootReminder(GmpInteger op, uint n)
     {
         GmpInteger root = new(), reminder = new();
@@ -1528,11 +2156,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return (root, reminder);
     }
 
-    /// <returns>true if op is a perfect power, i.e., if there exist integers a and b, with b>1, such that op equals a raised to the power b.</returns>
-    /// <remarks>
-    /// <para>Under this definition both 0 and 1 are considered to be perfect powers.</para>
-    /// <para>Negative values of op are accepted, but of course can only be odd perfect powers.</para>
-    /// </remarks>
+    /// <summary>
+    /// Determines whether this <see cref="GmpInteger"/> is a perfect power of some integer.
+    /// </summary>
+    /// <returns><c>true</c> if this <see cref="GmpInteger"/> is a perfect power of some integer; otherwise, <c>false</c>.</returns>
     public unsafe bool HasPerfectPower()
     {
         fixed (Mpz_t* pop = &Raw)
@@ -1541,10 +2168,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
-    /// <returns>
-    /// <para>true if op is a perfect square, i.e., if the square root of op is an integer.</para>
-    /// <para>Under this definition both 0 and 1 are considered to be perfect squares.</para>
-    /// </returns>
+    /// <summary>
+    /// Determines whether the current <see cref="GmpInteger"/> instance is a perfect square.
+    /// </summary>
+    /// <returns><c>true</c> if the current instance is a perfect square; otherwise, <c>false</c>.</returns>
     public unsafe bool HasPerfectSquare()
     {
         fixed (Mpz_t* pop = &Raw)
@@ -1555,11 +2182,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     #endregion
 
     #region Number Theoretic Functions
+
     /// <summary>
-    /// This function performs some trial divisions, a Baillie-PSW probable prime test, then reps-24 Miller-Rabin probabilistic primality tests. A higher reps value will reduce the chances of a non-prime being identified as “probably prime”. A composite number will be identified as a prime with an asymptotic probability of less than 4^(-reps).
+    /// Determines whether the current <see cref="GmpInteger"/> instance is a probable prime number with a certain number of Miller-Rabin tests.
     /// </summary>
-    /// <param name="reps">Reasonable values of reps are between 15 and 50.</param>
-    /// <returns></returns>
+    /// <param name="reps">The number of Miller-Rabin tests to perform. Default is 15.</param>
+    /// <returns>A <see cref="PrimePossibility"/> value indicating whether the current instance is a probable prime number.</returns>
     public unsafe PrimePossibility ProbablePrime(int reps = 15)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -1569,9 +2197,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Set rop to the next prime greater than op.
+    /// Finds the next prime number greater than <paramref name="op"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
-    /// <remarks>This function uses a probabilistic algorithm to identify primes. For practical purposes it’s adequate, the chance of a composite passing will be extremely small.</remarks>
+    /// <param name="rop">The <see cref="GmpInteger"/> instance to store the result in.</param>
+    /// <param name="op">The <see cref="GmpInteger"/> instance to find the next prime number greater than.</param>
+    /// <remarks>The value of <paramref name="rop"/> will be modified to store the result.</remarks>
     public static unsafe void NextPrimeInplace(GmpInteger rop, GmpInteger op)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -1582,9 +2212,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Set rop to the next prime greater than op.
+    /// Computes the next prime number greater than the specified <paramref name="op"/> and returns a new instance of <see cref="GmpInteger"/> representing the result.
     /// </summary>
-    /// <remarks>This function uses a probabilistic algorithm to identify primes. For practical purposes it’s adequate, the chance of a composite passing will be extremely small.</remarks>
+    /// <param name="op">The <see cref="GmpInteger"/> to find the next prime number greater than.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the next prime number greater than <paramref name="op"/>.</returns>
     public static GmpInteger NextPrime(GmpInteger op)
     {
         GmpInteger r = new();
@@ -1593,9 +2224,9 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Set rop to the next prime greater than op.
+    /// Finds the next prime number greater than the current <see cref="GmpInteger"/> instance.
     /// </summary>
-    /// <remarks>This function uses a probabilistic algorithm to identify primes. For practical purposes it’s adequate, the chance of a composite passing will be extremely small.</remarks>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the next prime number greater than the current instance.</returns>
     public GmpInteger NextPrime()
     {
         GmpInteger r = new();
@@ -1603,6 +2234,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return r;
     }
 
+    /// <summary>
+    /// Computes the greatest common divisor of two <see cref="GmpInteger"/>s <paramref name="op1"/> and <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> to store the result in.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> to compute the GCD with.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> to compute the GCD with.</param>
+    /// <remarks>The result is stored in <paramref name="rop"/> and both <paramref name="op1"/> and <paramref name="op2"/> are unchanged.</remarks>
     public static unsafe void GcdInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -1613,6 +2251,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Computes the greatest common divisor (GCD) of two <see cref="GmpInteger"/> values <paramref name="op1"/> and <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpInteger"/> value.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> value.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the GCD of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static unsafe GmpInteger Gcd(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger rop = new();
@@ -1620,6 +2264,16 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return rop;
     }
 
+    /// <summary>
+    /// Compute the greatest common divisor of <paramref name="op1"/> and <paramref name="op2"/> in place and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> instance.</param>
+    /// <param name="op2">The second unsigned integer value.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op1"/> is null.</exception>
+    /// <remarks>
+    /// This method modifies the value of <paramref name="rop"/>.
+    /// </remarks>
     public static unsafe void GcdInplace(GmpInteger rop, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -1629,6 +2283,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Computes the greatest common divisor (GCD) of a <see cref="GmpInteger"/> <paramref name="op1"/> and an unsigned integer <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The first operand.</param>
+    /// <param name="op2">The second operand.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the GCD of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static unsafe GmpInteger Gcd(GmpInteger op1, uint op2)
     {
         GmpInteger rop = new();
@@ -1637,17 +2297,17 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>Set g to the greatest common divisor of a and b, and in addition set s and t to coefficients satisfying a*s + b*t = g.</para>
-    /// <para>The value in g is always positive, even if one or both of a and b are negative (or zero if both inputs are zero).</para>
-    /// <para>The values in s and t are chosen such that normally, abs(s) &lt; abs(b) / (2 g) and abs(t) &lt; abs(a) / (2 g), and these relations define s and t uniquely.</para>
-    /// <para>There are a few exceptional cases:</para>
-    /// <list type="bullet">
-    /// <item>If abs(a) = abs(b), then s = 0, t = sgn(b).</item>
-    /// <item>Otherwise, s = sgn(a) if b = 0 or abs(b) = 2 g, and t = sgn(b) if a = 0 or abs(a) = 2 g.</item>
-    /// <item>In all cases, s = 0 if and only if g = abs(b), i.e., if b divides a or a = b = 0.</item>
-    /// <item>If t or g is NULL then that value is not computed.</item>
-    /// </list>
+    /// Computes the greatest common divisor (GCD) of two integers <paramref name="a"/> and <paramref name="b"/> and the Bezout coefficients <paramref name="s"/> and <paramref name="t"/> such that <paramref name="s"/> * <paramref name="a"/> + <paramref name="t"/> * <paramref name="b"/> = gcd(<paramref name="a"/>, <paramref name="b"/>).
     /// </summary>
+    /// <param name="g">The GCD of <paramref name="a"/> and <paramref name="b"/>.</param>
+    /// <param name="s">The Bezout coefficient of <paramref name="a"/>.</param>
+    /// <param name="t">The Bezout coefficient of <paramref name="b"/>.</param>
+    /// <param name="a">The first integer.</param>
+    /// <param name="b">The second integer.</param>
+    /// <exception cref="ArgumentNullException">Thrown when any of the parameters is null.</exception>
+    /// <remarks>
+    /// This method modifies the values of <paramref name="g"/>, <paramref name="s"/>, and <paramref name="t"/> in place.
+    /// </remarks>
     public static unsafe void Gcd2Inplace(GmpInteger g, GmpInteger s, GmpInteger t, GmpInteger a, GmpInteger b)
     {
         fixed (Mpz_t* pg = &g.Raw)
@@ -1661,17 +2321,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>Set g to the greatest common divisor of a and b, and in addition set s and t to coefficients satisfying a*s + b*t = g.</para>
-    /// <para>The value in g is always positive, even if one or both of a and b are negative (or zero if both inputs are zero).</para>
-    /// <para>The values in s and t are chosen such that normally, abs(s) &lt; abs(b) / (2 g) and abs(t) &lt; abs(a) / (2 g), and these relations define s and t uniquely.</para>
-    /// <para>There are a few exceptional cases:</para>
-    /// <list type="bullet">
-    /// <item>If abs(a) = abs(b), then s = 0, t = sgn(b).</item>
-    /// <item>Otherwise, s = sgn(a) if b = 0 or abs(b) = 2 g, and t = sgn(b) if a = 0 or abs(a) = 2 g.</item>
-    /// <item>In all cases, s = 0 if and only if g = abs(b), i.e., if b divides a or a = b = 0.</item>
-    /// <item>If t or g is NULL then that value is not computed.</item>
-    /// </list>
+    /// Computes the greatest common divisor (GCD) of two <see cref="GmpInteger"/> values <paramref name="a"/> and <paramref name="b"/> using the extended Euclidean algorithm.
     /// </summary>
+    /// <param name="a">The first <see cref="GmpInteger"/> value.</param>
+    /// <param name="b">The second <see cref="GmpInteger"/> value.</param>
+    /// <returns>A tuple of three <see cref="GmpInteger"/> values (g, s, t) such that g = gcd(a, b) and g = a * s + b * t.</returns>
     public static unsafe (GmpInteger g, GmpInteger s, GmpInteger t) Gcd2(GmpInteger a, GmpInteger b)
     {
         GmpInteger g = new();
@@ -1681,6 +2335,16 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return (g, s, t);
     }
 
+    /// <summary>
+    /// Calculates the least common multiple (LCM) of two <see cref="GmpInteger"/> values <paramref name="op1"/> and <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> instance to store the result in.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> operand.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand.</param>
+    /// <remarks>The values of <paramref name="op1"/> and <paramref name="op2"/> are not changed.</remarks>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/>, <paramref name="op1"/>, or <paramref name="op2"/> is null.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when <paramref name="rop"/>, <paramref name="op1"/>, or <paramref name="op2"/> has already been disposed.</exception>
+    /// <exception cref="GmpException">Thrown when an error occurs in the underlying GMP library.</exception>
     public static unsafe void LcmInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -1691,6 +2355,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Computes the least common multiple (LCM) of two <see cref="GmpInteger"/> values <paramref name="op1"/> and <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpInteger"/> value.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> value.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the LCM of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static unsafe GmpInteger Lcm(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger rop = new();
@@ -1698,6 +2368,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return rop;
     }
 
+    /// <summary>
+    /// Calculates the least common multiple of <paramref name="op1"/> and <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> instance to store the result in.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> instance.</param>
+    /// <param name="op2">The second unsigned integer value.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op1"/> is null.</exception>
+    /// <remarks>The result is stored in <paramref name="rop"/> and <paramref name="op1"/> and <paramref name="op2"/> are not modified.</remarks>
     public static unsafe void LcmInplace(GmpInteger rop, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -1707,6 +2385,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Computes the least common multiple (LCM) of <paramref name="op1"/> and <paramref name="op2"/> and returns the result as a new <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op1">The first operand.</param>
+    /// <param name="op2">The second operand.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the LCM of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static unsafe GmpInteger Lcm(GmpInteger op1, uint op2)
     {
         GmpInteger rop = new();
@@ -1715,12 +2399,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Set rop to the modular inverse of op1 mod op2, i.e. b, where op1 * b mod op2 = 1
+    /// Inverts <paramref name="op1"/> modulo <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop"></param>
-    /// <param name="op1"></param>
-    /// <param name="op2"></param>
-    /// <returns>true if find the inverse.</returns>
+    /// <param name="rop">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="GmpInteger"/> instance to be inverted.</param>
+    /// <param name="op2">The <see cref="GmpInteger"/> instance to be used as modulo.</param>
+    /// <returns><c>true</c> if the inversion is successful, <c>false</c> otherwise.</returns>
     public static unsafe bool InvertInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -1732,8 +2416,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Set rop to the modular inverse of op1 mod op2, i.e. b, where op1 * b mod op2 = 1
+    /// Calculates the inverse of <paramref name="op1"/> modulo <paramref name="op2"/> and returns the result as a new instance of <see cref="GmpInteger"/>.
     /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> to calculate the inverse of.</param>
+    /// <param name="op2">The modulus <see cref="GmpInteger"/>.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the inverse of <paramref name="op1"/> modulo <paramref name="op2"/>.</returns>
+    /// <exception cref="ArgumentException">Thrown when unable to find the inverse of <paramref name="op1"/> and <paramref name="op2"/>.</exception>
     public static unsafe GmpInteger Invert(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger rop = new();
@@ -1745,8 +2433,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Calculate the Jacobi symbol (a/b). This is defined only for b odd.
+    /// Computes the Jacobi symbol (a/b) for given integers <paramref name="a"/> and <paramref name="b"/>.
     /// </summary>
+    /// <param name="a">The first integer.</param>
+    /// <param name="b">The second integer.</param>
+    /// <returns>The Jacobi symbol (a/b).</returns>
     public static unsafe int Jacobi(GmpInteger a, GmpInteger b)
     {
         fixed (Mpz_t* p1 = &a.Raw)
@@ -1757,21 +2448,27 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>Calculate the Legendre symbol (a/p). </para>
-    /// <para>This is defined only for p an odd positive prime, and for such p it’s identical to the Jacobi symbol.</para>
+    /// Compute the Legendre symbol of <paramref name="a"/> and <paramref name="p"/> using the Jacobi symbol implementation.
     /// </summary>
+    /// <param name="a">The integer value.</param>
+    /// <param name="p">The prime value.</param>
+    /// <returns>The Legendre symbol of <paramref name="a"/> and <paramref name="p"/>.</returns>
     public static unsafe int Legendre(GmpInteger a, GmpInteger p) => Jacobi(a, p);
 
     /// <summary>
-    /// <para>Calculate the Jacobi symbol (a/b) with the Kronecker extension (a/2)=(2/a) when a odd, or (a/2)=0 when a even.</para>
-    /// <para>When b is odd the Jacobi symbol and Kronecker symbol are identical, so mpz_kronecker_ui etc can be used for mixed precision Jacobi symbols too.</para>
+    /// Compute the Kronecker symbol of two integers <paramref name="a"/> and <paramref name="b"/> using the Jacobi symbol.
     /// </summary>
+    /// <param name="a">The first integer.</param>
+    /// <param name="b">The second integer.</param>
+    /// <returns>The Kronecker symbol of <paramref name="a"/> and <paramref name="b"/>.</returns>
     public static unsafe int Kronecker(GmpInteger a, GmpInteger b) => Jacobi(a, b);
 
     /// <summary>
-    /// <para>Calculate the Jacobi symbol (a/b) with the Kronecker extension (a/2)=(2/a) when a odd, or (a/2)=0 when a even.</para>
-    /// <para>When b is odd the Jacobi symbol and Kronecker symbol are identical, so mpz_kronecker_ui etc can be used for mixed precision Jacobi symbols too.</para>
+    /// Compute the Kronecker symbol of <paramref name="a"/> and <paramref name="b"/>.
     /// </summary>
+    /// <param name="a">The <see cref="GmpInteger"/> instance.</param>
+    /// <param name="b">The integer value.</param>
+    /// <returns>The Kronecker symbol of <paramref name="a"/> and <paramref name="b"/>.</returns>
     public static unsafe int Kronecker(GmpInteger a, int b)
     {
         fixed (Mpz_t* p1 = &a.Raw)
@@ -1781,9 +2478,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>Calculate the Jacobi symbol (a/b) with the Kronecker extension (a/2)=(2/a) when a odd, or (a/2)=0 when a even.</para>
-    /// <para>When b is odd the Jacobi symbol and Kronecker symbol are identical, so mpz_kronecker_ui etc can be used for mixed precision Jacobi symbols too.</para>
+    /// Compute the Kronecker symbol of <paramref name="a"/> and <paramref name="b"/>.
     /// </summary>
+    /// <param name="a">The <see cref="GmpInteger"/> instance.</param>
+    /// <param name="b">The unsigned integer value.</param>
+    /// <returns>The Kronecker symbol of <paramref name="a"/> and <paramref name="b"/>.</returns>
     public static unsafe int Kronecker(GmpInteger a, uint b)
     {
         fixed (Mpz_t* p1 = &a.Raw)
@@ -1793,9 +2492,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>Calculate the Jacobi symbol (a/b) with the Kronecker extension (a/2)=(2/a) when a odd, or (a/2)=0 when a even.</para>
-    /// <para>When b is odd the Jacobi symbol and Kronecker symbol are identical, so mpz_kronecker_ui etc can be used for mixed precision Jacobi symbols too.</para>
+    /// Compute the Kronecker symbol of two integers <paramref name="a"/> and <paramref name="b"/>.
     /// </summary>
+    /// <param name="a">The first integer.</param>
+    /// <param name="b">The second integer as a <see cref="GmpInteger"/> instance.</param>
+    /// <returns>The Kronecker symbol of <paramref name="a"/> and <paramref name="b"/>.</returns>
     public static unsafe int Kronecker(int a, GmpInteger b)
     {
         fixed (Mpz_t* p2 = &b.Raw)
@@ -1805,9 +2506,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>Calculate the Jacobi symbol (a/b) with the Kronecker extension (a/2)=(2/a) when a odd, or (a/2)=0 when a even.</para>
-    /// <para>When b is odd the Jacobi symbol and Kronecker symbol are identical, so mpz_kronecker_ui etc can be used for mixed precision Jacobi symbols too.</para>
+    /// Compute the Kronecker symbol of two integers <paramref name="a"/> and <paramref name="b"/>.
     /// </summary>
+    /// <param name="a">The first integer.</param>
+    /// <param name="b">The second integer.</param>
+    /// <returns>The Kronecker symbol of <paramref name="a"/> and <paramref name="b"/>.</returns>
     public static unsafe int Kronecker(uint a, GmpInteger b)
     {
         fixed (Mpz_t* p2 = &b.Raw)
@@ -1817,9 +2520,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Remove all occurrences of the factor f from op and store the result in rop.
+    /// Removes the factor <paramref name="f"/> from <paramref name="op"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
-    /// <returns>The return value is how many such occurrences were removed.</returns>
+    /// <param name="rop">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="GmpInteger"/> instance to remove the factor from.</param>
+    /// <param name="f">The <see cref="GmpInteger"/> instance representing the factor to remove.</param>
+    /// <returns>The number of times the factor was removed from <paramref name="op"/>.</returns>
     public static unsafe uint RemoveFactorInplace(GmpInteger rop, GmpInteger op, GmpInteger f)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -1831,8 +2537,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Remove all occurrences of the factor f from op and store the result in rop.
+    /// Removes the factor <paramref name="f"/> from <paramref name="op"/> and returns the result as a new <see cref="GmpInteger"/> instance.
     /// </summary>
+    /// <param name="op">The <see cref="GmpInteger"/> to remove the factor from.</param>
+    /// <param name="f">The factor to remove.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of removing the factor.</returns>
     public static GmpInteger RemoveFactor(GmpInteger op, GmpInteger f)
     {
         GmpInteger rop = new();
@@ -1841,13 +2550,21 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Remove all occurrences of the factor f from op and store the result in rop.
+    /// Remove a factor <paramref name="f"/> from this <see cref="GmpInteger"/> instance.
     /// </summary>
+    /// <param name="f">The factor to remove.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of removing <paramref name="f"/> from this instance.</returns>
     public GmpInteger RemoveFactor(GmpInteger f) => RemoveFactor(this, f);
 
     /// <summary>
-    /// computes the plain factorial n!
+    /// Calculates the factorial of a given positive integer <paramref name="n"/> and stores the result in the provided <paramref name="rop"/> instance.
     /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> instance to store the result of the factorial calculation.</param>
+    /// <param name="n">The positive integer to calculate the factorial of.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="n"/> is negative.</exception>
+    /// <remarks>
+    /// The result of the factorial calculation can be very large, so make sure that the <paramref name="rop"/> instance has enough memory allocated to store the result.
+    /// </remarks>
     public static unsafe void FactorialInplace(GmpInteger rop, uint n)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -1857,8 +2574,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// computes the plain factorial n!
+    /// Calculates the factorial of a given non-negative integer <paramref name="n"/>.
     /// </summary>
+    /// <param name="n">The non-negative integer to calculate the factorial of.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the factorial of <paramref name="n"/>.</returns>
     public static GmpInteger Factorial(uint n)
     {
         GmpInteger rop = new();
@@ -1867,8 +2586,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// computes the double-factorial n!!
+    /// Calculates the double factorial of a non-negative integer <paramref name="n"/> and stores the result in-place in the <paramref name="rop"/> parameter.
     /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> instance to store the result in.</param>
+    /// <param name="n">The non-negative integer to calculate the double factorial of.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="n"/> is negative.</exception>
     public static unsafe void Factorial2Inplace(GmpInteger rop, uint n)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -1878,8 +2600,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// computes the double-factorial n!!
+    /// Calculates the factorial of a given non-negative integer <paramref name="n"/> and returns the result as a new instance of <see cref="GmpInteger"/>.
     /// </summary>
+    /// <param name="n">The non-negative integer to calculate the factorial of.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the factorial of <paramref name="n"/>.</returns>
     public static unsafe GmpInteger Factorial2(uint n)
     {
         GmpInteger rop = new();
@@ -1888,8 +2612,18 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// computes the m-multi-factorial n!^(m)
+    /// Calculate the m-factorial of n in place and store the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="n">The integer value to calculate the factorial.</param>
+    /// <param name="m">The integer value to specify the modulus.</param>
+    /// <remarks>
+    /// This method calculates the m-factorial of n, which is the product of all positive integers less than or equal to n that are congruent to m modulo n.
+    /// The result is stored in <paramref name="rop"/>.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="rop"/> is null.</exception>
+    /// <exception cref="ArgumentException"><paramref name="n"/> is less than 1 or <paramref name="m"/> is greater than or equal to <paramref name="n"/>.</exception>
+    /// <exception cref="ArithmeticException">An error occurred while calculating the factorial.</exception>
     public static unsafe void FactorialMInplace(GmpInteger rop, uint n, uint m)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -1899,8 +2633,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// computes the m-multi-factorial n!^(m)
+    /// Calculates the factorial of <paramref name="n"/> modulo <paramref name="m"/> and returns the result as a new instance of <see cref="GmpInteger"/>.
     /// </summary>
+    /// <param name="n">The number to calculate the factorial of.</param>
+    /// <param name="m">The modulo value.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the factorial of <paramref name="n"/> modulo <paramref name="m"/>.</returns>
     public static unsafe GmpInteger FactorialM(uint n, uint m)
     {
         GmpInteger rop = new();
@@ -1909,8 +2646,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Compute the binomial coefficient n over k and store the result in rop.
+    /// Calculates the binomial coefficient of <paramref name="n"/> and <paramref name="k"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="n">The <see cref="GmpInteger"/> instance representing the value of n.</param>
+    /// <param name="k">The value of k.</param>
+    /// <remarks>
+    /// The binomial coefficient of n and k is defined as n! / (k! * (n - k)!).
+    /// </remarks>
     public static unsafe void BinomialCoefficientInplace(GmpInteger rop, GmpInteger n, uint k)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -1921,8 +2664,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Compute the binomial coefficient n over k and store the result in rop.
+    /// Calculates the binomial coefficient of <paramref name="n"/> and <paramref name="k"/> and returns the result as a new instance of <see cref="GmpInteger"/>.
     /// </summary>
+    /// <param name="n">The first parameter of the binomial coefficient.</param>
+    /// <param name="k">The second parameter of the binomial coefficient.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the binomial coefficient of <paramref name="n"/> and <paramref name="k"/>.</returns>
     public static unsafe GmpInteger BinomialCoefficient(GmpInteger n, uint k)
     {
         GmpInteger rop = new();
@@ -1931,8 +2677,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Compute the binomial coefficient n over k and store the result in rop.
+    /// Compute the binomial coefficient of <paramref name="n"/> choose <paramref name="k"/> and store the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="n">The number of items.</param>
+    /// <param name="k">The number of items to choose.</param>
+    /// <remarks>
+    /// The result is computed as <paramref name="n"/>! / (<paramref name="k"/>! * (<paramref name="n"/> - <paramref name="k"/>)!).
+    /// </remarks>
     public static unsafe void BinomialCoefficientInplace(GmpInteger rop, uint n, uint k)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -1942,8 +2694,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Compute the binomial coefficient n over k and store the result in rop.
+    /// Calculates the binomial coefficient of two non-negative integers <paramref name="n"/> and <paramref name="k"/>.
     /// </summary>
+    /// <param name="n">The first non-negative integer.</param>
+    /// <param name="k">The second non-negative integer.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the binomial coefficient of <paramref name="n"/> and <paramref name="k"/>.</returns>
     public static unsafe GmpInteger BinomialCoefficient(uint n, uint k)
     {
         GmpInteger rop = new();
@@ -1952,8 +2707,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// 1,1,2,3,5,8,13,21,34,55
+    /// Calculate the Fibonacci number at position <paramref name="n"/> and store the result in-place in the <paramref name="fn"/> parameter.
     /// </summary>
+    /// <param name="fn">The <see cref="GmpInteger"/> instance to store the result in.</param>
+    /// <param name="n">The position of the Fibonacci number to calculate.</param>
+    /// <remarks>
+    /// The result will be stored in the <paramref name="fn"/> parameter, which will be modified in-place.
+    /// </remarks>
     public static unsafe void FibonacciInplace(GmpInteger fn, uint n)
     {
         fixed (Mpz_t* pr = &fn.Raw)
@@ -1963,8 +2723,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// 1,1,2,3,5,8,13,21,34,55
+    /// Calculates the nth Fibonacci number and returns it as a new instance of <see cref="GmpInteger"/>.
     /// </summary>
+    /// <param name="n">The index of the Fibonacci number to calculate.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the calculated Fibonacci number.</returns>
     public static unsafe GmpInteger Fibonacci(uint n)
     {
         GmpInteger fn = new();
@@ -1973,8 +2735,15 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// 1,1,2,3,5,8,13,21,34,55
+    /// Calculates the Fibonacci number at index <paramref name="n"/> using the two initial values <paramref name="fn"/> and <paramref name="fnsub1"/>.
+    /// The result is stored in <paramref name="fn"/> and <paramref name="fnsub1"/>.
     /// </summary>
+    /// <param name="fn">The first initial value of the Fibonacci sequence.</param>
+    /// <param name="fnsub1">The second initial value of the Fibonacci sequence.</param>
+    /// <param name="n">The index of the Fibonacci number to calculate.</param>
+    /// <remarks>
+    /// This method modifies the values of <paramref name="fn"/> and <paramref name="fnsub1"/> in place to store the result.
+    /// </remarks>
     public static unsafe void Fibonacci2Inplace(GmpInteger fn, GmpInteger fnsub1, uint n)
     {
         fixed (Mpz_t* pr = &fn.Raw)
@@ -1985,8 +2754,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// 1,1,2,3,5,8,13,21,34,55
+    /// Calculates the Fibonacci sequence up to the <paramref name="n"/>th number and returns a tuple containing the <paramref name="n"/>th and <paramref name="n"/>-1th numbers.
     /// </summary>
+    /// <param name="n">The index of the Fibonacci number to calculate.</param>
+    /// <returns>A tuple containing the <paramref name="n"/>th and <paramref name="n"/>-1th Fibonacci numbers.</returns>
     public static unsafe (GmpInteger fn, GmpInteger fnsub1) Fibonacci2(uint n)
     {
         GmpInteger fn = new();
@@ -1996,8 +2767,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// 1,3,4,7,11,18,29,47,76,123
+    /// Computes the <paramref name="n"/>th Lucas number in place and stores the result in the <paramref name="fn"/> parameter.
     /// </summary>
+    /// <param name="fn">The <see cref="GmpInteger"/> instance to store the result in.</param>
+    /// <param name="n">The index of the Lucas number to compute.</param>
+    /// <remarks>
+    /// The Lucas numbers form a sequence similar to the Fibonacci sequence, but with different starting values and recurrence relation.
+    /// </remarks>
     public static unsafe void LucasNumInplace(GmpInteger fn, uint n)
     {
         fixed (Mpz_t* pr = &fn.Raw)
@@ -2007,8 +2783,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// 1,3,4,7,11,18,29,47,76,123
+    /// Computes the Lucas number at index <paramref name="n"/>.
     /// </summary>
+    /// <param name="n">The index of the Lucas number to compute.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the Lucas number at index <paramref name="n"/>.</returns>
     public static unsafe GmpInteger LucasNum(uint n)
     {
         GmpInteger fn = new();
@@ -2017,8 +2795,18 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// 1,3,4,7,11,18,29,47,76,123
+    /// Calculates the second Lucas number at index <paramref name="n"/> and stores the result in <paramref name="fn"/>.
     /// </summary>
+    /// <param name="fn">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="fnsub1">The <see cref="GmpInteger"/> instance representing the (n-1)th Lucas number.</param>
+    /// <param name="n">The index of the Lucas number to calculate.</param>
+    /// <remarks>
+    /// The second Lucas number is defined as:
+    /// L_2(n) = L(n-1) + L(n+1)
+    /// where L_k is the kth Lucas number.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="fn"/> or <paramref name="fnsub1"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="n"/> is less than 0.</exception>
     public static unsafe void LucasNum2Inplace(GmpInteger fn, GmpInteger fnsub1, uint n)
     {
         fixed (Mpz_t* pr = &fn.Raw)
@@ -2029,8 +2817,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// 1,3,4,7,11,18,29,47,76,123
+    /// Computes the Lucas Numbers of the second kind for the given index <paramref name="n"/> and returns a tuple containing the result and the previous number in the sequence.
     /// </summary>
+    /// <param name="n">The index of the Lucas Number to compute.</param>
+    /// <returns>A tuple containing the computed Lucas Number and the previous number in the sequence.</returns>
     public static unsafe (GmpInteger fn, GmpInteger fnsub1) LucasNum2(uint n)
     {
         GmpInteger fn = new();
@@ -2041,6 +2831,18 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     #endregion
 
     #region Comparison Functions
+
+    /// <summary>
+    /// Compares two <see cref="GmpInteger"/> values and returns an integer that indicates their relationship to one another in the sort order.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpInteger"/> to compare.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// Value Meaning
+    /// Less than zero: <paramref name="op1"/> is less than <paramref name="op2"/>.
+    /// Zero: <paramref name="op1"/> equals <paramref name="op2"/>.
+    /// Greater than zero: <paramref name="op1"/> is greater than <paramref name="op2"/>.
+    /// </returns>
     public static unsafe int Compare(GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -2050,6 +2852,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Compares the current <see cref="GmpInteger"/> object with the specified object and returns an integer that indicates whether the current object is less than, equal to, or greater than the specified object.
+    /// </summary>
+    /// <param name="obj">The object to compare with the current object.</param>
+    /// <returns>A signed integer that indicates the relative values of this instance and <paramref name="obj"/>.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="obj"/> is not a valid type.</exception>
     public int CompareTo(object? obj) => obj switch
     {
         null => 1,
@@ -2061,12 +2869,26 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         _ => throw new ArgumentException($"obj must be GmpInteger, int, uint, double, GmpFloat"),
     };
 
+    /// <summary>
+    /// Compares this <see cref="GmpInteger"/> instance to another <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="other">The <see cref="GmpInteger"/> instance to compare with this instance.</param>
+    /// <returns>A signed integer that indicates the relative order of the objects being compared. The return value has the following meanings: 
+    /// Less than zero: This instance is less than <paramref name="other"/>.
+    /// Zero: This instance is equal to <paramref name="other"/>.
+    /// Greater than zero: This instance is greater than <paramref name="other"/>.
+    /// </returns>
     public int CompareTo([AllowNull] GmpInteger other) => other switch
     {
         null => 1,
         _ => Compare(this, other)
     };
 
+    /// <summary>
+    /// Determines whether the current <see cref="GmpInteger"/> object is equal to another <see cref="GmpInteger"/> object.
+    /// </summary>
+    /// <param name="other">The <see cref="GmpInteger"/> to compare with the current <see cref="GmpInteger"/> object.</param>
+    /// <returns><c>true</c> if the specified <see cref="GmpInteger"/> is equal to the current <see cref="GmpInteger"/>; otherwise, <c>false</c>.</returns>
     public bool Equals([AllowNull] GmpInteger other) => other switch
     {
         null => false,
@@ -2080,6 +2902,31 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     public static bool operator >=(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) >= 0;
     public static bool operator <=(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) <= 0;
 
+    /// <summary>
+    /// Compares a <see cref="GmpInteger"/> instance with a double-precision floating-point number.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> instance to compare.</param>
+    /// <param name="op2">The double-precision floating-point number to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// <list type="table">
+    ///     <listheader>
+    ///         <term>Value</term>
+    ///         <description>Meaning</description>
+    ///     </listheader>
+    ///     <item>
+    ///         <term>Less than zero</term>
+    ///         <description><paramref name="op1"/> is less than <paramref name="op2"/>.</description>
+    ///     </item>
+    ///     <item>
+    ///         <term>Zero</term>
+    ///         <description><paramref name="op1"/> equals <paramref name="op2"/>.</description>
+    ///     </item>
+    ///     <item>
+    ///         <term>Greater than zero</term>
+    ///         <description><paramref name="op1"/> is greater than <paramref name="op2"/>.</description>
+    ///     </item>
+    /// </list>
+    /// </returns>
     public static unsafe int Compare(GmpInteger op1, double op2)
     {
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -2101,6 +2948,31 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     public static bool operator >=(double op1, GmpInteger op2) => Compare(op2, op1) <= 0;
     public static bool operator <=(double op1, GmpInteger op2) => Compare(op2, op1) >= 0;
 
+    /// <summary>
+    /// Compares a <see cref="GmpInteger"/> instance with an integer value.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> instance to compare.</param>
+    /// <param name="op2">The integer value to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// <list type="table">
+    /// <listheader>
+    /// <term>Value</term>
+    /// <description>Meaning</description>
+    /// </listheader>
+    /// <item>
+    /// <term>Less than zero</term>
+    /// <description><paramref name="op1"/> is less than <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Zero</term>
+    /// <description><paramref name="op1"/> equals <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Greater than zero</term>
+    /// <description><paramref name="op1"/> is greater than <paramref name="op2"/>.</description>
+    /// </item>
+    /// </list>
+    /// </returns>
     public static unsafe int Compare(GmpInteger op1, int op2)
     {
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -2109,19 +2981,67 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is equal to an integer (op1 == op2).</summary>
     public static bool operator ==(GmpInteger op1, int op2) => Compare(op1, op2) == 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is not equal to an integer (op1 != op2).</summary>
     public static bool operator !=(GmpInteger op1, int op2) => Compare(op1, op2) != 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is greater than an integer (op1 > op2).</summary>
     public static bool operator >(GmpInteger op1, int op2) => Compare(op1, op2) > 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is less than an integer (op1 &lt; op2).</summary>
     public static bool operator <(GmpInteger op1, int op2) => Compare(op1, op2) < 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is greater than or equal to an integer (op1 >= op2).</summary>
     public static bool operator >=(GmpInteger op1, int op2) => Compare(op1, op2) >= 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is less than or equal to an integer (op1 &lt;= op2).</summary>
     public static bool operator <=(GmpInteger op1, int op2) => Compare(op1, op2) <= 0;
+
+    /// <summary>Determines whether an integer is equal to a <see cref="GmpInteger" /> instance (op1 == op2).</summary>
     public static bool operator ==(int op1, GmpInteger op2) => Compare(op2, op1) == 0;
+
+    /// <summary>Determines whether an integer is not equal to a <see cref="GmpInteger" /> instance (op1 != op2).</summary>
     public static bool operator !=(int op1, GmpInteger op2) => Compare(op2, op1) != 0;
+
+    /// <summary>Determines whether an integer is greater than a <see cref="GmpInteger" /> instance (op1 > op2).</summary>
     public static bool operator >(int op1, GmpInteger op2) => Compare(op2, op1) < 0;
+
+    /// <summary>Determines whether an integer is less than a <see cref="GmpInteger" /> instance (op1 &lt; op2).</summary>
     public static bool operator <(int op1, GmpInteger op2) => Compare(op2, op1) > 0;
+
+    /// <summary>Determines whether an integer is greater than or equal to a <see cref="GmpInteger" /> instance (op1 >= op2).</summary>
     public static bool operator >=(int op1, GmpInteger op2) => Compare(op2, op1) <= 0;
+
+    /// <summary>Determines whether an integer is less than or equal to a <see cref="GmpInteger" /> instance (op1 &lt;= op2).</summary>
     public static bool operator <=(int op1, GmpInteger op2) => Compare(op2, op1) >= 0;
 
+    /// <summary>
+    /// Compares a <see cref="GmpInteger"/> instance with an unsigned integer.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpInteger"/> instance to compare.</param>
+    /// <param name="op2">The unsigned integer to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// <list type="table">
+    /// <listheader>
+    /// <term>Value</term>
+    /// <description>Meaning</description>
+    /// </listheader>
+    /// <item>
+    /// <term>Less than zero</term>
+    /// <description><paramref name="op1"/> is less than <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Zero</term>
+    /// <description><paramref name="op1"/> equals <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Greater than zero</term>
+    /// <description><paramref name="op1"/> is greater than <paramref name="op2"/>.</description>
+    /// </item>
+    /// </list>
+    /// </returns>
     public static unsafe int Compare(GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -2130,19 +3050,47 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is equal to a uint (op1 == op2).</summary>
     public static bool operator ==(GmpInteger op1, uint op2) => Compare(op1, op2) == 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is not equal to a uint (op1 != op2).</summary>
     public static bool operator !=(GmpInteger op1, uint op2) => Compare(op1, op2) != 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is greater than a uint (op1 > op2).</summary>
     public static bool operator >(GmpInteger op1, uint op2) => Compare(op1, op2) > 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is less than a uint (op1 &lt; op2).</summary>
     public static bool operator <(GmpInteger op1, uint op2) => Compare(op1, op2) < 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is greater than or equal to a uint (op1 >= op2).</summary>
     public static bool operator >=(GmpInteger op1, uint op2) => Compare(op1, op2) >= 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is less than or equal to a uint (op1 &lt;= op2).</summary>
     public static bool operator <=(GmpInteger op1, uint op2) => Compare(op1, op2) <= 0;
+
+    /// <summary>Determines whether a uint is equal to a <see cref="GmpInteger" /> instance (op1 == op2).</summary>
     public static bool operator ==(uint op1, GmpInteger op2) => Compare(op2, op1) == 0;
+
+    /// <summary>Determines whether a uint is not equal to a <see cref="GmpInteger" /> instance (op1 != op2).</summary>
     public static bool operator !=(uint op1, GmpInteger op2) => Compare(op2, op1) != 0;
+
+    /// <summary>Determines whether a uint is greater than a <see cref="GmpInteger" /> instance (op1 > op2).</summary>
     public static bool operator >(uint op1, GmpInteger op2) => Compare(op2, op1) < 0;
+
+    /// <summary>Determines whether a uint is less than a <see cref="GmpInteger" /> instance (op1 &lt; op2).</summary>
     public static bool operator <(uint op1, GmpInteger op2) => Compare(op2, op1) > 0;
+
+    /// <summary>Determines whether a uint is greater than or equal to a <see cref="GmpInteger" /> instance (op1 >= op2).</summary>
     public static bool operator >=(uint op1, GmpInteger op2) => Compare(op2, op1) <= 0;
+
+    /// <summary>Determines whether a uint is less than or equal to a <see cref="GmpInteger" /> instance (op1 &lt;= op2).</summary>
     public static bool operator <=(uint op1, GmpInteger op2) => Compare(op2, op1) >= 0;
 
+    /// <summary>
+    /// Determines whether the current <see cref="GmpInteger"/> object is equal to another object.
+    /// </summary>
+    /// <param name="obj">The object to compare with the current object.</param>
+    /// <returns><c>true</c> if the specified object is equal to the current object; otherwise, <c>false</c>.</returns>
     public override bool Equals(object? obj)
     {
         return obj switch
@@ -2156,8 +3104,22 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         };
     }
 
+    /// <summary>
+    /// Returns the hash code for this <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <returns>An integer hash code.</returns>
     public override int GetHashCode() => Raw.GetHashCode();
 
+    /// <summary>
+    /// Compares the absolute values of two <see cref="GmpInteger"/> objects.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpInteger"/> to compare.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>. 
+    /// If the absolute value of <paramref name="op1"/> is greater than the absolute value of <paramref name="op2"/>, 
+    /// the method returns 1. If the absolute value of <paramref name="op1"/> is less than the absolute value of <paramref name="op2"/>, 
+    /// the method returns -1. If the absolute value of <paramref name="op1"/> equals the absolute value of <paramref name="op2"/>, 
+    /// the method returns 0.</returns>
     public static unsafe int CompareAbs(GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -2167,6 +3129,31 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Compares the absolute value of a <see cref="GmpInteger"/> with a double-precision floating-point number.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> to compare.</param>
+    /// <param name="op2">The double-precision floating-point number to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// <list type="table">
+    /// <listheader>
+    /// <term>Value</term>
+    /// <description>Meaning</description>
+    /// </listheader>
+    /// <item>
+    /// <term>Less than zero</term>
+    /// <description><paramref name="op1"/> is less than the absolute value of <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Zero</term>
+    /// <description><paramref name="op1"/> is equal to the absolute value of <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Greater than zero</term>
+    /// <description><paramref name="op1"/> is greater than the absolute value of <paramref name="op2"/>.</description>
+    /// </item>
+    /// </list>
+    /// </returns>
     public static unsafe int CompareAbs(GmpInteger op1, double op2)
     {
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -2175,6 +3162,15 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Compares the absolute value of a <see cref="GmpInteger"/> with an unsigned integer.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> to compare.</param>
+    /// <param name="op2">The unsigned integer to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>. If the absolute value of <paramref name="op1"/> is greater than <paramref name="op2"/>, the return value is greater than 0. If the absolute value of <paramref name="op1"/> is equal to <paramref name="op2"/>, the return value is 0. If the absolute value of <paramref name="op1"/> is less than <paramref name="op2"/>, the return value is less than 0.</returns>
+    /// <remarks>This method compares the absolute value of <paramref name="op1"/> with an unsigned integer <paramref name="op2"/>.</remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="op1"/> is null.</exception>
+    /// <exception cref="ArgumentException"><paramref name="op1"/> is negative.</exception>
     public static unsafe int CompareAbs(GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -2187,6 +3183,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     #endregion
 
     #region Logical and Bit Manipulation Functions
+
+    /// <summary>
+    /// Performs a bitwise AND operation between two <see cref="GmpInteger"/> operands and stores the result in the first operand.
+    /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> operand to store the result in.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> operand to perform the operation.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand to perform the operation.</param>
+    /// <remarks>The operation is performed in-place, meaning the value of <paramref name="rop"/> will be modified.</remarks>
     public static unsafe void BitwiseAndInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -2197,6 +3201,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Computes the bitwise AND of two <see cref="GmpInteger"/> values.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpInteger"/> value.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> value.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the bitwise AND operation.</returns>
     public static GmpInteger BitwiseAnd(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger rop = new();
@@ -2206,6 +3216,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
 
     public static GmpInteger operator &(GmpInteger op1, GmpInteger op2) => BitwiseAnd(op1, op2);
 
+    /// <summary>
+    /// Performs a bitwise OR operation between two <see cref="GmpInteger"/> operands and stores the result in the first operand.
+    /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> operand to store the result of the operation.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> operand to use in the operation.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand to use in the operation.</param>
+    /// <remarks>The operation is performed in-place, meaning the value of <paramref name="rop"/> will be modified.</remarks>
     public static unsafe void BitwiseOrInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -2216,6 +3233,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Computes the bitwise OR of two <see cref="GmpInteger"/> values.
+    /// </summary>
+    /// <param name="op1">The first operand.</param>
+    /// <param name="op2">The second operand.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the bitwise OR operation.</returns>
     public static GmpInteger BitwiseOr(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger rop = new();
@@ -2225,6 +3248,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
 
     public static GmpInteger operator |(GmpInteger op1, GmpInteger op2) => BitwiseOr(op1, op2);
 
+    /// <summary>
+    /// Computes the bitwise XOR of two <see cref="GmpInteger"/> values and stores the result in the first operand.
+    /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> value to store the result in.</param>
+    /// <param name="op1">The first <see cref="GmpInteger"/> operand.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand.</param>
+    /// <remarks>The result is computed as <paramref name="rop"/> = <paramref name="op1"/> XOR <paramref name="op2"/>.</remarks>
     public static unsafe void BitwiseXorInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -2235,6 +3265,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Computes the bitwise XOR of two <see cref="GmpInteger"/> operands.
+    /// </summary>
+    /// <param name="op1">The first operand.</param>
+    /// <param name="op2">The second operand.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the result of the bitwise XOR operation.</returns>
     public static GmpInteger BitwiseXor(GmpInteger op1, GmpInteger op2)
     {
         GmpInteger rop = new();
@@ -2248,8 +3284,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     public static GmpInteger operator ^(GmpInteger op1, GmpInteger op2) => BitwiseXor(op1, op2);
 
     /// <summary>
-    /// 1001 -> 0110
+    /// Computes the one's complement of the <paramref name="op"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> instance to store the result in.</param>
+    /// <param name="op">The <see cref="GmpInteger"/> instance to compute the one's complement of.</param>
+    /// <remarks>
+    /// The one's complement of a binary number is the value obtained by inverting all the bits (swapping 0s for 1s and vice versa).
+    /// </remarks>
     public static unsafe void ComplementInplace(GmpInteger rop, GmpInteger op)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -2260,8 +3301,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// 1001 -> 0110
+    /// Computes the one's complement of a <see cref="GmpInteger"/> instance.
     /// </summary>
+    /// <param name="op">The <see cref="GmpInteger"/> instance to complement.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the one's complement of <paramref name="op"/>.</returns>
     public static GmpInteger Complement(GmpInteger op)
     {
         GmpInteger rop = new();
@@ -2270,10 +3313,9 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>If op &gt;= 0, return the population count of op, which is the number of 1 bits in the binary representation.</para>
-    /// <para>If op &lt; 0, the number of 1s is infinite, and the return value is the largest possible mp_bitcnt_t.</para>
+    /// Returns the number of set bits (population count) in the binary representation of the current <see cref="GmpInteger"/> instance.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The number of set bits in the binary representation of the current <see cref="GmpInteger"/> instance.</returns>
     public unsafe uint PopulationCount()
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -2283,15 +3325,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para>
-    /// If op1 and op2 are both &gt;= 0 or both &lt; 0, return the hamming distance between the two operands, 
-    /// which is the number of bit positions where op1 and op2 have different bit values. 
-    /// </para>
-    /// <para>
-    /// If one operand is &gt;=0 and the other &lt; 0 then the number of bits different is infinite, 
-    /// and the return value is the largest possible mp_bitcnt_t.
-    /// </para>
+    /// Calculates the Hamming distance between two <see cref="GmpInteger"/> instances.
     /// </summary>
+    /// <param name="op1">The first <see cref="GmpInteger"/> instance.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> instance.</param>
+    /// <returns>The Hamming distance between <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static unsafe uint HammingDistance(GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -2302,15 +3340,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para><see cref="GmpLib.__gmpz_scan0"/></para>
-    /// <para>Scan op, starting from bit starting_bit, towards more significant bits, until the first 0 is found.</para>
-    /// <para>If the bit at starting_bit is already what’s sought, then starting_bit is returned.</para>
-    /// <para>
-    /// If there’s no bit found, then the largest possible mp_bitcnt_t is returned. 
-    /// This will happen in past the end of a negative number.
-    /// </para>
+    /// Finds the index of the first 0 bit in the binary representation of the current <see cref="GmpInteger"/> instance, starting from <paramref name="startingBit"/> position.
     /// </summary>
-    /// <returns>The index of the found bit.</returns>
+    /// <param name="startingBit">The bit position to start searching from. Default is 0.</param>
+    /// <returns>The index of the first 0 bit, or -1 if no 0 bit is found.</returns>
     public unsafe uint FirstIndexOf0(uint startingBit = 0)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -2320,15 +3353,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// <para><see cref="GmpLib.__gmpz_scan1"/></para>
-    /// <para>Scan op, starting from bit starting_bit, towards more significant bits, until the first 1 is found.</para>
-    /// <para>If the bit at starting_bit is already what’s sought, then starting_bit is returned.</para>
-    /// <para>
-    /// If there’s no bit found, then the largest possible mp_bitcnt_t is returned. 
-    /// This will happen in past the end of a nonnegative number.
-    /// </para>
+    /// Finds the index of the first bit with value 1 in the <see cref="GmpInteger"/> instance, starting from the specified <paramref name="startingBit"/> index.
     /// </summary>
-    /// <returns>The index of the found bit.</returns>
+    /// <param name="startingBit">The index to start searching from. Default is 0.</param>
+    /// <returns>The index of the first bit with value 1, or -1 if no such bit is found.</returns>
     public unsafe uint FirstIndexOf1(uint startingBit = 0)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -2337,6 +3365,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Set the bit at the specified <paramref name="bitIndex"/> to 1.
+    /// </summary>
+    /// <param name="bitIndex">The index of the bit to set to 1.</param>
+    /// <remarks>
+    /// If the bit at the specified <paramref name="bitIndex"/> is already 1, this method has no effect.
+    /// </remarks>
     public unsafe void SetBit(uint bitIndex)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -2345,6 +3380,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Clears the bit at the specified <paramref name="bitIndex"/> in the current <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="bitIndex">The zero-based index of the bit to clear.</param>
+    /// <remarks>
+    /// The bit at the specified <paramref name="bitIndex"/> is set to 0.
+    /// </remarks>
     public unsafe void ClearBit(uint bitIndex)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -2353,6 +3395,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Complements the bit at the specified <paramref name="bitIndex"/> in the <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="bitIndex">The index of the bit to complement.</param>
+    /// <remarks>
+    /// The bit at the specified <paramref name="bitIndex"/> is flipped, i.e. 0 becomes 1 and 1 becomes 0.
+    /// </remarks>
     public unsafe void ComplementBit(uint bitIndex)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -2361,6 +3410,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Tests whether the bit at the specified <paramref name="bitIndex"/> in the current <see cref="GmpInteger"/> is set or not.
+    /// </summary>
+    /// <param name="bitIndex">The zero-based index of the bit to test.</param>
+    /// <returns>1 if the bit is set; otherwise, 0.</returns>
     public unsafe int TestBit(uint bitIndex)
     {
         fixed (Mpz_t* ptr = &Raw)
@@ -2368,14 +3422,15 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
             return GmpLib.__gmpz_tstbit((IntPtr)ptr, bitIndex);
         }
     }
-    #endregion
 
-    #region Obsoleted Random
     /// <summary>
-    /// Generate a random integer of at most max_size limbs.
-    /// The generated random number doesn’t satisfy any particular requirements of randomness.
-    /// Negative random numbers are generated when max_size is negative.
+    /// Generates a random <see cref="GmpInteger"/> with a maximum number of limbs specified by <paramref name="maxLimbCount"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> to store the generated random number.</param>
+    /// <param name="maxLimbCount">The maximum number of limbs of the generated random number.</param>
+    /// <remarks>
+    /// This method is obsolete, use <see cref="GmpRandom"/> instead.
+    /// </remarks>
     [Obsolete("use GmpRandom")]
     public static unsafe void RandomInplace(GmpInteger rop, int maxLimbCount)
     {
@@ -2386,10 +3441,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Generate a random integer of at most max_size limbs.
-    /// The generated random number doesn’t satisfy any particular requirements of randomness.
-    /// Negative random numbers are generated when max_size is negative.
+    /// Creates a random <see cref="GmpInteger"/> instance with a maximum limb count of <paramref name="maxLimbCount"/>.
     /// </summary>
+    /// <param name="maxLimbCount">The maximum number of limbs the resulting <see cref="GmpInteger"/> can have.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> with random value.</returns>
+    /// <remarks>This method is obsolete, use <see cref="GmpRandom"/> instead.</remarks>
     [Obsolete("use GmpRandom")]
     public static unsafe GmpInteger Random(int maxLimbCount)
     {
@@ -2399,12 +3455,13 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Generate a random integer of at most max_size limbs, 
-    /// with long strings of zeros and ones in the binary representation. 
-    /// Useful for testing functions and algorithms, 
-    /// since this kind of random numbers have proven to be more likely to trigger corner-case bugs. 
-    /// Negative random numbers are generated when max_size is negative.
+    /// Generates a random <see cref="GmpInteger"/> with <paramref name="maxLimbCount"/> limbs and assigns it to <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="GmpInteger"/> to assign the generated random value to.</param>
+    /// <param name="maxLimbCount">The maximum number of limbs the generated random value can have.</param>
+    /// <remarks>
+    /// This method is obsolete, use <see cref="GmpRandom"/> instead.
+    /// </remarks>
     [Obsolete("use GmpRandom")]
     public static unsafe void Random2Inplace(GmpInteger rop, int maxLimbCount)
     {
@@ -2415,12 +3472,11 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Generate a random integer of at most max_size limbs, 
-    /// with long strings of zeros and ones in the binary representation. 
-    /// Useful for testing functions and algorithms, 
-    /// since this kind of random numbers have proven to be more likely to trigger corner-case bugs. 
-    /// Negative random numbers are generated when max_size is negative.
+    /// Creates a random <see cref="GmpInteger"/> instance with a maximum limb count of <paramref name="maxLimbCount"/>.
     /// </summary>
+    /// <param name="maxLimbCount">The maximum limb count of the generated <see cref="GmpInteger"/>.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> with random value.</returns>
+    /// <remarks>This method is obsolete, use <see cref="GmpRandom"/> instead.</remarks>
     [Obsolete("use GmpRandom")]
     public static unsafe GmpInteger Random2(int maxLimbCount)
     {
@@ -2430,6 +3486,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
     #endregion
 }
+
 
 public enum PrimePossibility
 {
