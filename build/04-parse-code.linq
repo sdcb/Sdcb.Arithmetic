@@ -21,7 +21,7 @@
 #load "work\opensource\sdcb.arithmetic\chatgpt-prompt-cache"
 
 string solutionRoot = GetParentDirectoryUntilContainsFile(new DirectoryInfo(Util.CurrentQueryPath), "Sdcb.Arithmetic.sln").ToString();
-string file = Path.Combine(solutionRoot, @"Sdcb.Arithmetic.Gmp/GmpInteger.cs");
+string file = Path.Combine(solutionRoot, @"Sdcb.Arithmetic.Gmp/GmpRational.cs");
 string code = File.ReadAllText(file);
 
 SyntaxTree tree = CSharpSyntaxTree.ParseText(code, new CSharpParseOptions().WithDocumentationMode(DocumentationMode.Parse));
@@ -29,7 +29,7 @@ CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
 
 ClassDeclarationSyntax theClass = root.DescendantNodes()
 	.OfType<ClassDeclarationSyntax>()
-	.Single(x => x.Identifier.ToString() == "GmpInteger");
+	.Single(x => x.Identifier.ToString() == "GmpRational");
 
 (await MethodReplacer.ReplaceMethods(theClass, QueryCancelToken)).ToFullString().Dump();
 
@@ -108,8 +108,6 @@ class CommentRemover : CSharpSyntaxRewriter
 class MethodReplacer : CSharpSyntaxRewriter
 {
 	private string _dummyClassCode;
-	private int totalCount;
-	private int currentCount;
 	private readonly ChatGPTAsker _gpt;
 
 	public MethodReplacer(ClassDeclarationSyntax classSyntax, ChatGPTAsker gpt)
@@ -118,26 +116,31 @@ class MethodReplacer : CSharpSyntaxRewriter
 			CommentRemover.RemoveComments(
 			MethodRemover.RemoveMethodsAndOperators(classSyntax)), new AdhocWorkspace());
 		_dummyClassCode = dummyClass.ToFullString();
-		totalCount = classSyntax.ChildNodes().OfType<MethodDeclarationSyntax>().Count();
 		_gpt = gpt;
 	}
 
-	public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
+	public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node) => TransformNode(node);
+	public override SyntaxNode? VisitConstructorDeclaration(ConstructorDeclarationSyntax node) => TransformNode(node);
+	public override SyntaxNode? VisitPropertyDeclaration(PropertyDeclarationSyntax node) => TransformNode(node);
+	public override SyntaxNode? VisitOperatorDeclaration(OperatorDeclarationSyntax node) => TransformNode(node);
+	public override SyntaxNode? VisitDestructorDeclaration(DestructorDeclarationSyntax node) => TransformNode(node);
+	public override SyntaxNode? VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node) => TransformNode(node);
+
+	SyntaxNode TransformNode(MemberDeclarationSyntax node)
 	{
-		//Console.WriteLine($"Executing {++currentCount} of {totalCount}, name={node.Identifier.ToString()}...");
+		if (node is DestructorDeclarationSyntax || node.Modifiers.Any(x => x.Text == "public" || x.Text == "protected"))
+		{
+			// Get the full text of the method declaration, including XML comments.
+			string comment = node.GetLeadingTrivia().ToFullString();
+			string body = node.ToString();
 
-		// Get the full text of the method declaration, including XML comments.
-		string comment = node.GetLeadingTrivia().ToFullString();
-		string body = node.ToString();
+			// Get the new method code from GetReplacementForFunction.
+			string newComment = GetReplacementForFunction(comment, body);
 
-		// Get the new method code from GetReplacementForFunction.
-		string newComment = GetReplacementForFunction(comment, body);
-
-		// Parse the new method code into a MethodDeclarationSyntax.
-		MethodDeclarationSyntax? newMethod = SyntaxFactory.ParseMemberDeclaration("\n" + newComment + "\n" + body + "\n") as MethodDeclarationSyntax;
-
-		// Replace the old method with the new one.
-		return newMethod;
+			// Parse the new method code and return
+			return SyntaxFactory.ParseMemberDeclaration("\n" + newComment + "\n" + body + "\n")!;
+		}
+		return node;
 	}
 
 	private string GetReplacementForFunction(string comment, string functionCode)
