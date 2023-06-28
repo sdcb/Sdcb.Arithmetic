@@ -9,8 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{974528A9
 		build\01-build-native.linq = build\01-build-native.linq
 		build\02-build-packages.linq = build\02-build-packages.linq
 		build\03-publish-proget-nuget.linq = build\03-publish-proget-nuget.linq
-		build\04-parse-code.linq = build\04-parse-code.linq
+		build\05-fast-parse-code.linq = build\05-fast-parse-code.linq
 		build\icon.png = build\icon.png
+		build\04-chatgpt-parse-code.linq = build\04-chatgpt-parse-code.linq
 		build\Sdcb.Arithmetic.Gmp.runtime.nuspec = build\Sdcb.Arithmetic.Gmp.runtime.nuspec
 		build\Sdcb.Arithmetic.Gmp.runtime.props = build\Sdcb.Arithmetic.Gmp.runtime.props
 	EndProjectSection
