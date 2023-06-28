@@ -126,7 +126,7 @@ public unsafe static class GmpRandomExtensions
     /// <param name="rounding">The rounding mode to use when generating the <see cref="MpfrFloat"/> instances. If null, the default rounding mode is used.</param>
     /// <returns>A tuple containing two new instances of <see cref="MpfrFloat"/> representing the generated values.</returns>
     [Obsolete("Use NextNMpfrFloat instead: mpfr_nrandom is much more efficient than mpfr_grandom, especially for large precision. Thus mpfr_grandom is marked as deprecated and will be removed in a future release.")]
-    public static (MpfrFloat op1, MpfrFloat op2) Next2GMpfrFloat(this GmpRandom random, int? precision = null, MpfrRounding? rounding = null)
+    public static (MpfrFloat op1, MpfrFloat op2) NextGMpfrFloat(this GmpRandom random, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop1 = new(precision ?? MpfrFloat.DefaultPrecision);
         MpfrFloat rop2 = new(precision ?? MpfrFloat.DefaultPrecision);

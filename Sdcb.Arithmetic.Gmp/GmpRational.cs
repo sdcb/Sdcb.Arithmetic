@@ -138,7 +138,7 @@ public class GmpRational : IDisposable, IComparable, IComparable<GmpInteger>, IE
     /// Tries to parse the string representation of a rational number in the specified base and returns a value indicating whether the conversion succeeded.
     /// </summary>
     /// <param name="str">The string representation of the rational number to parse.</param>
-    /// <param name="rop">When this method returns, contains the <see cref="GmpRational"/> equivalent of the string representation, if the conversion succeeded, or <see langword="null"/> if the conversion failed. The conversion fails if the <paramref name="str"/> parameter is <see langword="null"/>, is not of the correct format, or represents a number less than <see cref="GmpRational.MinValue"/> or greater than <see cref="GmpRational.MaxValue"/>. This parameter is passed uninitialized.</param>
+    /// <param name="rop">When this method returns, contains the <see cref="GmpRational"/> equivalent of the string representation, if the conversion succeeded, or <see langword="null"/> if the conversion failed. The conversion fails if the <paramref name="str"/> parameter is <see langword="null"/>, is not of the correct format. This parameter is passed uninitialized.</param>
     /// <param name="base">The base of the number in <paramref name="str"/>, which must be between 2 and 62, or 0 to detect the base automatically. The default value is 0.</param>
     /// <returns><see langword="true"/> if the <paramref name="str"/> parameter was converted successfully; otherwise, <see langword="false"/>.</returns>
     public static unsafe bool TryParse(string str, [MaybeNullWhen(returnValue: false)] out GmpRational rop, int @base = 0)

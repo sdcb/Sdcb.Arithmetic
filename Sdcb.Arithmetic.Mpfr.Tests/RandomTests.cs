@@ -5,7 +5,9 @@ namespace Sdcb.Arithmetic.Mpfr.Tests;
 
 public class RandomTests
 {
+#pragma warning disable IDE0052 // 删除未读的私有成员
     private readonly ITestOutputHelper _console;
+#pragma warning restore IDE0052 // 删除未读的私有成员
 
     public RandomTests(ITestOutputHelper console)
     {
@@ -38,11 +40,11 @@ public class RandomTests
         Assert.True(f < 7.0);
     }
 
-    [Fact]
+    [Fact, Obsolete]
     public void Next2NormalDistributedMpfrFloatTest()
     {
         using GmpRandom r = new();
-        (MpfrFloat f1, MpfrFloat f2) = r.Next2NMpfrFloat(precision: 100);
+        (MpfrFloat f1, MpfrFloat f2) = r.NextGMpfrFloat(precision: 100);
         Assert.NotEqual(f1, f2);
     }
 

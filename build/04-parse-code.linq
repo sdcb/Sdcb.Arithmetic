@@ -21,7 +21,7 @@
 #load "work\opensource\sdcb.arithmetic\chatgpt-prompt-cache"
 
 string solutionRoot = GetParentDirectoryUntilContainsFile(new DirectoryInfo(Util.CurrentQueryPath), "Sdcb.Arithmetic.sln").ToString();
-string file = Path.Combine(solutionRoot, @"Sdcb.Arithmetic.Gmp/GmpRational.cs");
+string file = Path.Combine(solutionRoot, @"Sdcb.Arithmetic.Mpfr/MpfrFloat.cs");
 string code = File.ReadAllText(file);
 
 SyntaxTree tree = CSharpSyntaxTree.ParseText(code, new CSharpParseOptions().WithDocumentationMode(DocumentationMode.Parse));
@@ -29,7 +29,7 @@ CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
 
 ClassDeclarationSyntax theClass = root.DescendantNodes()
 	.OfType<ClassDeclarationSyntax>()
-	.Single(x => x.Identifier.ToString() == "GmpRational");
+	.Single(x => x.Identifier.ToString() == "MpfrFloat");
 
 (await MethodReplacer.ReplaceMethods(theClass, QueryCancelToken)).ToFullString().Dump();
 
@@ -200,7 +200,7 @@ class MethodReplacer : CSharpSyntaxRewriter
 		{
 			using (ChatgptCacheDb db = new(Path.Combine(dbDir, "chatgpt-cache.db")))
 			{
-				await db.AskChatgptOrFromCache(req);
+				await db.AskChatgptOrFromCache(req, ct);
 			}
 
 			Interlocked.Increment(ref completed);
