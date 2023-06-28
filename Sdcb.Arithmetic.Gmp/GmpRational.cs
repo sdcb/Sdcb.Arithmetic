@@ -543,18 +543,40 @@ public class GmpRational : IDisposable, IComparable, IComparable<GmpInteger>, IE
         }
     }
 
+    /// <summary>Determines whether a <see cref="GmpRational" /> instance is greater than an integer (op1 &gt; op2).</summary>
     public static bool operator >(GmpRational op1, GmpInteger op2) => Compare(op1, op2) > 0;
+
+    /// <summary>Determines whether a <see cref="GmpRational" /> instance is greater than or equal to an integer (op1 &gt;= op2).</summary>
     public static bool operator >=(GmpRational op1, GmpInteger op2) => Compare(op1, op2) >= 0;
+
+    /// <summary>Determines whether a <see cref="GmpRational" /> instance is less than an integer (op1 &lt; op2).</summary>
     public static bool operator <(GmpRational op1, GmpInteger op2) => Compare(op1, op2) < 0;
+
+    /// <summary>Determines whether a <see cref="GmpRational" /> instance is less than or equal to an integer (op1 &lt;= op2).</summary>
     public static bool operator <=(GmpRational op1, GmpInteger op2) => Compare(op1, op2) <= 0;
+
+    /// <summary>Determines whether a <see cref="GmpRational" /> instance is equal to an integer (op1 == op2).</summary>
     public static bool operator ==(GmpRational op1, GmpInteger op2) => Compare(op1, op2) == 0;
+
+    /// <summary>Determines whether a <see cref="GmpRational" /> instance is not equal to an integer (op1 != op2).</summary>
     public static bool operator !=(GmpRational op1, GmpInteger op2) => Compare(op1, op2) != 0;
 
+    /// <summary>Determines whether an integer is greater than a <see cref="GmpRational" /> instance (op1 &gt; op2).</summary>
     public static bool operator >(GmpInteger op1, GmpRational op2) => Compare(op2, op1) < 0;
+
+    /// <summary>Determines whether an integer is greater than or equal to a <see cref="GmpRational" /> instance (op1 &gt;= op2).</summary>
     public static bool operator >=(GmpInteger op1, GmpRational op2) => Compare(op2, op1) <= 0;
+
+    /// <summary>Determines whether an integer is less than a <see cref="GmpRational" /> instance (op1 &lt; op2).</summary>
     public static bool operator <(GmpInteger op1, GmpRational op2) => Compare(op2, op1) > 0;
+
+    /// <summary>Determines whether an integer is less than or equal to a <see cref="GmpRational" /> instance (op1 &lt;= op2).</summary>
     public static bool operator <=(GmpInteger op1, GmpRational op2) => Compare(op2, op1) <= 0;
+
+    /// <summary>Determines whether an integer is equal to a <see cref="GmpRational" /> instance (op1 == op2).</summary>
     public static bool operator ==(GmpInteger op1, GmpRational op2) => Compare(op2, op1) == 0;
+
+    /// <summary>Determines whether an integer is not equal to a <see cref="GmpRational" /> instance (op1 != op2).</summary>
     public static bool operator !=(GmpInteger op1, GmpRational op2) => Compare(op2, op1) != 0;
 
     public static unsafe int Compare(GmpRational op1, uint num, uint den)
@@ -632,5 +654,5 @@ public struct Mpq_t
 
     public static int RawSize => Marshal.SizeOf<Mpq_t>();
 
-    public override int GetHashCode() => HashCode.Combine(Num.GetHashCode(), Den.GetHashCode());
+    public override readonly int GetHashCode() => HashCode.Combine(Num.GetHashCode(), Den.GetHashCode());
 }

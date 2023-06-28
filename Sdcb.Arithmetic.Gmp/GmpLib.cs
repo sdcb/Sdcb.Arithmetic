@@ -1,18 +1,28 @@
-﻿using Sdcb.Arithmetic.Gmp;
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+
+#if NET6_0_OR_GREATER
+#pragma warning disable CS1591 // 缺少对公共可见类型或成员的 XML 注释
+#endif
 
 [assembly: InternalsVisibleTo("Sdcb.Arithmetic.Gmp.Tests")]
 [assembly: InternalsVisibleTo("Sdcb.Arithmetic.Mpfr")]
 [assembly: InternalsVisibleTo("Sdcb.Arithmetic.Mpfr.Tests")]
 
 namespace Sdcb.Arithmetic.Gmp;
-
-using gmp_randalg_t = GmpRandomAlgorithm;
-
+/// <summary>
+/// Provides a collection of utility functions for GMP (GNU Multiple Precision Arithmetic Library).
+/// </summary>
 public static class GmpLib
 {
+    /// <summary>
+    /// Gets the size of a single limb in bits.
+    /// </summary>
+    /// <remarks>
+    /// A limb is a unit of data used internally by GMP to represent large integers.
+    /// </remarks>
+    /// <value>The size of a single limb in bits.</value>
     public static uint LimbBitSize => (uint)IntPtr.Size * 8;
 
     static GmpLib() => GmpNativeLoader.Init();

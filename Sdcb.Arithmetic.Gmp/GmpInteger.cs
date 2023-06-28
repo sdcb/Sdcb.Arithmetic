@@ -5,8 +5,20 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Sdcb.Arithmetic.Gmp;
 
+/// <summary>
+/// Represents a multi-precision integer that supports arithmetic operations
+/// with high performance using the GNU Multiple Precision Arithmetic Library.
+/// </summary>
 public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEquatable<GmpInteger>
 {
+    /// <summary>
+    /// Gets or sets the default precision for the <see cref="GmpInteger"/> operations.
+    /// The precision is expressed in bits and is used to determine the number of significant digits
+    /// in the results of arithmetic operations.
+    /// </summary>
+    /// <value>
+    /// A uint representing the default precision in bits.
+    /// </value>
     public static uint DefaultPrecision
     {
         get => GmpLib.__gmpf_get_default_prec();
@@ -310,6 +322,9 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return new GmpInteger(raw);
     }
 
+    /// <summary>
+    /// Explicitly Convert the specific double-precision floating-point number into <see cref="GmpInteger"/>.
+    /// </summary>
     public static explicit operator GmpInteger(double op) => From(op);
 
     /// <summary>
@@ -339,7 +354,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     /// Tries to parse a string <paramref name="val"/> to a <see cref="GmpInteger"/> instance with the specified base <paramref name="valBase"/>.
     /// </summary>
     /// <param name="val">The string to parse.</param>
-    /// <param name="result">When this method returns, contains the <see cref="GmpInteger"/> instance equivalent to the numeric value of <paramref name="val"/>, if the conversion succeeded, or <see langword="null"/> if the conversion failed. The conversion fails if the <paramref name="val"/> parameter is <see langword="null"/>, is not a number in a valid format, or represents a number less than <see cref="GmpInteger.MinValue"/> or greater than <see cref="GmpInteger.MaxValue"/>. This parameter is passed uninitialized.</param>
+    /// <param name="result">When this method returns, contains the <see cref="GmpInteger"/> instance equivalent to the numeric value of <paramref name="val"/>, if the conversion succeeded, or <see langword="null"/> if the conversion failed. The conversion fails if the <paramref name="val"/> parameter is <see langword="null"/>, is not a number in a valid format. This parameter is passed uninitialized.</param>
     /// <param name="valBase">The base of the number in <paramref name="val"/>, which must be 2, 8, 10, or 16. The default is 10.</param>
     /// <returns><see langword="true"/> if <paramref name="val"/> was converted successfully; otherwise, <see langword="false"/>.</returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="valBase"/> is not 2, 8, 10, or 16.</exception>
@@ -882,8 +897,25 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>
+    /// Converts a <see cref="GmpInteger"/> instance to an unsigned 32-bit integer.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpInteger"/> instance to convert.</param>
+    /// <returns>The result of the conversion.</returns>
     public static explicit operator uint(GmpInteger op) => op.ToUInt32();
+
+    /// <summary>
+    /// Converts a <see cref="GmpInteger"/> instance to a signed 32-bit integer.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpInteger"/> instance to convert.</param>
+    /// <returns>The result of the conversion.</returns>
     public static explicit operator int(GmpInteger op) => op.ToInt32();
+
+    /// <summary>
+    /// Converts a <see cref="GmpInteger"/> instance to a double-precision floating-point number.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpInteger"/> instance to convert.</param>
+    /// <returns>The result of the conversion.</returns>
     public static explicit operator double(GmpInteger op) => op.ToDouble();
 
     /// <summary>
@@ -1465,9 +1497,8 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Computes the floor division of <paramref name="n"/> by 2 raised to the power of <paramref name="exp2"/> and stores the remainder in <paramref name="q"/>.
+    /// Computes the floor division of <paramref name="n"/> by 2 raised to the power of <paramref name="exp2"/> and stores the remainder in returned value.
     /// </summary>
-    /// <param name="q">The <see cref="GmpInteger"/> to store the remainder.</param>
     /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
     /// <param name="exp2">The power of 2 to raise.</param>
     /// <returns>The floor division of <paramref name="n"/> by 2 raised to the power of <paramref name="exp2"/>.</returns>
@@ -1811,9 +1842,6 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     /// <param name="n">The <see cref="GmpInteger"/> to be divided.</param>
     /// <param name="d">The <see cref="GmpInteger"/> to divide by.</param>
     /// <exception cref="DivideByZeroException">Thrown when <paramref name="d"/> is zero.</exception>
-    /// <remarks>
-    /// This function is equivalent to calling <see cref="GmpInteger.DivideInplace"/> and throwing an exception if the remainder is not zero.
-    /// </remarks>
     public static unsafe void DivExactInplace(GmpInteger q, GmpInteger n, GmpInteger d)
     {
         fixed (Mpz_t* pq = &q.Raw)
@@ -2342,9 +2370,6 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     /// <param name="op1">The first <see cref="GmpInteger"/> operand.</param>
     /// <param name="op2">The second <see cref="GmpInteger"/> operand.</param>
     /// <remarks>The values of <paramref name="op1"/> and <paramref name="op2"/> are not changed.</remarks>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/>, <paramref name="op1"/>, or <paramref name="op2"/> is null.</exception>
-    /// <exception cref="ObjectDisposedException">Thrown when <paramref name="rop"/>, <paramref name="op1"/>, or <paramref name="op2"/> has already been disposed.</exception>
-    /// <exception cref="GmpException">Thrown when an error occurs in the underlying GMP library.</exception>
     public static unsafe void LcmInplace(GmpInteger rop, GmpInteger op1, GmpInteger op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
@@ -2935,44 +2960,42 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is equal to a double (op1 == op2).</summary>
     public static bool operator ==(GmpInteger op1, double op2) => Compare(op1, op2) == 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is not equal to a double (op1 != op2).</summary>
     public static bool operator !=(GmpInteger op1, double op2) => Compare(op1, op2) != 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is greater than a double (op1 > op2).</summary>
     public static bool operator >(GmpInteger op1, double op2) => Compare(op1, op2) > 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is less than a double (op1 &lt; op2).</summary>
     public static bool operator <(GmpInteger op1, double op2) => Compare(op1, op2) < 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is greater than or equal to a double (op1 >= op2).</summary>
     public static bool operator >=(GmpInteger op1, double op2) => Compare(op1, op2) >= 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is less than or equal to a double (op1 &lt;= op2).</summary>
     public static bool operator <=(GmpInteger op1, double op2) => Compare(op1, op2) <= 0;
+
+    /// <summary>Determines whether a double is equal to a <see cref="GmpInteger" /> instance (op1 == op2).</summary>
     public static bool operator ==(double op1, GmpInteger op2) => Compare(op2, op1) == 0;
+
+    /// <summary>Determines whether a double is not equal to a <see cref="GmpInteger" /> instance (op1 != op2).</summary>
     public static bool operator !=(double op1, GmpInteger op2) => Compare(op2, op1) != 0;
+
+    /// <summary>Determines whether a double is greater than a <see cref="GmpInteger" /> instance (op1 > op2).</summary>
     public static bool operator >(double op1, GmpInteger op2) => Compare(op2, op1) < 0;
+
+    /// <summary>Determines whether a double is less than a <see cref="GmpInteger" /> instance (op1 &lt; op2).</summary>
     public static bool operator <(double op1, GmpInteger op2) => Compare(op2, op1) > 0;
+
+    /// <summary>Determines whether a double is greater than or equal to a <see cref="GmpInteger" /> instance (op1 >= op2).</summary>
     public static bool operator >=(double op1, GmpInteger op2) => Compare(op2, op1) <= 0;
+
+    /// <summary>Determines whether a double is less than or equal to a <see cref="GmpInteger" /> instance (op1 &lt;= op2).</summary>
     public static bool operator <=(double op1, GmpInteger op2) => Compare(op2, op1) >= 0;
 
-    /// <summary>
-    /// Compares a <see cref="GmpInteger"/> instance with an integer value.
-    /// </summary>
-    /// <param name="op1">The <see cref="GmpInteger"/> instance to compare.</param>
-    /// <param name="op2">The integer value to compare.</param>
-    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
-    /// <list type="table">
-    /// <listheader>
-    /// <term>Value</term>
-    /// <description>Meaning</description>
-    /// </listheader>
-    /// <item>
-    /// <term>Less than zero</term>
-    /// <description><paramref name="op1"/> is less than <paramref name="op2"/>.</description>
-    /// </item>
-    /// <item>
-    /// <term>Zero</term>
-    /// <description><paramref name="op1"/> equals <paramref name="op2"/>.</description>
-    /// </item>
-    /// <item>
-    /// <term>Greater than zero</term>
-    /// <description><paramref name="op1"/> is greater than <paramref name="op2"/>.</description>
-    /// </item>
-    /// </list>
-    /// </returns>
     public static unsafe int Compare(GmpInteger op1, int op2)
     {
         fixed (Mpz_t* p1 = &op1.Raw)
