@@ -40,7 +40,7 @@ public class RandomTests
         Assert.True(f < 7.0);
     }
 
-    [Fact, Obsolete]
+    [Fact, Obsolete("mpfr_nrandom is much more efficient than mpfr_grandom, especially for large precision. Thus mpfr_grandom is marked as deprecated and will be removed in a future release.")]
     public void Next2NormalDistributedMpfrFloatTest()
     {
         using GmpRandom r = new();

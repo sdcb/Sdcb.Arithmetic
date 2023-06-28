@@ -26,9 +26,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     #region 1. Initialization Functions
     /// <summary>
-    /// Initialize, set its precision to be exactly prec bits and its value to NaN.
-    /// (Warning: the corresponding MPF function initializes to zero instead.)
+    /// Initializes a new instance of the <see cref="MpfrFloat"/> class with the specified <paramref name="precision"/>.
     /// </summary>
+    /// <param name="precision">The precision in bits of the floating-point number.</param>
+    /// <remarks>
+    /// The <paramref name="precision"/> parameter determines the number of bits used to represent the floating-point number. 
+    /// The higher the precision, the more accurate the number representation, but also the more memory it requires.
+    /// </remarks>
     public MpfrFloat(int precision)
     {
         fixed (Mpfr_t* ptr = &Raw)
@@ -39,9 +43,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Initialize, set its precision to the default precision, and set its value to NaN.
-    /// The default precision can be changed by a call to mpfr_set_default_prec.
+    /// Initializes a new instance of the <see cref="MpfrFloat"/> class with default precision and value 0.
     /// </summary>
+    /// <remarks>
+    /// The default precision is determined by the underlying MPFR library.
+    /// </remarks>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> with default precision and value 0.</returns>
     public MpfrFloat()
     {
         fixed (Mpfr_t* ptr = &Raw)
@@ -58,20 +65,32 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     };
 
     /// <summary>
-    /// The current default MPFR precision in bits.
+    /// Gets or sets the default precision in bits used for new <see cref="MpfrFloat"/> instances.
     /// </summary>
+    /// <value>The default precision in bits.</value>
     public static int DefaultPrecision
     {
         get => MpfrLib.mpfr_get_default_prec();
         set => MpfrLib.mpfr_set_default_prec(value);
     }
 
+    /// <summary>
+    /// The maximum supported precision that can be used in <see cref="MpfrFloat"/>.
+    /// </summary>
     public const int MaxSupportedPrecision = int.MaxValue - 256;
+
+    /// <summary>
+    /// The minimum supported precision that can be used in <see cref="MpfrFloat"/>.
+    /// </summary>
     public const int MinSupportedPrecision = 1;
 
     /// <summary>
-    /// The number of bits used to store its significand.
+    /// Gets or sets the precision of the current <see cref="MpfrFloat"/> instance.
     /// </summary>
+    /// <remarks>
+    /// The precision is the number of bits used to represent the floating-point number. 
+    /// </remarks>
+    /// <value>The precision of the current <see cref="MpfrFloat"/> instance.</value>
     public int Precision
     {
         get
@@ -90,7 +109,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
             throw new ArgumentOutOfRangeException(nameof(precision), $"Precision should in range of [{MinSupportedPrecision}..{MaxSupportedPrecision}].");
     }
 
-    /// <remarks>Note: reset precision will clear the value.</remarks>
+    /// <summary>
+    /// Reset the precision of the current <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="precision">The new precision to set.</param>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="precision"/> is less than <see cref="MinSupportedPrecision"/> or greater than <see cref="MaxSupportedPrecision"/>.</exception>
     public void ResetPrecision(int precision)
     {
         CheckPrecision(precision);
@@ -102,6 +125,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #endregion
 
     #region 2. Assignment Functions
+
+    /// <summary>
+    /// Assigns the value of <paramref name="val"/> to this <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="val">The <see cref="MpfrFloat"/> instance to assign the value from.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public int Assign(MpfrFloat val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -111,6 +141,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Assigns the unsigned integer <paramref name="val"/> to the current instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="val">The unsigned integer value to assign.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the assignment operation.</returns>
     public int Assign(uint val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -119,6 +155,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Assigns the integer value <paramref name="val"/> to this <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="val">The integer value to assign.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if the operation was successful, or a non-zero value otherwise.</returns>
     public int Assign(int val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -127,6 +169,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Assigns the value of a single-precision floating point number to the current instance.
+    /// </summary>
+    /// <param name="val">The single-precision floating point number to assign.</param>
+    /// <param name="rounding">The rounding mode to use, or null to use the default rounding mode.</param>
+    /// <returns>An integer indicating the status of the operation. Zero indicates success, while a non-zero value indicates an error.</returns>
+    /// <remarks>
+    /// The assigned value will be rounded according to the specified <paramref name="rounding"/> mode, or the default rounding mode if <paramref name="rounding"/> is null.
+    /// </remarks>
     public int Assign(float val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -135,6 +186,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Assigns the value of a double-precision floating-point number to the current instance.
+    /// </summary>
+    /// <param name="val">The double-precision floating-point number to assign.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
+    /// <returns>An integer indicating the success or failure of the operation. A non-negative value indicates success, while a negative value indicates failure.</returns>
+    /// <remarks>
+    /// The assigned value will be rounded according to the specified rounding mode, or the default rounding mode if none is specified.
+    /// </remarks>
     public int Assign(double val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -143,6 +203,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Assigns the value of a <see cref="GmpInteger"/> instance to this <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="val">The <see cref="GmpInteger"/> instance to assign.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
     public int Assign(GmpInteger val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -152,6 +218,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Assigns the value of a <see cref="GmpRational"/> instance to this <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="val">The <see cref="GmpRational"/> instance to assign.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the assignment operation.</returns>
     public int Assign(GmpRational val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -161,6 +233,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Assigns the value of <paramref name="val"/> to this <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="val">The <see cref="GmpFloat"/> instance to assign the value from.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
     public int Assign(GmpFloat val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -171,10 +249,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set the value of rop from op multiplied by two to the power e,
-    /// rounded toward the given direction rnd.
-    /// Note that the input 0 is converted to +0.
+    /// Assigns the value of <paramref name="op"/> times 2 to the power of <paramref name="e"/> to this <see cref="MpfrFloat"/> instance.
     /// </summary>
+    /// <param name="op">The unsigned integer value to multiply by 2 to the power of <paramref name="e"/>.</param>
+    /// <param name="e">The exponent of 2 to raise <paramref name="op"/> to.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the operation, 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <remarks>
+    /// The value of this instance will be set to <paramref name="op"/> times 2 to the power of <paramref name="e"/>.
+    /// </remarks>
     public int Assign2Exp(uint op, int e, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -184,10 +267,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set the value of rop from op multiplied by two to the power e,
-    /// rounded toward the given direction rnd.
-    /// Note that the input 0 is converted to +0.
+    /// Assigns the value of <paramref name="op"/> times 2 to the power of <paramref name="e"/> to this <see cref="MpfrFloat"/> instance.
     /// </summary>
+    /// <param name="op">The integer value to multiply by 2 to the power of <paramref name="e"/>.</param>
+    /// <param name="e">The exponent of 2.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the operation, 0 if successful, or a non-zero value if an error occurred.</returns>
     public int Assign2Exp(int op, int e, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -197,10 +282,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set the value of rop from op multiplied by two to the power e,
-    /// rounded toward the given direction rnd.
-    /// Note that the input 0 is converted to +0.
+    /// Assigns the value of <paramref name="op"/> times 2 raised to the power of <paramref name="e"/> to this <see cref="MpfrFloat"/> instance.
     /// </summary>
+    /// <param name="op">The <see cref="GmpInteger"/> value to multiply.</param>
+    /// <param name="e">The exponent of 2 to raise.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the operation, 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <remarks>
+    /// This function sets this <see cref="MpfrFloat"/> instance to the value of <paramref name="op"/> times 2 raised to the power of <paramref name="e"/>.
+    /// </remarks>
     public int Assign2Exp(GmpInteger op, int e, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -210,8 +300,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>Set rop to the value of the string s in base base, rounded in the direction rnd. </summary>
-    /// <exception cref="FormatException" />
+    /// <summary>
+    /// Assigns a string representation of a number to the current instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="s">The string representation of the number to assign.</param>
+    /// <param name="base">The base of the number to assign. Default is 0, which means auto-detect the base from the string.</param>
+    /// <param name="rounding">The rounding mode to use. Default is <see cref="DefaultRounding"/>.</param>
+    /// <exception cref="FormatException">Thrown when the string representation cannot be parsed to <see cref="MpfrFloat"/>.</exception>
+    /// <remarks>
+    /// The string representation must be in UTF-8 encoding. If the base is not specified, the function will try to auto-detect the base from the string.
+    /// </remarks>
     public void Assign(string s, int @base = 0, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -230,7 +328,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>Set to the value of the string s in base base, rounded in the direction rnd.</summary>
+    /// <summary>
+    /// Tries to assign a value to the current <see cref="MpfrFloat"/> instance from a string representation.
+    /// </summary>
+    /// <param name="s">The string representation of the value to assign.</param>
+    /// <param name="base">The base of the string representation, or 0 to auto-detect the base.</param>
+    /// <param name="rounding">The rounding mode to use, or <c>null</c> to use the default rounding mode.</param>
+    /// <returns><c>true</c> if the assignment was successful, <c>false</c> otherwise.</returns>
     public bool TryAssign(string s, int @base = 0, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -246,7 +350,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// set to NaN(not-a-number)
+    /// Assigns a NaN (Not-a-Number) value to the current instance.
     /// </summary>
     public void AssignNaN()
     {
@@ -257,8 +361,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// set to +inf if sign >= 0, otherwise -inf
+    /// Assigns positive or negative infinity to the current instance.
     /// </summary>
+    /// <param name="sign">The sign of the infinity to assign. Use 1 for positive infinity, -1 for negative infinity.</param>
+    /// <remarks>
+    /// After calling this method, the current instance will represent positive or negative infinity, depending on the value of <paramref name="sign"/>.
+    /// </remarks>
     public void AssignInfinity(int sign)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -268,9 +376,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// set to +0 if sign >= 0, otherwise -0
+    /// Assigns zero to the current instance.
     /// </summary>
-    /// <param name="sign"></param>
+    /// <param name="sign">The sign of the zero value. Default is 0, which means the sign is positive.</param>
     public void AssignZero(int sign = 0)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -280,10 +388,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Swap the structures pointed to by x and y.
-    /// In particular, the values are exchanged without rounding
-    /// (this may be different from three mpfr_set calls using a third auxiliary variable).
+    /// Swaps the values of two <see cref="MpfrFloat"/> instances.
     /// </summary>
+    /// <param name="x">The first <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="y">The second <see cref="MpfrFloat"/> instance.</param>
+    /// <remarks>
+    /// This method swaps the values of <paramref name="x"/> and <paramref name="y"/> by reference.
+    /// </remarks>
     public static void Swap(MpfrFloat x, MpfrFloat y)
     {
         fixed (Mpfr_t* p1 = &x.Raw)
@@ -294,14 +405,24 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Swap the structures pointed to by this and op.
-    /// In particular, the values are exchanged without rounding
-    /// (this may be different from three mpfr_set calls using a third auxiliary variable).
+    /// Swaps the value of this <see cref="MpfrFloat"/> instance with another <see cref="MpfrFloat"/> instance.
     /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to swap with.</param>
+    /// <remarks>
+    /// This method swaps the value of this <see cref="MpfrFloat"/> instance with another <see cref="MpfrFloat"/> instance.
+    /// </remarks>
     public void Swap(MpfrFloat op) => Swap(this, op);
     #endregion
 
     #region 3. Combined Initialization and Assignment Functions
+
+    /// <summary>
+    /// Create a new <see cref="MpfrFloat"/> instance from an existing <paramref name="op"/> instance, with optional <paramref name="precision"/> and <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to create a new instance from.</param>
+    /// <param name="precision">The precision in bits of the new instance, or null to use the same precision as <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use for the new instance, or null to use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> with the specified precision and rounding mode, initialized with the value of <paramref name="op"/>.</returns>
     public static MpfrFloat From(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -309,8 +430,19 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Creates a new instance of <see cref="MpfrFloat"/> that is a copy of the current instance.
+    /// </summary>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> that is a copy of this instance.</returns>
     public MpfrFloat Clone() => From(this, Precision);
 
+    /// <summary>
+    /// Create a new instance of <see cref="MpfrFloat"/> from an unsigned integer <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The unsigned integer value to convert.</param>
+    /// <param name="precision">The precision in bits of the new instance. If null, use default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the converted value.</returns>
     public static MpfrFloat From(uint op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -318,8 +450,20 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Implicitly converts an unsigned integer <paramref name="op"/> to a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The unsigned integer value to convert.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the converted value.</returns>
     public static implicit operator MpfrFloat(uint op) => From(op);
 
+    /// <summary>
+    /// Create a new instance of <see cref="MpfrFloat"/> from an integer <paramref name="op"/> with optional <paramref name="precision"/> and <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="op">The integer value to convert.</param>
+    /// <param name="precision">The precision in bits, or null to use default precision.</param>
+    /// <param name="rounding">The rounding mode to use, or null to use default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the converted value.</returns>
     public static MpfrFloat From(int op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -327,8 +471,20 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Implicitly converts an integer value to a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The integer value to convert.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the converted value.</returns>
     public static implicit operator MpfrFloat(int op) => From(op);
 
+    /// <summary>
+    /// Create a new instance of <see cref="MpfrFloat"/> from a double value <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The double value to convert.</param>
+    /// <param name="precision">The precision in bits of the new instance, or null to use default precision.</param>
+    /// <param name="rounding">The rounding mode to use, or null to use default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the converted value.</returns>
     public static MpfrFloat From(double op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -336,8 +492,20 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Implicitly converts a <see cref="double"/> value to a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="double"/> value to convert.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the converted value.</returns>
     public static implicit operator MpfrFloat(double op) => From(op);
 
+    /// <summary>
+    /// Create a new instance of <see cref="MpfrFloat"/> from a <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpInteger"/> instance to convert.</param>
+    /// <param name="precision">The precision in bit of the new <see cref="MpfrFloat"/> instance, default to the absolute value of <paramref name="op"/> size times <see cref="GmpLib.LimbBitSize"/>.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the converted value.</returns>
     public static MpfrFloat From(GmpInteger op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? (int)(Math.Abs(op.Raw.Size) * GmpLib.LimbBitSize));
@@ -345,8 +513,20 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Explicitly converts a <see cref="GmpInteger"/> to a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpInteger"/> to convert.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the converted value.</returns>
     public static explicit operator MpfrFloat(GmpInteger op) => From(op);
 
+    /// <summary>
+    /// Create a new instance of <see cref="MpfrFloat"/> from a <see cref="GmpRational"/> value.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpRational"/> value to convert.</param>
+    /// <param name="precision">The precision in bits of the new <see cref="MpfrFloat"/> instance. If null, use default precision.</param>
+    /// <param name="rounding">The rounding mode to use when converting the value. If null, use default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the converted value.</returns>
     public static MpfrFloat From(GmpRational op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -354,8 +534,20 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Explicitly converts a <see cref="GmpRational"/> instance to a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpRational"/> instance to convert.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the converted value.</returns>
     public static explicit operator MpfrFloat(GmpRational op) => From(op);
 
+    /// <summary>
+    /// Create a new instance of <see cref="MpfrFloat"/> from a <see cref="GmpFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpFloat"/> instance to convert.</param>
+    /// <param name="precision">The precision of the new <see cref="MpfrFloat"/> instance, default to null.</param>
+    /// <param name="rounding">The rounding mode to use, default to null.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the converted value.</returns>
     public static MpfrFloat From(GmpFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -363,9 +555,28 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Implicitly converts a <see cref="GmpFloat"/> instance to a <see cref="MpfrFloat"/> instance with the same precision.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpFloat"/> instance to convert.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the same value as <paramref name="op"/>.</returns>
     public static implicit operator MpfrFloat(GmpFloat op) => From(op, (int)op.Precision);
 
-    /// <exception cref="FormatException" />
+    /// <summary>
+    /// Parses the string representation of a number and returns a new instance of <see cref="MpfrFloat"/> with the parsed value.
+    /// </summary>
+    /// <param name="s">The string representation of the number to parse.</param>
+    /// <param name="base">The base of the number to parse. Default is 0, which means the base is determined by the prefix of the string (e.g. "0x" for hexadecimal).</param>
+    /// <param name="precision">The precision of the new instance of <see cref="MpfrFloat"/>. If null, the default precision is used.</param>
+    /// <param name="rounding">The rounding mode to use when assigning the parsed value to the new instance of <see cref="MpfrFloat"/>. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> with the parsed value.</returns>
+    /// <exception cref="FormatException">Thrown when the string representation of the number is invalid.</exception>
+    /// <exception cref="ArgumentException">Thrown when the specified base is not supported.</exception>
+    /// <exception cref="OverflowException">Thrown when the parsed value is outside the range of the target type.</exception>
+    /// <remarks>
+    /// This method creates a new instance of <see cref="MpfrFloat"/> with the specified precision, then assigns the parsed value to it using the specified rounding mode.
+    /// If the parsing fails, the created instance is cleared and an exception is thrown.
+    /// </remarks>
     public static MpfrFloat Parse(string s, int @base = 0, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -381,6 +592,18 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Tries to parse the string representation of a <see cref="MpfrFloat"/> number.
+    /// </summary>
+    /// <param name="s">The string to parse.</param>
+    /// <param name="rop">When this method returns, contains the <see cref="MpfrFloat"/> equivalent of the numeric value if the conversion succeeded, or <see langword="null"/> if the conversion failed. The conversion fails if the <paramref name="s"/> parameter is <see langword="null"/>, is not a number in a valid format. This parameter is passed uninitialized; any value originally supplied in <paramref name="rop"/> will be overwritten.</param>
+    /// <param name="base">The base of the number in <paramref name="s"/>. Default is 0, which means the base is determined by the format of <paramref name="s"/>.</param>
+    /// <param name="precision">The precision of the <see cref="MpfrFloat"/> to create. If <see langword="null"/>, the default precision will be used.</param>
+    /// <param name="rounding">The rounding mode to use. If <see langword="null"/>, the default rounding mode will be used.</param>
+    /// <returns><see langword="true"/> if the conversion succeeded; otherwise, <see langword="false"/>.</returns>
+    /// <remarks>
+    /// This method returns <see langword="false"/> if the <paramref name="s"/> parameter is <see langword="null"/>, is not a number in a valid format. The <paramref name="rop"/> parameter is passed uninitialized; any value originally supplied in <paramref name="rop"/> will be overwritten.
+    /// </remarks>
     public static bool TryParse(string s, [MaybeNullWhen(returnValue: false)] out MpfrFloat rop, int @base = 0, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat r = CreateWithNullablePrecision(precision);
@@ -399,6 +622,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #endregion
 
     #region 4. Conversion Functions
+
+    /// <summary>
+    /// Converts the current <see cref="MpfrFloat"/> instance to a <see cref="double"/> value.
+    /// </summary>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The <see cref="double"/> value representation of the current <see cref="MpfrFloat"/> instance.</returns>
     public double ToDouble(MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -407,8 +636,18 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Explicitly converts a <see cref="MpfrFloat"/> instance to a <see cref="double"/> value.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to convert.</param>
+    /// <returns>The <see cref="double"/> value converted from <paramref name="op"/>.</returns>
     public static explicit operator double(MpfrFloat op) => op.ToDouble();
 
+    /// <summary>
+    /// Converts the current <see cref="MpfrFloat"/> instance to a single-precision floating-point number.
+    /// </summary>
+    /// <param name="rounding">The rounding mode to use, or <see langword="null"/> to use the default rounding mode.</param>
+    /// <returns>The single-precision floating-point number equivalent to the current <see cref="MpfrFloat"/> instance.</returns>
     public float ToFloat(MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -417,8 +656,18 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Explicitly converts a <see cref="MpfrFloat"/> instance to a single-precision floating-point number.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to convert.</param>
+    /// <returns>The converted single-precision floating-point number.</returns>
     public static explicit operator float(MpfrFloat op) => op.ToFloat();
 
+    /// <summary>
+    /// Converts the current <see cref="MpfrFloat"/> instance to a 32-bit signed integer using the specified <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="rounding">The rounding mode to use. Default is <see cref="MpfrRounding.ToZero"/>.</param>
+    /// <returns>A 32-bit signed integer representation of the current <see cref="MpfrFloat"/> instance.</returns>
     public int ToInt32(MpfrRounding rounding = MpfrRounding.ToZero)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -427,8 +676,18 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Explicitly converts a <see cref="MpfrFloat"/> instance to a 32-bit signed integer.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to convert.</param>
+    /// <returns>The 32-bit signed integer value equivalent of the <paramref name="op"/> parameter.</returns>
     public static explicit operator int(MpfrFloat op) => op.ToInt32();
 
+    /// <summary>
+    /// Converts the current <see cref="MpfrFloat"/> instance to an unsigned 32-bit integer.
+    /// </summary>
+    /// <param name="rounding">The rounding mode to use for the conversion. Default is <see cref="MpfrRounding.ToZero"/>.</param>
+    /// <returns>An unsigned 32-bit integer representation of the current <see cref="MpfrFloat"/> instance.</returns>
     public uint ToUInt32(MpfrRounding rounding = MpfrRounding.ToZero)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -437,21 +696,18 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Explicitly converts the specified <see cref="MpfrFloat"/> object to an unsigned 32-bit integer.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> object to convert.</param>
+    /// <returns>An unsigned 32-bit integer that represents the converted <see cref="MpfrFloat"/> object.</returns>
     public static explicit operator uint(MpfrFloat op) => op.ToUInt32();
 
     /// <summary>
-    /// <para>
-    /// Return d and set exp (formally, the value pointed to by exp) such that 0.5 &lt;= abs(d) &lt; 1
-    /// and d times 2 raised to exp equals op rounded to double (resp. long double) precision, 
-    /// using the given rounding mode.
-    /// </para>
-    /// <para>
-    /// If op is zero, then a zero of the same sign (or an unsigned zero, if the implementation
-    /// does not have signed zeros) is returned, and exp is set to 0. If op is NaN or an infinity,
-    /// then the corresponding double precision (resp. long-double precision) value is returned,
-    /// and exp is undefined.
-    /// </para>
+    /// Converts the current instance to an <see cref="ExpDouble"/> instance with the specified <paramref name="rounding"/> mode.
     /// </summary>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
+    /// <returns>An <see cref="ExpDouble"/> instance representing the converted value.</returns>
     public ExpDouble ToExpDouble(MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -463,8 +719,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// y * 2^exp = x
+    /// Compute the normalized fraction and exponent of this <see cref="MpfrFloat"/> instance, and store the fraction in this instance.
     /// </summary>
+    /// <param name="y">The <see cref="MpfrFloat"/> instance to store the exponent.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>A tuple containing the exponent and a boolean indicating whether overflow occurred.</returns>
+    /// <remarks>
+    /// This method computes the normalized fraction and exponent of this <see cref="MpfrFloat"/> instance, and stores the fraction in this instance.
+    /// The exponent is stored in <paramref name="y"/>.
+    /// </remarks>
     public (int exp, bool overflowed) FrexpInplace(MpfrFloat y, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -477,8 +740,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// y * 2^exp = x
+    /// Computes the mantissa and exponent of this <see cref="MpfrFloat"/> instance and returns a tuple containing the mantissa as a new <see cref="MpfrFloat"/> instance, the exponent as an integer and a boolean indicating whether the operation caused an overflow.
     /// </summary>
+    /// <param name="precision">The precision in bits of the new <see cref="MpfrFloat"/> instance to create for the mantissa. If null, the precision of this instance is used.</param>
+    /// <param name="rounding">The rounding mode to use for the operation. If null, the default rounding mode is used.</param>
+    /// <returns>A tuple containing the mantissa as a new <see cref="MpfrFloat"/> instance, the exponent as an integer and a boolean indicating whether the operation caused an overflow.</returns>
+    /// <remarks>
+    /// The mantissa is returned as a new <see cref="MpfrFloat"/> instance with the specified precision. The exponent is returned as an integer. The boolean indicates whether the operation caused an overflow, which occurs when the mantissa is too large to be represented with the specified precision.
+    /// </remarks>
     public (MpfrFloat y, int exp, bool overflowed) Frexp(int? precision = 0, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -486,8 +755,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return (rop, exp, overflowed);
     }
 
-    /// <summary>z * 2^exp = x</summary>
-    /// <returns>2exp</returns>
+    /// <summary>
+    /// Gets the integer value and the exponent of 2 of this <see cref="MpfrFloat"/> instance and stores the integer value in the provided <paramref name="z"/>.
+    /// </summary>
+    /// <param name="z">The <see cref="GmpInteger"/> instance to store the integer value.</param>
+    /// <returns>The exponent of 2.</returns>
+    /// <remarks>
+    /// This method modifies the state of this <see cref="MpfrFloat"/> instance.
+    /// </remarks>
     public int GetIntegerAnd2ExpInplace(GmpInteger z)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -497,8 +772,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>z * 2^exp = x</summary>
-    /// <returns>the integer and 2exp.</returns>
+    /// <summary>
+    /// Get the integer part and 2^exp of this <see cref="GmpFloat"/> instance.
+    /// </summary>
+    /// <returns>A tuple containing the integer part as a <see cref="GmpInteger"/> and the exponent as an <see cref="int"/>.</returns>
     public (GmpInteger z, int exp) GetIntegerAnd2Exp()
     {
         GmpInteger z = new();
@@ -506,6 +783,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return (z, exp);
     }
 
+    /// <summary>
+    /// Converts the current <see cref="MpfrFloat"/> instance to a <see cref="GmpInteger"/> instance and stores the result in-place.
+    /// </summary>
+    /// <param name="z">The <see cref="GmpInteger"/> instance to store the result.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The number of limbs of the resulting <see cref="GmpInteger"/> instance.</returns>
+    /// <remarks>
+    /// The current <see cref="MpfrFloat"/> instance will be rounded to an integer before conversion.
+    /// </remarks>
     public int ToGmpIntegerInplace(GmpInteger z, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -515,6 +801,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Converts the current <see cref="MpfrFloat"/> instance to a <see cref="GmpInteger"/> instance with the specified <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="rounding">The rounding mode to use during the conversion. Default is <see cref="MpfrRounding.ToZero"/>.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the converted value.</returns>
     public GmpInteger ToGmpInteger(MpfrRounding rounding = MpfrRounding.ToZero)
     {
         GmpInteger rop = new();
@@ -522,8 +813,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Explicitly converts a <see cref="MpfrFloat"/> instance to a <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="r">The <see cref="MpfrFloat"/> instance to convert.</param>
+    /// <returns>A new instance of <see cref="GmpInteger"/> representing the converted value.</returns>
     public static explicit operator GmpInteger(MpfrFloat r) => r.ToGmpInteger();
 
+    /// <summary>
+    /// Converts the current instance to a <see cref="GmpRational"/> instance and stores the result in-place.
+    /// </summary>
+    /// <param name="q">The <see cref="GmpRational"/> instance to store the result.</param>
+    /// <param name="rounding">The rounding mode to use, or <see langword="null"/> to use the default rounding mode.</param>
+    /// <remarks>
+    /// This method converts the current instance to a <see cref="GmpRational"/> instance and stores the result in the <paramref name="q"/> parameter.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="q"/> is <see langword="null"/>.</exception>
     public void ToGmpRationalInplace(GmpRational q, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -533,6 +838,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Converts the current instance of <see cref="GmpFloat"/> to a <see cref="GmpRational"/> instance.
+    /// </summary>
+    /// <returns>A new instance of <see cref="GmpRational"/> representing the converted value.</returns>
     public GmpRational ToGmpRational()
     {
         GmpRational rop = new();
@@ -540,8 +849,19 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Explicitly converts a <see cref="MpfrFloat"/> instance to a <see cref="GmpRational"/> instance.
+    /// </summary>
+    /// <param name="r">The <see cref="MpfrFloat"/> instance to convert.</param>
+    /// <returns>A new instance of <see cref="GmpRational"/> representing the converted value.</returns>
     public static explicit operator GmpRational(MpfrFloat r) => r.ToGmpRational();
 
+    /// <summary>
+    /// Convert the current instance of <see cref="MpfrFloat"/> to a <see cref="GmpFloat"/> instance, and store the result in-place in <paramref name="f"/>.
+    /// </summary>
+    /// <param name="f">The <see cref="GmpFloat"/> instance to store the result.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The number of bits in the mantissa of the result.</returns>
     public int ToGmpFloatInplace(GmpFloat f, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -551,6 +871,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Converts the current instance to a <see cref="GmpFloat"/> instance with optional <paramref name="precision"/> and <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="precision">The precision in bits of the resulting <see cref="GmpFloat"/> instance. If null, the precision of the resulting instance will be the same as the current instance.</param>
+    /// <param name="rounding">The rounding mode to use for the conversion. If null, the rounding mode of the resulting instance will be the same as the current instance.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value.</returns>
     public GmpFloat ToGmpFloat(uint? precision = null, MpfrRounding? rounding = null)
     {
         GmpFloat rop = GmpFloat.CreateWithNullablePrecision(precision);
@@ -558,8 +884,20 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Explicitly convert a <see cref="MpfrFloat"/> instance to a <see cref="GmpFloat"/> instance.
+    /// </summary>
+    /// <param name="r">The <see cref="MpfrFloat"/> instance to convert.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the same value as <paramref name="r"/>.</returns>
     public static explicit operator GmpFloat(MpfrFloat r) => r.ToGmpFloat();
 
+    /// <summary>
+    /// Gets the maximum string length required to represent a <see cref="MpfrFloat"/> instance with the specified <paramref name="precision"/> and <paramref name="base"/>.
+    /// </summary>
+    /// <param name="precision">The precision of the <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="base">The base to use for the string representation. Must be between 2 and 62 (inclusive).</param>
+    /// <returns>The maximum string length required to represent the <see cref="MpfrFloat"/> instance.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="base"/> is less than 2 or greater than 62.</exception>
     public static nint GetMaxStringLength(int precision, int @base = 10)
     {
         if (@base >= 2 && @base <= 62)
@@ -572,13 +910,30 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Returns a string representation of the current <see cref="MpfrFloat"/> object using default format and culture-specific formatting information.
+    /// </summary>
+    /// <returns>A string representation of the current <see cref="MpfrFloat"/> object.</returns>
     public override string ToString() => ToString(format: null);
 
+    /// <summary>
+    /// Converts the numeric value of this instance to its equivalent string representation using the specified format and the formatting conventions of the current culture.
+    /// </summary>
+    /// <param name="format">A standard or custom numeric format string.</param>
+    /// <returns>The string representation of the value of this instance as specified by <paramref name="format"/> and the formatting conventions of the current culture.</returns>
     public string ToString(string? format)
     {
         return ToString(format, CultureInfo.CurrentCulture);
     }
 
+    /// <summary>
+    /// Converts the value of the current <see cref="MpfrFloat"/> object to its equivalent string representation using the specified format and culture-specific format information.
+    /// </summary>
+    /// <param name="format">A standard or custom numeric format string.</param>
+    /// <param name="formatProvider">An object that supplies culture-specific formatting information.</param>
+    /// <returns>The string representation of the current <see cref="MpfrFloat"/> object as specified by the <paramref name="format"/> and <paramref name="formatProvider"/> parameters.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="format"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="format"/> is not one of the supported format strings: N, F, E, G.</exception>
     public string ToString(string? format, IFormatProvider? formatProvider = null)
     {
         NumberFormatInfo numberFormat = (NumberFormatInfo)(formatProvider ?? Thread.CurrentThread.CurrentCulture).GetFormat(typeof(NumberFormatInfo))!;
@@ -612,6 +967,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 #pragma warning restore CS8509 // switch 表达式不会处理属于其输入类型的所有可能值(它并非详尽无遗)。
     }
 
+    /// <summary>
+    /// Converts the current <see cref="MpfrFloat"/> instance to a string representation with the specified base and rounding mode.
+    /// </summary>
+    /// <param name="base">The base to use for the string representation. Default is 10.</param>
+    /// <param name="rounding">The rounding mode to use for the conversion. Default is <see cref="DefaultRounding"/>.</param>
+    /// <returns>A string representation of the current <see cref="MpfrFloat"/> instance.</returns>
+    /// <exception cref="ArgumentException">Thrown when unable to convert the current <see cref="MpfrFloat"/> instance to a string.</exception>
     public string ToString(int @base = 10, MpfrRounding? rounding = null)
     {
         byte[] resbuf = new byte[GetMaxStringLength(Precision, @base)];
@@ -647,6 +1009,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Check if the current <see cref="MpfrFloat"/> instance can be safely converted to an unsigned 32-bit integer.
+    /// </summary>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
+    /// <returns>True if the current instance can be safely converted to an unsigned 32-bit integer, false otherwise.</returns>
     public bool FitsUInt32(MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -655,6 +1022,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Determines whether the current <see cref="MpfrFloat"/> instance can be represented as a 32-bit signed integer.
+    /// </summary>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
+    /// <returns>true if the current instance can be represented as a 32-bit signed integer; otherwise, false.</returns>
     public bool FitsInt32(MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -663,6 +1035,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Determines whether the current <see cref="MpfrFloat"/> instance can be converted to an unsigned 16-bit integer without overflow.
+    /// </summary>
+    /// <param name="rounding">The rounding mode to use for the conversion. If null, the default rounding mode is used.</param>
+    /// <returns>true if the current instance can be converted to an unsigned 16-bit integer without overflow; otherwise, false.</returns>
     public bool FitsUInt16(MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -671,6 +1048,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Check if the current <see cref="MpfrFloat"/> instance can be safely converted to a 16-bit integer without losing precision.
+    /// </summary>
+    /// <param name="rounding">The rounding mode to use for the conversion. If null, the default rounding mode will be used.</param>
+    /// <returns>True if the current instance can be safely converted to a 16-bit integer without losing precision, false otherwise.</returns>
     public bool FitsInt16(MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -679,6 +1061,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Determines whether the current instance of <see cref="MpfrFloat"/> can be represented as an unsigned 64-bit integer.
+    /// </summary>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
+    /// <returns>True if the current instance can be represented as an unsigned 64-bit integer, otherwise false.</returns>
     public bool FitsUInt64(MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -687,6 +1074,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Determines whether the current <see cref="MpfrFloat"/> instance can be represented as a 64-bit integer.
+    /// </summary>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
+    /// <returns>True if the current instance can be represented as a 64-bit integer, otherwise false.</returns>
     public bool FitsInt64(MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -698,6 +1090,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     #region 5. Arithmetic Functions
     #region Add
+
+    /// <summary>
+    /// Adds two <see cref="MpfrFloat"/> instances <paramref name="op1"/> and <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to add.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to add.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the addition operation.</returns>
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -708,6 +1109,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Adds two <see cref="MpfrFloat"/> instances <paramref name="op1"/> and <paramref name="op2"/> and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to add.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to add.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <see cref="DefaultPrecision"/> will be used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat Add(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -715,8 +1124,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Adds two <see cref="MpfrFloat"/> instances and returns the result.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to add.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to add.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat operator +(MpfrFloat op1, MpfrFloat op2) => Add(op1, op2, op1.Precision);
 
+    /// <summary>
+    /// Adds an unsigned integer <paramref name="op2"/> to <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to add.</param>
+    /// <param name="op2">The unsigned integer to add.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the addition operation.</returns>
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -726,6 +1149,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Adds an unsigned integer <paramref name="op2"/> to <paramref name="op1"/> and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to add to.</param>
+    /// <param name="op2">The unsigned integer value to add.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the addition.</returns>
     public static MpfrFloat Add(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -733,9 +1164,30 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Adds an unsigned integer <paramref name="op2"/> to a <see cref="MpfrFloat"/> <paramref name="op1"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> to add to.</param>
+    /// <param name="op2">The unsigned integer to add.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the addition.</returns>
     public static MpfrFloat operator +(MpfrFloat op1, uint op2) => Add(op1, op2, op1.Precision);
+
+    /// <summary>
+    /// Adds an unsigned integer <paramref name="op1"/> to a <see cref="MpfrFloat"/> <paramref name="op2"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The unsigned integer value to add.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to add.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat operator +(uint op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
 
+    /// <summary>
+    /// Adds an integer <paramref name="op2"/> to <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to add.</param>
+    /// <param name="op2">The integer value to add.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the addition operation.</returns>
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -745,6 +1197,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Adds an integer <paramref name="op2"/> to a <paramref name="op1"/> <see cref="MpfrFloat"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> to add to.</param>
+    /// <param name="op2">The integer value to add.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat Add(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -752,9 +1212,30 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Adds an integer value to a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to add to.</param>
+    /// <param name="op2">The integer value to add.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat operator +(MpfrFloat op1, int op2) => Add(op1, op2, op1.Precision);
+
+    /// <summary>
+    /// Adds an integer value to a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The integer value to add.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to add to.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the addition.</returns>
     public static MpfrFloat operator +(int op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
 
+    /// <summary>
+    /// Adds a double-precision floating-point number <paramref name="op2"/> to <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to add.</param>
+    /// <param name="op2">The double-precision floating-point number to add.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
+    /// <returns>Returns 0 if successful, or a non-zero value otherwise.</returns>
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -764,6 +1245,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Adds a double-precision floating-point number <paramref name="op2"/> to an <paramref name="op1"/> <see cref="MpfrFloat"/> instance and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to add.</param>
+    /// <param name="op2">The double-precision floating-point number to add to <paramref name="op1"/>.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op1"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat Add(MpfrFloat op1, double op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -771,9 +1260,30 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Adds a double-precision floating-point number to a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to add to.</param>
+    /// <param name="op2">The double-precision floating-point number to add.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat operator +(MpfrFloat op1, double op2) => Add(op1, op2, op1.Precision);
+
+    /// <summary>
+    /// Adds a double-precision floating-point number to a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The double-precision floating-point number to add.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to add to.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat operator +(double op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
 
+    /// <summary>
+    /// Adds a <see cref="GmpInteger"/> <paramref name="op2"/> to a <see cref="MpfrFloat"/> <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> to store the result in.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand.</param>
+    /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
+    /// <returns>The result of the addition operation.</returns>
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -784,6 +1294,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Adds a <see cref="GmpInteger"/> <paramref name="op2"/> to a <see cref="MpfrFloat"/> <paramref name="op1"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> to add to.</param>
+    /// <param name="op2">The <see cref="GmpInteger"/> to add.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op1"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat Add(MpfrFloat op1, GmpInteger op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -791,9 +1309,30 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Adds a <see cref="MpfrFloat"/> instance and a <see cref="GmpInteger"/> instance together.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to add.</param>
+    /// <param name="op2">The <see cref="GmpInteger"/> instance to add.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat operator +(MpfrFloat op1, GmpInteger op2) => Add(op1, op2, op1.Precision);
+
+    /// <summary>
+    /// Adds a <see cref="GmpInteger"/> and a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> instance to add.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to add.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat operator +(GmpInteger op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
 
+    /// <summary>
+    /// Adds a <see cref="GmpRational"/> <paramref name="op2"/> to a <see cref="MpfrFloat"/> <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op2">The second <see cref="GmpRational"/> operand.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the addition operation.</returns>
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -804,6 +1343,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Adds a <see cref="GmpRational"/> <paramref name="op2"/> to a <see cref="MpfrFloat"/> <paramref name="op1"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op2">The second <see cref="GmpRational"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op1"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat Add(MpfrFloat op1, GmpRational op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -811,11 +1358,33 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Adds a <see cref="MpfrFloat"/> instance and a <see cref="GmpRational"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to add.</param>
+    /// <param name="op2">The <see cref="GmpRational"/> instance to add.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat operator +(MpfrFloat op1, GmpRational op2) => Add(op1, op2, op1.Precision);
+
+    /// <summary>
+    /// Adds a <see cref="GmpRational"/> and a <see cref="MpfrFloat"/> instance and returns a new <see cref="MpfrFloat"/> instance with the result.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpRational"/> instance to add.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to add.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat operator +(GmpRational op1, MpfrFloat op2) => Add(op2, op1, op2.Precision);
     #endregion
 
     #region Subtract
+
+    /// <summary>
+    /// Subtracts <paramref name="op2"/> from <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to subtract from.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to subtract.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the subtraction operation.</returns>
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -826,6 +1395,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Subtracts two <see cref="MpfrFloat"/> instances <paramref name="op1"/> and <paramref name="op2"/> and returns a new instance of <see cref="MpfrFloat"/> with the result.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to subtract.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to subtract.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of the result will be the maximum of the precisions of <paramref name="op1"/> and <paramref name="op2"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat Subtract(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -833,8 +1410,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Subtracts two <see cref="MpfrFloat"/> instances.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat operator -(MpfrFloat op1, MpfrFloat op2) => Subtract(op1, op2, op1.Precision);
 
+    /// <summary>
+    /// Subtracts <paramref name="op2"/> from <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The unsigned integer value to subtract from.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to subtract.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the subtraction operation.</returns>
     public static int SubtractInplace(MpfrFloat rop, uint op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -844,6 +1435,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Subtracts <paramref name="op2"/> from <paramref name="op1"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The first operand.</param>
+    /// <param name="op2">The second operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op2"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat Subtract(uint op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -851,8 +1450,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Subtracts an unsigned integer <paramref name="op1"/> from a <see cref="MpfrFloat"/> <paramref name="op2"/> and returns a new <see cref="MpfrFloat"/> instance representing the result.
+    /// </summary>
+    /// <param name="op1">The unsigned integer value to subtract.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to subtract from.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat operator -(uint op1, MpfrFloat op2) => Subtract(op1, op2, op2.Precision);
 
+    /// <summary>
+    /// Subtract an unsigned integer <paramref name="op2"/> from <paramref name="op1"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to subtract from.</param>
+    /// <param name="op2">The unsigned integer value to subtract.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the subtraction operation.</returns>
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -862,6 +1475,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Subtract an unsigned integer <paramref name="op2"/> from <paramref name="op1"/> and return the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to subtract from.</param>
+    /// <param name="op2">The unsigned integer value to subtract.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat Subtract(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -869,8 +1490,23 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Subtracts an unsigned integer <paramref name="op2"/> from a <see cref="MpfrFloat"/> <paramref name="op1"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> to subtract from.</param>
+    /// <param name="op2">The unsigned integer to subtract.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat operator -(MpfrFloat op1, uint op2) => Subtract(op1, op2, op1.Precision);
 
+    /// <summary>
+    /// Subtracts an integer <paramref name="op1"/> from <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The integer value to subtract from <paramref name="op2"/>.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to subtract <paramref name="op1"/> from.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The return value indicates whether the operation succeeded (0) or failed (-1).</returns>
+    /// <remarks>The value of <paramref name="rop"/> will be modified to store the result of the operation.</remarks>
     public static int SubtractInplace(MpfrFloat rop, int op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -880,6 +1516,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Subtract an integer <paramref name="op1"/> from a <see cref="MpfrFloat"/> <paramref name="op2"/> and return the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The integer value to subtract from <paramref name="op2"/>.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to subtract <paramref name="op1"/> from.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op2"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultPrecision"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
+    /// <remarks>The operation is performed with the specified <paramref name="precision"/> and <paramref name="rounding"/> mode.</remarks>
     public static MpfrFloat Subtract(int op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -887,8 +1532,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Subtracts an integer value from a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The integer value to subtract.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to subtract from.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat operator -(int op1, MpfrFloat op2) => Subtract(op1, op2, op2.Precision);
 
+    /// <summary>
+    /// Subtracts an integer value <paramref name="op2"/> from <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to subtract from.</param>
+    /// <param name="op2">The integer value to subtract.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the subtraction operation.</returns>
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -898,6 +1557,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Subtract an integer <paramref name="op2"/> from a <paramref name="op1"/> <see cref="MpfrFloat"/> instance and return the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to subtract from.</param>
+    /// <param name="op2">The integer value to subtract.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat Subtract(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -905,8 +1572,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Subtracts an integer value from a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to subtract from.</param>
+    /// <param name="op2">The integer value to subtract.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat operator -(MpfrFloat op1, int op2) => Subtract(op1, op2, op1.Precision);
 
+    /// <summary>
+    /// Subtract <paramref name="op2"/> from <paramref name="op1"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The double value to subtract from.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to subtract.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the subtraction operation.</returns>
     public static int SubtractInplace(MpfrFloat rop, double op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -916,6 +1597,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Subtracts a <paramref name="op1"/> double value from a <paramref name="op2"/> <see cref="MpfrFloat"/> value and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The double value to subtract from <paramref name="op2"/>.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to subtract <paramref name="op1"/> from.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op2"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat Subtract(double op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -923,8 +1612,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Subtracts a <see cref="double"/> value from a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The <see cref="double"/> value to subtract.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to subtract from.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat operator -(double op1, MpfrFloat op2) => Subtract(op1, op2, op2.Precision);
 
+    /// <summary>
+    /// Subtracts a double-precision floating-point number <paramref name="op2"/> from <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The destination <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The source <see cref="MpfrFloat"/> instance to subtract from.</param>
+    /// <param name="op2">The double-precision floating-point number to subtract.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the subtraction operation.</returns>
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -934,6 +1637,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Subtract a double-precision floating-point number <paramref name="op2"/> from a <see cref="MpfrFloat"/> <paramref name="op1"/> and return the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> to subtract from.</param>
+    /// <param name="op2">The double-precision floating-point number to subtract.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="op1"/> is null.</exception>
     public static MpfrFloat Subtract(MpfrFloat op1, double op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -941,8 +1653,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Subtracts a double-precision floating-point number from a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to subtract from.</param>
+    /// <param name="op2">The double-precision floating-point number to subtract.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat operator -(MpfrFloat op1, double op2) => Subtract(op1, op2, op1.Precision);
 
+    /// <summary>
+    /// Subtracts a <see cref="GmpInteger"/> value <paramref name="op2"/> from a <see cref="MpfrFloat"/> value <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to subtract from.</param>
+    /// <param name="op2">The <see cref="GmpInteger"/> instance to subtract.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the subtraction operation.</returns>
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -953,6 +1679,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Subtracts a <see cref="GmpInteger"/> value <paramref name="op2"/> from a <see cref="MpfrFloat"/> value <paramref name="op1"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> value to subtract from.</param>
+    /// <param name="op2">The <see cref="GmpInteger"/> value to subtract.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat Subtract(MpfrFloat op1, GmpInteger op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -960,8 +1694,28 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Subtracts a <see cref="GmpInteger"/> from a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to subtract from.</param>
+    /// <param name="op2">The <see cref="GmpInteger"/> instance to subtract.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="op1"/> or <paramref name="op2"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="op1"/> and <paramref name="op2"/> have different precisions.</exception>
+    /// <remarks>The precision of the result is the same as the precision of <paramref name="op1"/>.</remarks>
     public static MpfrFloat operator -(MpfrFloat op1, GmpInteger op2) => Subtract(op1, op2, op1.Precision);
 
+    /// <summary>
+    /// Subtract <paramref name="op2"/> from <paramref name="op1"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="GmpInteger"/> instance to subtract from.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to subtract.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the operation is successful; otherwise it is a non-zero value.</returns>
+    /// <remarks>
+    /// The result is rounded according to the specified <paramref name="rounding"/> mode.
+    /// </remarks>
     public static int SubtractInplace(MpfrFloat rop, GmpInteger op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -972,6 +1726,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Subtract an <see cref="GmpInteger"/> <paramref name="op1"/> from an <see cref="MpfrFloat"/> <paramref name="op2"/> and return the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> to subtract from.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> to subtract.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op2"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat Subtract(GmpInteger op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -979,8 +1741,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Subtracts a <see cref="GmpInteger"/> from a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> to subtract.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to subtract from.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat operator -(GmpInteger op1, MpfrFloat op2) => Subtract(op1, op2, op2.Precision);
 
+    /// <summary>
+    /// Subtract a <see cref="GmpRational"/> value <paramref name="op2"/> from a <see cref="MpfrFloat"/> value <paramref name="op1"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to subtract from.</param>
+    /// <param name="op2">The <see cref="GmpRational"/> value to subtract.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the subtraction operation.</returns>
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -991,6 +1767,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Subtract a <see cref="GmpRational"/> value <paramref name="op2"/> from a <see cref="MpfrFloat"/> value <paramref name="op1"/> and return the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> value to subtract from.</param>
+    /// <param name="op2">The <see cref="GmpRational"/> value to subtract.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
     public static MpfrFloat Subtract(MpfrFloat op1, GmpRational op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -998,10 +1782,28 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Subtracts a <see cref="GmpRational"/> value from a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> value to subtract from.</param>
+    /// <param name="op2">The <see cref="GmpRational"/> value to subtract.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the subtraction.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="op1"/> or <paramref name="op2"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="op1"/> and <paramref name="op2"/> have different precisions.</exception>
+    /// <remarks>The precision of the result is the same as the precision of <paramref name="op1"/>.</remarks>
     public static MpfrFloat operator -(MpfrFloat op1, GmpRational op2) => Subtract(op1, op2, op1.Precision);
     #endregion
 
     #region Multiply
+
+    /// <summary>
+    /// Multiply two <see cref="MpfrFloat"/> instances <paramref name="op1"/> and <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The status of the operation.</returns>
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1012,6 +1814,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Multiplies two <see cref="MpfrFloat"/> instances <paramref name="op1"/> and <paramref name="op2"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op1"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
+    /// <remarks>The result is rounded according to the specified <paramref name="rounding"/> mode.</remarks>
+    /// <seealso cref="MultiplyInplace(MpfrFloat, MpfrFloat, MpfrFloat, MpfrRounding?)"/>
     public static MpfrFloat Multiply(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1019,8 +1831,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Multiplies two <see cref="MpfrFloat"/> instances.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat operator *(MpfrFloat op1, MpfrFloat op2) => Multiply(op1, op2, op1.Precision);
 
+    /// <summary>
+    /// Multiplies an <see cref="MpfrFloat"/> instance <paramref name="op1"/> by an unsigned integer <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be multiplied.</param>
+    /// <param name="op2">The unsigned integer to multiply with.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if successful, otherwise returns a non-zero value indicating the type of error.</returns>
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1030,6 +1856,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Multiplies an <see cref="MpfrFloat"/> instance <paramref name="op1"/> by an unsigned integer <paramref name="op2"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The unsigned integer to multiply by.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op1"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat Multiply(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1037,9 +1871,30 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Multiply an <see cref="MpfrFloat"/> instance by an unsigned integer <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The unsigned integer to multiply.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat operator *(MpfrFloat op1, uint op2) => Multiply(op1, op2, op1.Precision);
+
+    /// <summary>
+    /// Multiply an unsigned integer <paramref name="op1"/> with a <see cref="MpfrFloat"/> <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The unsigned integer to multiply.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> to multiply.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat operator *(uint op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
 
+    /// <summary>
+    /// Multiplies an <paramref name="op1"/> <see cref="MpfrFloat"/> instance by an integer <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be multiplied.</param>
+    /// <param name="op2">The integer value to multiply.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the multiplication operation.</returns>
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1049,6 +1904,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Multiplies an <see cref="MpfrFloat"/> instance <paramref name="op1"/> by an integer <paramref name="op2"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be multiplied.</param>
+    /// <param name="op2">The integer value to multiply by.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op1"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat Multiply(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1056,9 +1919,30 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Multiplies a <see cref="MpfrFloat"/> instance by an integer value.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The integer value to multiply by.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat operator *(MpfrFloat op1, int op2) => Multiply(op1, op2, op1.Precision);
+
+    /// <summary>
+    /// Multiply an integer value <paramref name="op1"/> with a <see cref="MpfrFloat"/> value <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The integer value to multiply.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to multiply.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat operator *(int op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
 
+    /// <summary>
+    /// Multiplies an <paramref name="op1"/> <see cref="MpfrFloat"/> instance with a double <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The double value to multiply with.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if successful, otherwise returns an error code.</returns>
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1068,6 +1952,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Multiplies a <see cref="MpfrFloat"/> instance <paramref name="op1"/> with a double <paramref name="op2"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The double value to multiply with.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat Multiply(MpfrFloat op1, double op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1075,9 +1967,30 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Multiplies a <see cref="MpfrFloat"/> instance by a double-precision floating-point number.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The double-precision floating-point number to multiply by.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat operator *(MpfrFloat op1, double op2) => Multiply(op1, op2, op1.Precision);
+
+    /// <summary>
+    /// Multiply a <see cref="MpfrFloat"/> instance by a double value.
+    /// </summary>
+    /// <param name="op1">The double value to multiply.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to be multiplied.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat operator *(double op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
 
+    /// <summary>
+    /// Multiplies <paramref name="op1"/> by <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The <see cref="GmpInteger"/> instance to multiply.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the multiplication operation.</returns>
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1088,6 +2001,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Multiplies <paramref name="op1"/> by <paramref name="op2"/> and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op1"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat Multiply(MpfrFloat op1, GmpInteger op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1095,9 +2016,30 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Multiplies two <see cref="MpfrFloat"/> instances, where the second operand is a <see cref="GmpInteger"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat operator *(MpfrFloat op1, GmpInteger op2) => Multiply(op1, op2, op1.Precision);
+
+    /// <summary>
+    /// Multiplies a <see cref="GmpInteger"/> instance with a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> instance to multiply.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat operator *(GmpInteger op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
 
+    /// <summary>
+    /// Multiply <paramref name="op1"/> by <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The <see cref="GmpRational"/> instance to multiply.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the multiplication operation.</returns>
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1108,6 +2050,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Multiplies <paramref name="op1"/> with <paramref name="op2"/> and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op2">The second <see cref="GmpRational"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op1"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
+    /// <remarks>The result is rounded according to the specified <paramref name="rounding"/> mode.</remarks>
+    /// <seealso cref="MultiplyInplace(MpfrFloat, MpfrFloat, GmpRational, MpfrRounding?)"/>
     public static MpfrFloat Multiply(MpfrFloat op1, GmpRational op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1115,10 +2067,30 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Multiplies a <see cref="MpfrFloat"/> instance by a <see cref="GmpRational"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The <see cref="GmpRational"/> instance to multiply.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat operator *(MpfrFloat op1, GmpRational op2) => Multiply(op1, op2, op1.Precision);
+
+    /// <summary>
+    /// Multiplies a <see cref="GmpRational"/> instance with a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpRational"/> instance to multiply.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat operator *(GmpRational op1, MpfrFloat op2) => Multiply(op2, op1, op2.Precision);
     #endregion
 
+    /// <summary>
+    /// Computes the square of <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be squared.</param>
+    /// <param name="rounding">The rounding mode to be used, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if successful, or a non-zero value otherwise.</returns>
     public static int SquareInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1128,6 +2100,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the square of the given <paramref name="op1"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to square.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, the precision of <paramref name="op1"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new <see cref="MpfrFloat"/> instance representing the square of <paramref name="op1"/>.</returns>
     public static MpfrFloat Square(MpfrFloat op1, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op1.Precision);
@@ -1136,6 +2115,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     #region Divide
+
+    /// <summary>
+    /// Divide <paramref name="op1"/> by <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The dividend <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The divisor <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the division operation.</returns>
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1146,6 +2134,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Divide two <see cref="MpfrFloat"/> values <paramref name="op1"/> and <paramref name="op2"/> and return the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The dividend.</param>
+    /// <param name="op2">The divisor.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/> or <paramref name="op2"/> (whichever is greater).</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat Divide(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1153,8 +2149,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Divides two <see cref="MpfrFloat"/> values.
+    /// </summary>
+    /// <param name="op1">The dividend.</param>
+    /// <param name="op2">The divisor.</param>
+    /// <returns>The quotient of the division.</returns>
     public static MpfrFloat operator /(MpfrFloat op1, MpfrFloat op2) => Divide(op1, op2, op1.Precision);
 
+    /// <summary>
+    /// Divide an unsigned integer <paramref name="op1"/> by a <see cref="MpfrFloat"/> <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> to store the result.</param>
+    /// <param name="op1">The unsigned integer to divide.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> to divide by.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the division.</returns>
     public static int DivideInplace(MpfrFloat rop, uint op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1164,6 +2174,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Divide an unsigned integer <paramref name="op1"/> by a <paramref name="op2"/> <see cref="MpfrFloat"/> instance and return the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The unsigned integer to divide.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to divide by.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat Divide(uint op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1171,8 +2189,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Divides an unsigned integer <paramref name="op1"/> by a <see cref="MpfrFloat"/> <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The unsigned integer to divide.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> to divide by.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat operator /(uint op1, MpfrFloat op2) => Divide(op1, op2, op2.Precision);
 
+    /// <summary>
+    /// Divide <paramref name="op1"/> by an unsigned integer <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The destination <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="op2">The unsigned integer to divide by.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the division operation.</returns>
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1182,6 +2214,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Divide <paramref name="op1"/> by an unsigned integer <paramref name="op2"/> and return the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="op2">The unsigned integer to divide <paramref name="op1"/> by.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat Divide(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1189,8 +2229,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Divide <paramref name="op1"/> by an unsigned integer <paramref name="op2"/> and return the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The dividend.</param>
+    /// <param name="op2">The divisor.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat operator /(MpfrFloat op1, uint op2) => Divide(op1, op2, op1.Precision);
 
+    /// <summary>
+    /// Divide an integer <paramref name="op1"/> by a <see cref="MpfrFloat"/> <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The integer value to divide.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to divide by.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The status of the operation.</returns>
     public static int DivideInplace(MpfrFloat rop, int op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1200,6 +2254,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Divide an integer <paramref name="op1"/> by a <see cref="MpfrFloat"/> <paramref name="op2"/> and return the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The integer value to divide.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to divide by.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op2"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat Divide(int op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1207,8 +2269,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Divides an integer value by a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The integer value to divide.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to divide by.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat operator /(int op1, MpfrFloat op2) => Divide(op1, op2, op2.Precision);
 
+    /// <summary>
+    /// Divide <paramref name="op1"/> by <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="op2">The integer value to divide <paramref name="op1"/> by.</param>
+    /// <param name="rounding">The rounding mode to be used, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the operation is successful, -1 otherwise.</returns>
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1218,6 +2294,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Divide <paramref name="op1"/> by integer <paramref name="op2"/> and return the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="op2">The integer value to divide <paramref name="op1"/> by.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat Divide(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1225,8 +2309,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Divide <paramref name="op1"/> by an integer <paramref name="op2"/> and return the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="op2">The integer value to divide <paramref name="op1"/> by.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat operator /(MpfrFloat op1, int op2) => Divide(op1, op2, op1.Precision);
 
+    /// <summary>
+    /// Divides a double <paramref name="op1"/> by a <see cref="MpfrFloat"/> <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> to store the result in.</param>
+    /// <param name="op1">The double value to be divided.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to divide by.</param>
+    /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
+    /// <returns>The result of the division operation.</returns>
     public static int DivideInplace(MpfrFloat rop, double op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1236,6 +2334,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Divide a double <paramref name="op1"/> by a <see cref="MpfrFloat"/> <paramref name="op2"/> and return the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The double value to divide.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to divide by.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op2"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat Divide(double op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1243,8 +2349,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Divide a double value <paramref name="op1"/> by a <see cref="MpfrFloat"/> instance <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The double value to divide.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to divide by.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat operator /(double op1, MpfrFloat op2) => Divide(op1, op2, op2.Precision);
 
+    /// <summary>
+    /// Divide <paramref name="op1"/> by a double <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="op2">The double value to divide by.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The status of the operation.</returns>
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1254,6 +2374,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Divide <paramref name="op1"/> by a double <paramref name="op2"/> and return the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="op2">The double value to divide by.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat Divide(MpfrFloat op1, double op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1261,8 +2389,23 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Divide a <see cref="MpfrFloat"/> instance by a double value.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="op2">The double value to divide by.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
+    /// <exception cref="DivideByZeroException">Thrown when <paramref name="op2"/> is zero.</exception>
     public static MpfrFloat operator /(MpfrFloat op1, double op2) => Divide(op1, op2, op1.Precision);
 
+    /// <summary>
+    /// Divide <paramref name="op1"/> by <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="op2">The <see cref="GmpInteger"/> instance to divide by.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the division operation.</returns>
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1273,6 +2416,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Divide <paramref name="op1"/> by <paramref name="op2"/> and return the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The dividend.</param>
+    /// <param name="op2">The divisor.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat Divide(MpfrFloat op1, GmpInteger op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1280,8 +2431,26 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Divides a <see cref="MpfrFloat"/> by a <see cref="GmpInteger"/>.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> to be divided.</param>
+    /// <param name="op2">The <see cref="GmpInteger"/> to divide by.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="op1"/> or <paramref name="op2"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="op1"/> or <paramref name="op2"/> is not initialized.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="op1"/> precision is less than <paramref name="op2"/> precision.</exception>
+    /// <remarks>The precision of the result is determined by the precision of <paramref name="op1"/>.</remarks>
     public static MpfrFloat operator /(MpfrFloat op1, GmpInteger op2) => Divide(op1, op2, op1.Precision);
 
+    /// <summary>
+    /// Divide <paramref name="op1"/> by <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="op2">The <see cref="GmpRational"/> instance to divide by.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the division operation.</returns>
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1292,6 +2461,17 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Divide <paramref name="op1"/> by <paramref name="op2"/> and return the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> dividend.</param>
+    /// <param name="op2">The <see cref="GmpRational"/> divisor.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
+    /// <exception cref="DivideByZeroException">Thrown when <paramref name="op2"/> is zero.</exception>
+    /// <remarks>The result is rounded according to the specified <paramref name="rounding"/> mode.</remarks>
+    /// <seealso cref="DivideInplace(MpfrFloat, MpfrFloat, GmpRational, MpfrRounding?)"/>
     public static MpfrFloat Divide(MpfrFloat op1, GmpRational op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1299,9 +2479,24 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Divides a <see cref="MpfrFloat"/> by a <see cref="GmpRational"/>.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> to be divided.</param>
+    /// <param name="op2">The <see cref="GmpRational"/> to divide by.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="op1"/> or <paramref name="op2"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="op1"/> and <paramref name="op2"/> have different precision.</exception>
     public static MpfrFloat operator /(MpfrFloat op1, GmpRational op2) => Divide(op1, op2, op1.Precision);
     #endregion
 
+    /// <summary>
+    /// Compute the square root of <paramref name="op1"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to compute the square root.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the computation has been performed correctly, -1 otherwise.</returns>
     public static int SqrtInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1311,6 +2506,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the square root of the specified <paramref name="op1"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to compute the square root of.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, the precision of <paramref name="op1"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the square root of <paramref name="op1"/>.</returns>
     public static MpfrFloat Sqrt(MpfrFloat op1, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op1.Precision);
@@ -1318,6 +2520,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Calculates the square root of an unsigned integer <paramref name="op1"/> and stores the result in-place in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op1">The unsigned integer value to calculate the square root of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if the operation is successful, or a non-zero value otherwise.</returns>
     public static int SqrtInplace(MpfrFloat rop, uint op1, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1326,6 +2535,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the square root of a non-negative integer <paramref name="op1"/> and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The non-negative integer to compute the square root of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the square root of <paramref name="op1"/>.</returns>
     public static MpfrFloat Sqrt(uint op1, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1334,8 +2550,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// set rop to 1/sqrt(op)
+    /// Compute the reciprocal square of <paramref name="op"/> and store the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the reciprocal square.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the computation succeeded, -1 otherwise.</returns>
     public static int ReciprocalSquareInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1345,7 +2565,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>1/sqrt(op)</returns>
+    /// <summary>
+    /// Computes the reciprocal square of a <see cref="MpfrFloat"/> instance <paramref name="op"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the reciprocal square of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the reciprocal square of <paramref name="op"/>.</returns>
     public static MpfrFloat ReciprocalSquare(MpfrFloat op, int? precision, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1353,6 +2579,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Compute the cubic root of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cubic root.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The sign of the result, 1 if positive, -1 if negative.</returns>
     public static int CubicRootInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1362,6 +2595,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the cubic root of a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cubic root of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the cubic root of <paramref name="op"/>.</returns>
     public static MpfrFloat CubicRoot(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -1369,6 +2609,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Compute the <paramref name="n"/>-th root of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the root.</param>
+    /// <param name="n">The positive integer root order.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if success, -1 otherwise.</returns>
     public static int RootNInplace(MpfrFloat rop, MpfrFloat op, uint n, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1378,6 +2626,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the <paramref name="n"/>th root of <paramref name="op"/> and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the root of.</param>
+    /// <param name="n">The positive integer root to compute.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed root.</returns>
     public static MpfrFloat RootN(MpfrFloat op, uint n, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -1386,10 +2642,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// This function is the same as mpfr_rootn_ui except when op is −0 and n is even:
-    /// the result is −0 instead of +0 (the reason was to be consistent with mpfr_sqrt).
-    /// Said otherwise, if op is zero, set rop to op
+    /// Calculates the <paramref name="n"/>th root of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the root.</param>
+    /// <param name="n">The positive integer value of the root.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     [Obsolete("use RootN")]
     public static int RootInplace(MpfrFloat rop, MpfrFloat op, uint n, MpfrRounding? rounding = null)
     {
@@ -1400,6 +2659,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Calculates the <paramref name="n"/>th root of <paramref name="op"/> and returns a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> to calculate the root of.</param>
+    /// <param name="n">The positive integer root to calculate.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the calculated root.</returns>
     [Obsolete("use RootN")]
     public static MpfrFloat Root(MpfrFloat op, uint n, int? precision = null, MpfrRounding? rounding = null)
     {
@@ -1408,6 +2675,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Negates the value of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to negate.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
     public static int NegateInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1417,6 +2691,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Negates the given <paramref name="op"/> <see cref="MpfrFloat"/> instance and returns a new instance with the result.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to negate.</param>
+    /// <param name="precision">The precision of the result. If not specified, the precision of <paramref name="op"/> will be used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode will be used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the negated value of <paramref name="op"/>.</returns>
     public static MpfrFloat Negate(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -1424,8 +2705,20 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Negates the specified <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> to negate.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the negated value.</returns>
     public static MpfrFloat operator -(MpfrFloat op) => Negate(op);
 
+    /// <summary>
+    /// Computes the absolute value of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the absolute value.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The sign of <paramref name="op"/> before the absolute value is computed.</returns>
     public static int AbsInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1435,6 +2728,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the absolute value of a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the absolute value of.</param>
+    /// <param name="precision">The precision to use for the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the absolute value of <paramref name="op"/>.</returns>
     public static MpfrFloat Abs(MpfrFloat op, int? precision, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -1442,7 +2742,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = op1 - op2(if op1 > op2), +0 (otherwise)</summary>
+    /// <summary>
+    /// Computes the dimension of the rectangle defined by <paramref name="op1"/> and <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance defining the rectangle.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance defining the rectangle.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The computed dimension of the rectangle.</returns>
     public static int DimInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1453,7 +2760,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>op1 - op2(if op1 > op2), +0 (otherwise)</returns>
+    /// <summary>
+    /// Computes the dimension of two <see cref="MpfrFloat"/> values <paramref name="op1"/> and <paramref name="op2"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> value.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> value.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/> or <paramref name="op2"/> if they have the same precision, otherwise use the default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the dimension of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat Dim(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1461,6 +2775,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Multiply <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be multiplied.</param>
+    /// <param name="op2">The power of 2 to raise.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the multiplication operation.</returns>
     public static int Multiply2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1470,6 +2792,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Multiplies a <see cref="MpfrFloat"/> instance <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The power of 2 to raise.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op1"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat Multiply2Exp(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op1.Precision);
@@ -1477,6 +2807,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Multiply the <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be multiplied.</param>
+    /// <param name="op2">The power of 2 to raise.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the multiplication operation.</returns>
     public static int Multiply2ExpInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1486,6 +2824,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Multiplies a <see cref="MpfrFloat"/> instance <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The power of 2 to raise.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op1"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
     public static MpfrFloat Multiply2Exp(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op1.Precision);
@@ -1493,6 +2839,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Divide a <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="op2">The power of 2 to divide <paramref name="op1"/> by.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the division operation.</returns>
     public static int Divide2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1502,6 +2856,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Divide a <see cref="MpfrFloat"/> instance by 2 raised to the power of <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to divide.</param>
+    /// <param name="op2">The power of 2 to raise.</param>
+    /// <param name="precision">The precision of the result, default to the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat Divide2Exp(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op1.Precision);
@@ -1509,6 +2871,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Divide a <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="op2">The power of 2 to divide by.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the division operation.</returns>
     public static int Divide2ExpInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1518,6 +2888,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Divide a <see cref="MpfrFloat"/> instance by 2 raised to the power of <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to divide.</param>
+    /// <param name="op2">The power of 2 to raise.</param>
+    /// <param name="precision">The precision of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat Divide2Exp(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op1.Precision);
@@ -1525,6 +2903,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Compute the factorial of a non-negative integer <paramref name="op"/> and store the result in-place in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op">The non-negative integer to compute the factorial of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
     public static int FactorialInplace(MpfrFloat rop, uint op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1533,6 +2918,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Calculates the factorial of a given unsigned integer <paramref name="op"/> and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op">The unsigned integer to calculate the factorial of.</param>
+    /// <param name="precision">The precision in bits of the resulting <see cref="MpfrFloat"/>. If null, the default precision will be used.</param>
+    /// <param name="rounding">The rounding mode to use in the calculation. If null, the default rounding mode will be used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the factorial of <paramref name="op"/>.</returns>
     public static MpfrFloat Factorial(uint op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1541,8 +2933,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// set rop to (op1 * op2) + op3
+    /// Computes the fused multiply-add of <paramref name="op1"/> and <paramref name="op2"/> and adds <paramref name="op3"/> to the result, storing the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The destination <see cref="MpfrFloat"/> to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op3">The third <see cref="MpfrFloat"/> operand to add to the result.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the operation succeeded, or a non-zero value otherwise.</returns>
     public static int FMAInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1554,7 +2952,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>(op1 * op2) + op3</returns>
+    /// <summary>
+    /// Computes the fused multiply-addition of three <see cref="MpfrFloat"/> values <paramref name="op1"/>, <paramref name="op2"/> and <paramref name="op3"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op3">The third <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the fused multiply-addition.</returns>
     public static MpfrFloat FMA(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1563,8 +2969,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// set rop to (op1 * op2) - op3
+    /// Computes the fused multiply-subtract operation (op1 * op2 - op3) and stores the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op3">The third <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>The result of the operation.</returns>
     public static int FMSInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1576,7 +2988,18 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>(op1 * op2) - op3</returns>
+    /// <summary>
+    /// Computes the fused multiply-subtract of three <see cref="MpfrFloat"/> values <paramref name="op1"/>, <paramref name="op2"/> and <paramref name="op3"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> value.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> value.</param>
+    /// <param name="op3">The third <see cref="MpfrFloat"/> value.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the fused multiply-subtract operation.</returns>
+    /// <remarks>
+    /// The fused multiply-subtract operation computes <c>(op1 * op2) - op3</c> as a single operation with a single rounding.
+    /// </remarks>
     public static MpfrFloat FMS(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1585,8 +3008,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// set rop to (op1 * op2) + (op3 * op4)
+    /// Computes the fused multiply-add operation (op1 * op2 + op3 * op4) and stores the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op3">The third <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op4">The fourth <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the operation succeeded, or a non-zero value otherwise.</returns>
     public static int FMMAInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1599,7 +3029,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>(op1 * op2) + (op3 * op4)</returns>
+    /// <summary>
+    /// Computes the fused multiply-add operation (op1 * op2 + op3) * op4 and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The first operand.</param>
+    /// <param name="op2">The second operand.</param>
+    /// <param name="op3">The third operand.</param>
+    /// <param name="op4">The fourth operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the fused multiply-add operation.</returns>
     public static MpfrFloat FMMA(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1608,8 +3047,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// set rop to (op1 * op2) - (op3 * op4)
+    /// Computes the fused multiply-subtract of four <see cref="MpfrFloat"/> operands <paramref name="op1"/>, <paramref name="op2"/>, <paramref name="op3"/> and <paramref name="op4"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op3">The third <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op4">The fourth <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if successful, or a non-zero value otherwise.</returns>
     public static int FMMSInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1622,7 +3068,20 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>(op1 * op2) - (op3 * op4)</returns>
+    /// <summary>
+    /// Computes the fused multiply-subtract of four <see cref="MpfrFloat"/> operands <paramref name="op1"/>, <paramref name="op2"/>, <paramref name="op3"/> and <paramref name="op4"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The first operand.</param>
+    /// <param name="op2">The second operand.</param>
+    /// <param name="op3">The third operand.</param>
+    /// <param name="op4">The fourth operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of the operands is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the fused multiply-subtract operation.</returns>
+    /// <remarks>
+    /// The fused multiply-subtract operation is computed as (op1 * op2) - (op3 * op4).
+    /// </remarks>
+    /// <seealso cref="FMMSInplace(MpfrFloat, MpfrFloat, MpfrFloat, MpfrFloat, MpfrFloat, MpfrRounding?)"/>
     public static MpfrFloat FMMS(MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1630,7 +3089,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>set rop to sqrt(op1 * op2 + op2 * op2)</summary>
+    /// <summary>
+    /// Computes the hypotenuse of a right-angled triangle with legs <paramref name="op1"/> and <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first leg of the triangle.</param>
+    /// <param name="op2">The second leg of the triangle.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
     public static int HypotInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1641,7 +3107,18 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>sqrt(op1 * op2 + op2 * op2)</returns>
+    /// <summary>
+    /// Computes the hypotenuse of two <see cref="MpfrFloat"/> values <paramref name="op1"/> and <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> value.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> value.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the hypotenuse of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
+    /// <remarks>
+    /// The hypotenuse is computed as sqrt(op1^2 + op2^2).
+    /// </remarks>
+    /// <seealso cref="HypotInplace(MpfrFloat, MpfrFloat, MpfrFloat, MpfrRounding?)"/>
     public static MpfrFloat Hypot(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1649,6 +3126,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Calculates the sum of a collection of <see cref="MpfrFloat"/> instances and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="tab">The collection of <see cref="MpfrFloat"/> instances to sum.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The sign of the result, 1 for positive, -1 for negative, 0 for zero.</returns>
+    /// <remarks>
+    /// The <paramref name="rop"/> instance will be modified to store the result of the sum.
+    /// </remarks>
     public static int SumInplace(MpfrFloat rop, IEnumerable<MpfrFloat> tab, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1669,6 +3156,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the sum of a sequence of <see cref="MpfrFloat"/> values.
+    /// </summary>
+    /// <param name="tab">A sequence of <see cref="MpfrFloat"/> values to calculate the sum of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of the first element in <paramref name="tab"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sum of the values in <paramref name="tab"/>.</returns>
     public static MpfrFloat Sum(IEnumerable<MpfrFloat> tab, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -1679,6 +3173,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     #region 6. Comparison Functions
     #region Compares
+
+    /// <summary>
+    /// Compares the current <see cref="GmpFloat"/> instance with the specified object and returns an integer that indicates whether the current instance precedes, follows, or occurs in the same position in the sort order as the specified object.
+    /// </summary>
+    /// <param name="obj">The object to compare with the current instance.</param>
+    /// <returns>A value that indicates the relative order of the objects being compared. The return value has these meanings: Value Meaning Less than zero This instance is less than <paramref name="obj"/>. Zero This instance is equal to <paramref name="obj"/>. Greater than zero This instance is greater than <paramref name="obj"/>.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="obj"/> is not a valid type.</exception>
     public int CompareTo(object? obj)
     {
         return obj switch
@@ -1695,8 +3196,28 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         };
     }
 
+    /// <summary>
+    /// Compares this instance to a specified <see cref="MpfrFloat"/> object.
+    /// </summary>
+    /// <param name="other">The <see cref="MpfrFloat"/> to compare with this instance.</param>
+    /// <returns>A signed integer that indicates the relative order of the objects being compared.</returns>
+    /// <remarks>
+    /// This method returns a value less than zero if this instance is less than <paramref name="other"/>,
+    /// zero if this instance is equal to <paramref name="other"/>, and greater than zero if this instance is greater than <paramref name="other"/>.
+    /// </remarks>
     public int CompareTo([AllowNull] MpfrFloat other) => other is null ? 1 : Compare(this, other);
 
+    /// <summary>
+    /// Compares two <see cref="MpfrFloat"/> values and returns an integer that indicates whether the first value is less than, equal to, or greater than the second value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// Value Meaning
+    /// Less than zero: <paramref name="op1"/> is less than <paramref name="op2"/>.
+    /// Zero: <paramref name="op1"/> equals <paramref name="op2"/>.
+    /// Greater than zero: <paramref name="op1"/> is greater than <paramref name="op2"/>.
+    /// </returns>
     public static int Compare(MpfrFloat op1, MpfrFloat op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1706,6 +3227,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Compare two <see cref="MpfrFloat"/> instances and returns true if the first operand is greater than the second operand.
+    /// </summary>
+    /// <param name="op1">The first operand to compare.</param>
+    /// <param name="op2">The second operand to compare.</param>
+    /// <returns>True if <paramref name="op1"/> is greater than <paramref name="op2"/>, false otherwise.</returns>
     public static bool CompareGreater(MpfrFloat op1, MpfrFloat op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1715,6 +3242,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Compares two <see cref="MpfrFloat"/> values and returns a value indicating whether one is greater than or equal to the other.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than or equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool CompareGreaterOrEquals(MpfrFloat op1, MpfrFloat op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1724,6 +3257,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Compares two <see cref="MpfrFloat"/> values and returns a value indicating whether one is less than the other.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> value to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> value to compare.</param>
+    /// <returns>true if <paramref name="op1"/> is less than <paramref name="op2"/>; otherwise, false.</returns>
     public static bool CompareLess(MpfrFloat op1, MpfrFloat op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1733,6 +3272,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Compares two <see cref="MpfrFloat"/> values and returns a value indicating whether one is less than or equal to the other.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is less than or equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool CompareLessOrEquals(MpfrFloat op1, MpfrFloat op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1742,6 +3287,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Compares two <see cref="MpfrFloat"/> instances for equality.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <returns><c>true</c> if the two instances are equal; otherwise, <c>false</c>.</returns>
     public static bool CompareEquals(MpfrFloat op1, MpfrFloat op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1751,15 +3302,72 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Determines whether the current <see cref="MpfrFloat"/> object is equal to another <see cref="MpfrFloat"/> object.
+    /// </summary>
+    /// <param name="other">The <see cref="MpfrFloat"/> to compare with the current object.</param>
+    /// <returns><c>true</c> if the specified <see cref="MpfrFloat"/> is equal to the current <see cref="MpfrFloat"/>; otherwise, <c>false</c>.</returns>
     public bool Equals(MpfrFloat? other) => (other is not null) && CompareEquals(this, other);
 
+    /// <summary>
+    /// Determines whether two specified <see cref="MpfrFloat"/> objects have the same value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is the same as the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator ==(MpfrFloat op1, MpfrFloat op2) => CompareEquals(op1, op2);
+
+    /// <summary>
+    /// Determines whether two specified <see cref="MpfrFloat"/> objects have different values.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is different from the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator !=(MpfrFloat op1, MpfrFloat op2) => !CompareEquals(op1, op2);
+
+    /// <summary>
+    /// Determines whether the first <see cref="MpfrFloat"/> operand is greater than the second <see cref="MpfrFloat"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >(MpfrFloat op1, MpfrFloat op2) => CompareGreater(op1, op2);
+
+    /// <summary>
+    /// Determines whether the first <see cref="MpfrFloat"/> operand is less than the second <see cref="MpfrFloat"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is less than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator <(MpfrFloat op1, MpfrFloat op2) => CompareLess(op1, op2);
+
+    /// <summary>
+    /// Determines whether the first <see cref="MpfrFloat"/> operand is greater than or equal to the second <see cref="MpfrFloat"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than or equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >=(MpfrFloat op1, MpfrFloat op2) => CompareGreaterOrEquals(op1, op2);
+
+    /// <summary>
+    /// Determines whether the first <see cref="MpfrFloat"/> operand is less than or equal to the second <see cref="MpfrFloat"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <returns><c>true</c> if the first <see cref="MpfrFloat"/> operand is less than or equal to the second <see cref="MpfrFloat"/> operand; otherwise, <c>false</c>.</returns>
     public static bool operator <=(MpfrFloat op1, MpfrFloat op2) => CompareLessOrEquals(op1, op2);
 
+    /// <summary>
+    /// Compares a <see cref="MpfrFloat"/> instance with an unsigned integer value.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The unsigned integer value to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// Value Meaning
+    /// Less than zero: <paramref name="op1"/> is less than <paramref name="op2"/>.
+    /// Zero: <paramref name="op1"/> equals <paramref name="op2"/>.
+    /// Greater than zero: <paramref name="op1"/> is greater than <paramref name="op2"/>.
+    /// </returns>
     public static int Compare(MpfrFloat op1, uint op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1768,19 +3376,127 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Determines whether a specified <see cref="MpfrFloat"/> object is equal to a specified unsigned integer.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second unsigned integer to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator ==(MpfrFloat op1, uint op2) => Compare(op1, op2) == 0;
+
+    /// <summary>
+    /// Determines whether a specified <see cref="MpfrFloat"/> object is not equal to a specified unsigned integer.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second unsigned integer to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is not equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator !=(MpfrFloat op1, uint op2) => Compare(op1, op2) != 0;
+
+    /// <summary>
+    /// Determines whether the value of the <paramref name="op1"/> object is greater than the specified unsigned integer <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second unsigned integer to compare.</param>
+    /// <returns><c>true</c> if the value of the <paramref name="op1"/> object is greater than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >(MpfrFloat op1, uint op2) => Compare(op1, op2) > 0;
+
+    /// <summary>
+    /// Determines whether the value of the <paramref name="op1"/> object is less than the specified unsigned integer <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second unsigned integer to compare.</param>
+    /// <returns><see langword="true"/> if the value of the <paramref name="op1"/> object is less than the value of <paramref name="op2"/>; otherwise, <see langword="false"/>.</returns>
     public static bool operator <(MpfrFloat op1, uint op2) => Compare(op1, op2) < 0;
+
+    /// <summary>
+    /// Determines whether a specified <see cref="MpfrFloat"/> object is greater than or equal to a specified unsigned integer.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second unsigned integer to compare.</param>
+    /// <returns>true if <paramref name="op1"/> is greater than or equal to <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator >=(MpfrFloat op1, uint op2) => Compare(op1, op2) >= 0;
+
+    /// <summary>
+    /// Determines whether the value of the <paramref name="op1"/> object is less than or equal to the <paramref name="op2"/> value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second <see cref="uint"/> value to compare.</param>
+    /// <returns>true if the value of the <paramref name="op1"/> object is less than or equal to the <paramref name="op2"/> value; otherwise, false.</returns>
     public static bool operator <=(MpfrFloat op1, uint op2) => Compare(op1, op2) <= 0;
+
+    /// <summary>
+    /// Determines whether a specified unsigned integer is equal to a specified <see cref="MpfrFloat"/> object.
+    /// </summary>
+    /// <param name="op1">The first unsigned integer to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> object to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator ==(uint op1, MpfrFloat op2) => Compare(op2, op1) == 0;
+
+    /// <summary>
+    /// Determines whether a specified unsigned integer value is not equal to a specified <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The first operand to compare.</param>
+    /// <param name="op2">The second operand to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is not equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator !=(uint op1, MpfrFloat op2) => Compare(op2, op1) != 0;
+
+    /// <summary>
+    /// Determines whether a specified unsigned integer is greater than a specified <see cref="MpfrFloat"/> object.
+    /// </summary>
+    /// <param name="op1">The first operand to compare.</param>
+    /// <param name="op2">The second operand to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >(uint op1, MpfrFloat op2) => Compare(op2, op1) < 0;
+
+    /// <summary>
+    /// Determines whether a specified unsigned integer is less than a specified <see cref="MpfrFloat"/> object.
+    /// </summary>
+    /// <param name="op1">The first unsigned integer to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> object to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is less than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator <(uint op1, MpfrFloat op2) => Compare(op2, op1) > 0;
+
+    /// <summary>
+    /// Determines whether a specified unsigned integer is greater than or equal to a specified <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The unsigned integer to compare.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than or equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >=(uint op1, MpfrFloat op2) => Compare(op2, op1) <= 0;
+
+    /// <summary>
+    /// Determines whether a specified unsigned integer is less than or equal to a specified <see cref="MpfrFloat"/> object.
+    /// </summary>
+    /// <param name="op1">The first operand to compare.</param>
+    /// <param name="op2">The second operand to compare.</param>
+    /// <returns>true if <paramref name="op1"/> is less than or equal to <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator <=(uint op1, MpfrFloat op2) => Compare(op2, op1) >= 0;
 
+    /// <summary>
+    /// Compares a <see cref="MpfrFloat"/> instance with an integer value.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The integer value to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// <list type="table">
+    /// <listheader>
+    /// <term>Value</term>
+    /// <description>Meaning</description>
+    /// </listheader>
+    /// <item>
+    /// <term>Less than zero</term>
+    /// <description><paramref name="op1"/> is less than <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Zero</term>
+    /// <description><paramref name="op1"/> equals <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Greater than zero</term>
+    /// <description><paramref name="op1"/> is greater than <paramref name="op2"/>.</description>
+    /// </item>
+    /// </list>
+    /// </returns>
     public static int Compare(MpfrFloat op1, int op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1789,19 +3505,127 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Determines whether a specified <see cref="MpfrFloat"/> object is equal to a specified integer value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second integer value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator ==(MpfrFloat op1, int op2) => Compare(op1, op2) == 0;
+
+    /// <summary>
+    /// Determines whether a specified <see cref="MpfrFloat"/> object is not equal to a specified integer value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second integer value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is not equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator !=(MpfrFloat op1, int op2) => Compare(op1, op2) != 0;
+
+    /// <summary>
+    /// Determines whether a specified <see cref="MpfrFloat"/> object is greater than a specified integer value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second integer value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >(MpfrFloat op1, int op2) => Compare(op1, op2) > 0;
+
+    /// <summary>
+    /// Determines whether the value of the <paramref name="op1"/> is less than the <paramref name="op2"/> integer value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The second integer value to compare.</param>
+    /// <returns><c>true</c> if the value of the <paramref name="op1"/> is less than the <paramref name="op2"/> integer value; otherwise, <c>false</c>.</returns>
     public static bool operator <(MpfrFloat op1, int op2) => Compare(op1, op2) < 0;
+
+    /// <summary>
+    /// Determines whether a specified <see cref="MpfrFloat"/> object is greater than or equal to a specified integer value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second integer value to compare.</param>
+    /// <returns>true if the value of <paramref name="op1"/> is greater than or equal to the value of <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator >=(MpfrFloat op1, int op2) => Compare(op1, op2) >= 0;
+
+    /// <summary>
+    /// Determines whether a specified <see cref="MpfrFloat"/> object is less than or equal to a specified integer value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second integer value to compare.</param>
+    /// <returns>true if <paramref name="op1"/> is less than or equal to <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator <=(MpfrFloat op1, int op2) => Compare(op1, op2) <= 0;
+
+    /// <summary>
+    /// Determines whether an integer value is equal to a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The integer value to compare.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to compare.</param>
+    /// <returns><c>true</c> if the integer value is equal to the <see cref="MpfrFloat"/> value; otherwise, <c>false</c>.</returns>
     public static bool operator ==(int op1, MpfrFloat op2) => Compare(op2, op1) == 0;
+
+    /// <summary>
+    /// Determines whether an integer value is not equal to a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The integer value to compare.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is not equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator !=(int op1, MpfrFloat op2) => Compare(op2, op1) != 0;
+
+    /// <summary>
+    /// Determines whether an integer value is greater than a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The integer value to compare.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >(int op1, MpfrFloat op2) => Compare(op2, op1) < 0;
+
+    /// <summary>
+    /// Determines whether an integer value is less than a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The integer value to compare.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is less than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator <(int op1, MpfrFloat op2) => Compare(op2, op1) > 0;
+
+    /// <summary>
+    /// Determines whether an integer value is greater than or equal to a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The integer value to compare.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than or equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >=(int op1, MpfrFloat op2) => Compare(op2, op1) <= 0;
+
+    /// <summary>
+    /// Determines whether an integer value is less than or equal to a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The integer value to compare.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is less than or equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator <=(int op1, MpfrFloat op2) => Compare(op2, op1) >= 0;
 
+    /// <summary>
+    /// Compares a <see cref="MpfrFloat"/> instance with a double-precision floating-point number.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The double-precision floating-point number to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// <list type="table">
+    /// <listheader>
+    /// <term>Value</term>
+    /// <description>Meaning</description>
+    /// </listheader>
+    /// <item>
+    /// <term>Less than zero</term>
+    /// <description><paramref name="op1"/> is less than <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Zero</term>
+    /// <description><paramref name="op1"/> equals <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Greater than zero</term>
+    /// <description><paramref name="op1"/> is greater than <paramref name="op2"/>.</description>
+    /// </item>
+    /// </list>
+    /// </returns>
     public static int Compare(MpfrFloat op1, double op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1810,19 +3634,113 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Determines whether the specified <see cref="MpfrFloat"/> object is equal to the specified double-precision floating-point number.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second double-precision floating-point number to compare.</param>
+    /// <returns><c>true</c> if the two values are equal; otherwise, <c>false</c>.</returns>
     public static bool operator ==(MpfrFloat op1, double op2) => Compare(op1, op2) == 0;
+
+    /// <summary>
+    /// Determines whether two specified <see cref="MpfrFloat"/> objects have different values.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="double"/> to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is different from the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator !=(MpfrFloat op1, double op2) => Compare(op1, op2) != 0;
+
+    /// <summary>
+    /// Determines whether a <see cref="MpfrFloat"/> object is greater than a double-precision floating-point number.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second double-precision floating-point number to compare.</param>
+    /// <returns>true if <paramref name="op1"/> is greater than <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator >(MpfrFloat op1, double op2) => Compare(op1, op2) > 0;
+
+    /// <summary>
+    /// Determines whether the value of the first <see cref="MpfrFloat"/> operand is less than the value of the second <see cref="double"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="double"/> operand to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is less than the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator <(MpfrFloat op1, double op2) => Compare(op1, op2) < 0;
+
+    /// <summary>
+    /// Determines whether the value of the <paramref name="op1"/> object is greater than or equal to the specified <paramref name="op2"/> double-precision floating-point number.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second double-precision floating-point number to compare.</param>
+    /// <returns>true if the value of the <paramref name="op1"/> object is greater than or equal to the value of <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator >=(MpfrFloat op1, double op2) => Compare(op1, op2) >= 0;
+
+    /// <summary>
+    /// Determines whether the value of the <paramref name="op1"/> object is less than or equal to the specified <paramref name="op2"/> double-precision floating-point number.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> object to compare.</param>
+    /// <param name="op2">The second double-precision floating-point number to compare.</param>
+    /// <returns>true if the value of the <paramref name="op1"/> object is less than or equal to the specified <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator <=(MpfrFloat op1, double op2) => Compare(op1, op2) <= 0;
+
+    /// <summary>
+    /// Determines whether a specified double-precision floating-point number is equal to a specified <see cref="MpfrFloat"/> object.
+    /// </summary>
+    /// <param name="op1">The first value to compare.</param>
+    /// <param name="op2">The second value to compare.</param>
+    /// <returns><c>true</c> if the values are equal; otherwise, <c>false</c>.</returns>
     public static bool operator ==(double op1, MpfrFloat op2) => Compare(op2, op1) == 0;
+
+    /// <summary>
+    /// Determines whether a specified double-precision floating-point number is not equal to a specified <see cref="MpfrFloat"/> object.
+    /// </summary>
+    /// <param name="op1">The first value to compare.</param>
+    /// <param name="op2">The second value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is not equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator !=(double op1, MpfrFloat op2) => Compare(op2, op1) != 0;
+
+    /// <summary>
+    /// Determines whether a double-precision floating-point number is greater than a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The double-precision floating-point number to compare.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >(double op1, MpfrFloat op2) => Compare(op2, op1) < 0;
+
+    /// <summary>
+    /// Determines whether a double-precision floating-point number is less than a specified <see cref="MpfrFloat"/> object.
+    /// </summary>
+    /// <param name="op1">The first double-precision floating-point number to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> object to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is less than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator <(double op1, MpfrFloat op2) => Compare(op2, op1) > 0;
+
+    /// <summary>
+    /// Determines whether a specified double-precision floating-point number is greater than or equal to a specified <see cref="MpfrFloat"/> object.
+    /// </summary>
+    /// <param name="op1">The first double-precision floating-point number to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> object to compare.</param>
+    /// <returns>true if <paramref name="op1"/> is greater than or equal to <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator >=(double op1, MpfrFloat op2) => Compare(op2, op1) <= 0;
+
+    /// <summary>
+    /// Determines whether a double-precision floating-point number is less than or equal to a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The double-precision floating-point number to compare.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is less than or equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator <=(double op1, MpfrFloat op2) => Compare(op2, op1) >= 0;
 
+    /// <summary>
+    /// Compares the value of a <see cref="MpfrFloat"/> instance with a <see cref="GmpInteger"/> instance.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The <see cref="GmpInteger"/> instance to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// Value Meaning
+    /// Less than zero: <paramref name="op1"/> is less than <paramref name="op2"/>.
+    /// Zero: <paramref name="op1"/> equals <paramref name="op2"/>.
+    /// Greater than zero: <paramref name="op1"/> is greater than <paramref name="op2"/>.
+    /// </returns>
     public static int Compare(MpfrFloat op1, GmpInteger op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1832,19 +3750,113 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Determines whether two specified <see cref="MpfrFloat"/> and <see cref="GmpInteger"/> objects have the same value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is the same as the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator ==(MpfrFloat op1, GmpInteger op2) => Compare(op1, op2) == 0;
+
+    /// <summary>
+    /// Determines whether two specified <see cref="MpfrFloat"/> and <see cref="GmpInteger"/> objects have different values.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> to compare.</param>
+    /// <returns><see langword="true"/> if the value of <paramref name="op1"/> is different from the value of <paramref name="op2"/>; otherwise, <see langword="false"/>.</returns>
     public static bool operator !=(MpfrFloat op1, GmpInteger op2) => Compare(op1, op2) != 0;
+
+    /// <summary>
+    /// Determines whether the value of the first <see cref="MpfrFloat"/> operand is greater than the value of the second <see cref="GmpInteger"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is greater than the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >(MpfrFloat op1, GmpInteger op2) => Compare(op1, op2) > 0;
+
+    /// <summary>
+    /// Determines whether the value of the first <see cref="MpfrFloat"/> operand is less than the value of the second <see cref="GmpInteger"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is less than the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator <(MpfrFloat op1, GmpInteger op2) => Compare(op1, op2) < 0;
+
+    /// <summary>
+    /// Determines whether the value of the first <see cref="MpfrFloat"/> operand is greater than or equal to the value of the second <see cref="GmpInteger"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand to compare.</param>
+    /// <returns><see langword="true"/> if the value of <paramref name="op1"/> is greater than or equal to the value of <paramref name="op2"/>; otherwise, <see langword="false"/>.</returns>
     public static bool operator >=(MpfrFloat op1, GmpInteger op2) => Compare(op1, op2) >= 0;
+
+    /// <summary>
+    /// Determines whether the value of the first <see cref="MpfrFloat"/> operand is less than or equal to the value of the second <see cref="GmpInteger"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="GmpInteger"/> operand to compare.</param>
+    /// <returns>true if the value of <paramref name="op1"/> is less than or equal to the value of <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator <=(MpfrFloat op1, GmpInteger op2) => Compare(op1, op2) <= 0;
+
+    /// <summary>
+    /// Determines whether two specified <see cref="GmpInteger"/> and <see cref="MpfrFloat"/> objects have the same value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpInteger"/> to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> to compare.</param>
+    /// <returns>true if the value of <paramref name="op1"/> is the same as the value of <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator ==(GmpInteger op1, MpfrFloat op2) => Compare(op2, op1) == 0;
+
+    /// <summary>
+    /// Determines whether two specified <see cref="GmpInteger"/> and <see cref="MpfrFloat"/> objects have different values.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpInteger"/> to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is different from the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator !=(GmpInteger op1, MpfrFloat op2) => Compare(op2, op1) != 0;
+
+    /// <summary>
+    /// Determines whether a <see cref="GmpInteger"/> value is greater than a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The first operand to compare.</param>
+    /// <param name="op2">The second operand to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >(GmpInteger op1, MpfrFloat op2) => Compare(op2, op1) < 0;
+
+    /// <summary>
+    /// Determines whether a <see cref="GmpInteger"/> value is less than a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The first value to compare.</param>
+    /// <param name="op2">The second value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is less than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator <(GmpInteger op1, MpfrFloat op2) => Compare(op2, op1) > 0;
+
+    /// <summary>
+    /// Determines whether a <see cref="GmpInteger"/> value is greater than or equal to a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The first value to compare.</param>
+    /// <param name="op2">The second value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than or equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >=(GmpInteger op1, MpfrFloat op2) => Compare(op2, op1) <= 0;
+
+    /// <summary>
+    /// Determines whether a <see cref="GmpInteger"/> value is less than or equal to a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpInteger"/> value to compare.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is less than or equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator <=(GmpInteger op1, MpfrFloat op2) => Compare(op2, op1) >= 0;
 
+    /// <summary>
+    /// Compares two numbers, one represented by a <see cref="MpfrFloat"/> instance and the other by a <see cref="GmpRational"/> instance.
+    /// </summary>
+    /// <param name="op1">The first number to compare.</param>
+    /// <param name="op2">The second number to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// Value Meaning
+    /// Less than zero: <paramref name="op1"/> is less than <paramref name="op2"/>.
+    /// Zero: <paramref name="op1"/> equals <paramref name="op2"/>.
+    /// Greater than zero: <paramref name="op1"/> is greater than <paramref name="op2"/>.
+    /// </returns>
     public static int Compare(MpfrFloat op1, GmpRational op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1854,19 +3866,113 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Determines whether two specified <see cref="MpfrFloat"/> and <see cref="GmpRational"/> objects have the same value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="GmpRational"/> to compare.</param>
+    /// <returns><see langword="true"/> if the value of <paramref name="op1"/> is the same as the value of <paramref name="op2"/>; otherwise, <see langword="false"/>.</returns>
     public static bool operator ==(MpfrFloat op1, GmpRational op2) => Compare(op1, op2) == 0;
+
+    /// <summary>
+    /// Determines whether two specified <see cref="MpfrFloat"/> and <see cref="GmpRational"/> objects have different values.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="GmpRational"/> to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is different from the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator !=(MpfrFloat op1, GmpRational op2) => Compare(op1, op2) != 0;
+
+    /// <summary>
+    /// Determines whether the first <see cref="MpfrFloat"/> operand is greater than the second <see cref="GmpRational"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="GmpRational"/> operand to compare.</param>
+    /// <returns><c>true</c> if the first operand is greater than the second operand; otherwise, <c>false</c>.</returns>
     public static bool operator >(MpfrFloat op1, GmpRational op2) => Compare(op1, op2) > 0;
+
+    /// <summary>
+    /// Determines whether the first <see cref="MpfrFloat"/> operand is less than the second <see cref="GmpRational"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="GmpRational"/> operand to compare.</param>
+    /// <returns><c>true</c> if the first operand is less than the second operand; otherwise, <c>false</c>.</returns>
     public static bool operator <(MpfrFloat op1, GmpRational op2) => Compare(op1, op2) < 0;
+
+    /// <summary>
+    /// Determines whether the value of the first <see cref="MpfrFloat"/> operand is greater than or equal to the value of the second <see cref="GmpRational"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="GmpRational"/> operand to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is greater than or equal to the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >=(MpfrFloat op1, GmpRational op2) => Compare(op1, op2) >= 0;
+
+    /// <summary>
+    /// Determines whether the value of the first <see cref="MpfrFloat"/> operand is less than or equal to the value of the second <see cref="GmpRational"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="GmpRational"/> operand to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is less than or equal to the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator <=(MpfrFloat op1, GmpRational op2) => Compare(op1, op2) <= 0;
+
+    /// <summary>
+    /// Determines whether two specified <see cref="GmpRational"/> and <see cref="MpfrFloat"/> objects have the same value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpRational"/> to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is the same as the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator ==(GmpRational op1, MpfrFloat op2) => Compare(op2, op1) == 0;
+
+    /// <summary>
+    /// Determines whether two specified <see cref="GmpRational"/> and <see cref="MpfrFloat"/> objects have different values.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpRational"/> to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is different from the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator !=(GmpRational op1, MpfrFloat op2) => Compare(op2, op1) != 0;
+
+    /// <summary>
+    /// Determines whether a <see cref="GmpRational"/> value is greater than a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The first value to compare.</param>
+    /// <param name="op2">The second value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >(GmpRational op1, MpfrFloat op2) => Compare(op2, op1) < 0;
+
+    /// <summary>
+    /// Determines whether a <see cref="GmpRational"/> value is less than a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The first value to compare.</param>
+    /// <param name="op2">The second value to compare.</param>
+    /// <returns>true if <paramref name="op1"/> is less than <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator <(GmpRational op1, MpfrFloat op2) => Compare(op2, op1) > 0;
+
+    /// <summary>
+    /// Determines whether a <see cref="GmpRational"/> value is greater than or equal to a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The first value to compare.</param>
+    /// <param name="op2">The second value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than or equal to <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >=(GmpRational op1, MpfrFloat op2) => Compare(op2, op1) <= 0;
+
+    /// <summary>
+    /// Determines whether a <see cref="GmpRational"/> value is less than or equal to a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The first value to compare.</param>
+    /// <param name="op2">The second value to compare.</param>
+    /// <returns>true if the value of <paramref name="op1"/> is less than or equal to the value of <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator <=(GmpRational op1, MpfrFloat op2) => Compare(op2, op1) >= 0;
 
+    /// <summary>
+    /// Compares two <see cref="MpfrFloat"/> and <see cref="GmpFloat"/> instances and returns an integer that indicates whether the first operand is less than, equal to, or greater than the second operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The second <see cref="GmpFloat"/> instance to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// Value Meaning
+    /// Less than zero: <paramref name="op1"/> is less than <paramref name="op2"/>.
+    /// Zero: <paramref name="op1"/> equals <paramref name="op2"/>.
+    /// Greater than zero: <paramref name="op1"/> is greater than <paramref name="op2"/>.
+    /// </returns>
     public static int Compare(MpfrFloat op1, GmpFloat op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1876,20 +3982,108 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Determines whether two specified <see cref="MpfrFloat"/> and <see cref="GmpFloat"/> objects have the same value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="GmpFloat"/> to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is the same as the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator ==(MpfrFloat op1, GmpFloat op2) => Compare(op1, op2) == 0;
+
+    /// <summary>
+    /// Determines whether two specified <see cref="MpfrFloat"/> and <see cref="GmpFloat"/> objects have different values.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="GmpFloat"/> to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is different from the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator !=(MpfrFloat op1, GmpFloat op2) => Compare(op1, op2) != 0;
+
+    /// <summary>
+    /// Determines whether the first <see cref="MpfrFloat"/> operand is greater than the second <see cref="GmpFloat"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="GmpFloat"/> operand to compare.</param>
+    /// <returns><c>true</c> if the first operand is greater than the second operand; otherwise, <c>false</c>.</returns>
     public static bool operator >(MpfrFloat op1, GmpFloat op2) => Compare(op1, op2) > 0;
+
+    /// <summary>
+    /// Determines whether the first <see cref="MpfrFloat"/> operand is less than the second <see cref="GmpFloat"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="GmpFloat"/> operand to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is less than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator <(MpfrFloat op1, GmpFloat op2) => Compare(op1, op2) < 0;
+
+    /// <summary>
+    /// Determines whether the first <see cref="MpfrFloat"/> operand is greater than or equal to the second <see cref="GmpFloat"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="GmpFloat"/> operand to compare.</param>
+    /// <returns><c>true</c> if the first operand is greater than or equal to the second operand; otherwise, <c>false</c>.</returns>
     public static bool operator >=(MpfrFloat op1, GmpFloat op2) => Compare(op1, op2) >= 0;
+
+    /// <summary>
+    /// Determines whether the value of the first <see cref="MpfrFloat"/> operand is less than or equal to the value of the second <see cref="GmpFloat"/> operand.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="GmpFloat"/> operand to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is less than or equal to the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator <=(MpfrFloat op1, GmpFloat op2) => Compare(op1, op2) <= 0;
+
+    /// <summary>
+    /// Determines whether two specified <see cref="GmpFloat"/> and <see cref="MpfrFloat"/> objects have the same value.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> to compare.</param>
+    /// <returns>true if the value of <paramref name="op1"/> is the same as the value of <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator ==(GmpFloat op1, MpfrFloat op2) => Compare(op2, op1) == 0;
+
+    /// <summary>
+    /// Determines whether two specified <see cref="GmpFloat"/> and <see cref="MpfrFloat"/> objects have different values.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> to compare.</param>
+    /// <returns><c>true</c> if the value of <paramref name="op1"/> is different from the value of <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator !=(GmpFloat op1, MpfrFloat op2) => Compare(op2, op1) != 0;
+
+    /// <summary>
+    /// Determines whether a <see cref="GmpFloat"/> value is greater than a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The first value to compare.</param>
+    /// <param name="op2">The second value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is greater than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >(GmpFloat op1, MpfrFloat op2) => Compare(op2, op1) < 0;
+
+    /// <summary>
+    /// Determines whether a <see cref="GmpFloat"/> value is less than a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The first value to compare.</param>
+    /// <param name="op2">The second value to compare.</param>
+    /// <returns>true if <paramref name="op1"/> is less than <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator <(GmpFloat op1, MpfrFloat op2) => Compare(op2, op1) > 0;
+
+    /// <summary>
+    /// Determines whether the value of the <paramref name="op1"/> is greater than or equal to the value of the <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="GmpFloat"/> instance to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <returns><c>true</c> if the value of the <paramref name="op1"/> is greater than or equal to the value of the <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >=(GmpFloat op1, MpfrFloat op2) => Compare(op2, op1) <= 0;
+
+    /// <summary>
+    /// Determines whether a <see cref="GmpFloat"/> value is less than or equal to a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op1">The first value to compare.</param>
+    /// <param name="op2">The second value to compare.</param>
+    /// <returns>true if <paramref name="op1"/> is less than or equal to <paramref name="op2"/>; otherwise, false.</returns>
     public static bool operator <=(GmpFloat op1, MpfrFloat op2) => Compare(op2, op1) >= 0;
     #endregion
 
+    /// <summary>
+    /// Determines whether the current <see cref="MpfrFloat"/> instance is equal to the specified object.
+    /// </summary>
+    /// <param name="obj">The object to compare with the current instance.</param>
+    /// <returns><c>true</c> if the specified object is equal to the current instance; otherwise, <c>false</c>.</returns>
     public override bool Equals(object? obj)
     {
         return obj switch
@@ -1906,6 +4100,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         };
     }
 
+    /// <summary>
+    /// Computes a hash code for the current <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <returns>A hash code for the current <see cref="MpfrFloat"/> instance.</returns>
     public override int GetHashCode()
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -1921,7 +4119,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary> compare op1 and op2 * 2 ^ e</summary>
+    /// <summary>
+    /// Compares the value of a <see cref="MpfrFloat"/> instance with a given unsigned integer multiplied by a power of 2.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The unsigned integer value to multiply by a power of 2 and compare with.</param>
+    /// <param name="e">The power of 2 to multiply the unsigned integer value with.</param>
+    /// <returns>A signed integer indicating the relative values of <paramref name="op1"/> and <paramref name="op2"/> * 2^<paramref name="e"/>.</returns>
     public static int Compare2Exp(MpfrFloat op1, uint op2, int e)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1930,7 +4134,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary> compare op1 and op2 * 2 ^ e</summary>
+    /// <summary>
+    /// Compares the value of a <see cref="MpfrFloat"/> instance with a value of the form op2 * 2^e.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The integer value to multiply by 2^e and compare with <paramref name="op1"/>.</param>
+    /// <param name="e">The exponent to multiply <paramref name="op2"/> by 2^e and compare with <paramref name="op1"/>.</param>
+    /// <returns>A signed integer indicating the relative values of <paramref name="op1"/> and op2 * 2^e.</returns>
+    /// <remarks>
+    /// The return value is negative if <paramref name="op1"/> is less than op2 * 2^e, zero if <paramref name="op1"/> is equal to op2 * 2^e, and positive if <paramref name="op1"/> is greater than op2 * 2^e.
+    /// </remarks>
     public static int Compare2Exp(MpfrFloat op1, int op2, int e)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1939,6 +4152,31 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Compares the absolute values of two <see cref="MpfrFloat"/> numbers.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> number to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> number to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// <list type="table">
+    /// <listheader>
+    /// <term>Value</term>
+    /// <description>Meaning</description>
+    /// </listheader>
+    /// <item>
+    /// <term>Less than zero</term>
+    /// <description><paramref name="op1"/> is less than <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Zero</term>
+    /// <description><paramref name="op1"/> equals <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Greater than zero</term>
+    /// <description><paramref name="op1"/> is greater than <paramref name="op2"/>.</description>
+    /// </item>
+    /// </list>
+    /// </returns>
     public static int CompareAbs(MpfrFloat op1, MpfrFloat op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1948,6 +4186,31 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Compares the absolute value of a <see cref="MpfrFloat"/> instance with an unsigned integer.
+    /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The unsigned integer to compare.</param>
+    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
+    /// <list type="table">
+    /// <listheader>
+    /// <term>Value</term>
+    /// <description>Meaning</description>
+    /// </listheader>
+    /// <item>
+    /// <term>Less than zero</term>
+    /// <description><paramref name="op1"/> is less than <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Zero</term>
+    /// <description><paramref name="op1"/> equals <paramref name="op2"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Greater than zero</term>
+    /// <description><paramref name="op1"/> is greater than <paramref name="op2"/>.</description>
+    /// </item>
+    /// </list>
+    /// </returns>
     public static int CompareAbs(MpfrFloat op1, uint op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -1956,6 +4219,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Gets a value indicating whether this <see cref="MpfrFloat"/> instance represents a NaN (not-a-number) value.
+    /// </summary>
+    /// <returns><c>true</c> if this instance represents a NaN value; otherwise, <c>false</c>.</returns>
     public bool IsNaN
     {
         get
@@ -1967,6 +4234,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Gets a value indicating whether the current <see cref="MpfrFloat"/> instance represents positive or negative infinity.
+    /// </summary>
+    /// <returns><c>true</c> if the current instance represents positive or negative infinity; otherwise, <c>false</c>.</returns>
     public bool IsInfinity
     {
         get
@@ -1978,6 +4249,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Gets a value indicating whether the current instance is a number.
+    /// </summary>
+    /// <returns><c>true</c> if the current instance is a number; otherwise, <c>false</c>.</returns>
     public bool IsNumber
     {
         get
@@ -1989,6 +4264,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Gets a value indicating whether this <see cref="MpfrFloat"/> instance is zero.
+    /// </summary>
+    /// <returns><c>true</c> if this instance is zero; otherwise, <c>false</c>.</returns>
     public bool IsZero
     {
         get
@@ -2000,7 +4279,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>neither NaN, infinity nor zero</summary>
+    /// <summary>
+    /// Gets a value indicating whether this <see cref="MpfrFloat"/> instance is a regular number.
+    /// </summary>
+    /// <remarks>
+    /// A regular number is a number that is neither NaN nor infinity.
+    /// </remarks>
+    /// <returns><c>true</c> if this instance is a regular number; otherwise, <c>false</c>.</returns>
     public bool IsRegular
     {
         get
@@ -2012,6 +4297,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Gets the sign of the current <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <returns>
+    /// A signed integer value indicating the sign of the current <see cref="MpfrFloat"/> instance.
+    /// -1 if the value is negative, 0 if the value is zero, and 1 if the value is positive.
+    /// </returns>
     public int Sign
     {
         get
@@ -2023,7 +4315,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>true if (op1 &lt; op2) or (op1 &gt; op2), false otherwise(NaN, or equals)</returns>
+    /// <summary>
+    /// Determines whether one <see cref="MpfrFloat"/> instance is less than or greater than another <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> is less than or greater than <paramref name="op2"/>; otherwise, <c>false</c>.</returns>
     public static bool IsLessOrGreater(MpfrFloat op1, MpfrFloat op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -2033,7 +4330,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>true if op1 or op2 is NaN, false otherwise</returns>
+    /// <summary>
+    /// Determines whether two <see cref="MpfrFloat"/> values are unordered.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> value to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> value to compare.</param>
+    /// <returns><c>true</c> if <paramref name="op1"/> and <paramref name="op2"/> are unordered; otherwise, <c>false</c>.</returns>
     public static bool IsUnordered(MpfrFloat op1, MpfrFloat op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -2044,10 +4346,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// This function implements the totalOrder predicate from IEEE 754,
-    /// where -NaN &lt; -Inf &lt; negative finite numbers &lt; -0 &lt; +0 &lt; positive finite numbers &lt; +Inf &lt; +NaN.
+    /// Determines whether the first <see cref="MpfrFloat"/> operand is less than or equal to the second <see cref="MpfrFloat"/> operand.
     /// </summary>
-    /// <returns>true when x is smaller than or equal to y for this order relation, false otherwise.</returns>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> operand to compare.</param>
+    /// <returns><c>true</c> if the first operand is less than or equal to the second operand; otherwise, <c>false</c>.</returns>
     public static bool TotalOrderLessOrEquals(MpfrFloat op1, MpfrFloat op2)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -2059,6 +4362,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #endregion
 
     #region 7. Transcendental Functions
+
+    /// <summary>
+    /// Calculates the natural logarithm of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the logarithm.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the operation, 0 if successful, or a non-zero value if an error occurred.</returns>
     public static int LogInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2068,6 +4379,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the natural logarithm of a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the logarithm of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the natural logarithm of <paramref name="op"/>.</returns>
     public static MpfrFloat Log(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2075,6 +4393,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Computes the natural logarithm of an unsigned integer <paramref name="op"/> and stores the result in-place in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op">The unsigned integer operand to compute the natural logarithm of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
     public static int LogInplace(MpfrFloat rop, uint op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2083,6 +4408,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the natural logarithm of a specified unsigned integer <paramref name="op"/> and returns a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op">The unsigned integer value to compute the natural logarithm of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the natural logarithm of <paramref name="op"/>.</returns>
     public static MpfrFloat Log(uint op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -2090,6 +4422,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Calculates the base-2 logarithm of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the logarithm of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the calculation.</returns>
     public static int Log2Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2099,6 +4438,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the base-2 logarithm of a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the logarithm of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the base-2 logarithm of <paramref name="op"/>.</returns>
     public static MpfrFloat Log2(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2106,6 +4452,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Calculates the base-10 logarithm of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the logarithm.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The sign of the result, 1 if positive, -1 if negative, 0 if zero.</returns>
     public static int Log10Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2115,6 +4468,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the base-10 logarithm of a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the logarithm of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the base-10 logarithm of <paramref name="op"/>.</returns>
     public static MpfrFloat Log10(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2122,7 +4482,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = log(op + 1)</summary>
+    /// <summary>
+    /// Computes the natural logarithm of 1 plus <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the natural logarithm of 1 plus.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The return value is 0 if the operation is successful; otherwise, it is a non-zero value.</returns>
     public static int LogP1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2132,7 +4498,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>log(op + 1)</returns>
+    /// <summary>
+    /// Computes the natural logarithm of (1 + <paramref name="op"/>) and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the natural logarithm of (1 + <paramref name="op"/>).</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the natural logarithm of (1 + <paramref name="op"/>).</returns>
     public static MpfrFloat LogP1(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2140,7 +4512,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = log2(op + 1)</summary>
+    /// <summary>
+    /// Calculates the logarithm of <paramref name="op"/> to the base 2 and adds 1 to the result, storing the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the logarithm of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The number of bits in the result, excluding the sign bit.</returns>
     public static int Log2P1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2150,7 +4528,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>log2(op + 1)</returns>
+    /// <summary>
+    /// Computes the natural logarithm of 1 plus the input <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The input <see cref="MpfrFloat"/> to compute the logarithm of 1 plus.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the natural logarithm of 1 plus the input <paramref name="op"/>.</returns>
     public static MpfrFloat Log2P1(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2158,7 +4542,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = log10(op + 1)</summary>
+    /// <summary>
+    /// Computes the logarithm base 10 of (1 + <paramref name="op"/>) and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the logarithm of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The sign of the result, 1 if positive, -1 if negative.</returns>
     public static int Log10P1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2168,7 +4558,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>log10(op + 1)</returns>
+    /// <summary>
+    /// Computes the natural logarithm of 1 plus the input <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The input <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the natural logarithm of 1 plus the input <paramref name="op"/>.</returns>
     public static MpfrFloat Log10P1(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2176,7 +4572,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = e ^ op</summary>
+    /// <summary>
+    /// Calculates the exponential function of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the exponential function.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the operation is successful, or a non-zero value otherwise.</returns>
     public static int ExpInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2186,7 +4588,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>e ^ op</returns>
+    /// <summary>
+    /// Calculates the exponential function of the specified <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> value to calculate the exponential function of.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the exponential function.</returns>
     public static MpfrFloat Exp(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2194,7 +4602,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = 2 ^ op</summary>
+    /// <summary>
+    /// Compute the base-2 exponential function of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the exponential function.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the computation was successful, or a non-zero value otherwise.</returns>
     public static int Exp2Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2204,7 +4618,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>2 ^ op</returns>
+    /// <summary>
+    /// Calculates the base-2 exponential function of the specified <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> to calculate the exponential function of.</param>
+    /// <param name="precision">The precision of the result. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the exponential function.</returns>
     public static MpfrFloat Exp2(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2212,7 +4632,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = 10 ^ op</summary>
+    /// <summary>
+    /// Calculates the base-10 exponential function of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the exponential function.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public static int Exp10Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2222,7 +4648,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>10 ^ op</returns>
+    /// <summary>
+    /// Calculates the 10 raised to the power of <paramref name="op"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the power of 10.</param>
+    /// <param name="precision">The precision of the result. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of 10 raised to the power of <paramref name="op"/>.</returns>
     public static MpfrFloat Exp10(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2230,7 +4662,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = e ^ op - 1</summary>
+    /// <summary>
+    /// Computes the value of e raised to the power of <paramref name="op"/> minus 1, and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the exponent.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the operation is successful, -1 otherwise.</returns>
     public static int ExpM1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2240,7 +4678,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>e ^ op - 1</returns>
+    /// <summary>
+    /// Computes the value of e raised to the power of <paramref name="op"/> minus 1, with optional <paramref name="precision"/> and <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> exponent.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the computation.</returns>
     public static MpfrFloat ExpM1(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2248,7 +4692,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = e ^ op - 1</summary>
+    /// <summary>
+    /// Calculates 2^(x)-1 and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the exponent.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the operation is successful, -1 otherwise.</returns>
     public static int Exp2M1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2258,7 +4708,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>e ^ op - 1</returns>
+    /// <summary>
+    /// Computes the value of 2^x - 1 for the given <paramref name="op"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the value of 2^x - 1 for.</param>
+    /// <param name="precision">The precision in bits to use for the result. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use for the computation. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed value of 2^x - 1.</returns>
     public static MpfrFloat Exp2M1(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2266,7 +4722,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = e ^ op - 1</summary>
+    /// <summary>
+    /// Compute the exponential of 10 minus 1 and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the exponential of 10 minus 1.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value indicates the rounding mode used in the operation.</returns>
+    /// <remarks>
+    /// The result is computed as exp(10) - 1, with a relative error of less than 1 ulp (unit in the last place).
+    /// </remarks>
     public static int Exp10M1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2276,7 +4741,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>e ^ op - 1</returns>
+    /// <summary>
+    /// Computes the value of 10^<paramref name="op"/> - 1 and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the value of 10^<paramref name="op"/> - 1 from.</param>
+    /// <param name="precision">The precision in bits of the resulting <see cref="MpfrFloat"/> instance. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use for the computation. If null, <see cref="DefaultRounding"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the value of 10^<paramref name="op"/> - 1.</returns>
     public static MpfrFloat Exp10M1(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2285,6 +4756,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     #region Power
+
+    /// <summary>
+    /// Computes the power of <paramref name="op1"/> to <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The exponent <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the operation.</returns>
     public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2295,6 +4775,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the power of <paramref name="op1"/> raised to the <paramref name="op2"/> power.
+    /// </summary>
+    /// <param name="op1">The base <see cref="MpfrFloat"/>.</param>
+    /// <param name="op2">The exponent <see cref="MpfrFloat"/>.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the power operation.</returns>
     public static MpfrFloat Power(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -2302,13 +4790,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Computes the power of <paramref name="op1"/> raised to the <paramref name="op2"/> power.
+    /// </summary>
+    /// <param name="op1">The base <see cref="MpfrFloat"/>.</param>
+    /// <param name="op2">The exponent <see cref="MpfrFloat"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the power operation.</returns>
     public static MpfrFloat operator ^(MpfrFloat op1, MpfrFloat op2) => Power(op1, op2);
 
     /// <summary>
-    /// <para>powr(x,y) is NaN for x=NaN or x &lt; 0 (a)</para>
-    /// <para>powr(+/-0,+/-0) is NaN whereas pow(x,+/-0) = 1 if x is not NaN (b)</para>
-    /// <para>powr(+Inf,+/-0) is NaN whereas pow(x,+/-0) = 1 if x is not NaN (b)</para>
+    /// Raises <paramref name="op1"/> to the power of <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The exponent <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the operation.</returns>
     public static int PowerRInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2320,10 +4817,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// <para>powr(x,y) is NaN for x=NaN or x &lt; 0 (a)</para>
-    /// <para>powr(+/-0,+/-0) is NaN whereas pow(x,+/-0) = 1 if x is not NaN (b)</para>
-    /// <para>powr(+Inf,+/-0) is NaN whereas pow(x,+/-0) = 1 if x is not NaN (b)</para>
+    /// Computes the power of <paramref name="op1"/> raised to the <paramref name="op2"/> power, with optional <paramref name="precision"/> and <paramref name="rounding"/> mode.
     /// </summary>
+    /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The exponent <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the power operation.</returns>
     public static MpfrFloat PowerR(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -2331,6 +4831,17 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Raises <paramref name="op1"/> to the power of <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The exponent as an unsigned integer.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the operation, as an integer error code.</returns>
+    /// <remarks>
+    /// The result of the operation is rounded according to the specified <paramref name="rounding"/> mode.
+    /// </remarks>
     public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2340,6 +4851,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the power of <paramref name="op1"/> to the <paramref name="op2"/> integer, and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The base value.</param>
+    /// <param name="op2">The exponent value.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the power operation.</returns>
     public static MpfrFloat Power(MpfrFloat op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -2347,8 +4866,26 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Computes the power of a <see cref="MpfrFloat"/> instance to an unsigned integer exponent.
+    /// </summary>
+    /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The unsigned integer exponent.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the power operation.</returns>
     public static MpfrFloat operator ^(MpfrFloat op1, uint op2) => Power(op1, op2);
 
+    /// <summary>
+    /// Calculates the power of <paramref name="op1"/> to the integer <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The integer exponent.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if successful, otherwise returns a non-zero value.</returns>
+    /// <remarks>
+    /// The result is rounded according to the specified <paramref name="rounding"/> mode.
+    /// </remarks>
+    /// <exception cref="NullReferenceException">Thrown when <paramref name="rop"/> or <paramref name="op1"/> is null.</exception>
     public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2358,6 +4895,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Calculates the power of <paramref name="op1"/> to the integer <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The integer exponent.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the calculated power.</returns>
     public static MpfrFloat Power(MpfrFloat op1, int op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -2365,8 +4910,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Computes the power of a <see cref="MpfrFloat"/> instance to an integer exponent.
+    /// </summary>
+    /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The integer exponent.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the power operation.</returns>
     public static MpfrFloat operator ^(MpfrFloat op1, int op2) => Power(op1, op2);
 
+    /// <summary>
+    /// Calculates the power of <paramref name="op1"/> to the integer <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The exponent <see cref="GmpInteger"/> instance.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
     public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2377,6 +4936,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the power of <paramref name="op1"/> raised to the <paramref name="op2"/> integer, and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The exponent <see cref="GmpInteger"/> instance.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op1"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the power of <paramref name="op1"/> raised to the <paramref name="op2"/> integer.</returns>
     public static MpfrFloat Power(MpfrFloat op1, GmpInteger op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -2384,8 +4951,25 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Computes the power of <paramref name="op1"/> raised to the <paramref name="op2"/> integer exponent.
+    /// </summary>
+    /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The exponent <see cref="GmpInteger"/> instance.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the power of <paramref name="op1"/> raised to the <paramref name="op2"/> integer exponent.</returns>
     public static MpfrFloat operator ^(MpfrFloat op1, GmpInteger op2) => Power(op1, op2);
 
+    /// <summary>
+    /// Raises an unsigned integer <paramref name="op1"/> to the power of another unsigned integer <paramref name="op2"/> and stores the result in-place in the <paramref name="rop"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op1">The base unsigned integer.</param>
+    /// <param name="op2">The exponent unsigned integer.</param>
+    /// <param name="rounding">The optional rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the operation, as an integer error code.</returns>
+    /// <remarks>
+    /// The result of the operation is computed as <paramref name="rop"/> = <paramref name="op1"/>^<paramref name="op2"/>.
+    /// </remarks>
     public static int PowerInplace(MpfrFloat rop, uint op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2394,6 +4978,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the power of <paramref name="op1"/> to the <paramref name="op2"/> exponent, with optional <paramref name="precision"/> and <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="op1">The base value.</param>
+    /// <param name="op2">The exponent value.</param>
+    /// <param name="precision">The precision in bits, or <see langword="null"/> to use default precision.</param>
+    /// <param name="rounding">The rounding mode, or <see langword="null"/> to use default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the power operation.</returns>
     public static MpfrFloat Power(uint op1, uint op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -2401,6 +4993,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Raises an unsigned integer <paramref name="op1"/> to the power of <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The unsigned integer base.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> exponent.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The result of the operation.</returns>
     public static int PowerInplace(MpfrFloat rop, uint op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2410,6 +5010,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the power of a <paramref name="op1"/> to a <paramref name="op2"/> and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The base value.</param>
+    /// <param name="op2">The exponent value.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the power operation.</returns>
     public static MpfrFloat Power(uint op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -2417,10 +5025,23 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Computes the power of an unsigned integer <paramref name="op1"/> to a <see cref="MpfrFloat"/> <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The unsigned integer base.</param>
+    /// <param name="op2">The <see cref="MpfrFloat"/> exponent.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the power operation.</returns>
     public static MpfrFloat operator ^(uint op1, MpfrFloat op2) => Power(op1, op2);
     #endregion
 
-    /// <summary>rop = (1 + op) * 2 ^ n</summary>
+    /// <summary>
+    /// Compound an integer <paramref name="n"/> with <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compound with.</param>
+    /// <param name="n">The integer value to compound with <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the compound operation.</returns>
     public static int CompoundInplace(MpfrFloat rop, MpfrFloat op, int n, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2430,7 +5051,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>(1 + op) * 2 ^ n</returns>
+    /// <summary>
+    /// Computes the compound interest of <paramref name="op"/> with <paramref name="n"/> periods and returns a new <see cref="MpfrFloat"/> instance representing the result.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance representing the principal amount.</param>
+    /// <param name="n">The number of periods.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the compound interest of <paramref name="op"/> with <paramref name="n"/> periods.</returns>
     public static MpfrFloat Compound(MpfrFloat op, int n, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2439,6 +5067,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     #region Trigonometric function
+
+    /// <summary>
+    /// Compute the cosine of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cosine.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public static int CosInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2448,6 +5084,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Compute the cosine of a <paramref name="op"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cosine of.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the cosine of <paramref name="op"/>.</returns>
     public static MpfrFloat Cos(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2455,6 +5098,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Compute the sine of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the sine.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value indicates the rounding mode used in the operation.</returns>
     public static int SinInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2464,6 +5114,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the sine of a <paramref name="op"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the sine of.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sine of <paramref name="op"/>.</returns>
     public static MpfrFloat Sin(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2471,6 +5128,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Compute the tangent of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the tangent.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public static int TanInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2480,6 +5144,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the tangent of a specified <paramref name="op"/> <see cref="MpfrFloat"/> number.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> number to compute the tangent of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the tangent of <paramref name="op"/>.</returns>
     public static MpfrFloat Tan(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2487,7 +5158,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = cos(op * 2𝝿 / u)</summary>
+    /// <summary>
+    /// Compute the cosine of <paramref name="op"/> in radians, with the result stored in-place in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cosine of.</param>
+    /// <param name="u">The number of bits of the angle to use, default to 360.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value of the underlying MPFR library function.</returns>
     public static int CosUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2497,7 +5175,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>cos(op * 2𝝿 / u)</returns>
+    /// <summary>
+    /// Compute the cosine of <paramref name="op"/> multiplied by <paramref name="u"/> degrees, with optional <paramref name="precision"/> and <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> to compute the cosine of.</param>
+    /// <param name="u">The degree to multiply <paramref name="op"/> by.</param>
+    /// <param name="precision">The precision in bits to use for the result. If not specified, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use for the computation. If not specified, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed cosine value.</returns>
     public static MpfrFloat CosU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2505,7 +5190,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = sin(op * 2𝝿 / u)</summary>
+    /// <summary>
+    /// Compute the sine of <paramref name="op"/> in place and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the sine.</param>
+    /// <param name="u">The angle unit in degrees, default to 360.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value of the underlying MPFR library function.</returns>
     public static int SinUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2515,7 +5207,17 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>sin(op * 2𝝿 / u)</returns>
+    /// <summary>
+    /// Compute the sine of <paramref name="op"/> in degrees, with a period of <paramref name="u"/> degrees.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the sine of.</param>
+    /// <param name="u">The period of the sine function in degrees.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sine of <paramref name="op"/>.</returns>
+    /// <remarks>
+    /// The result is computed with a precision of <paramref name="precision"/> bits and rounded according to <paramref name="rounding"/>.
+    /// </remarks>
     public static MpfrFloat SinU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2523,7 +5225,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = tan(op * 2𝝿 / u)</summary>
+    /// <summary>
+    /// Compute the tangent of <paramref name="op"/> multiplied by <paramref name="u"/> in unsigned mode and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the tangent.</param>
+    /// <param name="u">The multiplier for <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the operation is successful, -1 otherwise.</returns>
     public static int TanUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2533,7 +5242,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>tan(op * 2𝝿 / u)</returns>
+    /// <summary>
+    /// Compute the tangent of <paramref name="op"/> multiplied by <paramref name="u"/> in unsigned mode.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="u">The unsigned integer multiplier.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the rounding mode of <paramref name="op"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed tangent.</returns>
     public static MpfrFloat TanU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2541,7 +5257,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = cos(op * 𝝿)</summary>
+    /// <summary>
+    /// Compute the cosine of pi times <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cosine of pi times.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the computation succeeded, or a non-zero value otherwise.</returns>
     public static int CosPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2551,7 +5273,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>cos(op * 𝝿)</returns>
+    /// <summary>
+    /// Compute the cosine of pi times <paramref name="op"/> and return the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the cosine of pi times <paramref name="op"/>.</returns>
     public static MpfrFloat CosPi(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2559,7 +5287,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = sin(op * 𝝿)</summary>
+    /// <summary>
+    /// Compute the sine of pi times <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the sine of pi times.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the computation succeeded, -1 otherwise.</returns>
     public static int SinPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2569,7 +5303,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>sin(op * 𝝿)</returns>
+    /// <summary>
+    /// Compute the sine of pi times <paramref name="op"/> and return the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the sine of pi times <paramref name="op"/>.</returns>
     public static MpfrFloat SinPi(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2577,7 +5317,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = tan(op * 𝝿)</summary>
+    /// <summary>
+    /// Compute the tangent of pi times <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the tangent of pi times.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public static int TanPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2587,7 +5333,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>tan(op * 𝝿)</returns>
+    /// <summary>
+    /// Compute the tangent of pi times <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed tangent.</returns>
+    /// <remarks>
+    /// The result is computed as sin(pi * <paramref name="op"/>) / cos(pi * <paramref name="op"/>).
+    /// </remarks>
     public static MpfrFloat TanPi(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2595,6 +5350,18 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Compute the sine and cosine of <paramref name="op"/> and store the results in <paramref name="sop"/> and <paramref name="cop"/> respectively.
+    /// </summary>
+    /// <param name="sop">The <see cref="MpfrFloat"/> instance to store the sine result.</param>
+    /// <param name="cop">The <see cref="MpfrFloat"/> instance to store the cosine result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the sine and cosine.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if both sine and cosine are computed correctly, -1 if an error occurred.</returns>
+    /// <remarks>
+    /// The computation is performed in-place, i.e., the value of <paramref name="op"/> may be modified.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="sop"/>, <paramref name="cop"/> or <paramref name="op"/> is null.</exception>
     public static int SinCosInplace(MpfrFloat sop, MpfrFloat cop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* psin = &sop.Raw)
@@ -2605,6 +5372,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the sine and cosine of the specified <paramref name="op"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute sine and cosine for.</param>
+    /// <param name="precision">The precision in bits to use for the computation. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use for the computation. If not specified, the default rounding mode is used.</param>
+    /// <returns>A tuple containing the computed sine and cosine values as <see cref="MpfrFloat"/> instances.</returns>
     public static (MpfrFloat sin, MpfrFloat cos) SinCos(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat sop = new(precision ?? op.Precision);
@@ -2613,7 +5387,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return (sop, cop);
     }
 
-    /// <summary>rop = 1 / cos(op)</summary>
+    /// <summary>
+    /// Compute the secant of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the secant.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the computation succeeded, -1 otherwise.</returns>
     public static int SecInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2623,7 +5403,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>1 / cos(op)</returns>
+    /// <summary>
+    /// Computes the secant of a specified <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="precision">The precision of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the secant of <paramref name="op"/>.</returns>
     public static MpfrFloat Sec(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2631,7 +5417,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = 1/ sin(op)</summary>
+    /// <summary>
+    /// Compute the cosecant of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cosecant of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
     public static int CscInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2641,7 +5433,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>sin(op)</returns>
+    /// <summary>
+    /// Computes the cosecant of a <paramref name="op"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cosecant of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the cosecant of <paramref name="op"/>.</returns>
     public static MpfrFloat Csc(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2649,7 +5447,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = 1 / tan(op)</summary>
+    /// <summary>
+    /// Compute the cotangent of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cotangent.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the computation has been performed correctly, -1 otherwise.</returns>
     public static int CotInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2659,7 +5463,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>1 / tan(op)</returns>
+    /// <summary>
+    /// Calculates the cotangent of the specified <paramref name="op"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the cotangent of.</param>
+    /// <param name="precision">The precision of the result. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the cotangent of <paramref name="op"/>.</returns>
     public static MpfrFloat Cot(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2667,7 +5477,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = acos(op)</summary>
+    /// <summary>
+    /// Compute the inverse cosine of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse cosine of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value indicates whether the operation succeeded or failed.</returns>
     public static int AcosInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2677,7 +5493,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>acos(op)</returns>
+    /// <summary>
+    /// Computes the inverse cosine of a <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse cosine of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the inverse cosine of <paramref name="op"/>.</returns>
     public static MpfrFloat Acos(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2685,7 +5507,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = asin(op)</summary>
+    /// <summary>
+    /// Compute the inverse sine of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse sine of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the computation was successful, -1 otherwise.</returns>
     public static int AsinInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2695,7 +5523,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>asin(op)</returns>
+    /// <summary>
+    /// Computes the inverse sine of <paramref name="op"/> and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the inverse sine of <paramref name="op"/>.</returns>
     public static MpfrFloat Asin(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2703,7 +5537,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = atan(op)</summary>
+    /// <summary>
+    /// Compute the arctangent of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the arctangent.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the operation is successful; otherwise, it is a non-zero value.</returns>
     public static int AtanInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2713,7 +5553,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>atan(op)</returns>
+    /// <summary>
+    /// Compute the arctangent of <paramref name="op"/> and return the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op">The input <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the arctangent of <paramref name="op"/>.</returns>
     public static MpfrFloat Atan(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2721,7 +5567,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = acos(op) / 2𝝿 * u</summary>
+    /// <summary>
+    /// Compute the inverse cosine of <paramref name="op"/> and store the result in-place in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse cosine of.</param>
+    /// <param name="u">The maximum value of the input <paramref name="op"/> in unsigned integer format.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the operation, as an integer error code.</returns>
     public static int AcosUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2731,7 +5584,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>acos(op) / 2𝝿 * u</returns>
+    /// <summary>
+    /// Compute the inverse cosine of <paramref name="op"/> in degrees, with optional <paramref name="precision"/> and <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="op">The input <see cref="MpfrFloat"/> value.</param>
+    /// <param name="u">The maximum value of the input in degrees, default to 360.</param>
+    /// <param name="precision">The precision in bits, default to the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use, default to the rounding mode of <paramref name="op"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the inverse cosine of <paramref name="op"/>.</returns>
     public static MpfrFloat AcosU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2739,7 +5599,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = asin(op) / 2𝝿 * u</summary>
+    /// <summary>
+    /// Compute the inverse sine of <paramref name="op"/> and store the result in-place in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse sine of.</param>
+    /// <param name="u">The upper bound of the input value, default to 360.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value of the underlying MPFR library function.</returns>
     public static int AsinUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2749,7 +5616,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>asin(op) / 2𝝿 * u</returns>
+    /// <summary>
+    /// Computes the inverse sine of <paramref name="op"/> in degrees, with a maximum value of <paramref name="u"/> degrees.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="u">The maximum value of the inverse sine in degrees.</param>
+    /// <param name="precision">The precision of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the inverse sine of <paramref name="op"/>.</returns>
     public static MpfrFloat AsinU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2757,7 +5631,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = atan(op) / 2𝝿 * u</summary>
+    /// <summary>
+    /// Compute the inverse tangent of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse tangent.</param>
+    /// <param name="u">The unsigned integer value to specify the base of the input.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the computation succeeded, or a non-zero value otherwise.</returns>
     public static int AtanUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2767,7 +5648,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>atan(op) / 2𝝿 * u</returns>
+    /// <summary>
+    /// Computes the inverse tangent of <paramref name="op"/> multiplied by <paramref name="u"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse tangent of.</param>
+    /// <param name="u">The multiplier to apply to <paramref name="op"/> before computing the inverse tangent.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed inverse tangent.</returns>
     public static MpfrFloat AtanU(MpfrFloat op, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2775,7 +5663,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = acos(op) / 𝝿</summary>
+    /// <summary>
+    /// Compute the inverse cosine of <paramref name="op"/> multiplied by pi, and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse cosine of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public static int AcosPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2785,7 +5679,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>acos(op) / 𝝿</returns>
+    /// <summary>
+    /// Computes the inverse cosine of <paramref name="op"/> multiplied by pi.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the operation.</returns>
+    /// <remarks>
+    /// The result is in the range [0, 1].
+    /// </remarks>
     public static MpfrFloat AcosPi(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2793,7 +5696,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = asin(op) / 𝝿</summary>
+    /// <summary>
+    /// Compute the inverse sine of <paramref name="op"/> multiplied by pi and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse sine of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The return value indicates the accuracy of the result, 0 if exact, negative if the result is only an approximation.</returns>
     public static int AsinPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2803,7 +5712,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>asin(op) / 𝝿</returns>
+    /// <summary>
+    /// Compute the inverse sine of <paramref name="op"/> multiplied by pi.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the inverse sine of <paramref name="op"/> multiplied by pi.</returns>
     public static MpfrFloat AsinPi(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2811,7 +5726,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = atan(op) / 𝝿</summary>
+    /// <summary>
+    /// Computes the arctangent of <paramref name="op"/> and multiplies the result by 1/π, storing the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the arctangent of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
     public static int AtanPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2821,7 +5742,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>atan(op) / 𝝿</returns>
+    /// <summary>
+    /// Compute the arctangent of <paramref name="op"/> divided by pi, return the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the arctangent of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed arctangent of <paramref name="op"/> divided by pi.</returns>
     public static MpfrFloat AtanPi(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2829,7 +5756,17 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = atan2(y, x)</summary>
+    /// <summary>
+    /// Computes the arctangent of the quotient of two specified <see cref="MpfrFloat"/> numbers and stores the result in the specified <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> to store the result in.</param>
+    /// <param name="y">The <see cref="MpfrFloat"/> representing the numerator.</param>
+    /// <param name="x">The <see cref="MpfrFloat"/> representing the denominator.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>A value indicating whether the operation succeeded.</returns>
+    /// <remarks>
+    /// The arctangent is the angle whose tangent is the quotient of the two specified numbers. The return value is expressed in radians.
+    /// </remarks>
     public static int Atan2Inplace(MpfrFloat rop, MpfrFloat y, MpfrFloat x, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2840,7 +5777,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>atan2(op)</returns>
+    /// <summary>
+    /// Computes the arctangent of the quotient of its arguments, with the result in radians.
+    /// </summary>
+    /// <param name="y">The numerator of the quotient.</param>
+    /// <param name="x">The denominator of the quotient.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use <see cref="DefaultPrecision"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the arctangent of the quotient of its arguments.</returns>
     public static MpfrFloat Atan2(MpfrFloat y, MpfrFloat x, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? DefaultPrecision);
@@ -2848,7 +5792,18 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = atan2(y, x) / 2𝝿 * u</summary>
+    /// <summary>
+    /// Computes the arc tangent of y/x using unsigned arguments and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="y">The <see cref="MpfrFloat"/> instance representing the y-coordinate.</param>
+    /// <param name="x">The <see cref="MpfrFloat"/> instance representing the x-coordinate.</param>
+    /// <param name="u">The number of bits to use for the result.</param>
+    /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
+    /// <returns>The sign of the result, either 1, 0, or -1.</returns>
+    /// <remarks>
+    /// The result is in the range [0, 2^u-1].
+    /// </remarks>
     public static int Atan2UInplace(MpfrFloat rop, MpfrFloat y, MpfrFloat x, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2859,7 +5814,18 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>atan2(y, x) / 2𝝿 * u</returns>
+    /// <summary>
+    /// Computes the arc tangent of <paramref name="y"/>/<paramref name="x"/> with unsigned result in degrees, and stores the result in a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="y">The numerator of the fraction y/x.</param>
+    /// <param name="x">The denominator of the fraction y/x.</param>
+    /// <param name="u">The number of degrees in a circle. Default is 360.</param>
+    /// <param name="precision">The precision of the result in bits. Default is <see cref="MpfrFloat.DefaultPrecision"/>.</param>
+    /// <param name="rounding">The rounding mode to use. Default is <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed arc tangent.</returns>
+    /// <remarks>
+    /// The result is in the range [0, <paramref name="u"/>).
+    /// </remarks>
     public static MpfrFloat Atan2U(MpfrFloat y, MpfrFloat x, uint u = 360, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? DefaultPrecision);
@@ -2867,7 +5833,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = atan2(y, x) / 𝝿</summary>
+    /// <summary>
+    /// Compute the inverse tangent of <paramref name="y"/> over <paramref name="x"/> and multiply the result by 1/π, store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="y">The <see cref="MpfrFloat"/> instance representing the numerator of the tangent.</param>
+    /// <param name="x">The <see cref="MpfrFloat"/> instance representing the denominator of the tangent.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The sign of the result, 1 for positive, -1 for negative.</returns>
     public static int Atan2PiInplace(MpfrFloat rop, MpfrFloat y, MpfrFloat x, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2878,7 +5851,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>atan2(y, x) / 𝝿</returns>
+    /// <summary>
+    /// Computes the value of atan2(y, x) in the range [0, 1) and stores the result in a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="y">The y-coordinate of the point.</param>
+    /// <param name="x">The x-coordinate of the point.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use <see cref="DefaultPrecision"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the value of atan2(y, x) in the range [0, 1).</returns>
     public static MpfrFloat Atan2Pi(MpfrFloat y, MpfrFloat x, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? DefaultPrecision);
@@ -2886,6 +5866,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Computes the hyperbolic cosine of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic cosine.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public static int CoshInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2895,6 +5882,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the hyperbolic cosine of the specified <paramref name="op"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic cosine of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the hyperbolic cosine of <paramref name="op"/>.</returns>
     public static MpfrFloat Cosh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2902,6 +5896,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Computes the hyperbolic sine of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic sine of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public static int SinhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2911,6 +5912,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Compute the hyperbolic sine of the specified <paramref name="op"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic sine of.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the hyperbolic sine of <paramref name="op"/>.</returns>
     public static MpfrFloat Sinh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2918,6 +5926,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Compute the hyperbolic tangent of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic tangent.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the operation succeeded, or a non-zero value otherwise.</returns>
     public static int TanhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2927,6 +5942,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the hyperbolic tangent of the specified <paramref name="op"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic tangent of.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the hyperbolic tangent of <paramref name="op"/>.</returns>
     public static MpfrFloat Tanh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2934,6 +5956,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Compute the hyperbolic sine and cosine of <paramref name="op"/> and store the results in <paramref name="sop"/> and <paramref name="cop"/> respectively.
+    /// </summary>
+    /// <param name="sop">The <see cref="MpfrFloat"/> to store the hyperbolic sine result.</param>
+    /// <param name="cop">The <see cref="MpfrFloat"/> to store the hyperbolic cosine result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> to compute the hyperbolic sine and cosine.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if success, or a non-zero value if an error occurred.</returns>
     public static int SinhCoshInplace(MpfrFloat sop, MpfrFloat cop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* psin = &sop.Raw)
@@ -2944,6 +5974,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the hyperbolic sine and cosine of the specified <paramref name="op"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic sine and cosine of.</param>
+    /// <param name="precision">The precision in bits to use for the computation. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use for the computation. If null, the default rounding mode is used.</param>
+    /// <returns>A tuple containing the hyperbolic sine and cosine of <paramref name="op"/> as <see cref="MpfrFloat"/> instances.</returns>
     public static (MpfrFloat sinh, MpfrFloat cosh) SinhCosh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat sop = new(precision ?? op.Precision);
@@ -2952,7 +5989,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return (sop, cop);
     }
 
-    /// <summary>rop = 1 / cosh(op)</summary>
+    /// <summary>
+    /// Compute the hyperbolic secant of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic secant.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public static int SechInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2962,7 +6005,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>1 / cosh(op)</returns>
+    /// <summary>
+    /// Computes the hyperbolic secant of the specified <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the hyperbolic secant of <paramref name="op"/>.</returns>
     public static MpfrFloat Sech(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2970,7 +6019,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = 1/ sinh(op)</summary>
+    /// <summary>
+    /// Computes the hyperbolic cosecant of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic cosecant of.</param>
+    /// <param name="rounding">The rounding mode to use (optional, defaults to <see cref="DefaultRounding"/>).</param>
+    /// <returns>Returns 0 if the operation succeeded, or a non-zero value otherwise.</returns>
     public static int CschInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2980,7 +6035,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>1 / sinh(op)</returns>
+    /// <summary>
+    /// Computes the hyperbolic cosecant of a specified <paramref name="op"/> <see cref="MpfrFloat"/> number.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> number to compute the hyperbolic cosecant of.</param>
+    /// <param name="precision">The precision, in bits, of the result. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the hyperbolic cosecant of <paramref name="op"/>.</returns>
     public static MpfrFloat Csch(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -2988,7 +6049,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = 1 / tanh(op)</summary>
+    /// <summary>
+    /// Computes the hyperbolic cotangent of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic cotangent.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public static int CothInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2998,7 +6065,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>1 / tanh(op)</returns>
+    /// <summary>
+    /// Computes the hyperbolic cotangent of the specified <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the hyperbolic cotangent of <paramref name="op"/>.</returns>
     public static MpfrFloat Coth(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3006,7 +6079,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = acosh(op)</summary>
+    /// <summary>
+    /// Computes the inverse hyperbolic cosine of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse hyperbolic cosine of.</param>
+    /// <param name="rounding">The rounding mode to use (optional, defaults to <see cref="DefaultRounding"/>).</param>
+    /// <returns>The return value is 0 if the computation was successful, or a non-zero value otherwise.</returns>
     public static int AcoshInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3016,7 +6095,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>acosh(op)</returns>
+    /// <summary>
+    /// Computes the inverse hyperbolic cosine of a <see cref="MpfrFloat"/> value.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> value to compute the inverse hyperbolic cosine of.</param>
+    /// <param name="precision">The precision, in bits, of the result. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the inverse hyperbolic cosine of <paramref name="op"/>.</returns>
     public static MpfrFloat Acosh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3024,7 +6109,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = asinh(op)</summary>
+    /// <summary>
+    /// Computes the inverse hyperbolic sine of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse hyperbolic sine of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public static int AsinhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3034,7 +6125,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>asinh(op)</returns>
+    /// <summary>
+    /// Computes the inverse hyperbolic sine of a <see cref="MpfrFloat"/> <paramref name="op"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the inverse hyperbolic sine of <paramref name="op"/>.</returns>
     public static MpfrFloat Asinh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3042,7 +6139,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>rop = atanh(op)</summary>
+    /// <summary>
+    /// Computes the inverse hyperbolic tangent of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse hyperbolic tangent of.</param>
+    /// <param name="rounding">The rounding mode to use (optional, defaults to <see cref="DefaultRounding"/>).</param>
+    /// <returns>The return value is 0 if the operation is successful, -1 otherwise.</returns>
     public static int AtanhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3052,7 +6155,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>atanh(op)</returns>
+    /// <summary>
+    /// Computes the inverse hyperbolic tangent of a <see cref="MpfrFloat"/> <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the inverse hyperbolic tangent of <paramref name="op"/>.</returns>
     public static MpfrFloat Atanh(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3061,6 +6170,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
     #endregion
 
+    /// <summary>
+    /// Computes the nearest integer to <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the nearest integer from.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public static int EintInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3070,6 +6186,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the integral part of <paramref name="op"/> and stores the result in a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the integral part of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the integral part of <paramref name="op"/>.</returns>
+    /// <remarks>
+    /// The integral part of a number is the largest integer less than or equal to the number. For example, the integral part of 3.14 is 3, and the integral part of -3.14 is -4.
+    /// </remarks>
     public static MpfrFloat Eint(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3078,9 +6204,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Compute the real part of the dilogarithm defined by:
-    /// <para>Li2(x) = -\Int_{t=0}^x log(1-t)/t dt</para>
+    /// Compute the logarithm integral of <paramref name="op"/> and store the result in-place in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the logarithm integral of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the computation succeeded, -1 otherwise.</returns>
     public static int Li2Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3091,9 +6220,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Compute the real part of the dilogarithm defined by:
-    /// <para>Li2(x) = -\Int_{t=0}^x log(1-t)/t dt</para>
+    /// Computes the dilogarithm function of <paramref name="op"/> and returns the result as a new instance of <see cref="MpfrFloat"/>.
     /// </summary>
+    /// <param name="op">The input value to compute the dilogarithm function.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the dilogarithm function.</returns>
     public static MpfrFloat Li2(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3101,7 +6233,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set rop to the value of the Gamma function on op.</summary>
+    /// <summary>
+    /// Compute the gamma function of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the gamma function.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The sign of the gamma function of <paramref name="op"/>.</returns>
     public static int GammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3111,7 +6249,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>The value of the Gamma function on op.</returns>
+    /// <summary>
+    /// Computes the gamma function of the specified <paramref name="op"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the gamma function on.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the gamma function of <paramref name="op"/>.</returns>
     public static MpfrFloat Gamma(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3119,7 +6263,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>upper incomplete Gamma function</summary>
+    /// <summary>
+    /// Compute the incomplete gamma function and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The first <see cref="MpfrFloat"/> argument.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> argument.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value indicates the success or failure of the operation.</returns>
     public static int GammaIncInplace(MpfrFloat rop, MpfrFloat op, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3130,7 +6281,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>upper incomplete Gamma function</summary>
+    /// <summary>
+    /// Compute the incomplete gamma function with the first argument <paramref name="op"/> and the second argument <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op">The first argument of the incomplete gamma function.</param>
+    /// <param name="op2">The second argument of the incomplete gamma function.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the incomplete gamma function.</returns>
     public static MpfrFloat GammaInc(MpfrFloat op, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3138,7 +6296,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set rop to the value of the logarithm of the Gamma function on op, rounded in the direction rnd.</summary>
+    /// <summary>
+    /// Compute the natural logarithm of the absolute value of the gamma function of <paramref name="op"/> and store the result in-place in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the logarithm of the gamma function of.</param>
+    /// <param name="rounding">The rounding mode to use (defaults to <see cref="DefaultRounding"/> if not specified).</param>
+    /// <returns>The sign of the gamma function of <paramref name="op"/>.</returns>
     public static int LogGammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3148,7 +6312,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>the value of the logarithm of the Gamma function on op, rounded in the direction rnd.</returns>
+    /// <summary>
+    /// Computes the logarithm of the absolute value of the gamma function of <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the logarithm of the absolute value of the gamma function of.</param>
+    /// <param name="precision">The precision in bits to use for the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed value.</returns>
     public static MpfrFloat LogGamma(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3156,7 +6326,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set rop to the value of the logarithm of the absolute value of the Gamma function on op</summary>
+    /// <summary>
+    /// Compute the natural logarithm of the absolute value of the gamma function of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the gamma function.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>A tuple containing the sign of the gamma function and the return value of the mpfr_lgamma function.</returns>
     public static (int sign, int round) LGammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3168,7 +6344,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>The value of the logarithm of the absolute value of the Gamma function on op</returns>
+    /// <summary>
+    /// Compute the logarithm of the absolute value of the gamma function of <paramref name="op"/> and return the sign, value and rounding mode used.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the logarithm of the absolute value of the gamma function.</param>
+    /// <param name="precision">The precision in bits to use for the result. If not specified, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, use the default rounding mode.</param>
+    /// <returns>A tuple containing the sign of the result, a new instance of <see cref="MpfrFloat"/> representing the computed value and the rounding mode used.</returns>
+    /// <remarks>
+    /// The computation is performed in-place on a new instance of <see cref="MpfrFloat"/> with the specified <paramref name="precision"/> and <paramref name="rounding"/>.
+    /// </remarks>
     public static (int sign, MpfrFloat value, int round) LGamma(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3177,9 +6362,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set rop to the value of the Digamma (sometimes also called Psi) function on op, rounded in the direction rnd.
-    /// When op is a negative integer, set rop to NaN.
+    /// Compute the digamma function of <paramref name="op"/> and store the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the digamma function.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The status of the operation.</returns>
     public static int DigammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3189,10 +6377,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>
-    /// The value of the Digamma (sometimes also called Psi) function on op, rounded in the direction rnd.
-    /// When op is a negative integer, set rop to NaN.
-    /// </returns>
+    /// <summary>
+    /// Compute the digamma function of the given <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the digamma function of.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the digamma function.</returns>
     public static MpfrFloat Digamma(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3200,8 +6391,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set rop to the value of the Beta function at arguments op1 and op2.</summary>
-    /// <remarks>Note: the current code does not try to avoid internal overflow or underflow, and might use a huge internal precision in some cases.</remarks>
+    /// <summary>
+    /// Compute the beta function of <paramref name="op1"/> and <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The sign of the result, 1 if positive, -1 if negative, 0 if zero.</returns>
     public static int BetaInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3212,8 +6409,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>The value of the Beta function at arguments op1 and op2.</returns>
-    /// <remarks>Note: the current code does not try to avoid internal overflow or underflow, and might use a huge internal precision in some cases.</remarks>
+    /// <summary>
+    /// Computes the beta function of <paramref name="op1"/> and <paramref name="op2"/> and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op1">The first argument of the beta function.</param>
+    /// <param name="op2">The second argument of the beta function.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op1"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the beta function.</returns>
     public static MpfrFloat Beta(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -3221,7 +6424,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set rop to the value of the Riemann Zeta function on op, rounded in the direction rnd.</summary>
+    /// <summary>
+    /// Compute the Riemann zeta function at <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Riemann zeta function at.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the computation succeeded, -1 otherwise.</returns>
     public static int ZetaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3231,7 +6440,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>The value of the Riemann Zeta function on op, rounded in the direction rnd.</returns>
+    /// <summary>
+    /// Computes the Riemann zeta function of <paramref name="op"/> and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="op">The input <see cref="MpfrFloat"/> to compute the Riemann zeta function of.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the Riemann zeta function of <paramref name="op"/>.</returns>
     public static MpfrFloat Zeta(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3239,7 +6454,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set rop to the value of the Riemann Zeta function on op, rounded in the direction rnd.</summary>
+    /// <summary>
+    /// Compute the Riemann zeta function at integer <paramref name="op"/> in place and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The integer argument of the Riemann zeta function.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value of <see cref="MpfrLib.mpfr_zeta_ui(IntPtr, uint, MpfrRounding)"/>.</returns>
     public static int ZetaInplace(MpfrFloat rop, uint op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3248,7 +6469,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>The value of the Riemann Zeta function on op, rounded in the direction rnd.</returns>
+    /// <summary>
+    /// Computes the Riemann zeta function at the given positive integer <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The positive integer argument of the Riemann zeta function.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the computation.</returns>
     public static MpfrFloat Zeta(uint op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -3256,7 +6483,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set rop to the value of the error function on op, rounded in the direction rnd.</summary>
+    /// <summary>
+    /// Compute the error function of <paramref name="op"/> and store the result in-place in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the error function of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the operation is successful, or a non-zero value otherwise.</returns>
     public static int ErrorFunctionInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3266,7 +6499,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>The value of the error function on op, rounded in the direction rnd.</returns>
+    /// <summary>
+    /// Computes the error function of the specified <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="precision">The precision of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the error function of <paramref name="op"/>.</returns>
     public static MpfrFloat ErrorFunction(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3274,7 +6513,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set rop to the value of the complementary error function on op, rounded in the direction rnd.</summary>
+    /// <summary>
+    /// Computes the complementary error function of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the complementary error function of.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>Returns 0 if the computation was successful, or a non-zero value otherwise.</returns>
     public static int ComplementaryErrorFunctionInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3284,7 +6529,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>The value of the complementary error function on op, rounded in the direction rnd.</returns>
+    /// <summary>
+    /// Computes the complementary error function of the specified <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> to compute the complementary error function of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the complementary error function of <paramref name="op"/>.</returns>
     public static MpfrFloat ComplementaryErrorFunction(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3292,13 +6543,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
-    /// <list type="bullet">
-    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
-    /// <item>When op is +Inf, rop is set to +0.</item>
-    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
-    /// </list>
+    /// <summary>
+    /// Compute the Bessel function of the first kind of order zero of <paramref name="op"/> and store the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function of the first kind of order zero.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the computation was successful, -1 otherwise.</returns>
     public static int J0Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3308,13 +6559,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
-    /// <list type="bullet">
-    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
-    /// <item>When op is +Inf, rop is set to +0.</item>
-    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
-    /// </list>
+    /// <summary>
+    /// Compute the Bessel function of the first kind of order zero (J0) of the <paramref name="op"/> <see cref="MpfrFloat"/> instance.
     /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function of the first kind of order zero (J0) from.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the Bessel function of the first kind of order zero (J0) of the <paramref name="op"/> <see cref="MpfrFloat"/> instance.</returns>
     public static MpfrFloat J0(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3322,13 +6573,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
-    /// <list type="bullet">
-    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
-    /// <item>When op is +Inf, rop is set to +0.</item>
-    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
-    /// </list>
+    /// <summary>
+    /// Compute the Bessel function of the first kind of order one for <paramref name="op"/> and store the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function of the first kind of order one.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of the computation, 0 if successful, or an error code if an error occurred.</returns>
     public static int J1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3338,13 +6589,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
-    /// <list type="bullet">
-    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
-    /// <item>When op is +Inf, rop is set to +0.</item>
-    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
-    /// </list>
+    /// <summary>
+    /// Compute the Bessel function of the first kind of order one for the <paramref name="op"/> <see cref="MpfrFloat"/> instance.
     /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function of the first kind of order one for.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed value.</returns>
     public static MpfrFloat J1(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3352,13 +6603,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
-    /// <list type="bullet">
-    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
-    /// <item>When op is +Inf, rop is set to +0.</item>
-    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
-    /// </list>
+    /// <summary>
+    /// Compute the nth order Bessel function of the first kind in place and store the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="n">The order of the Bessel function.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value of the computation, 0 if success, or an error code if failed.</returns>
     public static int JNInplace(MpfrFloat rop, int n, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3368,13 +6620,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
-    /// <list type="bullet">
-    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
-    /// <item>When op is +Inf, rop is set to +0.</item>
-    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
-    /// </list>
+    /// <summary>
+    /// Compute the n-th order Bessel function of the first kind, Jn(op), and return the result as a new <see cref="MpfrFloat"/> instance.
     /// </summary>
+    /// <param name="n">The order of the Bessel function.</param>
+    /// <param name="op">The input value to compute the Bessel function.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed value of Jn(op).</returns>
     public static MpfrFloat JN(int n, MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3383,13 +6636,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
-    /// <list type="bullet">
-    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
-    /// <item>When op is +Inf, rop is set to +0.</item>
-    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
-    /// </list>
+    /// Compute the Bessel function of the second kind of order 0 of <paramref name="op"/> and store the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function of the second kind of order 0.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The sign of the result.</returns>
     public static int Y0Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3400,13 +6652,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
-    /// <list type="bullet">
-    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
-    /// <item>When op is +Inf, rop is set to +0.</item>
-    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
-    /// </list>
+    /// Compute the Bessel function of the second kind of order 0 of <paramref name="op"/>.
     /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function of the second kind of order 0.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the Bessel function of the second kind of order 0 of <paramref name="op"/>.</returns>
+    /// <remarks>
+    /// The Bessel function of the second kind of order 0 is defined as the solution of the Bessel differential equation:
+    /// x^2*y'' + x*y' + (x^2 - 1)y = 0
+    /// </remarks>
     public static MpfrFloat Y0(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3415,13 +6670,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
-    /// <list type="bullet">
-    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
-    /// <item>When op is +Inf, rop is set to +0.</item>
-    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
-    /// </list>
+    /// Compute the Bessel function of the second kind of order 1 for <paramref name="op"/> and store the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function of the second kind of order 1.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The sign of the result.</returns>
     public static int Y1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3432,13 +6686,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
-    /// <list type="bullet">
-    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
-    /// <item>When op is +Inf, rop is set to +0.</item>
-    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
-    /// </list>
+    /// Compute the Y1 function of the <paramref name="op"/> <see cref="MpfrFloat"/> instance and return the result as a new <see cref="MpfrFloat"/> instance.
     /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Y1 function on.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the Y1 function.</returns>
     public static MpfrFloat Y1(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3447,13 +6700,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
-    /// <list type="bullet">
-    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
-    /// <item>When op is +Inf, rop is set to +0.</item>
-    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
-    /// </list>
+    /// Compute the n-th order Bessel function of the second kind, Y_n(op), in-place and store the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="n">The order of the Bessel function.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function on.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The sign of the result, -1 if negative, 0 if zero, 1 if positive.</returns>
     public static int YNInplace(MpfrFloat rop, int n, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3464,13 +6717,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set rop to the value of the second kind Bessel function of order 0 (resp. 1 and n) on op, rounded in the direction rnd.
-    /// <list type="bullet">
-    /// <item>When op is NaN or negative, rop is always set to NaN.</item>
-    /// <item>When op is +Inf, rop is set to +0.</item>
-    /// <item>When op is zero, rop is set to +Inf or -Inf depending on the parity and sign of n.</item>
-    /// </list>
+    /// Compute the n-th order Bessel function of the second kind, Yn(op), and store the result in a new instance of <see cref="MpfrFloat"/>.
     /// </summary>
+    /// <param name="n">The order of the Bessel function.</param>
+    /// <param name="op">The input value to compute the Bessel function.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="op"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed value of Yn(op).</returns>
     public static MpfrFloat YN(int n, MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3478,7 +6731,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set rop to the arithmetic-geometric mean of op1 and op2, rounded in the direction rnd.</summary>
+    /// <summary>
+    /// Compute the arithmetic-geometric mean of <paramref name="op1"/> and <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The return value is 0 if the computation succeeded, -1 otherwise.</returns>
     public static int AGMInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3489,7 +6749,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>The arithmetic-geometric mean of op1 and op2, rounded in the direction rnd.</returns>
+    /// <summary>
+    /// Computes the arithmetic-geometric mean of two <see cref="MpfrFloat"/> values <paramref name="op1"/> and <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> value.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> value.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of the result will be the maximum of the precisions of <paramref name="op1"/> and <paramref name="op2"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the arithmetic-geometric mean of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat AGM(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -3497,14 +6764,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set rop to the value of the Airy function Ai on x, rounded in the direction rnd.</summary>
-    /// <remarks>
-    /// When x is NaN, rop is always set to NaN.
-    /// When x is +Inf or -Inf, rop is +0.
-    /// The current implementation is not intended to be used with large arguments.
-    /// It works with abs(x) typically smaller than 500.
-    /// For larger arguments, other methods should be used and will be implemented in a future version.
-    /// </remarks>
+    /// <summary>
+    /// Compute the Airy function Ai(x) and store the result in-place in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Airy function on.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if the computation is successful, -1 otherwise.</returns>
     public static int AiryInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3514,14 +6780,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>The value of the Airy function Ai on x, rounded in the direction rnd.</returns>
-    /// <remarks>
-    /// When x is NaN, rop is always set to NaN.
-    /// When x is +Inf or -Inf, rop is +0.
-    /// The current implementation is not intended to be used with large arguments.
-    /// It works with abs(x) typically smaller than 500.
-    /// For larger arguments, other methods should be used and will be implemented in a future version.
-    /// </remarks>
+    /// <summary>
+    /// Compute the Airy function of the first kind Ai(x) for the given <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The input <see cref="MpfrFloat"/> to compute the Airy function for.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use for the computation. If not specified, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed Airy function.</returns>
     public static MpfrFloat Airy(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3529,6 +6794,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Computes the logarithm of 2 and stores the result in-place in the <paramref name="rop"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The exponent of the power of 2 that is closest to the value of <paramref name="rop"/>.</returns>
     public static int ConstLog2Inplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3537,6 +6808,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the constant logarithm of 2 with the specified <paramref name="precision"/> and <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="precision">The precision in bits of the result. If null, use the default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the constant logarithm of 2.</returns>
     public static MpfrFloat ConstLog2(int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -3544,6 +6821,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Set the value of <paramref name="rop"/> to the mathematical constant pi, using the specified <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to set the value of.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
+    /// <returns>Returns 0 if the operation succeeded, or a non-zero value if an error occurred.</returns>
     public static int ConstPiInplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3552,6 +6835,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the mathematical constant pi with the specified <paramref name="precision"/> and <paramref name="rounding"/> mode, and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="precision">The precision in bits of the result. If null, the default precision is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the value of pi.</returns>
     public static MpfrFloat ConstPi(int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -3559,6 +6848,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Set the value of <paramref name="rop"/> to the mathematical constant Euler's number (e) with the specified <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to set the value to Euler's number.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>Returns 0 if the operation is successful, otherwise returns a non-zero value.</returns>
     public static int ConstEulerInplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3567,6 +6862,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Returns a new instance of <see cref="MpfrFloat"/> representing the Euler's constant with the specified <paramref name="precision"/> and <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="precision">The precision in bits of the returned value. If null, use the default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the Euler's constant.</returns>
     public static MpfrFloat ConstEuler(int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -3574,6 +6875,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Compute the Catalan's constant and store the result in-place in the <paramref name="rop"/> instance.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The return value is 0 if the operation is successful; otherwise, it is a non-zero value.</returns>
     public static int ConstCatalanInplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3582,6 +6889,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the mathematical constant Catalan to the specified <paramref name="precision"/> and <paramref name="rounding"/> mode, and returns the result as a new instance of <see cref="MpfrFloat"/>.
+    /// </summary>
+    /// <param name="precision">The precision in bits to use for the computation. If null, the default precision is used.</param>
+    /// <param name="rounding">The rounding mode to use for the computation. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the computed value of Catalan.</returns>
     public static MpfrFloat ConstCatalan(int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -3591,7 +6904,18 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #endregion
 
     #region 10. Integer and Remainder Related Functions
-    /// <summary>rounds to the nearest representable integer in the given direction rnd.</summary>
+
+    /// <summary>
+    /// Rounds the <paramref name="op"/> to the nearest integer and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <returns>The sign of the rounded value.</returns>
+    /// <remarks>
+    /// The function rounds the <paramref name="op"/> to the nearest integer, using the specified <paramref name="rounding"/> mode, and stores the result in <paramref name="rop"/>. 
+    /// If the fractional part of <paramref name="op"/> is exactly 0.5, the rounding is done away from zero.
+    /// </remarks>
     public static int RIntInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3601,7 +6925,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>rounds to the nearest representable integer in the given direction rnd.</returns>
+    /// <summary>
+    /// Rounds the <paramref name="op"/> to the nearest integer using the specified <paramref name="rounding"/> mode and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="precision">The precision of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the rounded value.</returns>
     public static MpfrFloat RInt(MpfrFloat op, MpfrRounding rounding, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3609,7 +6939,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>to the next higher or equal representable integer (like mpfr_rint with MPFR_RNDU)</summary>
+    /// <summary>
+    /// Computes the ceiling of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the ceiling of.</param>
+    /// <returns>0 if the operation succeeded, or a non-zero value otherwise.</returns>
     public static int CeilingInplace(MpfrFloat rop, MpfrFloat op)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3619,7 +6954,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>to the next higher or equal representable integer (like mpfr_rint with MPFR_RNDU)</summary>
+    /// <summary>
+    /// Computes the smallest integral value greater than or equal to the specified <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the ceiling value of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the ceiling value of <paramref name="op"/>.</returns>
     public static MpfrFloat Ceiling(MpfrFloat op, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3627,7 +6967,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>to the next lower or equal representable integer (like mpfr_rint with MPFR_RNDD)</summary>
+    /// <summary>
+    /// Computes the largest integer value less than or equal to the specified <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the floor value.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public static int FloorInplace(MpfrFloat rop, MpfrFloat op)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3637,7 +6982,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>to the next lower or equal representable integer (like mpfr_rint with MPFR_RNDD)</summary>
+    /// <summary>
+    /// Computes the largest integral value less than or equal to the specified <paramref name="op"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the floor value of.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the floor value of <paramref name="op"/>.</returns>
+    /// <remarks>
+    /// The result is rounded towards negative infinity.
+    /// </remarks>
     public static MpfrFloat Floor(MpfrFloat op, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3645,7 +6998,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>to the nearest representable integer, rounding halfway cases away from zero (as in the roundTiesToAway mode of IEEE 754)</summary>
+    /// <summary>
+    /// Rounds the <paramref name="op"/> value and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to be rounded.</param>
+    /// <returns>The rounding mode used for the operation.</returns>
     public static int RoundInplace(MpfrFloat rop, MpfrFloat op)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3655,7 +7013,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>to the nearest representable integer, rounding halfway cases away from zero (as in the roundTiesToAway mode of IEEE 754)</summary>
+    /// <summary>
+    /// Rounds the <paramref name="op"/> <see cref="MpfrFloat"/> to the specified <paramref name="precision"/> if provided, or to its original precision if not.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> to round.</param>
+    /// <param name="precision">The precision to round to, in bits. If null, the original precision of <paramref name="op"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the rounded value.</returns>
     public static MpfrFloat Round(MpfrFloat op, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3663,7 +7026,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>to the nearest representable integer, rounding halfway cases with the even-rounding rule (like mpfr_rint with MPFR_RNDN)</summary>
+    /// <summary>
+    /// Rounds the <paramref name="op"/> to the nearest even integer and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
+    /// <returns>The rounding direction, as an integer in the range [-1, 1].</returns>
     public static int RoundEvenInplace(MpfrFloat rop, MpfrFloat op)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3673,7 +7041,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>to the nearest representable integer, rounding halfway cases with the even-rounding rule (like mpfr_rint with MPFR_RNDN)</summary>
+    /// <summary>
+    /// Rounds the <paramref name="op"/> <see cref="MpfrFloat"/> instance to the nearest even value with the specified <paramref name="precision"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
+    /// <param name="precision">The precision to use for the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the rounded value.</returns>
     public static MpfrFloat RoundEven(MpfrFloat op, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3681,7 +7054,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>to the next representable integer toward zero (like mpfr_rint with MPFR_RNDZ).</summary>
+    /// <summary>
+    /// Truncates the value of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the truncated result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to be truncated.</param>
+    /// <returns>Returns 0 if the operation is successful, otherwise returns a non-zero value.</returns>
     public static int TruncateInplace(MpfrFloat rop, MpfrFloat op)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3691,7 +7069,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>to the next representable integer toward zero (like mpfr_rint with MPFR_RNDZ).</summary>
+    /// <summary>
+    /// Truncates the given <paramref name="op"/> <see cref="MpfrFloat"/> to an integer value using round-to-even rounding mode, and returns the result as a new <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to truncate.</param>
+    /// <param name="precision">The precision of the result, default to the precision of <paramref name="op"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the truncated value of <paramref name="op"/>.</returns>
+    /// <remarks>
+    /// The truncation is performed using round-to-even rounding mode.
+    /// </remarks>
     public static MpfrFloat Truncate(MpfrFloat op, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3699,8 +7085,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>to the next higher or equal integer</summary>
-    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    /// <summary>
+    /// Rounds the value of <paramref name="op"/> to the nearest integer greater than or equal to it, and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <returns>The sign of the result, 0 if the result is zero, or -1 if an error occurred.</returns>
     public static int RIntCeilingInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3710,8 +7101,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>to the next higher or equal integer</returns>
-    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    /// <summary>
+    /// Computes the smallest integer greater than or equal to the given <paramref name="op"/> <see cref="MpfrFloat"/> instance, with the specified <paramref name="rounding"/> mode and optional <paramref name="precision"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the smallest integer greater than or equal to.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="precision">The precision in bits, optional. If not specified, use the precision of <paramref name="op"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the smallest integer greater than or equal to the given <paramref name="op"/>.</returns>
     public static MpfrFloat RIntCeiling(MpfrFloat op, MpfrRounding rounding, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3719,8 +7115,18 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>to the next lower or equal integer</summary>
-    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    /// <summary>
+    /// Rounds the value of <paramref name="op"/> to the nearest integer towards negative infinity, and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <returns>The sign of the rounded value.</returns>
+    /// <remarks>
+    /// The value of <paramref name="op"/> is rounded to the nearest integer towards negative infinity, and the result is stored in <paramref name="rop"/>. 
+    /// The rounding mode is determined by <paramref name="rounding"/>. 
+    /// The sign of the rounded value is returned.
+    /// </remarks>
     public static int RIntFloorInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3730,8 +7136,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>to the next lower or equal integer</returns>
-    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    /// <summary>
+    /// Computes the largest integer less than or equal to a given <paramref name="op"/> <see cref="MpfrFloat"/> instance, with the specified <paramref name="rounding"/> mode and optional <paramref name="precision"/>.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the floor of.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="precision">The precision in bits to use, or <see langword="null"/> to use the precision of <paramref name="op"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the largest integer less than or equal to <paramref name="op"/>.</returns>
     public static MpfrFloat RIntFloor(MpfrFloat op, MpfrRounding rounding, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3739,8 +7150,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>to the nearest integer, rounding halfway cases away from zero.</summary>
-    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    /// <summary>
+    /// Round the value of <paramref name="op"/> to the nearest integer and store the result in <paramref name="rop"/> with the specified <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <returns>The sign of the rounded value.</returns>
     public static int RIntRoundInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3750,8 +7166,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>to the nearest integer, rounding halfway cases away from zero.</returns>
-    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    /// <summary>
+    /// Rounds the <paramref name="op"/> to the nearest integer using the specified <paramref name="rounding"/> mode and returns a new <see cref="MpfrFloat"/> instance with the result.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the rounded value.</returns>
     public static MpfrFloat RIntRound(MpfrFloat op, MpfrRounding rounding, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3759,8 +7180,17 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>to the nearest integer, rounding halfway cases to the nearest even integer</summary>
-    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    /// <summary>
+    /// Rounds the value of <paramref name="op"/> to the nearest integer using "round to even" rule, and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <returns>The sign of the rounded value.</returns>
+    /// <remarks>
+    /// This function rounds the value of <paramref name="op"/> to the nearest integer using "round to even" rule, and stores the result in <paramref name="rop"/>.
+    /// If the fractional part of <paramref name="op"/> is exactly 0.5, the result is the nearest even integer.
+    /// </remarks>
     public static int RIntRoundEvenInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3770,8 +7200,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>to the nearest integer, rounding halfway cases to the nearest even integer</returns>
-    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    /// <summary>
+    /// Rounds the given <paramref name="op"/> to the nearest integer using the specified <paramref name="rounding"/> mode and returns a new <see cref="MpfrFloat"/> instance with the result.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="precision">The precision of the result. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the rounded value.</returns>
     public static MpfrFloat RIntRoundEven(MpfrFloat op, MpfrRounding rounding, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3779,8 +7214,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>to the next integer toward zero</summary>
-    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    /// <summary>
+    /// Truncates the value of <paramref name="op"/> to an integer and stores the result in <paramref name="rop"/> using the specified <paramref name="rounding"/> mode.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to truncate.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
     public static int RIntTruncateInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3790,8 +7230,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <returns>to the next integer toward zero</returns>
-    /// <remarks>Contrary to mpfr_rint, those functions do perform a double rounding</remarks>
+    /// <summary>
+    /// Returns a new <see cref="MpfrFloat"/> instance representing the integer part of the input <paramref name="op"/> with the specified <paramref name="rounding"/> mode and optional <paramref name="precision"/>.
+    /// </summary>
+    /// <param name="op">The input <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="precision">The precision of the result. If not specified, use the precision of the input <paramref name="op"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the integer part of the input <paramref name="op"/>.</returns>
     public static MpfrFloat RIntTruncate(MpfrFloat op, MpfrRounding rounding, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -3799,6 +7244,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Compute the fractional part of <paramref name="op"/> and store the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the fractional part.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The sign of the fractional part of <paramref name="op"/>.</returns>
     public static int FractionalInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3808,6 +7260,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Compute the fractional part of a <paramref name="op"/> <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the fractional part of.</param>
+    /// <param name="precision">The precision in bits of the result. If not specified, use <see cref="DefaultPrecision"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, use <see cref="DefaultRounding"/>.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the fractional part of <paramref name="op"/>.</returns>
     public static MpfrFloat Fractional(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? DefaultPrecision);
@@ -3815,6 +7274,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Computes the fractional part of <paramref name="iop"/> and stores it in <paramref name="fop"/>. The integral part of <paramref name="iop"/> is stored in <paramref name="op"/>.
+    /// </summary>
+    /// <param name="iop">The <see cref="MpfrFloat"/> to compute the fractional part from.</param>
+    /// <param name="fop">The <see cref="MpfrFloat"/> to store the fractional part of <paramref name="iop"/>.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> to store the integral part of <paramref name="iop"/>.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The sign of <paramref name="iop"/> if it is NaN, otherwise 0.</returns>
     public static int ModFractionalInplace(MpfrFloat iop, MpfrFloat fop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* fi = &iop.Raw)
@@ -3825,6 +7292,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the integer and fractional parts of a <see cref="MpfrFloat"/> instance <paramref name="op"/> and returns them along with the rounding mode used.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the integer and fractional parts of.</param>
+    /// <param name="precision">The precision in bits to use for the resulting <see cref="MpfrFloat"/> instances. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode of <paramref name="op"/> is used.</param>
+    /// <returns>A tuple containing the integer part, fractional part, and the rounding mode used.</returns>
     public static (MpfrFloat iop, MpfrFloat fop, int round) ModFractional(MpfrFloat op, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat iop = new(precision ?? op.Precision);
@@ -3834,8 +7308,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// Computes the remainder of the division of <paramref name="x"/> by <paramref name="y"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="x">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="y">The <see cref="MpfrFloat"/> instance to divide by.</param>
+    /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
+    /// <returns>The sign of the remainder.</returns>
+    /// <remarks>
+    /// The remainder is defined as <paramref name="x"/> - n * <paramref name="y"/> where n is the quotient of <paramref name="x"/> divided by <paramref name="y"/> rounded to the nearest integer.
+    /// </remarks>
     public static int ModInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3847,8 +7329,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// Computes the remainder of the division of <paramref name="x"/> by <paramref name="y"/> using the specified <paramref name="precision"/> and <paramref name="rounding"/> mode.
     /// </summary>
+    /// <param name="x">The dividend.</param>
+    /// <param name="y">The divisor.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the remainder of the division of <paramref name="x"/> by <paramref name="y"/>.</returns>
     public static MpfrFloat Mod(MpfrFloat x, MpfrFloat y, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -3857,13 +7344,21 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// Computes the remainder of dividing one <see cref="MpfrFloat"/> by another <see cref="MpfrFloat"/>.
     /// </summary>
+    /// <param name="x">The <see cref="MpfrFloat"/> to be divided.</param>
+    /// <param name="y">The <see cref="MpfrFloat"/> to divide by.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the remainder of dividing <paramref name="x"/> by <paramref name="y"/>.</returns>
     public static MpfrFloat operator %(MpfrFloat x, MpfrFloat y) => Mod(x, y, x.Precision);
 
     /// <summary>
-    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// Computes the remainder of <paramref name="x"/> divided by <paramref name="y"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="x">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="y">The divisor.</param>
+    /// <param name="rounding">The rounding mode to be used. If null, <see cref="DefaultRounding"/> will be used.</param>
+    /// <returns>The sign of the remainder.</returns>
     public static int ModInplace(MpfrFloat rop, MpfrFloat x, uint y, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3874,8 +7369,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// Computes the modulo of <paramref name="x"/> and <paramref name="y"/> and returns the result as a new <see cref="MpfrFloat"/> instance.
     /// </summary>
+    /// <param name="x">The <see cref="MpfrFloat"/> instance to compute the modulo of.</param>
+    /// <param name="y">The divisor.</param>
+    /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="x"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the modulo of <paramref name="x"/> and <paramref name="y"/>.</returns>
     public static MpfrFloat Mod(MpfrFloat x, uint y, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -3884,13 +7384,21 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// Computes the remainder of dividing a <see cref="MpfrFloat"/> by an unsigned integer.
     /// </summary>
+    /// <param name="x">The <see cref="MpfrFloat"/> to be divided.</param>
+    /// <param name="y">The unsigned integer divisor.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the remainder of the division.</returns>
     public static MpfrFloat operator %(MpfrFloat x, uint y) => Mod(x, y, x.Precision);
 
     /// <summary>
-    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// Computes the quotient and remainder of <paramref name="x"/> divided by <paramref name="y"/> and stores the quotient in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the quotient.</param>
+    /// <param name="x">The dividend <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="y">The divisor <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>A tuple of two integers, the quotient and the remainder.</returns>
     public static (int quotient, int round) ModQuotientInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3904,8 +7412,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y, rounded toward zero
+    /// Computes the quotient and remainder of the division of <paramref name="x"/> by <paramref name="y"/> with the specified <paramref name="precision"/> and <paramref name="rounding"/> mode.
     /// </summary>
+    /// <param name="x">The dividend.</param>
+    /// <param name="y">The divisor.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A tuple containing the quotient, remainder, and the rounding mode used.</returns>
     public static (MpfrFloat rop, int quotient, int round) ModQuotient(MpfrFloat x, MpfrFloat y, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -3914,9 +7427,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y,
-    /// rounded to the nearest integer (ties rounded to even)
+    /// Computes the remainder of <paramref name="x"/> divided by <paramref name="y"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="x">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="y">The <see cref="MpfrFloat"/> instance to divide by.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The sign of the remainder.</returns>
     public static int ReminderInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3928,9 +7445,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y,
-    /// rounded to the nearest integer (ties rounded to even)
+    /// Computes the remainder of the division of <paramref name="x"/> by <paramref name="y"/> and stores the result in a new <see cref="MpfrFloat"/> instance.
     /// </summary>
+    /// <param name="x">The dividend.</param>
+    /// <param name="y">The divisor.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the precision of <paramref name="x"/>.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the remainder of the division of <paramref name="x"/> by <paramref name="y"/>.</returns>
     public static MpfrFloat Reminder(MpfrFloat x, MpfrFloat y, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -3939,9 +7460,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y,
-    /// rounded to the nearest integer (ties rounded to even)
+    /// Compute the remainder and quotient of <paramref name="x"/> divided by <paramref name="y"/> with rounding mode <paramref name="rounding"/> and store the remainder in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the remainder.</param>
+    /// <param name="x">The dividend <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="y">The divisor <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
+    /// <returns>A tuple of two integers, the quotient and the rounding flag.</returns>
     public static (int quotient, int round) ReminderQuotientInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3955,9 +7480,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set r to the value of x - ny, rounded according to the direction rnd, where n is the integer quotient of x divided by y,
-    /// rounded to the nearest integer (ties rounded to even)
+    /// Computes the remainder and quotient of two <see cref="MpfrFloat"/> numbers <paramref name="x"/> and <paramref name="y"/>.
     /// </summary>
+    /// <param name="x">The dividend.</param>
+    /// <param name="y">The divisor.</param>
+    /// <param name="precision">The precision in bits of the result. If null, use the default precision.</param>
+    /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
+    /// <returns>A tuple containing the remainder as a new <see cref="MpfrFloat"/> instance, the quotient as an integer, and the rounding mode used.</returns>
+    /// <remarks>
+    /// The remainder is computed as <paramref name="x"/> - <paramref name="y"/> * quotient, where quotient is the integer part of <paramref name="x"/> / <paramref name="y"/>.
+    /// </remarks>
     public static (MpfrFloat rop, int quotient, int round) ReminderQuotient(MpfrFloat x, MpfrFloat y, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
@@ -3965,6 +7497,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return (rop, quotient, round);
     }
 
+    /// <summary>
+    /// Gets a value indicating whether this <see cref="MpfrFloat"/> instance is an integer.
+    /// </summary>
+    /// <returns><c>true</c> if this instance is an integer; otherwise, <c>false</c>.</returns>
     public bool IsInteger
     {
         get
@@ -3978,6 +7514,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #endregion
 
     #region 11. Rounding-Related Functions
+
+    /// <summary>
+    /// Gets or sets the default rounding mode used by MPFR library.
+    /// </summary>
+    /// <value>The default rounding mode used by MPFR library.</value>
     public static MpfrRounding DefaultRounding
     {
         get => MpfrLib.mpfr_get_default_rounding_mode();
@@ -3985,12 +7526,11 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Round x according to rnd with precision prec, which must be an integer between MPFR_PREC_MIN and MPFR_PREC_MAX (otherwise the behavior is undefined).
-    /// If prec is greater than or equal to the precision of x, then new space is allocated for the significand, and it is filled with zeros.
-    /// Otherwise, the significand is rounded to precision prec with the given direction; no memory reallocation to free the unused limbs is done.
-    /// In both cases, the precision of x is changed to prec.
+    /// Rounds the current <see cref="MpfrFloat"/> instance to the specified <paramref name="precision"/> with the specified <paramref name="rounding"/> mode.
     /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException" />
+    /// <param name="precision">The precision to round to.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
+    /// <returns>The number of bits truncated from the original value.</returns>
     public int RoundToPrecision(int precision, MpfrRounding? rounding = null)
     {
         CheckPrecision(precision);
@@ -4001,8 +7541,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// <see cref="MpfrLib.mpfr_can_round"/>
+    /// Determines whether the current <see cref="MpfrFloat"/> instance can be rounded to the specified precision with the specified rounding modes and error bound.
     /// </summary>
+    /// <param name="error">The error bound.</param>
+    /// <param name="round1">The first rounding mode to use.</param>
+    /// <param name="round2">The second rounding mode to use.</param>
+    /// <param name="precision">The precision to round to.</param>
+    /// <returns><see langword="true"/> if the current instance can be rounded to the specified precision with the specified rounding modes and error bound; otherwise, <see langword="false"/>.</returns>
     public bool CanRound(int error, MpfrRounding round1, MpfrRounding round2, int precision)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -4011,6 +7556,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Gets the minimal precision of the current <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <returns>The minimal precision of the current <see cref="MpfrFloat"/> instance.</returns>
     public int MinimalPrecision
     {
         get
@@ -4024,6 +7573,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #endregion
 
     #region 12. Miscellaneous Functions
+
+    /// <summary>
+    /// Set the value of this <see cref="MpfrFloat"/> to the next representable value toward <paramref name="y"/>.
+    /// </summary>
+    /// <param name="y">The target value to approach.</param>
+    /// <remarks>
+    /// If this <see cref="MpfrFloat"/> is already equal to <paramref name="y"/>, it will remain unchanged.
+    /// </remarks>
     public void NextToward(MpfrFloat y)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -4033,6 +7590,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Set the value of this <see cref="MpfrFloat"/> to the next representable value above the current value.
+    /// </summary>
     public void NextAbove()
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -4041,6 +7601,9 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Set the value of the current <see cref="MpfrFloat"/> instance to the next representable number below the current value.
+    /// </summary>
     public void NextBelow()
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -4049,6 +7612,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Computes the minimum value between two <see cref="MpfrFloat"/> instances and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
+    /// <returns>The sign of the result, i.e. -1 if <paramref name="op1"/> is less than <paramref name="op2"/>, 0 if they are equal, and 1 if <paramref name="op1"/> is greater than <paramref name="op2"/>.</returns>
+    /// <remarks>The result is stored in <paramref name="rop"/> and returned as the sign of the result.</remarks>
     public static int MinInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4059,6 +7631,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Returns the minimum value between two <see cref="MpfrFloat"/> instances.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="precision">The precision of the result. If not specified, the maximum precision between <paramref name="op1"/> and <paramref name="op2"/> will be used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode will be used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the minimum value between <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat Min(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? Math.Max(op1.Precision, op2.Precision));
@@ -4066,6 +7646,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
+    /// <summary>
+    /// Computes the maximum value between two <see cref="MpfrFloat"/> instances and stores the result in <paramref name="rop"/>.
+    /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>The sign of the result, 1 if <paramref name="op1"/> is greater, -1 if <paramref name="op2"/> is greater, 0 if they are equal.</returns>
+    /// <remarks>The result is stored in <paramref name="rop"/> and returned as the sign of the result.</remarks>
     public static int MaxInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4076,6 +7665,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Returns the maximum value between two <see cref="MpfrFloat"/> instances.
+    /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="precision">The precision of the result. If not specified, the maximum precision between <paramref name="op1"/> and <paramref name="op2"/> will be used.</param>
+    /// <param name="rounding">The rounding mode to use. If not specified, the default rounding mode will be used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the maximum value between <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static MpfrFloat Max(MpfrFloat op1, MpfrFloat op2, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? Math.Max(op1.Precision, op2.Precision));
@@ -4083,7 +7680,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Get/set the exponent of value to e if x is a non-zero ordinary number and e is in the current exponent range.</summary>
+    /// <summary>
+    /// Gets or sets the exponent of the current <see cref="MpfrFloat"/> instance.
+    /// </summary>
+    /// <value>The exponent of the current <see cref="MpfrFloat"/> instance.</value>
     public int Exponent
     {
         get
@@ -4102,7 +7702,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>Return a true if op has its sign bit set (i.e., if it is negative, -0, or a NaN whose representation has its sign bit set).</summary>
+    /// <summary>
+    /// Gets or sets a value indicating whether the sign bit of the current <see cref="MpfrFloat"/> instance is set.
+    /// </summary>
+    /// <value><c>true</c> if the sign bit is set; otherwise, <c>false</c>.</value>
     public bool SignBit
     {
         get
@@ -4119,8 +7722,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set the value of rop from op, rounded toward the given direction rnd, then set (resp. clear) its sign bit if s is non-zero (resp. zero), even when op is a NaN.
+    /// Sets the sign of <paramref name="rop"/> to the sign of <paramref name="op"/> and returns the result.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to set the sign.</param>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to get the sign from.</param>
+    /// <param name="sign">The sign to set to <paramref name="rop"/>.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
+    /// <returns>The result of setting the sign of <paramref name="rop"/> to the sign of <paramref name="op"/>.</returns>
     public static int CopySetSignInplace(MpfrFloat rop, MpfrFloat op, bool sign, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4131,8 +7739,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Set the value of rop from op, rounded toward the given direction rnd, then set (resp. clear) its sign bit if s is non-zero (resp. zero), even when op is a NaN.
+    /// Creates a new instance of <see cref="MpfrFloat"/> with the same value and sign as <paramref name="op"/>.
     /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to copy the value from.</param>
+    /// <param name="sign">The sign of the new instance.</param>
+    /// <param name="precision">The precision of the new instance. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the rounding mode of <paramref name="op"/> is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> with the same value and sign as <paramref name="op"/>.</returns>
     public static MpfrFloat CopySetSign(MpfrFloat op, bool sign, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -4140,7 +7753,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         return rop;
     }
 
-    /// <summary>Set the value of rop from op1, rounded toward the given direction rnd, then set its sign bit to that of op2 (even when op1 or op2 is a NaN).</summary>
+    /// <summary>
+    /// Copies the absolute value of <paramref name="op"/> to <paramref name="rop"/> and sets its sign to the sign of <paramref name="signOp"/>.
+    /// </summary>
+    /// <param name="rop">The destination <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="op">The source <see cref="MpfrFloat"/> instance.</param>
+    /// <param name="signOp">The <see cref="MpfrFloat"/> instance whose sign will be used to set the sign of <paramref name="rop"/>.</param>
+    /// <param name="rounding">The rounding mode to use (defaults to <see cref="DefaultRounding"/>).</param>
+    /// <returns>The sign of <paramref name="rop"/> after the operation.</returns>
     public static int CopySetSignInplace(MpfrFloat rop, MpfrFloat op, MpfrFloat signOp, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4151,7 +7771,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
-    /// <summary>Set the value of rop from op1, rounded toward the given direction rnd, then set its sign bit to that of op2 (even when op1 or op2 is a NaN).</summary>
+    /// <summary>
+    /// Creates a new instance of <see cref="MpfrFloat"/> with the same value and sign as <paramref name="op"/> and <paramref name="signOp"/> respectively.
+    /// </summary>
+    /// <param name="op">The <see cref="MpfrFloat"/> instance to copy the value from.</param>
+    /// <param name="signOp">The <see cref="MpfrFloat"/> instance to copy the sign from.</param>
+    /// <param name="precision">The precision in bits of the new instance. If null, the precision of <paramref name="op"/> is used.</param>
+    /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> with the same value and sign as <paramref name="op"/> and <paramref name="signOp"/> respectively.</returns>
     public static MpfrFloat CopySetSign(MpfrFloat op, MpfrFloat signOp, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
@@ -4162,26 +7789,59 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
 
     #region 13 Exception Related Functions
 
-    /// <summary>Get/set the smallest exponents allowed for a floating-point variable.</summary>
+    /// <summary>
+    /// Gets or sets the minimum exponent value for subnormal numbers in the current environment.
+    /// </summary>
+    /// <value>The minimum exponent value for subnormal numbers.</value>
     public static int EMin
     {
         get => MpfrLib.mpfr_get_emin();
         set => _ = MpfrLib.mpfr_set_emin(value);
     }
 
-    /// <summary>Get/set the largest exponents allowed for a floating-point variable.</summary>
+    /// <summary>
+    /// Gets or sets the maximum value of the exponent for the current environment.
+    /// </summary>
+    /// <value>The maximum value of the exponent for the current environment.</value>
     public static int EMax
     {
         get => MpfrLib.mpfr_get_emax();
         set => _ = MpfrLib.mpfr_set_emax(value);
     }
 
+    /// <summary>
+    /// Gets the minimum exponent value for subnormal numbers.
+    /// </summary>
+    /// <returns>The minimum exponent value for subnormal numbers.</returns>
     public static int MinEMin => MpfrLib.mpfr_get_emin_min();
+
+    /// <summary>
+    /// Gets the maximum exponent for the subnormal numbers in the current floating-point format.
+    /// </summary>
+    /// <returns>The maximum exponent for the subnormal numbers.</returns>
     public static int MaxEMin => MpfrLib.mpfr_get_emin_max();
+
+    /// <summary>
+    /// Gets the minimum and maximum values of the exponent for the current system.
+    /// </summary>
+    /// <returns>The minimum and maximum values of the exponent as a tuple.</returns>
     public static int MinEMax => MpfrLib.mpfr_get_emax_min();
+
+    /// <summary>
+    /// Gets the maximum value of the unbiased exponent for the current platform.
+    /// </summary>
+    /// <returns>The maximum value of the unbiased exponent.</returns>
     public static int MaxEMax => MpfrLib.mpfr_get_emax_max();
 
-    /// <summary>This function rounds x emulating subnormal number arithmetic</summary>
+    /// <summary>
+    /// Subnormalize the <see cref="MpfrFloat"/> instance, which means shifting the significand to the right until the most significant bit is set.
+    /// </summary>
+    /// <param name="t">The number of bits to shift the significand to the right before subnormalizing. Default is 0.</param>
+    /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> will be used.</param>
+    /// <returns>The number of bits shifted to the right.</returns>
+    /// <remarks>
+    /// This method modifies the current instance of <see cref="MpfrFloat"/>.
+    /// </remarks>
     public int SubNormalize(int t = 0, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -4190,6 +7850,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Gets or sets the current error flags of the MPFR library.
+    /// </summary>
+    /// <value>The current error flags of the MPFR library.</value>
     public static MpfrErrorFlags ErrorFlags
     {
         get => (MpfrErrorFlags)MpfrLib.mpfr_flags_save();
@@ -4198,24 +7862,25 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #endregion
 
     #region 14. Memory Handling Functions
+
     /// <summary>
-    /// Free all caches and pools used by MPFR internally (those local to the current thread and those shared by all threads).
-    /// You should call this function before terminating a thread, even if you did not call mpfr_const_* functions directly (they could have been called internally).
+    /// Frees the cache of MPFR memory blocks.
     /// </summary>
+    /// <param name="way">The cache to free, default is <see cref="MpfrFreeCache.Local"/> and <see cref="MpfrFreeCache.Global"/>.</param>
     public static void FreeCache(MpfrFreeCache way = MpfrFreeCache.Local | MpfrFreeCache.Global)
     {
         MpfrLib.mpfr_free_cache2(way);
     }
 
     /// <summary>
-    /// Free the pools used by MPFR internally.
-    /// Note: This function is automatically called after the thread-local caches are freed.
+    /// Frees the memory allocated for the memory pool used by MPFR functions.
     /// </summary>
     public static void FreePool() => MpfrLib.mpfr_free_pool();
 
     /// <summary>
-    /// This function should be called before calling <see cref="GmpMemory.SetAllocator(GmpMalloc, GmpRealloc, GmpFree)"/>.
+    /// Cleans up the memory allocated by the GMP library for multi-precision floating-point numbers.
     /// </summary>
+    /// <exception cref="Exception">Thrown when memory cleanup fails.</exception>
     public static void MemoryCleanup()
     {
         int ret = MpfrLib.mpfr_mp_memory_cleanup();
@@ -4224,14 +7889,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     #endregion
 
     #region 15. Compatibility With MPF
+
     /// <summary>
-    /// Reset the precision of x to be exactly prec bits.
-    /// The only difference with mpfr_set_prec is that prec 
-    /// is assumed to be small enough so that the 
-    /// significand fits into the current allocated memory 
-    /// space for x. 
-    /// Otherwise the behavior is undefined.
+    /// Sets the precision of the <see cref="MpfrFloat"/> instance to the specified <paramref name="precision"/>.
     /// </summary>
+    /// <param name="precision">The new precision to set.</param>
+    /// <remarks>
+    /// This method sets the precision of the <see cref="MpfrFloat"/> instance to the specified <paramref name="precision"/>.
+    /// </remarks>
     public void SetRawPrecision(int precision)
     {
         fixed (Mpfr_t* ptr = &Raw)
@@ -4241,16 +7906,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Return non-zero if op1 and op2 are both non-zero ordinary 
-    /// numbers with the same exponent and the same first op3 bits,
-    /// both zero, or both infinities of the same sign. Return 
-    /// zero otherwise. 
-    /// This function is defined for compatibility with MPF, we do 
-    /// not recommend to use it otherwise. 
-    /// Do not use it either if you want to know whether two numbers 
-    /// are close to each other; for instance, 1.011111 and 1.100000 
-    /// are regarded as different for any value of op3 larger than 1.
+    /// Compare two <see cref="MpfrFloat"/> instances for equality with a given precision.
     /// </summary>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> instance to compare.</param>
+    /// <param name="op3">The precision to use for the comparison.</param>
+    /// <returns>1 if the two instances are equal, 0 otherwise.</returns>
     public int MpfEquals(MpfrFloat op1, MpfrFloat op2, uint op3)
     {
         fixed (Mpfr_t* p1 = &op1.Raw)
@@ -4261,12 +7922,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// <para>rop = abs(op1-op2)/op1</para>
-    /// <para>
-    /// Compute the relative difference between op1 and op2 and store the result in rop.
-    /// This function does not guarantee the correct rounding on the relative difference;
-    /// it just computes |op1 - op2| / op1</para>
+    /// Calculates the relative difference between two <see cref="MpfrFloat"/> values <paramref name="op1"/> and <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> operand.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <remarks>
+    /// The relative difference is defined as (op1 - op2) / ((op1 + op2) / 2).
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/>, <paramref name="op1"/>, or <paramref name="op2"/> is null.</exception>
     public static unsafe void RelDiffInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding rounding)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4278,15 +7943,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// Compute the relative difference between op1 and op2 and store the result in rop.
-    /// This function does not guarantee the correct rounding on the relative difference;
-    /// it just computes |op1 - op2| / op1
+    /// Calculates the relative difference between two <see cref="MpfrFloat"/> values <paramref name="op1"/> and <paramref name="op2"/>.
     /// </summary>
-    /// <param name="op1">The first operand.</param>
-    /// <param name="op2">The second operand.</param>
-    /// <param name="rounding">The rounding mode to use.</param>
-    /// <param name="precision">The result precision.</param>
-    /// <returns>abs(op1-op2)/op1</returns>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> value.</param>
+    /// <param name="op2">The second <see cref="MpfrFloat"/> value.</param>
+    /// <param name="rounding">The rounding mode to use in the calculation.</param>
+    /// <param name="precision">The precision in bits to use in the calculation. If not specified, the default precision of <see cref="DefaultPrecision"/> will be used.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the relative difference between <paramref name="op1"/> and <paramref name="op2"/>.</returns>
+    /// <remarks>
+    /// The relative difference is calculated as (op1 - op2) / ((op1 + op2) / 2).
+    /// </remarks>
     public static MpfrFloat RelDiff(MpfrFloat op1, MpfrFloat op2, MpfrRounding rounding, int precision = 0)
     {
         MpfrFloat rop = new(precision);
@@ -4295,9 +7961,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// These functions are identical to mpfr_mul_2ui and mpfr_div_2ui respectively.
-    /// These functions are only kept for compatibility with MPF, one should prefer mpfr_mul_2ui and mpfr_div_2ui otherwise.
+    /// Multiply the <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/> and store the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The power of 2 to raise.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <returns>The result of the multiplication operation.</returns>
     public static int Multiply2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding rounding)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4308,9 +7978,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// These functions are identical to mpfr_mul_2ui and mpfr_div_2ui respectively.
-    /// These functions are only kept for compatibility with MPF, one should prefer mpfr_mul_2ui and mpfr_div_2ui otherwise.
+    /// Divide a <see cref="MpfrFloat"/> instance by 2 raised to the power of <paramref name="op2"/> and store the result in <paramref name="rop"/>.
     /// </summary>
+    /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
+    /// <param name="op2">The power of 2 to raise.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <returns>The result of the operation.</returns>
     public static int Divide2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding rounding)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4321,9 +7995,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// These functions are identical to mpfr_mul_2ui and mpfr_div_2ui respectively.
-    /// These functions are only kept for compatibility with MPF, one should prefer mpfr_mul_2ui and mpfr_div_2ui otherwise.
+    /// Multiply a <see cref="MpfrFloat"/> instance by 2 raised to the power of <paramref name="op2"/>.
     /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to multiply.</param>
+    /// <param name="op2">The power of 2 to raise.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="precision">The precision in bits of the result.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the multiplication.</returns>
+    /// <remarks>
+    /// The result is rounded according to the specified <paramref name="rounding"/> mode and has a precision of <paramref name="precision"/> bits.
+    /// </remarks>
     public static MpfrFloat Multiply2Exp(MpfrFloat op1, uint op2, MpfrRounding rounding, int precision)
     {
         MpfrFloat rop = new(precision);
@@ -4332,16 +8013,20 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     }
 
     /// <summary>
-    /// These functions are identical to mpfr_mul_2ui and mpfr_div_2ui respectively.
-    /// These functions are only kept for compatibility with MPF, one should prefer mpfr_mul_2ui and mpfr_div_2ui otherwise.
+    /// Divide a <see cref="MpfrFloat"/> instance by 2 raised to the power of <paramref name="op2"/> with the specified <paramref name="rounding"/> and <paramref name="precision"/>.
     /// </summary>
+    /// <param name="op1">The <see cref="MpfrFloat"/> instance to divide.</param>
+    /// <param name="op2">The power of 2 to raise to.</param>
+    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="precision">The precision in bits of the result.</param>
+    /// <returns>A new instance of <see cref="MpfrFloat"/> representing the result of the division.</returns>
     public static MpfrFloat Divide2Exp(MpfrFloat op1, uint op2, MpfrRounding rounding, int precision)
     {
         MpfrFloat rop = new(precision);
         Divide2ExpInplace(rop, op1, op2, rounding);
         return rop;
     }
-    #endregion
+#endregion
 
     #region Clear & Dispose
     private bool _disposed;
@@ -4354,6 +8039,14 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Releases the resources used by the <see cref="MpfrFloat"/> object.
+    /// </summary>
+    /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+    /// <remarks>
+    /// If <paramref name="disposing"/> is true, this method releases all resources held by any managed objects that this <see cref="MpfrFloat"/> references.
+    /// If <paramref name="disposing"/> is false, this method releases only the unmanaged resources.
+    /// </remarks>
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -4370,12 +8063,18 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         }
     }
 
+    /// <summary>
+    /// Finalizer for <see cref="MpfrFloat"/> class.
+    /// </summary>
     ~MpfrFloat()
     {
         // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
         Dispose(disposing: false);
     }
 
+    /// <summary>
+    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+    /// </summary>
     public void Dispose()
     {
         // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
