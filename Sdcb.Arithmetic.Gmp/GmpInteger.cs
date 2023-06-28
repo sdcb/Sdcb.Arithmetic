@@ -413,15 +413,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>Finalizer for <see cref="GmpInteger"/>.</summary>
     ~GmpInteger()
     {
         // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
         Dispose(disposing: false);
     }
 
-    /// <summary>
-    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-    /// </summary>
+    /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
     public void Dispose()
     {
         // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
@@ -462,6 +461,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return r;
     }
 
+    /// <summary>Adds two <see cref="GmpInteger"/> instances (op1 + op2).</summary>
     public static GmpInteger operator +(GmpInteger a, GmpInteger b) => Add(a, b);
 
     /// <summary>
@@ -494,7 +494,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return r;
     }
 
+    /// <summary>Adds a <see cref="GmpInteger" /> instance and an unsigned integer (a + b).</summary>
     public static GmpInteger operator +(GmpInteger a, uint b) => Add(a, b);
+
+    /// <summary>Adds an unsigned integer and a <see cref="GmpInteger" /> instance (a + b).</summary>
     public static GmpInteger operator +(uint a, GmpInteger b) => Add(b, a);
 
     /// <summary>
@@ -528,6 +531,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return r;
     }
 
+    /// <summary>Subtracts two <see cref="GmpInteger" /> instances and returns the result as a new <see cref="GmpInteger" />.</summary>
     public static GmpInteger operator -(GmpInteger op1, GmpInteger op2) => Subtract(op1, op2);
 
     /// <summary>
@@ -560,6 +564,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return r;
     }
 
+    /// <summary>Performs subtraction of a <see cref="GmpInteger"/> and an <see cref="uint"/> by invoking the Subtract method.</summary>
     public static GmpInteger operator -(GmpInteger op1, uint op2) => Subtract(op1, op2);
 
     /// <summary>
@@ -592,6 +597,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return r;
     }
 
+    /// <summary>Subtracts a <see cref="GmpInteger"/> from a <see cref="uint"/> value, resulting in a new <see cref="GmpInteger"/>.</summary>
     public static GmpInteger operator -(uint op1, GmpInteger op2) => Subtract(op1, op2);
 
     /// <summary>
@@ -625,6 +631,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return r;
     }
 
+    /// <summary>Multiplies two <see cref="GmpInteger"/> instances together (op1 * op2).</summary>
     public static GmpInteger operator *(GmpInteger op1, GmpInteger op2) => Multiply(op1, op2);
 
     /// <summary>
@@ -656,7 +663,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return r;
     }
 
+    /// <summary>Multiplies a <see cref="GmpInteger" /> instance by an integer (op1 * op2).</summary>
     public static GmpInteger operator *(GmpInteger op1, int op2) => Multiply(op1, op2);
+
+    /// <summary>Multiplies an integer by a <see cref="GmpInteger" /> instance (op1 * op2).</summary>
     public static GmpInteger operator *(int op1, GmpInteger op2) => Multiply(op2, op1);
 
     /// <summary>
@@ -689,7 +699,10 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return r;
     }
 
+    /// <summary>Performs multiplication of a <see cref="GmpInteger" /> instance by an unsigned integer (op1 * op2).</summary>
     public static GmpInteger operator *(GmpInteger op1, uint op2) => Multiply(op1, op2);
+
+    /// <summary>Performs multiplication of an unsigned integer by a <see cref="GmpInteger" /> instance (op1 * op2).</summary>
     public static GmpInteger operator *(uint op1, GmpInteger op2) => Multiply(op2, op1);
 
     /// <summary>
@@ -797,6 +810,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     /// </remarks>
     public void LeftShift(uint bits) => Multiply2ExpInplace(this, this, bits);
 
+    /// <summary>Performs left shift of the specified <see cref="GmpInteger"/> operand by the given number of bits.</summary>
     public static GmpInteger operator <<(GmpInteger op1, uint exp2) => Multiply2Exp(op1, exp2);
 
     /// <summary>
@@ -827,6 +841,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return r;
     }
 
+    /// <summary>Negates a <see cref="GmpInteger" /> instance (unary minus, -op1).</summary>
     public static GmpInteger operator -(GmpInteger op1) => Negate(op1);
 
     /// <summary>
@@ -1776,12 +1791,16 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     #endregion
 
     #region operators
+    /// <summary>Divides two <see cref="GmpInteger" /> instances, returning the quotient (op1 / op2).</summary>
     public static GmpInteger operator /(GmpInteger op1, GmpInteger op2) => Divide(op1, op2);
 
+    /// <summary>Calculates the remainder when two <see cref="GmpInteger" /> instances are divided (op1 % op2).</summary>
     public static GmpInteger operator %(GmpInteger op1, GmpInteger op2) => Reminder(op1, op2);
 
+    /// <summary>Divides a <see cref="GmpInteger" /> instance by an unsigned integer (op1 / op2).</summary>
     public static GmpInteger operator /(GmpInteger op1, uint op2) => Divide(op1, op2);
 
+    /// <summary>Calculates the remainder when a <see cref="GmpInteger" /> instance is divided by an unsigned integer (op1 % op2).</summary>
     public static GmpInteger operator %(GmpInteger op1, uint op2) => Reminder(op1, op2);
     #endregion
 
@@ -2293,21 +2312,22 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     }
 
     /// <summary>
-    /// Compute the greatest common divisor of <paramref name="op1"/> and <paramref name="op2"/> in place and store the result in <paramref name="rop"/>.
+    /// Compute the greatest common divisor of op1 and op2. 
     /// </summary>
-    /// <param name="rop">The <see cref="GmpInteger"/> instance to store the result.</param>
-    /// <param name="op1">The first <see cref="GmpInteger"/> instance.</param>
-    /// <param name="op2">The second unsigned integer value.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op1"/> is null.</exception>
-    /// <remarks>
-    /// This method modifies the value of <paramref name="rop"/>.
-    /// </remarks>
-    public static unsafe void GcdInplace(GmpInteger rop, GmpInteger op1, uint op2)
+    /// <param name="rop">Parameter to store the result</param>
+    /// <param name="op1">First parameter to compute gcd against</param>
+    /// <param name="op2">Second parameter to compute gcd against</param>
+    /// <returns>
+    /// <para>If the result is small enough to fit in an unsigned, it is returned. </para>
+    /// <para>If the result does not fit, 0 is returned, and the result is equal to the argument op1. </para>
+    /// <para>Note that the result will always fit if op2 is non-zero</para>
+    /// </returns>
+    public static unsafe uint GcdInplace(GmpInteger rop, GmpInteger op1, uint op2)
     {
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
         {
-            GmpLib.__gmpz_gcd_ui((IntPtr)pr, (IntPtr)p1, op2);
+            return GmpLib.__gmpz_gcd_ui((IntPtr)pr, (IntPtr)p1, op2);
         }
     }
 
@@ -2920,11 +2940,22 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         _ => Compare(this, other) == 0,
     };
 
+    /// <summary>Determines whether two <see cref="GmpInteger" /> instances are equal (op1 == op2).</summary>
     public static bool operator ==(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) == 0;
+
+    /// <summary>Determines whether two <see cref="GmpInteger" /> instances are not equal (op1 != op2).</summary>
     public static bool operator !=(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) != 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is greater than another instance (op1 > op2).</summary>
     public static bool operator >(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) > 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is less than another instance (op1 &lt; op2).</summary>
     public static bool operator <(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) < 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is greater than or equal to another instance (op1 >= op2).</summary>
     public static bool operator >=(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) >= 0;
+
+    /// <summary>Determines whether a <see cref="GmpInteger" /> instance is less than or equal to another instance (op1 &lt;= op2).</summary>
     public static bool operator <=(GmpInteger op1, GmpInteger op2) => Compare(op1, op2) <= 0;
 
     /// <summary>
@@ -2996,6 +3027,12 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     /// <summary>Determines whether a double is less than or equal to a <see cref="GmpInteger" /> instance (op1 &lt;= op2).</summary>
     public static bool operator <=(double op1, GmpInteger op2) => Compare(op2, op1) >= 0;
 
+    /// <summary>
+    /// Compare this GmpInteger to an int value.
+    /// </summary>
+    /// <param name="op1">The first GmpInteger to compare.</param>
+    /// <param name="op2">The second int to compare.</param>
+    /// <returns>A value indicating the relative values of this instance and a specified object.</returns>
     public static unsafe int Compare(GmpInteger op1, int op2)
     {
         fixed (Mpz_t* p1 = &op1.Raw)
@@ -3202,6 +3239,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         }
     }
 
+    /// <summary>The sign of the <see cref="GmpInteger"/>.</summary>
     public int Sign => Raw.Size < 0 ? -1 : Raw.Size > 0 ? 1 : 0;
     #endregion
 
@@ -3237,6 +3275,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return rop;
     }
 
+    /// <summary>Performs a bitwise AND operation on two <see cref="GmpInteger" /> instances (op1 &amp; op2).</summary>
     public static GmpInteger operator &(GmpInteger op1, GmpInteger op2) => BitwiseAnd(op1, op2);
 
     /// <summary>
@@ -3269,6 +3308,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return rop;
     }
 
+    /// <summary>Performs a bitwise OR operation on two <see cref="GmpInteger"/> instances and returns the result as a new <see cref="GmpInteger"/>.</summary>
     public static GmpInteger operator |(GmpInteger op1, GmpInteger op2) => BitwiseOr(op1, op2);
 
     /// <summary>
@@ -3508,49 +3548,4 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         return rop;
     }
     #endregion
-}
-
-
-public enum PrimePossibility
-{
-    /// <summary>
-    /// definitely non-prime
-    /// </summary>
-    No = 0,
-
-    /// <summary>
-    /// probably prime (without being certain)
-    /// </summary>
-    Probably = 1,
-
-    /// <summary>
-    /// definitely prime
-    /// </summary>
-    Yes = 2,
-}
-
-public record struct Mpz_t
-{
-    public int Allocated;
-    public int Size;
-    /// <summary>
-    /// nint*
-    /// </summary>
-    public IntPtr Limbs;
-
-    public static int RawSize => Marshal.SizeOf<Mpz_t>();
-
-    private readonly unsafe Span<nint> GetLimbData() => new((void*)Limbs, Allocated);
-
-    public override readonly int GetHashCode()
-    {
-        HashCode c = new();
-        c.Add(Allocated);
-        c.Add(Size);
-        foreach (nint i in GetLimbData())
-        {
-            c.Add(i);
-        }
-        return c.ToHashCode();
-    }
 }

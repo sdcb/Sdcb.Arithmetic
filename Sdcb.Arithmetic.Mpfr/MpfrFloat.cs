@@ -11,8 +11,11 @@ using System.Threading;
 
 namespace Sdcb.Arithmetic.Mpfr;
 
+/// <summary>Represents an arbitrary precision floating point number using the MPFR library.</summary>
+/// <remarks>This class is not thread-safe and should be used with caution in multi-threaded applications.</remarks>
 public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>, IComparable, IComparable<MpfrFloat>
 {
+    /// <summary>The size of the MPFR float in bytes, depending on the operating system.</summary>
     public static readonly int RawSize = Environment.OSVersion.Platform switch
     {
         PlatformID.Win32NT => sizeof(WindowsMpfr_t),

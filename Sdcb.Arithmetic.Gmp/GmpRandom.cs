@@ -252,7 +252,7 @@ public class GmpRandom : IDisposable
         GmpRandomState state = new();
         if (GmpLib.__gmp_randinit_lc_2exp_size((IntPtr)(&state), size) == 0)
         {
-            throw new ArgumentOutOfRangeException("size");
+            throw new ArgumentOutOfRangeException(nameof(size));
         }
         return new GmpRandom(state);
     }
@@ -271,7 +271,7 @@ public class GmpRandom : IDisposable
         GmpRandomState state = new();
         if (GmpLib.__gmp_randinit_lc_2exp_size((IntPtr)(&state), size) == 0)
         {
-            throw new ArgumentOutOfRangeException("size");
+            throw new ArgumentOutOfRangeException(nameof(size));
         }
         return new GmpRandom(state, seed);
     }
@@ -483,18 +483,4 @@ public class GmpRandom : IDisposable
         GC.SuppressFinalize(this);
     }
     #endregion
-}
-
-[StructLayout(LayoutKind.Sequential)]
-internal struct GmpRandomState
-{
-    public Mpz_t Seed;
-    public GmpRandomAlgorithm Algorithm;
-    public IntPtr Data;
-}
-
-public enum GmpRandomAlgorithm
-{
-    Default = 0,
-    LC = 0,
 }
