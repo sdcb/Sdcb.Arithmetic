@@ -131,7 +131,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="val">The <see cref="MpfrFloat"/> instance to assign the value from.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public int Assign(MpfrFloat val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -146,7 +154,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="val">The unsigned integer value to assign.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the assignment operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public int Assign(uint val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -160,7 +176,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="val">The integer value to assign.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if the operation was successful, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public int Assign(int val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -174,7 +198,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="val">The single-precision floating point number to assign.</param>
     /// <param name="rounding">The rounding mode to use, or null to use the default rounding mode.</param>
-    /// <returns>An integer indicating the status of the operation. Zero indicates success, while a non-zero value indicates an error.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The assigned value will be rounded according to the specified <paramref name="rounding"/> mode, or the default rounding mode if <paramref name="rounding"/> is null.
     /// </remarks>
@@ -191,7 +223,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="val">The double-precision floating-point number to assign.</param>
     /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
-    /// <returns>An integer indicating the success or failure of the operation. A non-negative value indicates success, while a negative value indicates failure.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The assigned value will be rounded according to the specified rounding mode, or the default rounding mode if none is specified.
     /// </remarks>
@@ -208,7 +248,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="val">The <see cref="GmpInteger"/> instance to assign.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public int Assign(GmpInteger val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -223,7 +271,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="val">The <see cref="GmpRational"/> instance to assign.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the assignment operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public int Assign(GmpRational val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -238,7 +294,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="val">The <see cref="GmpFloat"/> instance to assign the value from.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public int Assign(GmpFloat val, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -254,7 +318,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The unsigned integer value to multiply by 2 to the power of <paramref name="e"/>.</param>
     /// <param name="e">The exponent of 2 to raise <paramref name="op"/> to.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the operation, 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The value of this instance will be set to <paramref name="op"/> times 2 to the power of <paramref name="e"/>.
     /// </remarks>
@@ -272,7 +344,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The integer value to multiply by 2 to the power of <paramref name="e"/>.</param>
     /// <param name="e">The exponent of 2.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the operation, 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public int Assign2Exp(int op, int e, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -287,7 +367,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The <see cref="GmpInteger"/> value to multiply.</param>
     /// <param name="e">The exponent of 2 to raise.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the operation, 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// This function sets this <see cref="MpfrFloat"/> instance to the value of <paramref name="op"/> times 2 raised to the power of <paramref name="e"/>.
     /// </remarks>
@@ -788,7 +876,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="z">The <see cref="GmpInteger"/> instance to store the result.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The number of limbs of the resulting <see cref="GmpInteger"/> instance.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The current <see cref="MpfrFloat"/> instance will be rounded to an integer before conversion.
     /// </remarks>
@@ -861,7 +957,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="f">The <see cref="GmpFloat"/> instance to store the result.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The number of bits in the mantissa of the result.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public int ToGmpFloatInplace(GmpFloat f, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
@@ -1098,7 +1202,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance to add.</param>
     /// <param name="op2">The second <see cref="MpfrFloat"/> instance to add.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the addition operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1139,7 +1251,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance to add.</param>
     /// <param name="op2">The unsigned integer to add.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the addition operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1187,7 +1307,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance to add.</param>
     /// <param name="op2">The integer value to add.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the addition operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1235,7 +1363,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance to add.</param>
     /// <param name="op2">The double-precision floating-point number to add.</param>
     /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
-    /// <returns>Returns 0 if successful, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1283,7 +1419,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
     /// <param name="op2">The second <see cref="GmpInteger"/> operand.</param>
     /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
-    /// <returns>The result of the addition operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1332,7 +1476,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> operand.</param>
     /// <param name="op2">The second <see cref="GmpRational"/> operand.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the addition operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AddInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1384,7 +1536,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance to subtract from.</param>
     /// <param name="op2">The second <see cref="MpfrFloat"/> instance to subtract.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the subtraction operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1425,7 +1585,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The unsigned integer value to subtract from.</param>
     /// <param name="op2">The <see cref="MpfrFloat"/> instance to subtract.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the subtraction operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SubtractInplace(MpfrFloat rop, uint op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1465,7 +1633,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to subtract from.</param>
     /// <param name="op2">The unsigned integer value to subtract.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the subtraction operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1505,7 +1681,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The integer value to subtract from <paramref name="op2"/>.</param>
     /// <param name="op2">The <see cref="MpfrFloat"/> instance to subtract <paramref name="op1"/> from.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The return value indicates whether the operation succeeded (0) or failed (-1).</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>The value of <paramref name="rop"/> will be modified to store the result of the operation.</remarks>
     public static int SubtractInplace(MpfrFloat rop, int op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
@@ -1547,7 +1731,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to subtract from.</param>
     /// <param name="op2">The integer value to subtract.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the subtraction operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1587,7 +1779,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The double value to subtract from.</param>
     /// <param name="op2">The <see cref="MpfrFloat"/> instance to subtract.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the subtraction operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SubtractInplace(MpfrFloat rop, double op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1627,7 +1827,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The source <see cref="MpfrFloat"/> instance to subtract from.</param>
     /// <param name="op2">The double-precision floating-point number to subtract.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the subtraction operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1668,7 +1876,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to subtract from.</param>
     /// <param name="op2">The <see cref="GmpInteger"/> instance to subtract.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the subtraction operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1712,7 +1928,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="GmpInteger"/> instance to subtract from.</param>
     /// <param name="op2">The <see cref="MpfrFloat"/> instance to subtract.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the operation is successful; otherwise it is a non-zero value.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The result is rounded according to the specified <paramref name="rounding"/> mode.
     /// </remarks>
@@ -1756,7 +1980,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to subtract from.</param>
     /// <param name="op2">The <see cref="GmpRational"/> value to subtract.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the subtraction operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SubtractInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1803,7 +2035,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance to multiply.</param>
     /// <param name="op2">The second <see cref="MpfrFloat"/> instance to multiply.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The status of the operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1846,7 +2086,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to be multiplied.</param>
     /// <param name="op2">The unsigned integer to multiply with.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if successful, otherwise returns a non-zero value indicating the type of error.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1894,7 +2142,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to be multiplied.</param>
     /// <param name="op2">The integer value to multiply.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the multiplication operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1942,7 +2198,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance to multiply.</param>
     /// <param name="op2">The double value to multiply with.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if successful, otherwise returns an error code.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -1990,7 +2254,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance to multiply.</param>
     /// <param name="op2">The <see cref="GmpInteger"/> instance to multiply.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the multiplication operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2039,7 +2311,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance to multiply.</param>
     /// <param name="op2">The <see cref="GmpRational"/> instance to multiply.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the multiplication operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int MultiplyInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2090,7 +2370,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to be squared.</param>
     /// <param name="rounding">The rounding mode to be used, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if successful, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SquareInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2123,7 +2411,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The dividend <see cref="MpfrFloat"/> instance.</param>
     /// <param name="op2">The divisor <see cref="MpfrFloat"/> instance.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the division operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2164,7 +2460,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The unsigned integer to divide.</param>
     /// <param name="op2">The <see cref="MpfrFloat"/> to divide by.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the division.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int DivideInplace(MpfrFloat rop, uint op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2204,7 +2508,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
     /// <param name="op2">The unsigned integer to divide by.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the division operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2244,7 +2556,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The integer value to divide.</param>
     /// <param name="op2">The <see cref="MpfrFloat"/> value to divide by.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The status of the operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int DivideInplace(MpfrFloat rop, int op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2284,7 +2604,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
     /// <param name="op2">The integer value to divide <paramref name="op1"/> by.</param>
     /// <param name="rounding">The rounding mode to be used, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2324,7 +2652,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The double value to be divided.</param>
     /// <param name="op2">The <see cref="MpfrFloat"/> value to divide by.</param>
     /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
-    /// <returns>The result of the division operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int DivideInplace(MpfrFloat rop, double op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2364,7 +2700,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
     /// <param name="op2">The double value to divide by.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The status of the operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, double op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2405,7 +2749,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
     /// <param name="op2">The <see cref="GmpInteger"/> instance to divide by.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the division operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2450,7 +2802,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
     /// <param name="op2">The <see cref="GmpRational"/> instance to divide by.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the division operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int DivideInplace(MpfrFloat rop, MpfrFloat op1, GmpRational op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2496,7 +2856,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to compute the square root.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the computation has been performed correctly, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SqrtInplace(MpfrFloat rop, MpfrFloat op1, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2526,7 +2894,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="op1">The unsigned integer value to calculate the square root of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if the operation is successful, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SqrtInplace(MpfrFloat rop, uint op1, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2555,7 +2931,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the reciprocal square.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the computation succeeded, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ReciprocalSquareInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2585,7 +2969,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cubic root.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The sign of the result, 1 if positive, -1 if negative.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int CubicRootInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2616,7 +3008,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the root.</param>
     /// <param name="n">The positive integer root order.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if success, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int RootNInplace(MpfrFloat rop, MpfrFloat op, uint n, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2648,7 +3048,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the root.</param>
     /// <param name="n">The positive integer value of the root.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     [Obsolete("use RootN")]
     public static int RootInplace(MpfrFloat rop, MpfrFloat op, uint n, MpfrRounding? rounding = null)
     {
@@ -2681,7 +3089,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to negate.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int NegateInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2718,7 +3134,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the absolute value.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The sign of <paramref name="op"/> before the absolute value is computed.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AbsInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2749,7 +3173,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance defining the rectangle.</param>
     /// <param name="op2">The second <see cref="MpfrFloat"/> instance defining the rectangle.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The computed dimension of the rectangle.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int DimInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2782,7 +3214,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to be multiplied.</param>
     /// <param name="op2">The power of 2 to raise.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the multiplication operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Multiply2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2814,7 +3254,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to be multiplied.</param>
     /// <param name="op2">The power of 2 to raise.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the multiplication operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Multiply2ExpInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2846,7 +3294,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
     /// <param name="op2">The power of 2 to divide <paramref name="op1"/> by.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the division operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Divide2ExpInplace(MpfrFloat rop, MpfrFloat op1, uint op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2878,7 +3334,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The <see cref="MpfrFloat"/> instance to be divided.</param>
     /// <param name="op2">The power of 2 to divide by.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the division operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Divide2ExpInplace(MpfrFloat rop, MpfrFloat op1, int op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2909,7 +3373,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="op">The non-negative integer to compute the factorial of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int FactorialInplace(MpfrFloat rop, uint op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2940,7 +3412,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op2">The second <see cref="MpfrFloat"/> operand.</param>
     /// <param name="op3">The third <see cref="MpfrFloat"/> operand to add to the result.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the operation succeeded, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int FMAInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -2976,7 +3456,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op2">The second <see cref="MpfrFloat"/> operand.</param>
     /// <param name="op3">The third <see cref="MpfrFloat"/> operand.</param>
     /// <param name="rounding">The rounding mode to use. If null, the default rounding mode is used.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int FMSInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3016,7 +3504,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op3">The third <see cref="MpfrFloat"/> operand.</param>
     /// <param name="op4">The fourth <see cref="MpfrFloat"/> operand.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the operation succeeded, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int FMMAInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3055,7 +3551,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op3">The third <see cref="MpfrFloat"/> operand.</param>
     /// <param name="op4">The fourth <see cref="MpfrFloat"/> operand.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if successful, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int FMMSInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrFloat op3, MpfrFloat op4, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3096,7 +3600,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first leg of the triangle.</param>
     /// <param name="op2">The second leg of the triangle.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int HypotInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -3132,7 +3644,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="tab">The collection of <see cref="MpfrFloat"/> instances to sum.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The sign of the result, 1 for positive, -1 for negative, 0 for zero.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The <paramref name="rop"/> instance will be modified to store the result of the sum.
     /// </remarks>
@@ -4369,7 +4889,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the logarithm.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the operation, 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int LogInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4399,7 +4927,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="op">The unsigned integer operand to compute the natural logarithm of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int LogInplace(MpfrFloat rop, uint op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4428,7 +4964,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the logarithm of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the calculation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Log2Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4458,7 +5002,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the logarithm.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The sign of the result, 1 if positive, -1 if negative, 0 if zero.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Log10Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4488,7 +5040,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the natural logarithm of 1 plus.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The return value is 0 if the operation is successful; otherwise, it is a non-zero value.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int LogP1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4518,7 +5078,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the logarithm of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The number of bits in the result, excluding the sign bit.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Log2P1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4548,7 +5116,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the logarithm of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The sign of the result, 1 if positive, -1 if negative.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Log10P1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4578,7 +5154,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the exponential function.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the operation is successful, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ExpInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4608,7 +5192,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the exponential function.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the computation was successful, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Exp2Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4638,7 +5230,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the exponential function.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Exp10Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4668,7 +5268,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the exponent.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ExpM1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4698,7 +5306,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to calculate the exponent.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Exp2M1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4728,7 +5344,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the exponential of 10 minus 1.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value indicates the rounding mode used in the operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The result is computed as exp(10) - 1, with a relative error of less than 1 ulp (unit in the last place).
     /// </remarks>
@@ -4764,7 +5388,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
     /// <param name="op2">The exponent <see cref="MpfrFloat"/> instance.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4805,7 +5437,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
     /// <param name="op2">The exponent <see cref="MpfrFloat"/> instance.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int PowerRInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4838,7 +5478,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
     /// <param name="op2">The exponent as an unsigned integer.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the operation, as an integer error code.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The result of the operation is rounded according to the specified <paramref name="rounding"/> mode.
     /// </remarks>
@@ -4881,7 +5529,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
     /// <param name="op2">The integer exponent.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if successful, otherwise returns a non-zero value.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The result is rounded according to the specified <paramref name="rounding"/> mode.
     /// </remarks>
@@ -4925,7 +5581,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The base <see cref="MpfrFloat"/> instance.</param>
     /// <param name="op2">The exponent <see cref="GmpInteger"/> instance.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int PowerInplace(MpfrFloat rop, MpfrFloat op1, GmpInteger op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -4966,7 +5630,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The base unsigned integer.</param>
     /// <param name="op2">The exponent unsigned integer.</param>
     /// <param name="rounding">The optional rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the operation, as an integer error code.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The result of the operation is computed as <paramref name="rop"/> = <paramref name="op1"/>^<paramref name="op2"/>.
     /// </remarks>
@@ -5000,7 +5672,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The unsigned integer base.</param>
     /// <param name="op2">The <see cref="MpfrFloat"/> exponent.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int PowerInplace(MpfrFloat rop, uint op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5041,7 +5721,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compound with.</param>
     /// <param name="n">The integer value to compound with <paramref name="op"/>.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the compound operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int CompoundInplace(MpfrFloat rop, MpfrFloat op, int n, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5074,7 +5762,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cosine.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int CosInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5104,7 +5800,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the sine.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value indicates the rounding mode used in the operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SinInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5134,7 +5838,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the tangent.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int TanInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5165,7 +5877,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cosine of.</param>
     /// <param name="u">The number of bits of the angle to use, default to 360.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value of the underlying MPFR library function.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int CosUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5197,7 +5917,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the sine.</param>
     /// <param name="u">The angle unit in degrees, default to 360.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value of the underlying MPFR library function.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SinUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5232,7 +5960,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the tangent.</param>
     /// <param name="u">The multiplier for <paramref name="op"/>.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int TanUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5263,7 +5999,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cosine of pi times.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the computation succeeded, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int CosPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5293,7 +6037,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the sine of pi times.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the computation succeeded, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SinPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5323,7 +6075,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the tangent of pi times.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int TanPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5357,7 +6117,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="cop">The <see cref="MpfrFloat"/> instance to store the cosine result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the sine and cosine.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if both sine and cosine are computed correctly, -1 if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The computation is performed in-place, i.e., the value of <paramref name="op"/> may be modified.
     /// </remarks>
@@ -5393,7 +6161,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the secant.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the computation succeeded, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SecInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5423,7 +6199,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cosecant of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int CscInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5453,7 +6237,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the cotangent.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the computation has been performed correctly, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int CotInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5483,7 +6275,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse cosine of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value indicates whether the operation succeeded or failed.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AcosInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5513,7 +6313,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse sine of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the computation was successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AsinInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5543,7 +6351,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the arctangent.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the operation is successful; otherwise, it is a non-zero value.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AtanInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5574,7 +6390,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse cosine of.</param>
     /// <param name="u">The maximum value of the input <paramref name="op"/> in unsigned integer format.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the operation, as an integer error code.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AcosUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5606,7 +6430,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse sine of.</param>
     /// <param name="u">The upper bound of the input value, default to 360.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value of the underlying MPFR library function.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AsinUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5638,7 +6470,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse tangent.</param>
     /// <param name="u">The unsigned integer value to specify the base of the input.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the computation succeeded, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AtanUInplace(MpfrFloat rop, MpfrFloat op, uint u = 360, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5669,7 +6509,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse cosine of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AcosPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5702,7 +6550,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse sine of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The return value indicates the accuracy of the result, 0 if exact, negative if the result is only an approximation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AsinPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5732,7 +6588,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the arctangent of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if successful, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AtanPiInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5763,7 +6627,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="y">The <see cref="MpfrFloat"/> representing the numerator.</param>
     /// <param name="x">The <see cref="MpfrFloat"/> representing the denominator.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>A value indicating whether the operation succeeded.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The arctangent is the angle whose tangent is the quotient of the two specified numbers. The return value is expressed in radians.
     /// </remarks>
@@ -5800,7 +6672,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="x">The <see cref="MpfrFloat"/> instance representing the x-coordinate.</param>
     /// <param name="u">The number of bits to use for the result.</param>
     /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
-    /// <returns>The sign of the result, either 1, 0, or -1.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The result is in the range [0, 2^u-1].
     /// </remarks>
@@ -5840,7 +6720,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="y">The <see cref="MpfrFloat"/> instance representing the numerator of the tangent.</param>
     /// <param name="x">The <see cref="MpfrFloat"/> instance representing the denominator of the tangent.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The sign of the result, 1 for positive, -1 for negative.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Atan2PiInplace(MpfrFloat rop, MpfrFloat y, MpfrFloat x, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5872,7 +6760,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic cosine.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int CoshInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5902,7 +6798,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic sine of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SinhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5932,7 +6836,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic tangent.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the operation succeeded, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int TanhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -5963,7 +6875,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="cop">The <see cref="MpfrFloat"/> to store the hyperbolic cosine result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> to compute the hyperbolic sine and cosine.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if success, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SinhCoshInplace(MpfrFloat sop, MpfrFloat cop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* psin = &sop.Raw)
@@ -5995,7 +6915,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic secant.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int SechInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6025,7 +6953,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic cosecant of.</param>
     /// <param name="rounding">The rounding mode to use (optional, defaults to <see cref="DefaultRounding"/>).</param>
-    /// <returns>Returns 0 if the operation succeeded, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int CschInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6055,7 +6991,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the hyperbolic cotangent.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int CothInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6085,7 +7029,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse hyperbolic cosine of.</param>
     /// <param name="rounding">The rounding mode to use (optional, defaults to <see cref="DefaultRounding"/>).</param>
-    /// <returns>The return value is 0 if the computation was successful, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AcoshInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6115,7 +7067,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse hyperbolic sine of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AsinhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6145,7 +7105,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the inverse hyperbolic tangent of.</param>
     /// <param name="rounding">The rounding mode to use (optional, defaults to <see cref="DefaultRounding"/>).</param>
-    /// <returns>The return value is 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AtanhInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6176,7 +7144,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the nearest integer from.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int EintInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6209,7 +7185,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the logarithm integral of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the computation succeeded, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Li2Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6239,7 +7223,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the gamma function.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The sign of the gamma function of <paramref name="op"/>.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int GammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6270,7 +7262,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The first <see cref="MpfrFloat"/> argument.</param>
     /// <param name="op2">The second <see cref="MpfrFloat"/> argument.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value indicates the success or failure of the operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int GammaIncInplace(MpfrFloat rop, MpfrFloat op, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6302,7 +7302,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the logarithm of the gamma function of.</param>
     /// <param name="rounding">The rounding mode to use (defaults to <see cref="DefaultRounding"/> if not specified).</param>
-    /// <returns>The sign of the gamma function of <paramref name="op"/>.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int LogGammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6367,7 +7375,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the digamma function.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The status of the operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int DigammaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6398,7 +7414,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance.</param>
     /// <param name="op2">The second <see cref="MpfrFloat"/> instance.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The sign of the result, 1 if positive, -1 if negative, 0 if zero.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int BetaInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6430,7 +7454,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Riemann zeta function at.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the computation succeeded, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ZetaInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6460,7 +7492,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The integer argument of the Riemann zeta function.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value of <see cref="MpfrLib.mpfr_zeta_ui(IntPtr, uint, MpfrRounding)"/>.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ZetaInplace(MpfrFloat rop, uint op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6489,7 +7529,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the error function of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the operation is successful, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ErrorFunctionInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6519,7 +7567,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the complementary error function of.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>Returns 0 if the computation was successful, or a non-zero value otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ComplementaryErrorFunctionInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6549,7 +7605,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function of the first kind of order zero.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the computation was successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int J0Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6579,7 +7643,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function of the first kind of order one.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of the computation, 0 if successful, or an error code if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int J1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6610,7 +7682,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="n">The order of the Bessel function.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value of the computation, 0 if success, or an error code if failed.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int JNInplace(MpfrFloat rop, int n, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6641,7 +7721,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function of the second kind of order 0.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The sign of the result.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Y0Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6675,7 +7763,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function of the second kind of order 1.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The sign of the result.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int Y1Inplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6706,7 +7802,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="n">The order of the Bessel function.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Bessel function on.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The sign of the result, -1 if negative, 0 if zero, 1 if positive.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int YNInplace(MpfrFloat rop, int n, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6738,7 +7842,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance.</param>
     /// <param name="op2">The second <see cref="MpfrFloat"/> instance.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The return value is 0 if the computation succeeded, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AGMInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6770,7 +7882,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the Airy function on.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if the computation is successful, -1 otherwise.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int AiryInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6799,7 +7919,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The exponent of the power of 2 that is closest to the value of <paramref name="rop"/>.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ConstLog2Inplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6826,7 +7954,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to set the value of.</param>
     /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
-    /// <returns>Returns 0 if the operation succeeded, or a non-zero value if an error occurred.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ConstPiInplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6853,7 +7989,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to set the value to Euler's number.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>Returns 0 if the operation is successful, otherwise returns a non-zero value.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ConstEulerInplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -6880,7 +8024,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result in.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The return value is 0 if the operation is successful; otherwise, it is a non-zero value.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ConstCatalanInplace(MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -7250,7 +8402,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the fractional part.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The sign of the fractional part of <paramref name="op"/>.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int FractionalInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -7281,7 +8441,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="fop">The <see cref="MpfrFloat"/> to store the fractional part of <paramref name="iop"/>.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> to store the integral part of <paramref name="iop"/>.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The sign of <paramref name="iop"/> if it is NaN, otherwise 0.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ModFractionalInplace(MpfrFloat iop, MpfrFloat fop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* fi = &iop.Raw)
@@ -7314,7 +8482,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="x">The <see cref="MpfrFloat"/> instance to be divided.</param>
     /// <param name="y">The <see cref="MpfrFloat"/> instance to divide by.</param>
     /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
-    /// <returns>The sign of the remainder.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The remainder is defined as <paramref name="x"/> - n * <paramref name="y"/> where n is the quotient of <paramref name="x"/> divided by <paramref name="y"/> rounded to the nearest integer.
     /// </remarks>
@@ -7358,7 +8534,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="x">The <see cref="MpfrFloat"/> instance to be divided.</param>
     /// <param name="y">The divisor.</param>
     /// <param name="rounding">The rounding mode to be used. If null, <see cref="DefaultRounding"/> will be used.</param>
-    /// <returns>The sign of the remainder.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ModInplace(MpfrFloat rop, MpfrFloat x, uint y, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -7433,7 +8617,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="x">The <see cref="MpfrFloat"/> instance to be divided.</param>
     /// <param name="y">The <see cref="MpfrFloat"/> instance to divide by.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The sign of the remainder.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int ReminderInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -7530,7 +8722,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="precision">The precision to round to.</param>
     /// <param name="rounding">The rounding mode to use. If null, the default rounding mode will be used.</param>
-    /// <returns>The number of bits truncated from the original value.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public int RoundToPrecision(int precision, MpfrRounding? rounding = null)
     {
         CheckPrecision(precision);
@@ -7619,7 +8819,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance to compare.</param>
     /// <param name="op2">The second <see cref="MpfrFloat"/> instance to compare.</param>
     /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> is used.</param>
-    /// <returns>The sign of the result, i.e. -1 if <paramref name="op1"/> is less than <paramref name="op2"/>, 0 if they are equal, and 1 if <paramref name="op1"/> is greater than <paramref name="op2"/>.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>The result is stored in <paramref name="rop"/> and returned as the sign of the result.</remarks>
     public static int MinInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
@@ -7653,7 +8861,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op1">The first <see cref="MpfrFloat"/> instance to compare.</param>
     /// <param name="op2">The second <see cref="MpfrFloat"/> instance to compare.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
-    /// <returns>The sign of the result, 1 if <paramref name="op1"/> is greater, -1 if <paramref name="op2"/> is greater, 0 if they are equal.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>The result is stored in <paramref name="rop"/> and returned as the sign of the result.</remarks>
     public static int MaxInplace(MpfrFloat rop, MpfrFloat op1, MpfrFloat op2, MpfrRounding? rounding = null)
     {
@@ -7728,7 +8944,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to get the sign from.</param>
     /// <param name="sign">The sign to set to <paramref name="rop"/>.</param>
     /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/>.</param>
-    /// <returns>The result of setting the sign of <paramref name="rop"/> to the sign of <paramref name="op"/>.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int CopySetSignInplace(MpfrFloat rop, MpfrFloat op, bool sign, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -7760,7 +8984,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The source <see cref="MpfrFloat"/> instance.</param>
     /// <param name="signOp">The <see cref="MpfrFloat"/> instance whose sign will be used to set the sign of <paramref name="rop"/>.</param>
     /// <param name="rounding">The rounding mode to use (defaults to <see cref="DefaultRounding"/>).</param>
-    /// <returns>The sign of <paramref name="rop"/> after the operation.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     public static int CopySetSignInplace(MpfrFloat rop, MpfrFloat op, MpfrFloat signOp, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
@@ -7838,7 +9070,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="t">The number of bits to shift the significand to the right before subnormalizing. Default is 0.</param>
     /// <param name="rounding">The rounding mode to use. If null, <see cref="DefaultRounding"/> will be used.</param>
-    /// <returns>The number of bits shifted to the right.</returns>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// This method modifies the current instance of <see cref="MpfrFloat"/>.
     /// </remarks>
@@ -8026,7 +9266,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
         Divide2ExpInplace(rop, op1, op2, rounding);
         return rop;
     }
-#endregion
+    #endregion
 
     #region Clear & Dispose
     private bool _disposed;
