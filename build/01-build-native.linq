@@ -60,7 +60,7 @@ static string BuildNuspec(string[] libs, string rid, string titleRid, string fol
 
 	// nuspec
 	{
-		string masterName = "LibRaw";
+		string masterName = pkgName;
 		XDocument nuspec = XDocument.Parse($"""
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
