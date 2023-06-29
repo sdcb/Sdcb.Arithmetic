@@ -77,7 +77,7 @@ static string BuildNuspec(string[] libs, string rid, string titleRid, string fol
         <summary>Native binding for {masterName} to work on {titleRid}.</summary>
         <releaseNotes></releaseNotes>
         <copyright>Copyright {DateTime.Now.Year}</copyright>
-        <tags>libraw;raw;image;sony;canon;nikon;arw;cr3;nef;linqpad-samples</tags>
+        <tags>GMP;BigInteger;BigRational;BigFloat;GmpInteger;GmpRational;GmpFloat;GmpRandom;MPFR;MpfrFloat;multi-precision;arithmetic;linqpad-samples</tags>
         <repository type="git" url="https://github.com/sdcb/{pkgName}.git" />
         <dependencies>
         </dependencies>
