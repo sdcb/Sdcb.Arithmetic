@@ -13,19 +13,13 @@
 async Task Main()
 {
 	await SetupAsync(QueryCancelToken);
-	//await new WindowsNugetSource("win-x64", "win64", "gmp-10.dll", @"C:\_\3rd\vcpkg\packages\gmp_x64-windows\bin", "Sdcb.Arithmetic.Gmp", deps: new string[0])
-	//	.Process(QueryCancelToken);
-	//await new WindowsNugetSource("win-x86", "win32", "gmp-10.dll", @"C:\_\3rd\vcpkg\packages\gmp_x86-windows\bin", "Sdcb.Arithmetic.Gmp", deps: new string[0])
-	//	.Process(QueryCancelToken);
-	//await new WindowsNugetSource("win-x64", "win64", "mpfr-6.dll", @"C:\_\3rd\vcpkg\packages\mpfr_x64-windows\bin", "Sdcb.Arithmetic.Mpfr", deps: new[] { "Sdcb.Arithmetic.Gmp" })
-	//	.Process(QueryCancelToken);
-	//await new WindowsNugetSource("win-x86", "win32", "mpfr-6.dll", @"C:\_\3rd\vcpkg\packages\mpfr_x86-windows\bin", "Sdcb.Arithmetic.Mpfr", deps: new[] { "Sdcb.Arithmetic.Gmp" } )
-	//	.Process(QueryCancelToken);
+	await new WindowsNugetSource("win-x64", "win64", new("gmp-10.dll"), @"C:\_\3rd\vcpkg\packages\gmp_x64-windows\bin", "Sdcb.Arithmetic.Gmp", deps: new string[0]).Process(QueryCancelToken);
+	await new WindowsNugetSource("win-x86", "win32", new("gmp-10.dll"), @"C:\_\3rd\vcpkg\packages\gmp_x86-windows\bin", "Sdcb.Arithmetic.Gmp", deps: new string[0]).Process(QueryCancelToken);
+	await new WindowsNugetSource("win-x64", "win64", new("mpfr-6.dll"), @"C:\_\3rd\vcpkg\packages\mpfr_x64-windows\bin", "Sdcb.Arithmetic.Mpfr", deps: new[] { "Sdcb.Arithmetic.Gmp" }).Process(QueryCancelToken);
+	await new WindowsNugetSource("win-x86", "win32", new("mpfr-6.dll"), @"C:\_\3rd\vcpkg\packages\mpfr_x86-windows\bin", "Sdcb.Arithmetic.Mpfr", deps: new[] { "Sdcb.Arithmetic.Gmp" }).Process(QueryCancelToken);
 
-	await new WindowsNugetSource("linux-x64", "linux64", new LibNames("libgmp.so.10"), @"C:\Users\ZhouJie\Downloads\vcpkg-libraw\good", "Sdcb.Arithmetic.Gmp", deps: new string[0])
-		.Process(QueryCancelToken);
-	await new WindowsNugetSource("linux-x64", "linux64", new LibNames("libmpfr.so.6"), @"C:\Users\ZhouJie\Downloads\vcpkg-libraw\good", "Sdcb.Arithmetic.Mpfr", deps: new[] { "Sdcb.Arithmetic.Gmp" })
-		.Process(QueryCancelToken);
+	await new WindowsNugetSource("linux-x64", "linux64", new("libgmp.so.10"), @"C:\Users\ZhouJie\Downloads\vcpkg-libraw\good", "Sdcb.Arithmetic.Gmp", deps: new string[0]).Process(QueryCancelToken);
+	await new WindowsNugetSource("linux-x64", "linux64", new("libmpfr.so.6"), @"C:\Users\ZhouJie\Downloads\vcpkg-libraw\good", "Sdcb.Arithmetic.Mpfr", deps: new[] { "Sdcb.Arithmetic.Gmp" }).Process(QueryCancelToken);
 }
 
 static string BuildNuspec(string[] libs, string rid, string titleRid, string folder, string pkgName, string[] deps)
@@ -140,7 +134,7 @@ public record WindowsNugetSource(string rid, string titleRid, LibNames libNames,
 			foreach (ZipArchiveEntry entry in zip.Entries.Where(x => libNames.Contains(x.Name)))
 			{
 				if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
-				
+
 				string localEntryDest = Path.Combine(CLibFolder, entry.Name);
 				Console.Write($"Expand {entry} -> {localEntryDest}... ");
 				entry.ExtractToFile(localEntryDest, overwrite: true);
