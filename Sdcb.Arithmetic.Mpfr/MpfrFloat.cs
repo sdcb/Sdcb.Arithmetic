@@ -398,7 +398,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <remarks>
     /// The string representation must be in UTF-8 encoding. If the base is not specified, the function will try to auto-detect the base from the string.
     /// </remarks>
-    public void Assign(string s, int @base = 0, MpfrRounding? rounding = null)
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
+    public int Assign(string s, int @base = 0, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pthis = &Raw)
         {
@@ -412,6 +421,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
                     string location = Marshal.PtrToStringUTF8((IntPtr)endptr)!;
                     throw new FormatException($"Failed to parse \"{s}\", base={@base} to {nameof(MpfrFloat)}, mpfr_strtofr returns {ret} at: {location}");
                 }
+                return ret;
             }
         }
     }
@@ -6118,13 +6128,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the sine and cosine.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
     /// <returns>
-    /// Returns a ternary value indicating the success of the operation.
-    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
-    /// <para>If the value is positive, the result is greater than the exact result, </para>
-    /// <para>if the value is negative, the result is lower than the exact result. </para>
-    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
-    /// <para>A NaN result always corresponds to an exact return value. </para>
-    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// Return 0 iff both results are exact, more precisely it returns s + 4c where s = 0 if sop is exact, s = 1 if sop is larger than the sine of op, s = 2 if sop is smaller than the sine of op, and similarly for c and the cosine of op.
     /// </returns>
     /// <remarks>
     /// The computation is performed in-place, i.e., the value of <paramref name="op"/> may be modified.
@@ -8242,14 +8246,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
-    /// <param name="rounding">The rounding mode to use.</param>
-    /// <returns>The sign of the result, 0 if the result is zero, or -1 if an error occurred.</returns>
-    public static int RIntCeilingInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
+    public static int RIntCeilingInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* pop = &op.Raw)
         {
-            return MpfrLib.mpfr_rint_ceil((IntPtr)pr, (IntPtr)pop, rounding);
+            return MpfrLib.mpfr_rint_ceil((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
     }
 
@@ -8257,10 +8269,10 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// Computes the smallest integer greater than or equal to the given <paramref name="op"/> <see cref="MpfrFloat"/> instance, with the specified <paramref name="rounding"/> mode and optional <paramref name="precision"/>.
     /// </summary>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the smallest integer greater than or equal to.</param>
-    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
     /// <param name="precision">The precision in bits, optional. If not specified, use the precision of <paramref name="op"/>.</param>
     /// <returns>A new instance of <see cref="MpfrFloat"/> representing the smallest integer greater than or equal to the given <paramref name="op"/>.</returns>
-    public static MpfrFloat RIntCeiling(MpfrFloat op, MpfrRounding rounding, int? precision = null)
+    public static MpfrFloat RIntCeiling(MpfrFloat op, MpfrRounding? rounding = null, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
         RIntCeilingInplace(rop, op, rounding);
@@ -8272,19 +8284,27 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
-    /// <param name="rounding">The rounding mode to use.</param>
-    /// <returns>The sign of the rounded value.</returns>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// The value of <paramref name="op"/> is rounded to the nearest integer towards negative infinity, and the result is stored in <paramref name="rop"/>. 
     /// The rounding mode is determined by <paramref name="rounding"/>. 
     /// The sign of the rounded value is returned.
     /// </remarks>
-    public static int RIntFloorInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
+    public static int RIntFloorInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* pop = &op.Raw)
         {
-            return MpfrLib.mpfr_rint_floor((IntPtr)pr, (IntPtr)pop, rounding);
+            return MpfrLib.mpfr_rint_floor((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
     }
 
@@ -8292,13 +8312,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// Computes the largest integer less than or equal to a given <paramref name="op"/> <see cref="MpfrFloat"/> instance, with the specified <paramref name="rounding"/> mode and optional <paramref name="precision"/>.
     /// </summary>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to compute the floor of.</param>
-    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
     /// <param name="precision">The precision in bits to use, or <see langword="null"/> to use the precision of <paramref name="op"/>.</param>
     /// <returns>A new instance of <see cref="MpfrFloat"/> representing the largest integer less than or equal to <paramref name="op"/>.</returns>
-    public static MpfrFloat RIntFloor(MpfrFloat op, MpfrRounding rounding, int? precision = null)
+    public static MpfrFloat RIntFloor(MpfrFloat op, MpfrRounding? rounding = null, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
-        RIntFloorInplace(rop, op, rounding);
+        RIntFloorInplace(rop, op, rounding ?? DefaultRounding);
         return rop;
     }
 
@@ -8307,14 +8327,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
-    /// <param name="rounding">The rounding mode to use.</param>
-    /// <returns>The sign of the rounded value.</returns>
-    public static int RIntRoundInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
+    public static int RIntRoundInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* pop = &op.Raw)
         {
-            return MpfrLib.mpfr_rint_round((IntPtr)pr, (IntPtr)pop, rounding);
+            return MpfrLib.mpfr_rint_round((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
     }
 
@@ -8322,13 +8350,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// Rounds the <paramref name="op"/> to the nearest integer using the specified <paramref name="rounding"/> mode and returns a new <see cref="MpfrFloat"/> instance with the result.
     /// </summary>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
-    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
     /// <param name="precision">The precision in bits of the result. If null, the precision of <paramref name="op"/> is used.</param>
     /// <returns>A new instance of <see cref="MpfrFloat"/> representing the rounded value.</returns>
-    public static MpfrFloat RIntRound(MpfrFloat op, MpfrRounding rounding, int? precision = null)
+    public static MpfrFloat RIntRound(MpfrFloat op, MpfrRounding? rounding = null, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
-        RIntRoundInplace(rop, op, rounding);
+        RIntRoundInplace(rop, op, rounding ?? DefaultRounding);
         return rop;
     }
 
@@ -8337,18 +8365,26 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
-    /// <param name="rounding">The rounding mode to use.</param>
-    /// <returns>The sign of the rounded value.</returns>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
     /// <remarks>
     /// This function rounds the value of <paramref name="op"/> to the nearest integer using "round to even" rule, and stores the result in <paramref name="rop"/>.
     /// If the fractional part of <paramref name="op"/> is exactly 0.5, the result is the nearest even integer.
     /// </remarks>
-    public static int RIntRoundEvenInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
+    public static int RIntRoundEvenInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* pop = &op.Raw)
         {
-            return MpfrLib.mpfr_rint_roundeven((IntPtr)pr, (IntPtr)pop, rounding);
+            return MpfrLib.mpfr_rint_roundeven((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
     }
 
@@ -8356,13 +8392,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// Rounds the given <paramref name="op"/> to the nearest integer using the specified <paramref name="rounding"/> mode and returns a new <see cref="MpfrFloat"/> instance with the result.
     /// </summary>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to round.</param>
-    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
     /// <param name="precision">The precision of the result. If null, the precision of <paramref name="op"/> is used.</param>
     /// <returns>A new instance of <see cref="MpfrFloat"/> representing the rounded value.</returns>
-    public static MpfrFloat RIntRoundEven(MpfrFloat op, MpfrRounding rounding, int? precision = null)
+    public static MpfrFloat RIntRoundEven(MpfrFloat op, MpfrRounding? rounding = null, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
-        RIntRoundEvenInplace(rop, op, rounding);
+        RIntRoundEvenInplace(rop, op, rounding ?? DefaultRounding);
         return rop;
     }
 
@@ -8371,14 +8407,22 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// </summary>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="op">The <see cref="MpfrFloat"/> instance to truncate.</param>
-    /// <param name="rounding">The rounding mode to use.</param>
-    /// <returns>Returns 0 if the operation is successful, -1 otherwise.</returns>
-    public static int RIntTruncateInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding rounding)
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
+    /// <returns>
+    /// Returns a ternary value indicating the success of the operation.
+    /// <para>If the value is 0, the result stored in the destination variable is exact.</para>
+    /// <para>If the value is positive, the result is greater than the exact result, </para>
+    /// <para>if the value is negative, the result is lower than the exact result. </para>
+    /// <para>If the result is infinite, it is considered inexact if it was obtained by overflow, and exact otherwise. </para>
+    /// <para>A NaN result always corresponds to an exact return value. </para>
+    /// <para>The opposite of the returned ternary value is representable in an int.</para>
+    /// </returns>
+    public static int RIntTruncateInplace(MpfrFloat rop, MpfrFloat op, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* pop = &op.Raw)
         {
-            return MpfrLib.mpfr_rint_trunc((IntPtr)pr, (IntPtr)pop, rounding);
+            return MpfrLib.mpfr_rint_trunc((IntPtr)pr, (IntPtr)pop, rounding ?? DefaultRounding);
         }
     }
 
@@ -8386,13 +8430,13 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// Returns a new <see cref="MpfrFloat"/> instance representing the integer part of the input <paramref name="op"/> with the specified <paramref name="rounding"/> mode and optional <paramref name="precision"/>.
     /// </summary>
     /// <param name="op">The input <see cref="MpfrFloat"/> instance.</param>
-    /// <param name="rounding">The rounding mode to use.</param>
+    /// <param name="rounding">The rounding mode to use, defaults to <see cref="DefaultRounding"/> if not specified.</param>
     /// <param name="precision">The precision of the result. If not specified, use the precision of the input <paramref name="op"/>.</param>
     /// <returns>A new instance of <see cref="MpfrFloat"/> representing the integer part of the input <paramref name="op"/>.</returns>
-    public static MpfrFloat RIntTruncate(MpfrFloat op, MpfrRounding rounding, int? precision = null)
+    public static MpfrFloat RIntTruncate(MpfrFloat op, MpfrRounding? rounding = null, int? precision = null)
     {
         MpfrFloat rop = new(precision ?? op.Precision);
-        RIntTruncateInplace(rop, op, rounding);
+        RIntTruncateInplace(rop, op, rounding ?? DefaultRounding);
         return rop;
     }
 

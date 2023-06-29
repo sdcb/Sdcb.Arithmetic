@@ -119,7 +119,7 @@ class MethodReplacer : CSharpSyntaxRewriter
 		"mpfr_exp10","mpfr_expm1","mpfr_exp2m1","mpfr_exp10m1","mpfr_pow","mpfr_powr","mpfr_pow_ui","mpfr_pow_si",
 		"mpfr_pow_uj","mpfr_pow_sj","mpfr_pown","mpfr_pow_z","mpfr_ui_pow_ui","mpfr_ui_pow","mpfr_compound_si","mpfr_cos",
 		"mpfr_sin","mpfr_tan","mpfr_cosu","mpfr_sinu","mpfr_tanu","mpfr_cospi","mpfr_sinpi","mpfr_tanpi",
-		"mpfr_sin_cos","mpfr_sec","mpfr_csc","mpfr_cot","mpfr_acos","mpfr_asin","mpfr_atan","mpfr_acosu",
+		"mpfr_sec","mpfr_csc","mpfr_cot","mpfr_acos","mpfr_asin","mpfr_atan","mpfr_acosu",
 		"mpfr_asinu","mpfr_atanu","mpfr_acospi","mpfr_asinpi","mpfr_atanpi","mpfr_atan2","mpfr_atan2u","mpfr_atan2pi",
 		"mpfr_cosh","mpfr_sinh","mpfr_tanh","mpfr_sinh_cosh","mpfr_sech","mpfr_csch","mpfr_coth","mpfr_acosh",
 		"mpfr_asinh","mpfr_atanh","mpfr_eint","mpfr_li2","mpfr_gamma","mpfr_gamma_inc","mpfr_lngamma","mpfr_lgamma",
