@@ -8626,16 +8626,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="x">The dividend <see cref="MpfrFloat"/> instance.</param>
     /// <param name="y">The divisor <see cref="MpfrFloat"/> instance.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>A tuple of two integers, the quotient and the remainder.</returns>
-    public static (int quotient, int round) ModQuotientInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
+    /// <returns>A tuple of two integers, the quotient and the ternary value which can determine result is exact(0), greater(>0) or lower(&lt;0).</returns>
+    public static (int quotient, int ternary) ModQuotientInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* px = &x.Raw)
         fixed (Mpfr_t* py = &y.Raw)
         {
             int q;
-            int round = MpfrLib.mpfr_fmodquo((IntPtr)pr, (IntPtr)(&q), (IntPtr)px, (IntPtr)py, rounding ?? DefaultRounding);
-            return (q, round);
+            int ternary = MpfrLib.mpfr_fmodquo((IntPtr)pr, (IntPtr)(&q), (IntPtr)px, (IntPtr)py, rounding ?? DefaultRounding);
+            return (q, ternary);
         }
     }
 
@@ -8646,12 +8646,12 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="y">The divisor.</param>
     /// <param name="precision">The precision in bits of the result. If null, use the default precision.</param>
     /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
-    /// <returns>A tuple containing the quotient, remainder, and the rounding mode used.</returns>
-    public static (MpfrFloat rop, int quotient, int round) ModQuotient(MpfrFloat x, MpfrFloat y, int? precision = null, MpfrRounding? rounding = null)
+    /// <returns>A tuple containing the quotient, remainder, and the ternary value which can determine result is exact(0), greater(>0) or lower(&lt;0).</returns>
+    public static (MpfrFloat rop, int quotient, int ternary) ModQuotient(MpfrFloat x, MpfrFloat y, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
-        (int quotient, int round) = ModQuotientInplace(rop, x, y, rounding);
-        return (rop, quotient, round);
+        (int quotient, int ternary) = ModQuotientInplace(rop, x, y, rounding);
+        return (rop, quotient, ternary);
     }
 
     /// <summary>
@@ -8702,16 +8702,16 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="x">The dividend <see cref="MpfrFloat"/> instance.</param>
     /// <param name="y">The divisor <see cref="MpfrFloat"/> instance.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="DefaultRounding"/>.</param>
-    /// <returns>A tuple of two integers, the quotient and the rounding flag.</returns>
-    public static (int quotient, int round) ReminderQuotientInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
+    /// <returns>A tuple of two integers, the quotient and the ternary value which can determine result is exact(0), greater(>0) or lower(&lt;0).</returns>
+    public static (int quotient, int ternary) ReminderQuotientInplace(MpfrFloat rop, MpfrFloat x, MpfrFloat y, MpfrRounding? rounding = null)
     {
         fixed (Mpfr_t* pr = &rop.Raw)
         fixed (Mpfr_t* px = &x.Raw)
         fixed (Mpfr_t* py = &y.Raw)
         {
             int q;
-            int round = MpfrLib.mpfr_remquo((IntPtr)pr, (IntPtr)(&q), (IntPtr)px, (IntPtr)py, rounding ?? DefaultRounding);
-            return (q, round);
+            int ternary = MpfrLib.mpfr_remquo((IntPtr)pr, (IntPtr)(&q), (IntPtr)px, (IntPtr)py, rounding ?? DefaultRounding);
+            return (q, ternary);
         }
     }
 
@@ -8722,15 +8722,15 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     /// <param name="y">The divisor.</param>
     /// <param name="precision">The precision in bits of the result. If null, use the default precision.</param>
     /// <param name="rounding">The rounding mode to use. If null, use the default rounding mode.</param>
-    /// <returns>A tuple containing the remainder as a new <see cref="MpfrFloat"/> instance, the quotient as an integer, and the rounding mode used.</returns>
+    /// <returns>A tuple containing the remainder as a new <see cref="MpfrFloat"/> instance, the quotient as an integer, and the ternary value which can determine result is exact(0), greater(>0) or lower(&lt;0).</returns>
     /// <remarks>
     /// The remainder is computed as <paramref name="x"/> - <paramref name="y"/> * quotient, where quotient is the integer part of <paramref name="x"/> / <paramref name="y"/>.
     /// </remarks>
-    public static (MpfrFloat rop, int quotient, int round) ReminderQuotient(MpfrFloat x, MpfrFloat y, int? precision = null, MpfrRounding? rounding = null)
+    public static (MpfrFloat rop, int quotient, int ternary) ReminderQuotient(MpfrFloat x, MpfrFloat y, int? precision = null, MpfrRounding? rounding = null)
     {
         MpfrFloat rop = CreateWithNullablePrecision(precision);
-        (int quotient, int round) = ReminderQuotientInplace(rop, x, y, rounding);
-        return (rop, quotient, round);
+        (int quotient, int ternary) = ReminderQuotientInplace(rop, x, y, rounding);
+        return (rop, quotient, ternary);
     }
 
     /// <summary>

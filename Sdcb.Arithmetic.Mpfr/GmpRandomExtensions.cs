@@ -13,7 +13,7 @@ public unsafe static class GmpRandomExtensions
     /// </summary>
     /// <param name="random">The <see cref="GmpRandom"/> generator to use.</param>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the generated value.</param>
-    /// <returns>An integer indicating the success or failure of the operation.</returns>
+    /// <returns>The ternary value which can determine result is exact(0), greater(>0) or lower(&lt;0).</returns>
     /// <remarks>
     /// The <paramref name="rop"/> instance will be modified to store the generated value.
     /// </remarks>
@@ -45,7 +45,7 @@ public unsafe static class GmpRandomExtensions
     /// <param name="random">The <see cref="GmpRandom"/> generator to use.</param>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the result.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="MpfrFloat.DefaultRounding"/>.</param>
-    /// <returns>The status code of the operation.</returns>
+    /// <returns>The ternary value which can determine result is exact(0), greater(>0) or lower(&lt;0).</returns>
     public static int NextMpfrFloatRoundInplace(this GmpRandom random, MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (GmpRandomState* prandom = &random.Raw)
@@ -75,7 +75,7 @@ public unsafe static class GmpRandomExtensions
     /// <param name="random">The <see cref="GmpRandom"/> generator to use.</param>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the generated value.</param>
     /// <param name="rounding">The rounding mode to use, default to <see cref="MpfrFloat.DefaultRounding"/>.</param>
-    /// <returns>The status code of the generation operation.</returns>
+    /// <returns>The ternary value which can determine result is exact(0), greater(>0) or lower(&lt;0).</returns>
     public static int NextNMpfrFloatInplace(this GmpRandom random, MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (GmpRandomState* prandom = &random.Raw)
@@ -106,7 +106,7 @@ public unsafe static class GmpRandomExtensions
     /// <param name="rop1">The first <see cref="MpfrFloat"/> instance to store the generated value.</param>
     /// <param name="rop2">The second <see cref="MpfrFloat"/> instance to store the generated value.</param>
     /// <param name="rounding">The optional rounding mode to use, default to <see cref="MpfrFloat.DefaultRounding"/>.</param>
-    /// <returns>The return value of <see cref="MpfrLib.mpfr_grandom(IntPtr, IntPtr, IntPtr, MpfrRounding)"/>.</returns>
+    /// <returns>The ternary value which can determine result is exact(0), greater(>0) or lower(&lt;0).</returns>
     [Obsolete("Use NextNMpfrFloatInplace instead: mpfr_nrandom is much more efficient than mpfr_grandom, especially for large precision. Thus mpfr_grandom is marked as deprecated and will be removed in a future release.")]
     public static int NextGMpfrFloatInplace(this GmpRandom random, MpfrFloat rop1, MpfrFloat rop2, MpfrRounding? rounding = null)
     {
@@ -140,7 +140,7 @@ public unsafe static class GmpRandomExtensions
     /// <param name="random">The <see cref="GmpRandom"/> instance to use as the random number generator.</param>
     /// <param name="rop">The <see cref="MpfrFloat"/> instance to store the generated random number.</param>
     /// <param name="rounding">The optional rounding mode to use, default to <see cref="MpfrFloat.DefaultRounding"/>.</param>
-    /// <returns>The status code of the generation operation.</returns>
+    /// <returns>The ternary value which can determine result is exact(0), greater(>0) or lower(&lt;0).</returns>
     public static int NextEMpfrFloatInplace(this GmpRandom random, MpfrFloat rop, MpfrRounding? rounding = null)
     {
         fixed (GmpRandomState* prandom = &random.Raw)
