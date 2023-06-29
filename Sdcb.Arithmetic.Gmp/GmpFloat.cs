@@ -13,8 +13,9 @@ namespace Sdcb.Arithmetic.Gmp;
 public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, IComparable, IComparable<GmpFloat>
 {
     /// <summary>
-    /// The default precision for GmpFloat operations.
+    /// Gets or sets the default precision used for new <see cref="GmpFloat"/> instances, in bits.
     /// </summary>
+    /// <value>The default precision in bits.</value>
     public static uint DefaultPrecision
     {
         get => GmpLib.__gmpf_get_default_prec();
@@ -25,8 +26,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
 
     #region Initialization functions
 
-
-    /// <summary>Initializes a new instance of the <see cref="GmpFloat"/> class.</summary>
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GmpFloat"/> class with <see cref="DefaultPrecision"/>.
+    /// </summary>
     public unsafe GmpFloat()
     {
         fixed (Mpf_t* ptr = &Raw)
@@ -36,18 +38,18 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GmpFloat"/> class with the specified <see cref="Mpf_t "/> structure.
+    /// Initializes a new instance of the <see cref="GmpFloat"/> class with the specified <paramref name="raw"/> value.
     /// </summary>
-    /// <param name="raw">The <see cref="Mpf_t "/> structure to initialize this instance with.</param>
+    /// <param name="raw">The <see cref="Mpf_t"/> value to assign to the new instance.</param>
     public GmpFloat(Mpf_t raw)
     {
         Raw = raw;
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GmpFloat"/> class.
+    /// Initializes a new instance of the <see cref="GmpFloat"/> class with the specified precision.
     /// </summary>
-    /// <param name="precision">The number of bits to use for the float's mantissa.</param>
+    /// <param name="precision">The precision in bits. If set to 0, the <see cref="DefaultPrecision"/> is used.</param>
     public unsafe GmpFloat(uint precision)
     {
         fixed (Mpf_t* ptr = &Raw)
@@ -64,9 +66,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Create a new instance of <see cref="GmpFloat"/> with the specified precision, or default precision if <paramref name="precision"/> is null.
+    /// Create a new instance of <see cref="GmpFloat"/> with the specified precision, or <see cref="DefaultPrecision"/> if <paramref name="precision"/> is null.
     /// </summary>
-    /// <param name="precision">The precision of the new instance, or null to use default precision.</param>
+    /// <param name="precision">The precision of the new instance, or null to use <see cref="DefaultPrecision"/>.</param>
     /// <returns>A new instance of <see cref="GmpFloat"/> with the specified precision.</returns>
     internal static GmpFloat CreateWithNullablePrecision(uint? precision) => precision switch
     {
@@ -78,9 +80,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     #region Combined Initialization and Assignment Functions
 
     /// <summary>
-    /// Creates a new instance of <see cref="GmpFloat"/> that is a copy of the current instance.
+    /// Creates a deep copy of the current <see cref="GmpFloat"/> instance.
     /// </summary>
-    /// <returns>A new instance of <see cref="GmpFloat"/> that is a copy of the current instance.</returns>
+    /// <returns>A new <see cref="GmpFloat"/> instance with the same value and precision as the current instance.</returns>
     public GmpFloat Clone()
     {
         GmpFloat rop = new(Precision);
@@ -89,11 +91,10 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Create a <see cref="GmpFloat"/> instance from a integer <paramref name="val"/>, precision default to <see cref="DefaultPrecision"/> in bit.
+    /// Create a <see cref="GmpFloat"/> instance from a integer <paramref name="val"/> with <see cref="DefaultPrecision"/>.
     /// </summary>
     /// <param name="val">The integer value to convert.</param>
     /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value.</returns>
-    /// <exception cref="System.ArithmeticException">Thrown when the conversion from <paramref name="val"/> to <see cref="GmpFloat"/> fails.</exception>
     public unsafe static GmpFloat From(int val)
     {
         Mpf_t raw = new();
@@ -103,18 +104,18 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Converts the specified int value to a GmpFloat.
+    /// Implicitly converts an <see cref="int"/> value to a <see cref="GmpFloat"/> instance.
     /// </summary>
-    /// <param name="val">The int value to convert.</param>
-    /// <returns>The GmpFloat result of the conversion.</returns>
+    /// <param name="val">The integer value to convert.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value.</returns>
     public static implicit operator GmpFloat(int val) => From(val);
 
     /// <summary>
-    /// Create a <see cref="GmpFloat"/> instance from a integer <paramref name="val"/> with specified <paramref name="precision"/> in bit.
+    /// Create a <see cref="GmpFloat"/> instance from a integer <paramref name="val"/> with the specified <paramref name="precision"/> in bits.
     /// </summary>
     /// <param name="val">The integer value to convert.</param>
-    /// <param name="precision">The precision in bit of the new <see cref="GmpFloat"/> instance.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value.</returns>
+    /// <param name="precision">The precision in bits for the resulting <see cref="GmpFloat"/> instance.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value with the specified precision.</returns>
     public unsafe static GmpFloat From(int val, uint precision)
     {
         GmpFloat f = new(precision);
@@ -136,16 +137,18 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Implicitly converts the specified uint value to a <see cref="GmpFloat"/>.
+    /// Implicitly convert a <see cref="uint"/> value to a <see cref="GmpFloat"/> instance, precision default to <see cref="DefaultPrecision"/> in bit.
     /// </summary>
+    /// <param name="val">The unsigned integer value to convert.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value.</returns>
     public static implicit operator GmpFloat(uint val) => From(val);
 
     /// <summary>
-    /// Create a <see cref="GmpFloat"/> instance from an unsigned integer <paramref name="val"/> with a specified <paramref name="precision"/> in bit.
+    /// Create a <see cref="GmpFloat"/> instance from an unsigned integer <paramref name="val"/> with the specified <paramref name="precision"/> in bits.
     /// </summary>
     /// <param name="val">The unsigned integer value to convert.</param>
-    /// <param name="precision">The precision in bit of the new <see cref="GmpFloat"/> instance.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value.</returns>
+    /// <param name="precision">The desired precision in bits.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value with the specified precision.</returns>
     public unsafe static GmpFloat From(uint val, uint precision)
     {
         GmpFloat f = new(precision);
@@ -154,7 +157,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Create a <see cref="GmpFloat"/> instance from a double-precision floating-point <paramref name="val"/>, precision default to <see cref="DefaultPrecision"/> in bit.
+    /// Create a <see cref="GmpFloat"/> instance from a double-precision floating-point number <paramref name="val"/>, precision default to <see cref="DefaultPrecision"/> in bit.
     /// </summary>
     /// <param name="val">The double-precision floating-point value to convert.</param>
     /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value.</returns>
@@ -167,16 +170,18 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Implicitly converts the specified <see cref="double"/> value to a <see cref="GmpFloat"/>.
+    /// Implicitly converts a <see cref="double"/> to a <see cref="GmpFloat"/>.
     /// </summary>
+    /// <param name="val">The double value to convert.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value.</returns>
     public static implicit operator GmpFloat(double val) => From(val);
 
     /// <summary>
-    /// Create a <see cref="GmpFloat"/> instance from a double <paramref name="val"/> with specified <paramref name="precision"/> in bit.
+    /// Create a <see cref="GmpFloat"/> instance from a double <paramref name="val"/> with the specified <paramref name="precision"/> in bits.
     /// </summary>
     /// <param name="val">The double value to convert.</param>
-    /// <param name="precision">The precision in bit of the new <see cref="GmpFloat"/> instance.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value.</returns>
+    /// <param name="precision">The precision in bits for the resulting <see cref="GmpFloat"/>.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value with the specified precision.</returns>
     public unsafe static GmpFloat From(double val, uint precision)
     {
         GmpFloat f = new(precision);
@@ -185,11 +190,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Create a <see cref="GmpFloat"/> instance from a <see cref="GmpInteger"/> <paramref name="val"/> with a specified <paramref name="precision"/> in bit.
+    /// Create a <see cref="GmpFloat"/> instance from a <see cref="GmpInteger"/> <paramref name="val"/> with the specified <paramref name="precision"/> in bits.
     /// </summary>
     /// <param name="val">The <see cref="GmpInteger"/> value to convert.</param>
-    /// <param name="precision">The precision in bit of the resulting <see cref="GmpFloat"/> instance.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value.</returns>
+    /// <param name="precision">The precision of the resulting <see cref="GmpFloat"/> in bits.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value with the specified precision.</returns>
     public unsafe static GmpFloat From(GmpInteger val, uint precision)
     {
         GmpFloat f = new(precision);
@@ -198,7 +203,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Create a <see cref="GmpFloat"/> instance from a <see cref="GmpInteger"/> <paramref name="val"/>.
+    /// Create a <see cref="GmpFloat"/> instance from a <see cref="GmpInteger"/> <paramref name="val"/>, precision default to <see cref="DefaultPrecision"/> in bit.
     /// </summary>
     /// <param name="val">The <see cref="GmpInteger"/> value to convert.</param>
     /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value.</returns>
@@ -209,16 +214,20 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         return f;
     }
 
-    /// <summary>Implicitly converts a GmpInteger value into a GmpFloat value.</summary>
+    /// <summary>
+    /// Implicitly converts a <see cref="GmpInteger"/> to a <see cref="GmpFloat"/> with the same value.
+    /// </summary>
+    /// <param name="val">The <see cref="GmpInteger"/> to convert.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the converted value.</returns>
     public static implicit operator GmpFloat(GmpInteger val) => From(val);
 
     /// <summary>
-    /// Parses the string representation of a number in the specified base and returns a new instance of <see cref="GmpFloat"/> that represents that number.
+    /// Parse a string representation of a floating-point number in the specified base and create a <see cref="GmpFloat"/> instance.
     /// </summary>
-    /// <param name="val">The string representation of the number to parse.</param>
-    /// <param name="base">The base of the number to parse. Default is 10.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> that represents the parsed number.</returns>
-    /// <exception cref="FormatException">Thrown when the string representation of the number is not in the correct format.</exception>
+    /// <param name="val">The string representation of the floating-point number.</param>
+    /// <param name="base">The base of the number system, default is 10 (decimal).</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the parsed value.</returns>
+    /// <exception cref="FormatException">Thrown when the string cannot be parsed to a floating-point number in the specified base.</exception>
     public unsafe static GmpFloat Parse(string val, int @base = 10)
     {
         Mpf_t raw = new();
@@ -237,12 +246,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Parses the string representation of a number in a specified base and precision, and returns a new instance of <see cref="GmpFloat"/>.
+    /// Parse a string representation of a number into a <see cref="GmpFloat"/> with specified precision and base.
     /// </summary>
     /// <param name="val">The string representation of the number to parse.</param>
-    /// <param name="precision">The precision of the resulting <see cref="GmpFloat"/> in bits.</param>
-    /// <param name="base">The base of the number to parse. Default is 10.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the parsed number.</returns>
+    /// <param name="precision">The desired precision in bits for the resulting <see cref="GmpFloat"/>.</param>
+    /// <param name="base">The base of the number to parse. Default is 10 (decimal).</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the parsed value.</returns>
     public static GmpFloat Parse(string val, uint precision, int @base = 10)
     {
         GmpFloat f = new(precision);
@@ -251,12 +260,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Tries to parse a string <paramref name="val"/> to a <see cref="GmpFloat"/> instance with the specified <paramref name="base"/>.
+    /// Tries to parse a string representation of a floating-point number into a <see cref="GmpFloat"/> instance.
     /// </summary>
-    /// <param name="val">The string to parse.</param>
-    /// <param name="result">When this method returns, contains the <see cref="GmpFloat"/> instance equivalent to the numeric value or null if the conversion failed.</param>
-    /// <param name="base">The base of the number in <paramref name="val"/>, which must be 2, 8, 10, or 16. Default is 10.</param>
-    /// <returns>true if <paramref name="val"/> was converted successfully; otherwise, false.</returns>
+    /// <param name="val">The string representation of the floating-point number to parse.</param>
+    /// <param name="result">When this method returns, contains the <see cref="GmpFloat"/> equivalent to the floating-point number contained in <paramref name="val"/>, if the conversion succeeded, or null if the conversion failed.</param>
+    /// <param name="base">The base of the number system to use for parsing, default is 10.</param>
+    /// <returns>true if the parsing succeeded; false otherwise.</returns>
     public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out GmpFloat result, int @base = 10)
     {
         Mpf_t raw = new();
@@ -280,13 +289,13 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Tries to parse a string <paramref name="val"/> to a <see cref="GmpFloat"/> instance with the specified <paramref name="precision"/> and <paramref name="base"/>.
+    /// Tries to parse a <see cref="GmpFloat"/> from a string <paramref name="val"/> with specified <paramref name="precision"/> and <paramref name="base"/>.
     /// </summary>
-    /// <param name="val">The string to parse.</param>
-    /// <param name="result">When this method returns, contains the <see cref="GmpFloat"/> instance equivalent to the string <paramref name="val"/>, or null if the conversion failed.</param>
-    /// <param name="precision">The precision in bit of the <see cref="GmpFloat"/> instance to create.</param>
-    /// <param name="base">The base of the number in <paramref name="val"/>. Default is 10.</param>
-    /// <returns>true if the conversion succeeded; otherwise, false.</returns>
+    /// <param name="val">The string value to parse.</param>
+    /// <param name="result">The resulting <see cref="GmpFloat"/> if the parsing is successful, otherwise null.</param>
+    /// <param name="precision">The precision of the resulting <see cref="GmpFloat"/> in bits.</param>
+    /// <param name="base">The base of the number system used in the input string, default to 10.</param>
+    /// <returns>True if the parsing is successful, otherwise false.</returns>
     public unsafe static bool TryParse(string val, [MaybeNullWhen(returnValue: false)] out GmpFloat result, uint precision, int @base = 10)
     {
         GmpFloat f = new(precision);
@@ -311,7 +320,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         }
     }
 
-    /// Gets or sets the precision of the <see cref="GmpFloat"/> instance.
+    /// <summary>
+    /// Gets or sets the precision of the <see cref="GmpFloat"/> instance in bits.
+    /// </summary>
+    /// <value>
+    /// The precision in bits.
+    /// </value>
     public unsafe uint Precision
     {
         get
@@ -331,11 +345,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Sets the precision of the current <see cref="GmpFloat"/> instance using the raw number of bits.
+    /// Sets the raw precision of the current <see cref="GmpFloat"/> instance. This method is obsolete, use <see cref="Precision"/> property instead.
     /// </summary>
-    /// <param name="value">The number of bits to set as the precision.</param>
+    /// <param name="value">The new raw precision value.</param>
     /// <remarks>
-    /// This method is obsolete, use <see cref="Precision"/> property instead.
+    /// This method is marked as obsolete and may be removed in future versions.
     /// </remarks>
     [Obsolete("use Precision")]
     public unsafe void SetRawPrecision(uint value)
@@ -350,9 +364,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     #region Assignment functions
 
     /// <summary>
-    /// Assign the value of another <see cref="GmpFloat"/> instance to this instance.
+    /// Assigns the value of the specified <see cref="GmpFloat"/> <paramref name="op"/> to the current instance.
     /// </summary>
-    /// <param name="op">The <see cref="GmpFloat"/> instance to assign from.</param>
+    /// <param name="op">The <see cref="GmpFloat"/> instance to assign its value from.</param>
     public unsafe void Assign(GmpFloat op)
     {
         fixed (Mpf_t* pthis = &Raw)
@@ -363,7 +377,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Assigns the unsigned integer <paramref name="op"/> to the current instance of <see cref="GmpFloat"/>.
+    /// Assigns the value of an unsigned integer <paramref name="op"/> to the current <see cref="GmpFloat"/> instance.
     /// </summary>
     /// <param name="op">The unsigned integer value to assign.</param>
     public unsafe void Assign(uint op)
@@ -375,7 +389,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Assigns an integer value <paramref name="op"/> to the current <see cref="GmpFloat"/> instance.
+    /// Assigns the <paramref name="op"/> integer value to the current <see cref="GmpFloat"/> instance.
     /// </summary>
     /// <param name="op">The integer value to assign.</param>
     public unsafe void Assign(int op)
@@ -387,12 +401,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Assigns a double-precision floating-point value to the current <see cref="GmpFloat"/> instance.
+    /// Assigns the value of a double <paramref name="op"/> to the current <see cref="GmpFloat"/> instance.
     /// </summary>
-    /// <param name="op">The double-precision floating-point value to assign.</param>
-    /// <remarks>
-    /// This method assigns the value of <paramref name="op"/> to the current <see cref="GmpFloat"/> instance.
-    /// </remarks>
+    /// <param name="op">The double value to assign.</param>
     public unsafe void Assign(double op)
     {
         fixed (Mpf_t* pthis = &Raw)
@@ -402,9 +413,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Assigns the value of a <see cref="GmpInteger"/> <paramref name="op"/> to this <see cref="GmpFloat"/> instance.
+    /// Assigns the value of the specified <see cref="GmpInteger"/> <paramref name="op"/> to the current <see cref="GmpFloat"/> instance.
     /// </summary>
-    /// <param name="op">The <see cref="GmpInteger"/> instance to assign the value from.</param>
+    /// <param name="op">The <see cref="GmpInteger"/> value to assign.</param>
     public unsafe void Assign(GmpInteger op)
     {
         fixed (Mpf_t* pthis = &Raw)
@@ -415,9 +426,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Assigns the value of a <see cref="GmpRational"/> instance to this <see cref="GmpFloat"/> instance.
+    /// Assigns the value of a <see cref="GmpRational"/> <paramref name="op"/> to the current <see cref="GmpFloat"/> instance.
     /// </summary>
-    /// <param name="op">The <see cref="GmpRational"/> instance to assign from.</param>
+    /// <param name="op">The <see cref="GmpRational"/> value to assign.</param>
     public unsafe void Assign(GmpRational op)
     {
         fixed (Mpf_t* pthis = &Raw)
@@ -428,11 +439,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Assigns the value of a string <paramref name="op"/> to the current <see cref="GmpFloat"/> instance.
+    /// Assigns the value of a string <paramref name="op"/> to the current <see cref="GmpFloat"/> instance, with an optional number <paramref name="base"/>.
     /// </summary>
     /// <param name="op">The string representation of the value to assign.</param>
-    /// <param name="base">The base of the number in the string representation. Default is 10.</param>
-    /// <exception cref="FormatException">Thrown when the string <paramref name="op"/> cannot be parsed to a <see cref="GmpFloat"/> instance.</exception>
+    /// <param name="base">The optional number base of the value to assign, default is 10.</param>
+    /// <exception cref="FormatException">Thrown when the string cannot be parsed to a <see cref="GmpFloat"/>.</exception>
     public unsafe void Assign(string op, int @base = 10)
     {
         fixed (Mpf_t* pthis = &Raw)
@@ -450,13 +461,10 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Swaps the values of two <see cref="GmpFloat"/> instances.
+    /// Swaps the values of two <see cref="GmpFloat"/> instances, <paramref name="op1"/> and <paramref name="op2"/>.
     /// </summary>
     /// <param name="op1">The first <see cref="GmpFloat"/> instance.</param>
     /// <param name="op2">The second <see cref="GmpFloat"/> instance.</param>
-    /// <remarks>
-    /// This method swaps the values of <paramref name="op1"/> and <paramref name="op2"/> by reference.
-    /// </remarks>
     public unsafe static void Swap(GmpFloat op1, GmpFloat op2)
     {
         fixed (Mpf_t* pop1 = &op1.Raw)
@@ -470,9 +478,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     #region Conversion Functions
 
     /// <summary>
-    /// Converts the current <see cref="GmpFloat"/> instance to a double-precision floating-point number.
+    /// Converts the current <see cref="GmpFloat"/> instance to a <see cref="double"/> value.
     /// </summary>
-    /// <returns>A double-precision floating-point number that represents the value of the current <see cref="GmpFloat"/> instance.</returns>
+    /// <returns>A <see cref="double"/> representation of the current <see cref="GmpFloat"/> instance.</returns>
     public unsafe double ToDouble()
     {
         fixed (Mpf_t* ptr = &Raw)
@@ -482,16 +490,16 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Explicitly converts the given instance of <see cref="GmpFloat"/> to a <see cref="double"/>.
+    /// Converts the value of the specified <see cref="GmpFloat"/> to its equivalent double-precision floating-point number.
     /// </summary>
-    /// <param name="op">The given instance to convert.</param>
-    /// <returns>The <see cref="double"/> resulting from the conversion.</returns>
+    /// <param name="op">The <see cref="GmpFloat"/> to be converted.</param>
+    /// <returns>A double-precision floating-point number equivalent to the value of <paramref name="op"/>.</returns>
     public static explicit operator double(GmpFloat op) => op.ToDouble();
 
     /// <summary>
-    /// Converts the current <see cref="GmpFloat"/> instance to an <see cref="ExpDouble"/> instance.
+    /// Converts the current <see cref="GmpFloat"/> instance to an <see cref="ExpDouble"/> representation.
     /// </summary>
-    /// <returns>An <see cref="ExpDouble"/> instance representing the same value as the current <see cref="GmpFloat"/> instance.</returns>
+    /// <returns>An <see cref="ExpDouble"/> instance representing the current <see cref="GmpFloat"/> value.</returns>
     public unsafe ExpDouble ToExpDouble()
     {
         fixed (Mpf_t* ptr = &Raw)
@@ -505,7 +513,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// <summary>
     /// Converts the current <see cref="GmpFloat"/> instance to a 32-bit signed integer.
     /// </summary>
-    /// <returns>A 32-bit signed integer that represents the value of the current <see cref="GmpFloat"/> instance.</returns>
+    /// <returns>A 32-bit signed integer representation of the current <see cref="GmpFloat"/> instance.</returns>
     public unsafe int ToInt32()
     {
         fixed (Mpf_t* ptr = &Raw)
@@ -515,14 +523,16 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Explicitly converts the given instance of <see cref="GmpFloat"/> to a <see cref="int"/>.
+    /// Explicitly converts a <see cref="GmpFloat"/> instance to an <see cref="int"/>.
     /// </summary>
+    /// <param name="op">The <see cref="GmpFloat"/> instance to convert.</param>
+    /// <returns>An <see cref="int"/> value that represents the converted value of the <see cref="GmpFloat"/> instance.</returns>
     public static explicit operator int(GmpFloat op) => op.ToInt32();
 
     /// <summary>
     /// Converts the current <see cref="GmpFloat"/> instance to an unsigned 32-bit integer.
     /// </summary>
-    /// <returns>An unsigned 32-bit integer representation of the current <see cref="GmpFloat"/> instance.</returns>
+    /// <returns>An unsigned 32-bit integer representing the value of the current <see cref="GmpFloat"/> instance.</returns>
     public unsafe uint ToUInt32()
     {
         fixed (Mpf_t* ptr = &Raw)
@@ -532,25 +542,30 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Converts the current <see cref="GmpFloat"/> instance to a <see cref="GmpRational"/> instance.
+    /// Converts the current <see cref="GmpFloat"/> instance to a <see cref="GmpRational"/> representation.
     /// </summary>
-    /// <returns>A new instance of <see cref="GmpRational"/> representing the same value as the current <see cref="GmpFloat"/> instance.</returns>
+    /// <returns>A new instance of <see cref="GmpRational"/> representing the converted value.</returns>
     public GmpRational ToGmpRational() => GmpRational.From(this);
 
-    /// <summary>Explicitly converts a GmpFloat value to an unsigned 32-bit integer.</summary>
+    /// <summary>
+    /// Explicitly converts a <see cref="GmpFloat"/> to an unsigned 32-bit integer.
+    /// </summary>
+    /// <param name="op">The <see cref="GmpFloat"/> instance to convert.</param>
+    /// <returns>An unsigned 32-bit integer representing the converted value.</returns>
     public static explicit operator uint(GmpFloat op) => op.ToUInt32();
 
     /// <summary>
-    /// Returns a string representation of the current <see cref="GmpFloat"/> object using default format.
+    /// Returns a string representation of the current <see cref="GmpFloat"/> value using the default format.
     /// </summary>
-    /// <returns>A string representation of the current <see cref="GmpFloat"/> object.</returns>
+    /// <returns>A string representation of the current <see cref="GmpFloat"/> value.</returns>
     public override string ToString() => ToString(format: null);
 
     /// <summary>
-    /// Converts the value of this <see cref="GmpFloat"/> instance to its equivalent string representation using the specified base.
+    /// Converts the <see cref="GmpFloat"/> value to its string representation in the specified base.
     /// </summary>
-    /// <param name="base">The base of the number system to use for the return value. Default is 10.</param>
-    /// <returns>A string representation of the value of this instance in the specified base.</returns>
+    /// <param name="base">The base of the number system to use for the string representation (default is 10).</param>
+    /// <returns>A string representation of the <see cref="GmpFloat"/> value in the specified base.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the base is less than 2 or greater than 62.</exception>
     public unsafe string ToString(int @base = 10)
     {
         return Prepare(@base).SplitNumberString().Format0(Thread.CurrentThread.CurrentCulture.NumberFormat);
@@ -573,8 +588,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// <param name="base">The base to use for the conversion.</param>
     /// <returns>A new instance of <see cref="DecimalNumberString"/> representing the converted value.</returns>
     /// <exception cref="ArgumentException">Thrown when unable to convert <see cref="GmpFloat"/> to string.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the base is less than 2 or greater than 62.</exception>
     private unsafe DecimalNumberString Prepare(int @base)
     {
+        if (@base < 2 || @base > 62) throw new ArgumentOutOfRangeException(nameof(@base), $"@base parameter must in range [2, 62].");
+
         const nint srcptr = 0;
         const int digits = 0;
         fixed (Mpf_t* ptr = &Raw)
@@ -583,7 +601,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
             IntPtr ret = default;
             try
             {
-                ret = GmpLib.__gmpf_get_str(srcptr, (IntPtr)(&exp), 10, digits, (IntPtr)ptr);
+                ret = GmpLib.__gmpf_get_str(srcptr, (IntPtr)(&exp), @base, digits, (IntPtr)ptr);
                 if (ret == IntPtr.Zero)
                 {
                     throw new ArgumentException($"Unable to convert BigInteger to string.");
@@ -603,12 +621,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Converts the value of the current <see cref="GmpFloat"/> object to its equivalent string representation using the specified format and culture-specific format information.
+    /// Converts the numeric value of this instance to its equivalent string representation using the specified format and culture-specific format information.
     /// </summary>
-    /// <param name="format">A format string containing formatting specifications.</param>
+    /// <param name="format">Allowed values: N, F, E, G</param>
     /// <param name="formatProvider">An object that supplies culture-specific formatting information.</param>
-    /// <returns>The string representation of the value of the current <see cref="GmpFloat"/> object as specified by <paramref name="format"/> and <paramref name="formatProvider"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="format"/> is null.</exception>
+    /// <returns>The string representation of the value of this instance as specified by <paramref name="format"/> and <paramref name="formatProvider"/>.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="format"/> is not one of the supported format strings: "N", "F", "E", "G".</exception>
     public string ToString(string? format, IFormatProvider? formatProvider = null)
     {
@@ -644,16 +661,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Compares the absolute value of a <see cref="GmpFloat"/> instance <paramref name="op1"/> with a double-precision floating-point number <paramref name="op2"/>.
+    /// Compares the absolute values of two numbers, a <see cref="GmpFloat"/> <paramref name="op1"/> and a <see cref="double"/> <paramref name="op2"/>.
     /// </summary>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to compare.</param>
-    /// <param name="op2">The double-precision floating-point number to compare.</param>
-    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
-    /// <para>Value Meaning</para>
-    /// <para>Less than zero: The absolute value of <paramref name="op1"/> is less than <paramref name="op2"/>.</para>
-    /// <para>Zero: The absolute value of <paramref name="op1"/> equals <paramref name="op2"/>.</para>
-    /// <para>Greater than zero: The absolute value of <paramref name="op1"/> is greater than <paramref name="op2"/>.</para>
-    /// </returns>
+    /// <param name="op1">The first operand of type <see cref="GmpFloat"/>.</param>
+    /// <param name="op2">The second operand of type <see cref="double"/>.</param>
+    /// <returns>A signed integer that indicates the relative values of the absolute values of <paramref name="op1"/> and <paramref name="op2"/>, &lt;0 if <paramref name="op1"/> is less than <paramref name="op2"/>, 0 if they are equal, or >0 if <paramref name="op1"/> is greater than <paramref name="op2"/>.</returns>
     public static int CompareAbs(GmpFloat op1, double op2)
     {
         int raw = op1.Raw.Size;
@@ -669,7 +681,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Converts the current <see cref="GmpFloat"/> instance to a <see cref="GmpInteger"/> instance.
+    /// Converts the current <see cref="GmpFloat"/> instance to a <see cref="GmpInteger"/>.
     /// </summary>
     /// <returns>A new instance of <see cref="GmpInteger"/> representing the converted value.</returns>
     public GmpInteger ToGmpInteger() => GmpInteger.From(this);
@@ -679,13 +691,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     #region Arithmetic Functions - Raw inplace functions
 
     /// <summary>
-    /// Adds two <see cref="GmpFloat"/> instances <paramref name="op1"/> and <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// Add two <see cref="GmpFloat"/> instances <paramref name="op1"/> and <paramref name="op2"/> and store the result in <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result of the addition.</param>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
     /// <param name="op1">The first <see cref="GmpFloat"/> instance to add.</param>
     /// <param name="op2">The second <see cref="GmpFloat"/> instance to add.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/>, <paramref name="op1"/>, or <paramref name="op2"/> is null.</exception>
-    /// <remarks>The result is stored in <paramref name="rop"/> and the original values of <paramref name="op1"/> and <paramref name="op2"/> are not modified.</remarks>
     public static unsafe void AddInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -697,13 +707,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Adds an unsigned integer <paramref name="op2"/> to <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// Adds an unsigned integer <paramref name="op2"/> to a <see cref="GmpFloat"/> <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
-    /// <param name="op1">The first <see cref="GmpFloat"/> instance to add.</param>
-    /// <param name="op2">The unsigned integer to add.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op1"/> is null.</exception>
-    /// <remarks>The precision of <paramref name="rop"/> is not changed.</remarks>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance where the result will be stored.</param>
+    /// <param name="op1">The <see cref="GmpFloat"/> instance to be added.</param>
+    /// <param name="op2">The unsigned integer to be added.</param>
     public static unsafe void AddInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -717,10 +725,8 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// Subtracts <paramref name="op2"/> from <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
     /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to subtract from.</param>
-    /// <param name="op2">The <see cref="GmpFloat"/> instance to subtract.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/>, <paramref name="op1"/>, or <paramref name="op2"/> is null.</exception>
-    /// <remarks>The operation is performed in-place, meaning the value of <paramref name="op1"/> will be modified.</remarks>
+    /// <param name="op1">The minuend <see cref="GmpFloat"/> instance.</param>
+    /// <param name="op2">The subtrahend <see cref="GmpFloat"/> instance.</param>
     public static unsafe void SubtractInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -732,13 +738,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Subtracts an unsigned integer <paramref name="op2"/> from <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// Subtracts an unsigned integer <paramref name="op2"/> from a <see cref="GmpFloat"/> <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
     /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to subtract from.</param>
-    /// <param name="op2">The unsigned integer value to subtract.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op1"/> is null.</exception>
-    /// <remarks>The precision of <paramref name="rop"/> will be the same as <paramref name="op1"/>.</remarks>
+    /// <param name="op1">The minuend <see cref="GmpFloat"/> instance.</param>
+    /// <param name="op2">The subtrahend unsigned integer value.</param>
     public static unsafe void SubtractInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -749,17 +753,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Subtracts <paramref name="op2"/> from <paramref name="rop"/> and stores the result in <paramref name="rop"/>.
+    /// Subtracts a <paramref name="op2"/> from an unsigned integer <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to subtract from and store the result in.</param>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
     /// <param name="op1">The unsigned integer value to subtract from.</param>
     /// <param name="op2">The <see cref="GmpFloat"/> instance to subtract.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op2"/> is null.</exception>
-    /// <exception cref="ObjectDisposedException">Thrown when <paramref name="rop"/> or <paramref name="op2"/> has already been disposed.</exception>
-    /// <exception cref="ArithmeticException">Thrown when the operation results in an arithmetic error.</exception>
-    /// <remarks>
-    /// This method modifies the value of <paramref name="rop"/> in place.
-    /// </remarks>
     public static unsafe void SubtractInplace(GmpFloat rop, uint op1, GmpFloat op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -771,14 +769,10 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
 
     /// <summary>
     /// Multiplies two <see cref="GmpFloat"/> instances <paramref name="op1"/> and <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
-    /// <seealso cref="GmpFloat"/>
-    /// <seealso cref="GmpLib"/>
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result of multiplication.</param>
-    /// <param name="op1">The first <see cref="GmpFloat"/> instance to multiply.</param>
-    /// <param name="op2">The second <see cref="GmpFloat"/> instance to multiply.</param>
-    /// <exception cref="ArgumentNullException">Thrown when any of the input parameters is null.</exception>
-    /// <remarks>The input parameters are fixed to avoid garbage collection during the operation.</remarks>
+    /// <param name="rop">The result operand where the multiplication result will be stored.</param>
+    /// <param name="op1">The first operand to be multiplied.</param>
+    /// <param name="op2">The second operand to be multiplied.</param>
     public static unsafe void MultiplyInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -790,13 +784,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Multiplies a <see cref="GmpFloat"/> instance <paramref name="op1"/> by an unsigned integer <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// Multiply <paramref name="op1"/> by an unsigned integer <paramref name="op2"/> and store the result in <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result of the multiplication.</param>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to be multiplied.</param>
-    /// <param name="op2">The unsigned integer value to multiply by.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op1"/> is null.</exception>
-    /// <remarks>The multiplication is performed in-place, meaning the value of <paramref name="op1"/> is modified.</remarks>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
+    /// <param name="op1">The first <see cref="GmpFloat"/> operand.</param>
+    /// <param name="op2">The unsigned integer operand.</param>
     public static unsafe void MultiplyInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -807,45 +799,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Divides <paramref name="op1"/> by <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// Divides the values of <paramref name="op1"/> and <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result of the division.</param>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to be divided.</param>
-    /// <param name="op2">The <see cref="GmpFloat"/> instance to divide by.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/>, <paramref name="op1"/> or <paramref name="op2"/> is null.</exception>
-    /// <remarks>The operation is performed in-place, meaning the value of <paramref name="op1"/> will be modified.</remarks>
-    /// <remarks>The precision of the result is determined by the precision of <paramref name="op1"/> and <paramref name="op2"/>.</remarks>
-    /// <remarks>If <paramref name="op2"/> is zero, the result will be NaN (not-a-number).</remarks>
-    /// <remarks>If <paramref name="op1"/> is NaN, the result will be NaN.</remarks>
-    /// <remarks>If <paramref name="op1"/> is infinity and <paramref name="op2"/> is infinity, the result will be NaN.</remarks>
-    /// <remarks>If <paramref name="op1"/> is infinity and <paramref name="op2"/> is zero, the result will be infinity.</remarks>
-    /// <remarks>If <paramref name="op1"/> is zero and <paramref name="op2"/> is infinity, the result will be zero.</remarks>
-    /// <remarks>If <paramref name="op1"/> is infinity and <paramref name="op2"/> is not infinity or NaN, the result will be infinity.</remarks>
-    /// <remarks>If <paramref name="op1"/> is not infinity or NaN and <paramref name="op2"/> is infinity, the result will be zero.</remarks>
-    /// <remarks>If <paramref name="op1"/> is zero and <paramref name="op2"/> is not infinity or NaN, the result will be zero.</remarks>
-    /// <remarks>If <paramref name="op1"/> is not infinity or NaN and <paramref name="op2"/> is zero, the result will be infinity.</remarks>
-    /// <remarks>If <paramref name="op1"/> and <paramref name="op2"/> are both NaN, the result will be NaN.</remarks>
-    /// <remarks>If <paramref name="op1"/> and <paramref name="op2"/> are both infinity with opposite signs, the result will be NaN.</remarks>
-    /// <remarks>If <paramref name="op1"/> and <paramref name="op2"/> are both zero, the result will be NaN.</remarks>
-    /// <remarks>If <paramref name="op1"/> and <paramref name="op2"/> are both infinity with the same sign, the result will be infinity.</remarks>
-    /// <remarks>If <paramref name="op1"/> is not infinity or NaN and <paramref name="op2"/> is not infinity or NaN, the result will be the quotient of <paramref name="op1"/> and <paramref name="op2"/>.</remarks>
-    /// <remarks>If <paramref name="op1"/> is infinity and <paramref name="op2"/> is not infinity or NaN, the result will be infinity.</remarks>
-    /// <remarks>If <paramref name="op1"/> is not infinity or NaN and <paramref name="op2"/> is infinity, the result will be zero.</remarks>
-    /// <remarks>If <paramref name="op1"/> is zero and <paramref name="op2"/> is not infinity or NaN, the result will be zero.</remarks>
-    /// <remarks>If <paramref name="op1"/> is not infinity or NaN and <paramref name="op2"/> is zero, the result will be infinity.</remarks>
-    /// <remarks>If <paramref name="op1"/> and <paramref name="op2"/> are both NaN, the result will be NaN.</remarks>
-    /// <remarks>If <paramref name="op1"/> and <paramref name="op2"/> are both infinity with opposite signs, the result will be NaN.</remarks>
-    /// <remarks>If <paramref name="op1"/> and <paramref name="op2"/> are both zero, the result will be NaN.</remarks>
-    /// <remarks>If <paramref name="op1"/> and <paramref name="op2"/> are both infinity with the same sign, the result will be infinity.</remarks>
-    /// <remarks>If <paramref name="op1"/> is not infinity or NaN and <paramref name="op2"/> is not infinity or NaN, the result will be the quotient of <paramref name="op1"/> and <paramref name="op2"/>.</remarks>
-    /// <remarks>If <paramref name="op1"/> is infinity and <paramref name="op2"/> is not infinity or NaN, the result will be infinity.</remarks>
-    /// <remarks>If <paramref name="op1"/> is not infinity or NaN and <paramref name="op2"/> is infinity, the result will be zero.</remarks>
-    /// <remarks>If <paramref name="op1"/> is zero and <paramref name="op2"/> is not infinity or NaN, the result will be zero.</remarks>
-    /// <remarks>If <paramref name="op1"/> is not infinity or NaN and <paramref name="op2"/> is zero, the result will be infinity.</remarks>
-    /// <remarks>If <paramref name="op1"/> and <paramref name="op2"/> are both NaN, the result will be NaN.</remarks>
-    /// <remarks>If <paramref name="op1"/> and <paramref name="op2"/> are both infinity with opposite signs, the result will be NaN.</remarks>
-    /// <remarks>If <paramref name="op1"/> and <paramref name="op2"/> are both zero, the result will be NaN.</remarks>
-    /// <remarks>If <paramref name="op1"/> and <paramref name="op2"/> are both infinity with the same sign, the result will be infinity.</remarks>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
+    /// <param name="op1">The dividend <see cref="GmpFloat"/> instance.</param>
+    /// <param name="op2">The divisor <see cref="GmpFloat"/> instance.</param>
     public static unsafe void DivideInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -857,13 +815,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Divides <paramref name="op1"/> by an unsigned integer <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// Divides a <see cref="GmpFloat"/> <paramref name="op1"/> by an unsigned integer <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance where the result will be stored.</param>
     /// <param name="op1">The <see cref="GmpFloat"/> instance to be divided.</param>
-    /// <param name="op2">The unsigned integer to divide <paramref name="op1"/> by.</param>
-    /// <exception cref="DivideByZeroException">Thrown when <paramref name="op2"/> is zero.</exception>
-    /// <remarks>The precision of <paramref name="rop"/> is determined by the precision of <paramref name="op1"/>.</remarks>
+    /// <param name="op2">The unsigned integer to divide by.</param>
     public static unsafe void DivideInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -877,14 +833,8 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// Divides an unsigned integer <paramref name="op1"/> by a <see cref="GmpFloat"/> <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
     /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result of the division.</param>
-    /// <param name="op1">The unsigned integer to be divided.</param>
+    /// <param name="op1">The unsigned integer to divide.</param>
     /// <param name="op2">The <see cref="GmpFloat"/> instance to divide by.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op2"/> is null.</exception>
-    /// <exception cref="ObjectDisposedException">Thrown when <paramref name="rop"/> or <paramref name="op2"/> has already been disposed.</exception>
-    /// <exception cref="DivideByZeroException">Thrown when <paramref name="op2"/> is zero.</exception>
-    /// <remarks>
-    /// This method modifies the value of <paramref name="rop"/> in place.
-    /// </remarks>
     public static unsafe void DivideInplace(GmpFloat rop, uint op1, GmpFloat op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -895,13 +845,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Raises <paramref name="op1"/> to the power of <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// Computes the power of a <see cref="GmpFloat"/> <paramref name="op1"/> raised to an unsigned integer <paramref name="op2"/>, and stores the result in <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to be raised to the power.</param>
-    /// <param name="op2">The power to raise <paramref name="op1"/> to.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op1"/> is null.</exception>
-    /// <remarks>The operation is performed in-place, meaning the value of <paramref name="rop"/> will be modified.</remarks>
+    /// <param name="rop">The <see cref="GmpFloat"/> to store the result.</param>
+    /// <param name="op1">The base <see cref="GmpFloat"/>.</param>
+    /// <param name="op2">The exponent as an unsigned integer.</param>
     public static unsafe void PowerInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -912,12 +860,10 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Negates the value of <paramref name="op1"/> and stores the result in <paramref name="rop"/>.
+    /// Negate the value of <paramref name="op1"/> and store the result in <paramref name="rop"/> inplace.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to negate.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op1"/> is null.</exception>
-    /// <remarks>The value of <paramref name="op1"/> is not modified.</remarks>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the negated result.</param>
+    /// <param name="op1">The <see cref="GmpFloat"/> instance to be negated.</param>
     public static unsafe void NegateInplace(GmpFloat rop, GmpFloat op1)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -928,12 +874,10 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Calculates the square root of the <paramref name="op"/> and stores the result in <paramref name="rop"/>.
+    /// Computes the square root of <paramref name="op"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
-    /// <param name="op">The <see cref="GmpFloat"/> instance to calculate the square root from.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op"/> is null.</exception>
-    /// <remarks>The <paramref name="rop"/> and <paramref name="op"/> instances must have the same precision.</remarks>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance where the result will be stored.</param>
+    /// <param name="op">The <see cref="GmpFloat"/> instance whose square root will be computed.</param>
     public static unsafe void SqrtInplace(GmpFloat rop, GmpFloat op)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -944,12 +888,10 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Calculates the square root of an unsigned integer <paramref name="op"/> and stores the result in the <paramref name="rop"/> instance.
+    /// Computes the square root of an unsigned integer <paramref name="op"/> and stores the result in the existing <see cref="GmpFloat"/> instance <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
-    /// <param name="op">The unsigned integer to calculate the square root.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> is null.</exception>
-    /// <remarks>The precision of the result is determined by the precision of <paramref name="rop"/>.</remarks>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance where the result will be stored.</param>
+    /// <param name="op">The unsigned integer value to compute the square root of.</param>
     public static unsafe void SqrtInplace(GmpFloat rop, uint op)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -959,11 +901,10 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Computes the absolute value of a <see cref="GmpFloat"/> instance in place.
+    /// Computes the absolute value of a <see cref="GmpFloat"/> in-place.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
-    /// <param name="op">The <see cref="GmpFloat"/> instance to compute the absolute value.</param>
-    /// <remarks>The result is stored in <paramref name="rop"/> and <paramref name="op"/> is not modified.</remarks>
+    /// <param name="rop">The result of the absolute value operation.</param>
+    /// <param name="op">The input <see cref="GmpFloat"/> to compute the absolute value of.</param>
     public static unsafe void AbsInplace(GmpFloat rop, GmpFloat op)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -974,16 +915,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Multiply <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// Multiplies the <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance where the result will be stored.</param>
     /// <param name="op1">The <see cref="GmpFloat"/> instance to be multiplied.</param>
-    /// <param name="op2">The power of 2 to raise.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op1"/> is null.</exception>
-    /// <remarks>The result will be stored in <paramref name="rop"/> and <paramref name="op1"/> will not be modified.</remarks>
-    /// <remarks>The precision of <paramref name="rop"/> will be the same as the precision of <paramref name="op1"/>.</remarks>
-    /// <remarks>The operation is performed in-place, meaning the value of <paramref name="rop"/> will be modified.</remarks>
-    /// <remarks>The function is unsafe because it uses pointers.</remarks>
+    /// <param name="op2">The exponent to which 2 will be raised.</param>
     public static unsafe void Mul2ExpInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -994,14 +930,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Divide a <see cref="GmpFloat"/> instance <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/> and store the result in <paramref name="rop"/>.
+    /// Divide <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/> and store the result in <paramref name="rop"/>.
     /// </summary>
     /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
     /// <param name="op1">The <see cref="GmpFloat"/> instance to be divided.</param>
-    /// <param name="op2">The power of 2 to divide <paramref name="op1"/> by.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op1"/> is null.</exception>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="op2"/> is negative.</exception>
-    /// <remarks>The result is stored in <paramref name="rop"/> and <paramref name="op1"/> is not modified.</remarks>
+    /// <param name="op2">The exponent to which 2 is raised.</param>
     public static unsafe void Div2ExpInplace(GmpFloat rop, GmpFloat op1, uint op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -1016,15 +949,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     #region Arithmetic Functions - Easier functions
 
     /// <summary>
-    /// Adds two <see cref="GmpFloat"/> instances <paramref name="op1"/> and <paramref name="op2"/> and returns the result as a new instance of <see cref="GmpFloat"/>.
+    /// Adds two <see cref="GmpFloat"/> instances, <paramref name="op1"/> and <paramref name="op2"/>, and returns the result with the specified <paramref name="precision"/> in bits.
     /// </summary>
-    /// <param name="op1">The first <see cref="GmpFloat"/> instance to add.</param>
-    /// <param name="op2">The second <see cref="GmpFloat"/> instance to add.</param>
-    /// <param name="precision">The precision in bits of the result. If set to 0, the precision of the result will be the maximum of the precisions of <paramref name="op1"/> and <paramref name="op2"/>.</param>
+    /// <param name="op1">The first operand in the addition operation.</param>
+    /// <param name="op2">The second operand in the addition operation.</param>
+    /// <param name="precision">The desired precision of the result in bits. Default is 0, which uses the <see cref="DefaultPrecision"/>.</param>
     /// <returns>A new instance of <see cref="GmpFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when either <paramref name="op1"/> or <paramref name="op2"/> is null.</exception>
-    /// <exception cref="ArgumentException">Thrown when the precisions of <paramref name="op1"/> and <paramref name="op2"/> are not equal and <paramref name="precision"/> is set to 0.</exception>
-    /// <remarks>The result will have a precision of <paramref name="precision"/> bits if it is set to a non-zero value, otherwise it will have a precision equal to the maximum of the precisions of <paramref name="op1"/> and <paramref name="op2"/>.</remarks>
     public static unsafe GmpFloat Add(GmpFloat op1, GmpFloat op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1033,12 +963,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Adds an unsigned integer <paramref name="op2"/> to a <paramref name="op1"/> <see cref="GmpFloat"/> instance and returns a new instance of <see cref="GmpFloat"/> with the result.
+    /// Adds a <see cref="GmpFloat"/> and an unsigned integer, returning a new <see cref="GmpFloat"/> with the specified precision.
     /// </summary>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to add to.</param>
-    /// <param name="op2">The unsigned integer value to add.</param>
-    /// <param name="precision">The precision in bits of the result. If not specified, the precision of <paramref name="op1"/> is used.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
+    /// <param name="op1">The first <see cref="GmpFloat"/> operand.</param>
+    /// <param name="op2">The unsigned integer operand to add.</param>
+    /// <param name="precision">The desired precision of the result in bits. Default is 0, which uses the precision of the first operand.</param>
+    /// <returns>A new <see cref="GmpFloat"/> representing the sum of the two operands with the specified precision.</returns>
     public static unsafe GmpFloat Add(GmpFloat op1, uint op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1047,11 +977,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Subtracts <paramref name="op2"/> from <paramref name="op1"/> and returns the result as a new instance of <see cref="GmpFloat"/>.
+    /// Subtracts two <see cref="GmpFloat"/> instances and returns the result with the specified precision.
     /// </summary>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to subtract from.</param>
-    /// <param name="op2">The <see cref="GmpFloat"/> instance to subtract.</param>
-    /// <param name="precision">The precision of the result in bits. If set to 0, the precision will be set to the default precision.</param>
+    /// <param name="op1">The minuend.</param>
+    /// <param name="op2">The subtrahend.</param>
+    /// <param name="precision">The precision of the result in bits. If 0, the <see cref="DefaultPrecision"/> will be used.</param>
     /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the subtraction.</returns>
     public static unsafe GmpFloat Subtract(GmpFloat op1, GmpFloat op2, uint precision = 0)
     {
@@ -1061,12 +991,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Subtracts an unsigned integer <paramref name="op2"/> from a <see cref="GmpFloat"/> <paramref name="op1"/> and returns the result as a new instance of <see cref="GmpFloat"/>.
+    /// Subtracts an unsigned integer <paramref name="op2"/> from a <see cref="GmpFloat"/> <paramref name="op1"/> and returns the result as a new <see cref="GmpFloat"/> instance.
     /// </summary>
     /// <param name="op1">The <see cref="GmpFloat"/> to subtract from.</param>
-    /// <param name="op2">The unsigned integer value to subtract.</param>
-    /// <param name="precision">The precision in bits of the result. If set to 0, the precision will be set to <see cref="GmpFloat.DefaultPrecision"/>.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the subtraction.</returns>
+    /// <param name="op2">The unsigned integer to subtract.</param>
+    /// <param name="precision">The precision of the result in bits. If 0, the <see cref="DefaultPrecision"/> will be used.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance representing the result of the subtraction.</returns>
     public static unsafe GmpFloat Subtract(GmpFloat op1, uint op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1075,11 +1005,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Subtracts a <paramref name="op2"/> from an unsigned integer <paramref name="op1"/> and returns the result as a new instance of <see cref="GmpFloat"/>.
+    /// Subtracts a <paramref name="op1"/> and a <see cref="GmpFloat"/> <paramref name="op2"/> with an optional <paramref name="precision"/> in bits.
     /// </summary>
     /// <param name="op1">The unsigned integer value to subtract from.</param>
     /// <param name="op2">The <see cref="GmpFloat"/> value to subtract.</param>
-    /// <param name="precision">The precision in bits of the result. If set to 0, the default precision will be used.</param>
+    /// <param name="precision">The optional precision in bits for the result. Default is 0, which uses the <see cref="DefaultPrecision"/>.</param>
     /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the subtraction.</returns>
     public static unsafe GmpFloat Subtract(uint op1, GmpFloat op2, uint precision = 0)
     {
@@ -1089,14 +1019,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Multiplies two <see cref="GmpFloat"/> instances <paramref name="op1"/> and <paramref name="op2"/> and returns the result as a new instance of <see cref="GmpFloat"/>.
+    /// Multiplies two <see cref="GmpFloat"/> instances and returns the result.
     /// </summary>
-    /// <param name="op1">The first <see cref="GmpFloat"/> operand.</param>
-    /// <param name="op2">The second <see cref="GmpFloat"/> operand.</param>
-    /// <param name="precision">The precision in bits of the result. If set to 0, the precision will be set to the default precision.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the multiplication.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when either <paramref name="op1"/> or <paramref name="op2"/> is null.</exception>
-    /// <remarks>The result will have a precision of <paramref name="precision"/> bits. If <paramref name="precision"/> is set to 0, the default precision will be used.</remarks>
+    /// <param name="op1">The first operand of the multiplication.</param>
+    /// <param name="op2">The second operand of the multiplication.</param>
+    /// <param name="precision">The precision of the result in bits, default to 0 which means use <see cref="DefaultPrecision"/>.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance representing the result of the multiplication.</returns>
     public static unsafe GmpFloat Multiply(GmpFloat op1, GmpFloat op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1105,11 +1033,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Multiplies a <see cref="GmpFloat"/> instance <paramref name="op1"/> by an unsigned integer <paramref name="op2"/> and returns the result as a new <see cref="GmpFloat"/> instance.
+    /// Multiplies a <see cref="GmpFloat"/> <paramref name="op1"/> with an unsigned integer <paramref name="op2"/> and returns the result as a new <see cref="GmpFloat"/> instance.
     /// </summary>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to multiply.</param>
-    /// <param name="op2">The unsigned integer to multiply by.</param>
-    /// <param name="precision">The precision in bits of the result. If set to 0, the default precision will be used.</param>
+    /// <param name="op1">The first <see cref="GmpFloat"/> operand to multiply.</param>
+    /// <param name="op2">The unsigned integer operand to multiply.</param>
+    /// <param name="precision">The optional precision of the result in bits. If not specified or set to 0, the <see cref="DefaultPrecision"/> will be used.</param>
     /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the multiplication.</returns>
     public static unsafe GmpFloat Multiply(GmpFloat op1, uint op2, uint precision = 0)
     {
@@ -1119,12 +1047,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Divide two <see cref="GmpFloat"/> values <paramref name="op1"/> and <paramref name="op2"/> and return the result as a new <see cref="GmpFloat"/> instance.
+    /// Divides two <see cref="GmpFloat"/> instances and returns the result as a new <see cref="GmpFloat"/>.
     /// </summary>
-    /// <param name="op1">The dividend.</param>
-    /// <param name="op2">The divisor.</param>
-    /// <param name="precision">The precision of the result in bits. If set to 0, the precision will be set to default.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the division.</returns>
+    /// <param name="op1">The dividend <see cref="GmpFloat"/>.</param>
+    /// <param name="op2">The divisor <see cref="GmpFloat"/>.</param>
+    /// <param name="precision">The precision of the result in bits. If not specified, the <see cref="DefaultPrecision"/> will be used.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance representing the result of the division.</returns>
     public static unsafe GmpFloat Divide(GmpFloat op1, GmpFloat op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1133,12 +1061,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Divide <paramref name="op1"/> by an unsigned integer <paramref name="op2"/> and return the result as a new instance of <see cref="GmpFloat"/>.
+    /// Divides a <see cref="GmpFloat"/> by an unsigned integer and returns the result with the specified precision.
     /// </summary>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to be divided.</param>
-    /// <param name="op2">The unsigned integer value to divide <paramref name="op1"/> by.</param>
-    /// <param name="precision">The precision in bits of the result. If set to 0, the default precision will be used.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the division.</returns>
+    /// <param name="op1">The <see cref="GmpFloat"/> dividend.</param>
+    /// <param name="op2">The uint divisor.</param>
+    /// <param name="precision">The desired precision in bits. Default is 0, which uses the precision of <paramref name="op1"/>.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance representing the result of the division.</returns>
     public static unsafe GmpFloat Divide(GmpFloat op1, uint op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1147,12 +1075,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Divide an unsigned integer <paramref name="op1"/> by a <see cref="GmpFloat"/> <paramref name="op2"/> and return the result as a new instance of <see cref="GmpFloat"/>.
+    /// Divides an unsigned integer <paramref name="op1"/> by a <see cref="GmpFloat"/> <paramref name="op2"/> and returns the result as a new <see cref="GmpFloat"/> instance.
     /// </summary>
-    /// <param name="op1">The unsigned integer to divide.</param>
-    /// <param name="op2">The <see cref="GmpFloat"/> to divide by.</param>
-    /// <param name="precision">The precision in bit of the result, default to 0 which means using the precision of <paramref name="op2"/>.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the division.</returns>
+    /// <param name="op1">The unsigned integer dividend.</param>
+    /// <param name="op2">The <see cref="GmpFloat"/> divisor.</param>
+    /// <param name="precision">The optional precision of the result in bits. If not specified, the <see cref="DefaultPrecision"/> is used.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance representing the result of the division.</returns>
     public static unsafe GmpFloat Divide(uint op1, GmpFloat op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1161,11 +1089,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Computes the power of <paramref name="op1"/> to the <paramref name="op2"/> integer, and returns a new instance of <see cref="GmpFloat"/> with the result.
+    /// Calculates the power of a <see cref="GmpFloat"/> number raised to an unsigned integer exponent.
     /// </summary>
-    /// <param name="op1">The base value.</param>
-    /// <param name="op2">The exponent value.</param>
-    /// <param name="precision">The precision in bits of the result. If not specified, the default precision will be used.</param>
+    /// <param name="op1">The base <see cref="GmpFloat"/> number.</param>
+    /// <param name="op2">The unsigned integer exponent.</param>
+    /// <param name="precision">The precision of the result in bits. If not specified, <see cref="DefaultPrecision"/> will be used.</param>
     /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the power operation.</returns>
     public static unsafe GmpFloat Power(GmpFloat op1, uint op2, uint precision = 0)
     {
@@ -1175,11 +1103,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Negates a <see cref="GmpFloat"/> instance.
+    /// Negate the value of a <see cref="GmpFloat"/> instance <paramref name="op1"/> and create a new instance with the result.
     /// </summary>
     /// <param name="op1">The <see cref="GmpFloat"/> instance to negate.</param>
-    /// <param name="precision">The precision in bits of the result. If set to 0, the precision will be set to <see cref="GmpFloat.DefaultPrecision"/>.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the negated value of <paramref name="op1"/>.</returns>
+    /// <param name="precision">Optional precision for the result; if not provided, the <see cref="DefaultPrecision"/> will be used.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance representing the negated value.</returns>
     public static unsafe GmpFloat Negate(GmpFloat op1, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1188,11 +1116,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Calculates the square root of a <see cref="GmpFloat"/> instance.
+    /// Calculates the square root of a <see cref="GmpFloat"/> instance <paramref name="op"/> with the specified <paramref name="precision"/>.
     /// </summary>
     /// <param name="op">The <see cref="GmpFloat"/> instance to calculate the square root of.</param>
-    /// <param name="precision">The precision in bits of the result. If set to 0, the default precision will be used.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the square root of <paramref name="op"/>.</returns>
+    /// <param name="precision">The precision of the result in bits, default is 0 which uses the <see cref="DefaultPrecision"/>.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance representing the square root of the input value.</returns>
     public static unsafe GmpFloat Sqrt(GmpFloat op, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1201,11 +1129,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Computes the square root of a non-negative integer <paramref name="op"/> and returns the result as a new instance of <see cref="GmpFloat"/>.
+    /// Calculate the square root of a given unsigned integer <paramref name="op"/> with specified <paramref name="precision"/>.
     /// </summary>
-    /// <param name="op">The non-negative integer to compute the square root of.</param>
-    /// <param name="precision">The precision in bits of the result. If set to 0, the default precision is used.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the square root of <paramref name="op"/>.</returns>
+    /// <param name="op">The unsigned integer value to calculate the square root of.</param>
+    /// <param name="precision">The desired precision of the result, in bits. Default is 0, which uses the <see cref="DefaultPrecision"/>.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the square root of the input value.</returns>
     public static unsafe GmpFloat Sqrt(uint op, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1214,11 +1142,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Computes the absolute value of a <see cref="GmpFloat"/> instance.
+    /// Calculate the absolute value of a <see cref="GmpFloat"/> instance.
     /// </summary>
-    /// <param name="op">The <see cref="GmpFloat"/> instance to compute the absolute value of.</param>
-    /// <param name="precision">The precision of the result in bits. If set to 0, the precision will default to <see cref="GmpFloat.DefaultPrecision"/>.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the absolute value of <paramref name="op"/>.</returns>
+    /// <param name="op">The input <see cref="GmpFloat"/> value.</param>
+    /// <param name="precision">The desired precision of the result in bits. If set to 0, the <see cref="DefaultPrecision"/> will be used.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the absolute value of the input value.</returns>
     public static unsafe GmpFloat Abs(GmpFloat op, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1227,12 +1155,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Multiply a <see cref="GmpFloat"/> instance <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/>.
+    /// Multiplies the given <see cref="GmpFloat"/> <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/> and returns the result.
     /// </summary>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to multiply.</param>
-    /// <param name="op2">The power of 2 to raise.</param>
-    /// <param name="precision">The precision in bits of the result. If not specified, the default precision is used.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the multiplication.</returns>
+    /// <param name="op1">The <see cref="GmpFloat"/> value to multiply.</param>
+    /// <param name="op2">The exponent to which 2 is raised.</param>
+    /// <param name="precision">The precision of the result in bits. If 0, <see cref="DefaultPrecision"/> is used.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance representing the result of the multiplication.</returns>
     public static unsafe GmpFloat Mul2Exp(GmpFloat op1, uint op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1241,15 +1169,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Divide a <see cref="GmpFloat"/> instance <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/>.
+    /// Divide a <see cref="GmpFloat"/> <paramref name="op1"/> by 2 raised to the power of <paramref name="op2"/> with an optional specified <paramref name="precision"/>.
     /// </summary>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to divide.</param>
-    /// <param name="op2">The power of 2 to raise.</param>
-    /// <param name="precision">The precision of the result, default to 0 which means use the precision of <paramref name="op1"/>.</param>
+    /// <param name="op1">The dividend <see cref="GmpFloat"/>.</param>
+    /// <param name="op2">The exponent to raise 2 to.</param>
+    /// <param name="precision">The optional precision in bits, default to 0 which means using <see cref="DefaultPrecision"/>.</param>
     /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the division.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="op1"/> is null.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="op2"/> is negative.</exception>
-    /// <remarks>The result precision is determined by <paramref name="precision"/>. If it is 0, the precision of <paramref name="op1"/> is used.</remarks>
     public static unsafe GmpFloat Div2Exp(GmpFloat op1, uint op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1259,63 +1184,126 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     #endregion
 
     #region Arithmetic Functions - Operators
-    /// <summary>Adds two <see cref="GmpFloat"/> values and returns a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
+
+    /// <summary>
+    /// Adds two <see cref="GmpFloat"/> instances and returns the result with the precision of <paramref name="op1"/>.
+    /// </summary>
+    /// <param name="op1">The first operand to add.</param>
+    /// <param name="op2">The second operand to add.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance representing the sum of the two operands.</returns>
     public static unsafe GmpFloat operator +(GmpFloat op1, GmpFloat op2) => Add(op1, op2, op1.Precision);
 
-    /// <summary>Adds a <see cref="GmpFloat"/> value and a <see cref="uint"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
+    /// <summary>
+    /// Adds a <see cref="GmpFloat"/> and a <see cref="uint"/> together, returning a new <see cref="GmpFloat"/>.
+    /// </summary>
+    /// <param name="op1">The first operand of type <see cref="GmpFloat"/>.</param>
+    /// <param name="op2">The second operand of type <see cref="uint"/>.</param>
+    /// <returns>A new <see cref="GmpFloat"/> representing the sum of <paramref name="op1"/> and <paramref name="op2"/>.</returns>
     public static unsafe GmpFloat operator +(GmpFloat op1, uint op2) => Add(op1, op2, op1.Precision);
 
-    /// <summary>Subtracts two <see cref="GmpFloat"/> values, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
+    /// <summary>
+    /// Subtracts two <see cref="GmpFloat"/> instances and returns the result.
+    /// </summary>
+    /// <param name="op1">The first operand.</param>
+    /// <param name="op2">The second operand.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance representing the result of the subtraction.</returns>
     public static unsafe GmpFloat operator -(GmpFloat op1, GmpFloat op2) => Subtract(op1, op2, op1.Precision);
 
-    /// <summary>Subtracts a <see cref="uint"/> value from a <see cref="GmpFloat"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
+    /// <summary>
+    /// Subtracts an unsigned integer <paramref name="op2"/> from a <see cref="GmpFloat"/> <paramref name="op1"/> with specified precision.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpFloat"/> operand.</param>
+    /// <param name="op2">The unsigned integer operand.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the subtraction.</returns>
     public static unsafe GmpFloat operator -(GmpFloat op1, uint op2) => Subtract(op1, op2, op1.Precision);
 
-    /// <summary>Subtracts a <see cref="GmpFloat"/> value from a <see cref="uint"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the second operand.</summary>
+    /// <summary>
+    /// Subtracts a <see cref="GmpFloat"/> from an unsigned integer, with the precision of the result set to the precision of <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The unsigned integer to subtract from.</param>
+    /// <param name="op2">The <see cref="GmpFloat"/> to subtract.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance representing the result of the subtraction.</returns>
     public static unsafe GmpFloat operator -(uint op1, GmpFloat op2) => Subtract(op1, op2, op2.Precision);
 
-    /// <summary>Multiplies two <see cref="GmpFloat"/> values, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
+    /// <summary>
+    /// Multiply two <see cref="GmpFloat"/> instances with the specified precision.
+    /// </summary>
+    /// <param name="op1">The first operand.</param>
+    /// <param name="op2">The second operand.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the multiplication.</returns>
     public static unsafe GmpFloat operator *(GmpFloat op1, GmpFloat op2) => Multiply(op1, op2, op1.Precision);
 
-    /// <summary>Multiplies a <see cref="GmpFloat"/> value by a <see cref="uint"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
+    /// <summary>
+    /// Multiply a <see cref="GmpFloat"/> with an unsigned integer.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpFloat"/> operand.</param>
+    /// <param name="op2">The unsigned integer operand.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the multiplication.</returns>
     public static unsafe GmpFloat operator *(GmpFloat op1, uint op2) => Multiply(op1, op2, op1.Precision);
 
-    /// <summary>Divides a <see cref="GmpFloat"/> value by another <see cref="GmpFloat"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
+    /// <summary>
+    /// Divides two <see cref="GmpFloat"/> instances and returns the result as a new <see cref="GmpFloat"/>.
+    /// </summary>
+    /// <param name="op1">The dividend <see cref="GmpFloat"/>.</param>
+    /// <param name="op2">The divisor <see cref="GmpFloat"/>.</param>
+    /// <returns>A new <see cref="GmpFloat"/> representing the result of the division.</returns>
     public static unsafe GmpFloat operator /(GmpFloat op1, GmpFloat op2) => Divide(op1, op2, op1.Precision);
 
-    /// <summary>Divides a <see cref="GmpFloat"/> value by a <see cref="uint"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
+    /// <summary>
+    /// Divides a <see cref="GmpFloat"/> <paramref name="op1"/> by an unsigned integer <paramref name="op2"/>.
+    /// </summary>
+    /// <param name="op1">The dividend of type <see cref="GmpFloat"/>.</param>
+    /// <param name="op2">The divisor of type <see cref="uint"/>.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the division.</returns>
     public static unsafe GmpFloat operator /(GmpFloat op1, uint op2) => Divide(op1, op2, op1.Precision);
 
-    /// <summary>Divides a <see cref="uint"/> value by a <see cref="GmpFloat"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the second operand.</summary>
+    /// <summary>
+    /// Divides an unsigned integer <paramref name="op1"/> by a <see cref="GmpFloat"/> <paramref name="op2"/> with the specified precision.
+    /// </summary>
+    /// <param name="op1">The unsigned integer dividend.</param>
+    /// <param name="op2">The <see cref="GmpFloat"/> divisor.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the result of the division.</returns>
     public static unsafe GmpFloat operator /(uint op1, GmpFloat op2) => Divide(op1, op2, op2.Precision);
 
-    /// <summary>Raises a <see cref="GmpFloat"/> value to the power of a <see cref="uint"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the first operand.</summary>
+    /// <summary>
+    /// Raises a <see cref="GmpFloat"/> value to the power of a specified unsigned integer value.
+    /// </summary>
+    /// <param name="op1">The base <see cref="GmpFloat"/> value.</param>
+    /// <param name="op2">The exponent as an unsigned integer value.</param>
+    /// <returns>The result of raising <paramref name="op1"/> to the power of <paramref name="op2"/>, as a new <see cref="GmpFloat"/> instance.</returns>
     public static unsafe GmpFloat operator ^(GmpFloat op1, uint op2) => Power(op1, op2, op1.Precision);
 
-    /// <summary>Negates a <see cref="GmpFloat"/> value, returning a new <see cref="GmpFloat"/> with the same precision as the input.</summary>
+    /// <summary>
+    /// Negates the given <paramref name="op1"/> <see cref="GmpFloat"/> instance, preserving its precision.
+    /// </summary>
+    /// <param name="op1">The <see cref="GmpFloat"/> instance to negate.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance representing the negation of <paramref name="op1"/>.</returns>
     public static unsafe GmpFloat operator -(GmpFloat op1) => Negate(op1, op1.Precision);
 
     #endregion
     #endregion
 
     #region Comparison Functions
-
     /// <summary>
-    /// Determines whether the current <see cref="GmpFloat"/> object is equal to another <see cref="GmpFloat"/> object.
+    /// Determines whether the current <see cref="GmpFloat"/> instance is equal to the specified <paramref name="other"/> instance.
     /// </summary>
-    /// <param name="other">The <see cref="GmpFloat"/> to compare with the current object.</param>
-    /// <returns><c>true</c> if the current <see cref="GmpFloat"/> object is equal to the <paramref name="other"/> parameter; otherwise, <c>false</c>.</returns>
+    /// <param name="other">The <see cref="GmpFloat"/> instance to compare with the current instance.</param>
+    /// <returns><c>true</c> if the current instance is equal to the specified instance; otherwise, <c>false</c>.</returns>
     public bool Equals([AllowNull] GmpFloat other)
     {
         return other is not null && Compare(this, other) == 0;
     }
 
     /// <summary>
-    /// Compares the current <see cref="GmpFloat"/> instance with another object and returns an integer that indicates whether the current instance precedes, follows, or occurs in the same position in the sort order as the other object.
+    /// Compares the current <see cref="GmpFloat"/> instance to the specified <paramref name="obj"/> and returns an integer that indicates their relative order.
     /// </summary>
-    /// <param name="obj">The object to compare with the current instance.</param>
-    /// <returns>A value that indicates the relative order of the objects being compared. The return value has these meanings: Value Meaning Less than zero This instance is less than <paramref name="obj"/>. Zero This instance is equal to <paramref name="obj"/>. Greater than zero This instance is greater than <paramref name="obj"/>.</returns>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="obj"/> is not a valid type.</exception>
+    /// <param name="obj">The object to compare with the current <see cref="GmpFloat"/> instance.</param>
+    /// <returns>A value that indicates the relative order of the objects being compared. The return value has the following meanings:
+    /// Less than zero: This instance precedes <paramref name="obj"/> in the sort order.
+    /// Zero: This instance occurs in the same position in the sort order as <paramref name="obj"/>.
+    /// Greater than zero: This instance follows <paramref name="obj"/> in the sort order.
+    /// </returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="obj"/> is not a valid type for comparison.</exception>
     public int CompareTo(object? obj)
     {
         return obj switch
@@ -1331,29 +1319,24 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Compares the current <see cref="GmpFloat"/> object with another object of the same type.
+    /// Compares the current <see cref="GmpFloat"/> instance to the specified <paramref name="other"/> instance.
     /// </summary>
-    /// <param name="other">An object to compare with this object.</param>
-    /// <returns>A value that indicates the relative order of the objects being compared. The return value has the following meanings:
-    /// Value Meaning Less than zero This object is less than the <paramref name="other"/> parameter.
-    /// Zero This object is equal to <paramref name="other"/>.
-    /// Greater than zero This object is greater than <paramref name="other"/>. -or- <paramref name="other"/> is null.</returns>
+    /// <param name="other">The <see cref="GmpFloat"/> instance to compare with the current instance.</param>
+    /// <returns>A signed integer that indicates the relative order of the objects being compared. The return value has the following meanings: Less than zero: This instance is less than <paramref name="other"/>. Zero: This instance is equal to <paramref name="other"/>. Greater than zero: This instance is greater than <paramref name="other"/>.</returns>
     public int CompareTo([AllowNull] GmpFloat other)
     {
         return other is null ? 1 : Compare(this, other);
     }
 
     /// <summary>
-    /// Compares two <see cref="GmpFloat"/> instances and returns an integer that indicates whether the first instance is less than, equal to, or greater than the second instance.
+    /// Compares two <see cref="GmpFloat"/> instances and returns an integer that indicates their relative position in the sort order.
     /// </summary>
-    /// <param name="op1">The first <see cref="GmpFloat"/> instance to compare.</param>
-    /// <param name="op2">The second <see cref="GmpFloat"/> instance to compare.</param>
-    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
-    /// Value Meaning
-    /// Less than zero: <paramref name="op1"/> is less than <paramref name="op2"/>.
-    /// Zero: <paramref name="op1"/> equals <paramref name="op2"/>.
-    /// Greater than zero: <paramref name="op1"/> is greater than <paramref name="op2"/>.
-    /// </returns>
+    /// <param name="op1">The first <see cref="GmpFloat"/> to compare.</param>
+    /// <param name="op2">The second <see cref="GmpFloat"/> to compare.</param>
+    /// <returns>A signed integer that indicates the relative order of <paramref name="op1"/> and <paramref name="op2"/>:
+    /// Less than zero if <paramref name="op1"/> is less than <paramref name="op2"/>,
+    /// Zero if <paramref name="op1"/> is equal to <paramref name="op2"/>,
+    /// Greater than zero if <paramref name="op1"/> is greater than <paramref name="op2"/>.</returns>
     public static unsafe int Compare(GmpFloat op1, GmpFloat op2)
     {
         fixed (Mpf_t* pop1 = &op1.Raw)
@@ -1364,10 +1347,10 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Determines whether the current <see cref="GmpFloat"/> instance is equal to the specified object.
+    /// Determines whether the specified <see cref="object"/> is equal to the current <see cref="GmpFloat"/>.
     /// </summary>
-    /// <param name="obj">The object to compare with the current instance.</param>
-    /// <returns><c>true</c> if the specified object is equal to the current instance; otherwise, <c>false</c>.</returns>
+    /// <param name="obj">The object to compare with the current <see cref="GmpFloat"/>.</param>
+    /// <returns>true if the specified object is equal to the current <see cref="GmpFloat"/>; otherwise, false.</returns>
     public override bool Equals(object? obj) => obj switch
     {
         null => false,
@@ -1382,181 +1365,449 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// <summary>
     /// Returns the hash code for this <see cref="GmpFloat"/> instance.
     /// </summary>
-    /// <returns>An integer hash code.</returns>
+    /// <returns>An integer hash code for this instance.</returns>
     public override int GetHashCode() => Raw.GetHashCode();
 
-    /// <summary>Determines whether two <see cref="GmpFloat"/> instances are equal.</summary>
+    /// <summary>
+    /// Determines whether two <see cref="GmpFloat"/> instances are equal.
+    /// </summary>
+    /// <param name="left">The first <see cref="GmpFloat"/> to compare.</param>
+    /// <param name="right">The second <see cref="GmpFloat"/> to compare.</param>
+    /// <returns>True if the two instances are equal, otherwise false.</returns>
     public static bool operator ==(GmpFloat left, GmpFloat right) => Compare(left, right) == 0;
 
-    /// <summary>Determines whether two <see cref="GmpFloat"/> instances are not equal.</summary>
+    /// <summary>
+    /// Determines whether two <see cref="GmpFloat"/> instances are not equal.
+    /// </summary>
+    /// <param name="left">The first <see cref="GmpFloat"/> instance to compare.</param>
+    /// <param name="right">The second <see cref="GmpFloat"/> instance to compare.</param>
+    /// <returns>True if the two instances are not equal; otherwise, false.</returns>
     public static bool operator !=(GmpFloat left, GmpFloat right) => Compare(left, right) != 0;
 
-    /// <summary>Determines whether one <see cref="GmpFloat"/> instance is greater than another.</summary>
+    /// <summary>
+    /// Determines if the <paramref name="left"/> <see cref="GmpFloat"/> is greater than the <paramref name="right"/> <see cref="GmpFloat"/>.
+    /// </summary>
+    /// <param name="left">The left operand.</param>
+    /// <param name="right">The right operand.</param>
+    /// <returns>True if the <paramref name="left"/> <see cref="GmpFloat"/> is greater than the <paramref name="right"/> <see cref="GmpFloat"/>, otherwise false.</returns>
     public static bool operator >(GmpFloat left, GmpFloat right) => Compare(left, right) > 0;
 
-    /// <summary>Determines whether one <see cref="GmpFloat"/> instance is less than another.</summary>
+    /// <summary>
+    /// Determines if the value of a <see cref="GmpFloat"/> instance is less than the value of another instance.
+    /// </summary>
+    /// <param name="left">The first instance to compare.</param>
+    /// <param name="right">The second instance to compare.</param>
+    /// <returns>True if the value of <paramref name="left"/> is less than the value of <paramref name="right"/>; otherwise, false.</returns>
     public static bool operator <(GmpFloat left, GmpFloat right) => Compare(left, right) < 0;
 
-    /// <summary>Determines whether one <see cref="GmpFloat"/> instance is greater than or equal to another.</summary>
+    /// <summary>
+    /// Determines if the value of the <paramref name="left"/> <see cref="GmpFloat"/> is greater than or equal to the value of the <paramref name="right"/> <see cref="GmpFloat"/>.
+    /// </summary>
+    /// <param name="left">The left operand.</param>
+    /// <param name="right">The right operand.</param>
+    /// <returns>True if the value of the <paramref name="left"/> <see cref="GmpFloat"/> is greater than or equal to the value of the <paramref name="right"/> <see cref="GmpFloat"/>, otherwise false.</returns>
     public static bool operator >=(GmpFloat left, GmpFloat right) => Compare(left, right) >= 0;
 
-    /// <summary>Determines whether one <see cref="GmpFloat"/> instance is less than or equal to another.</summary>
+    /// <summary>
+    /// Determines whether a specified <see cref="GmpFloat"/> is less than or equal to another specified <see cref="GmpFloat"/>.
+    /// </summary>
+    /// <param name="left">The first <see cref="GmpFloat"/> to compare.</param>
+    /// <param name="right">The second <see cref="GmpFloat"/> to compare.</param>
+    /// <returns>true if <paramref name="left"/> is less than or equal to <paramref name="right"/>; otherwise, false.</returns>
     public static bool operator <=(GmpFloat left, GmpFloat right) => Compare(left, right) <= 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is equal to a double.</summary>
+    /// <summary>
+    /// Determines whether a <see cref="GmpFloat"/> instance is equal to a <see cref="double"/> value.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> instance.</param>
+    /// <param name="right">The <see cref="double"/> value.</param>
+    /// <returns>true if the two values are equal; otherwise, false.</returns>
     public static bool operator ==(GmpFloat left, double right) => Compare(left, right) == 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is not equal to a double.</summary>
+    /// <summary>
+    /// Determines whether two <see cref="GmpFloat"/> and <see cref="double"/> values are not equal.
+    /// </summary>
+    /// <param name="left">The first <see cref="GmpFloat"/> value to compare.</param>
+    /// <param name="right">The second <see cref="double"/> value to compare.</param>
+    /// <returns>true if the values are not equal; otherwise, false.</returns>
     public static bool operator !=(GmpFloat left, double right) => Compare(left, right) != 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than a double.</summary>
+    /// <summary>
+    /// Determines if a <see cref="GmpFloat"/> value is greater than a <see cref="double"/> value.
+    /// </summary>
+    /// <param name="left">The left <see cref="GmpFloat"/> value.</param>
+    /// <param name="right">The right <see cref="double"/> value.</param>
+    /// <returns>True if the left <see cref="GmpFloat"/> value is greater than the right <see cref="double"/> value, otherwise false.</returns>
     public static bool operator >(GmpFloat left, double right) => Compare(left, right) > 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than a double.</summary>
+    /// <summary>
+    /// Determines whether the specified <see cref="GmpFloat"/> value is less than the specified double value.
+    /// </summary>
+    /// <param name="left">The first <see cref="GmpFloat"/> value to compare.</param>
+    /// <param name="right">The double value to compare with the first <see cref="GmpFloat"/> value.</param>
+    /// <returns>true if the first <see cref="GmpFloat"/> value is less than the double value; otherwise, false.</returns>
     public static bool operator <(GmpFloat left, double right) => Compare(left, right) < 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than or equal to a double.</summary>
+    /// <summary>
+    /// Determines whether the <see cref="GmpFloat"/> value <paramref name="left"/> is greater than or equal to the <see cref="double"/> value <paramref name="right"/>.
+    /// </summary>
+    /// <param name="left">The left <see cref="GmpFloat"/> operand.</param>
+    /// <param name="right">The right <see cref="double"/> operand.</param>
+    /// <returns>True if <paramref name="left"/> is greater than or equal to <paramref name="right"/>; otherwise, False.</returns>
     public static bool operator >=(GmpFloat left, double right) => Compare(left, right) >= 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than or equal to a double.</summary>
+    /// <summary>
+    /// Determines whether a specified <see cref="GmpFloat"/> instance is less than or equal to a specified double value.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> instance to compare.</param>
+    /// <param name="right">The double value to compare.</param>
+    /// <returns>true if the value of <paramref name="left"/> is less than or equal to the value of <paramref name="right"/>; otherwise, false.</returns>
     public static bool operator <=(GmpFloat left, double right) => Compare(left, right) <= 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is equal to an int.</summary>
+    /// <summary>
+    /// Determines whether a <see cref="GmpFloat"/> instance is equal to an integer.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> instance.</param>
+    /// <param name="right">The integer value to compare.</param>
+    /// <returns>true if the <see cref="GmpFloat"/> instance is equal to the integer; otherwise, false.</returns>
     public static bool operator ==(GmpFloat left, int right) => Compare(left, right) == 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is not equal to an int.</summary>
+    /// <summary>
+    /// Determines if a <see cref="GmpFloat"/> value is not equal to an integer value.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> value to compare.</param>
+    /// <param name="right">The integer value to compare.</param>
+    /// <returns>True if the two values are not equal, otherwise false.</returns>
     public static bool operator !=(GmpFloat left, int right) => Compare(left, right) != 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than an int.</summary>
+    /// <summary>
+    /// Determines if a <see cref="GmpFloat"/> instance is greater than an integer value.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> instance to compare.</param>
+    /// <param name="right">The integer value to compare.</param>
+    /// <returns>True if the <see cref="GmpFloat"/> instance is greater than the integer value, otherwise false.</returns>
     public static bool operator >(GmpFloat left, int right) => Compare(left, right) > 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than an int.</summary>
+    /// <summary>
+    /// Determines if a <see cref="GmpFloat"/> value is less than an integer value.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> value to compare.</param>
+    /// <param name="right">The integer value to compare.</param>
+    /// <returns>True if the <see cref="GmpFloat"/> value is less than the integer value, otherwise False.</returns>
     public static bool operator <(GmpFloat left, int right) => Compare(left, right) < 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than or equal to an int.</summary>
+    /// <summary>
+    /// Determines if the value of a <see cref="GmpFloat"/> is greater than or equal to an integer value.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> instance to compare.</param>
+    /// <param name="right">The integer value to compare.</param>
+    /// <returns>True if the <see cref="GmpFloat"/> value is greater than or equal to the integer value, otherwise false.</returns>
     public static bool operator >=(GmpFloat left, int right) => Compare(left, right) >= 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than or equal to an int.</summary>
+    /// <summary>
+    /// Determines whether a specified <see cref="GmpFloat"/> is less than or equal to a specified integer.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> to compare.</param>
+    /// <param name="right">The integer to compare.</param>
+    /// <returns>true if the value of <paramref name="left"/> is less than or equal to the value of <paramref name="right"/>; otherwise, false.</returns>
     public static bool operator <=(GmpFloat left, int right) => Compare(left, right) <= 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is equal to a uint.</summary>
+    /// <summary>
+    /// Determines whether a <see cref="GmpFloat"/> instance is equal to a <see cref="uint"/> value.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> instance to compare.</param>
+    /// <param name="right">The <see cref="uint"/> value to compare.</param>
+    /// <returns><c>true</c> if the <see cref="GmpFloat"/> and <see cref="uint"/> values are equal; otherwise, <c>false</c>.</returns>
     public static bool operator ==(GmpFloat left, uint right) => Compare(left, right) == 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is not equal to a uint.</summary>
+    /// <summary>
+    /// Determines whether a <see cref="GmpFloat"/> and a <see cref="uint"/> are not equal.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> to compare.</param>
+    /// <param name="right">The <see cref="uint"/> to compare.</param>
+    /// <returns>True if the two values are not equal; otherwise, false.</returns>
     public static bool operator !=(GmpFloat left, uint right) => Compare(left, right) != 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than a uint.</summary>
+    /// <summary>
+    /// Determines if a <see cref="GmpFloat"/> value is greater than an unsigned integer value.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> value to compare.</param>
+    /// <param name="right">The unsigned integer value to compare.</param>
+    /// <returns>True if the <see cref="GmpFloat"/> value is greater than the unsigned integer value, false otherwise.</returns>
     public static bool operator >(GmpFloat left, uint right) => Compare(left, right) > 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than a uint.</summary>
+    /// <summary>
+    /// Determines whether the <see cref="GmpFloat"/> value of <paramref name="left"/> is less than the <see cref="uint"/> value of <paramref name="right"/>.
+    /// </summary>
+    /// <param name="left">The left <see cref="GmpFloat"/> value to compare.</param>
+    /// <param name="right">The right <see cref="uint"/> value to compare.</param>
+    /// <returns>True if the value of <paramref name="left"/> is less than the value of <paramref name="right"/>; otherwise, false.</returns>
     public static bool operator <(GmpFloat left, uint right) => Compare(left, right) < 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than or equal to a uint.</summary>
+    /// <summary>
+    /// Determines whether a <see cref="GmpFloat"/> value is greater than or equal to a <see cref="uint"/> value.
+    /// </summary>
+    /// <param name="left">The left <see cref="GmpFloat"/> operand.</param>
+    /// <param name="right">The right <see cref="uint"/> operand.</param>
+    /// <returns><c>true</c> if the <paramref name="left"/> is greater than or equal to the <paramref name="right"/>; otherwise, <c>false</c>.</returns>
     public static bool operator >=(GmpFloat left, uint right) => Compare(left, right) >= 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than or equal to a uint.</summary>
+    /// <summary>
+    /// Determines if the value of a <see cref="GmpFloat"/> is less than or equal to a uint.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> to compare.</param>
+    /// <param name="right">The uint to compare.</param>
+    /// <returns>true if the value of <paramref name="left"/> is less than or equal to <paramref name="right"/>; otherwise, false.</returns>
     public static bool operator <=(GmpFloat left, uint right) => Compare(left, right) <= 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is equal to a <see cref="GmpInteger"/>.</summary>
+    /// <summary>
+    /// Determines whether two specified instances of <see cref="GmpFloat"/> and <see cref="GmpInteger"/> are equal.
+    /// </summary>
+    /// <param name="left">The first instance to compare.</param>
+    /// <param name="right">The second instance to compare.</param>
+    /// <returns>true if the values of <paramref name="left"/> and <paramref name="right"/> are equal; otherwise, false.</returns>
     public static bool operator ==(GmpFloat left, GmpInteger right) => Compare(left, right) == 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is not equal to a <see cref="GmpInteger"/>.</summary>
+    /// <summary>
+    /// Determines whether two instances of <see cref="GmpFloat"/> and <see cref="GmpInteger"/> are not equal.
+    /// </summary>
+    /// <param name="left">The first instance of <see cref="GmpFloat"/>.</param>
+    /// <param name="right">The second instance of <see cref="GmpInteger"/>.</param>
+    /// <returns>true if the instances are not equal; otherwise, false.</returns>
     public static bool operator !=(GmpFloat left, GmpInteger right) => Compare(left, right) != 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than a <see cref="GmpInteger"/>.</summary>
+    /// <summary>
+    /// Determines if a <see cref="GmpFloat"/> is greater than a <see cref="GmpInteger"/>.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> to compare.</param>
+    /// <param name="right">The <see cref="GmpInteger"/> to compare.</param>
+    /// <returns>True if the <paramref name="left"/> is greater than <paramref name="right"/>, otherwise false.</returns>
     public static bool operator >(GmpFloat left, GmpInteger right) => Compare(left, right) > 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than a <see cref="GmpInteger"/>.</summary>
+    /// <summary>
+    /// Determines if a <see cref="GmpFloat"/> is less than a <see cref="GmpInteger"/>.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> to compare.</param>
+    /// <param name="right">The <see cref="GmpInteger"/> to compare.</param>
+    /// <returns>True if <paramref name="left"/> is less than <paramref name="right"/>, otherwise false.</returns>
     public static bool operator <(GmpFloat left, GmpInteger right) => Compare(left, right) < 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is greater than or equal to a <see cref="GmpInteger"/>.</summary>
+    /// <summary>
+    /// Determines if the value of a <see cref="GmpFloat"/> is greater than or equal to the value of a <see cref="GmpInteger"/>.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> to compare.</param>
+    /// <param name="right">The <see cref="GmpInteger"/> to compare.</param>
+    /// <returns>True if the value of <paramref name="left"/> is greater than or equal to the value of <paramref name="right"/>, otherwise false.</returns>
     public static bool operator >=(GmpFloat left, GmpInteger right) => Compare(left, right) >= 0;
 
-    /// <summary>Determines whether a <see cref="GmpFloat"/> instance is less than or equal to a <see cref="GmpInteger"/>.</summary>
+    /// <summary>
+    /// Determines if the <see cref="GmpFloat"/> value is less than or equal to the <see cref="GmpInteger"/> value.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpFloat"/> value.</param>
+    /// <param name="right">The <see cref="GmpInteger"/> value.</param>
+    /// <returns>True if the <see cref="GmpFloat"/> value is less than or equal to the <see cref="GmpInteger"/> value, otherwise false.</returns>
     public static bool operator <=(GmpFloat left, GmpInteger right) => Compare(left, right) <= 0;
 
-    /// <summary>Determines whether a double is equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines whether a <see cref="double"/> value is equal to a <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The <see cref="double"/> value to compare.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> value to compare.</param>
+    /// <returns><c>true</c> if the values are equal; otherwise, <c>false</c>.</returns>
     public static bool operator ==(double left, GmpFloat right) => right == left;
 
-    /// <summary>Determines whether a double is not equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines whether a <see cref="double"/> and a <see cref="GmpFloat"/> are not equal.
+    /// </summary>
+    /// <param name="left">The double value to compare.</param>
+    /// <param name="right">The GmpFloat value to compare.</param>
+    /// <returns>true if the specified values are not equal; otherwise, false.</returns>
     public static bool operator !=(double left, GmpFloat right) => right != left;
 
-    /// <summary>Determines whether a double is greater than a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines whether a <see cref="double"/> value is greater than a <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The left-hand side <see cref="double"/> value.</param>
+    /// <param name="right">The right-hand side <see cref="GmpFloat"/> value.</param>
+    /// <returns>true if the <paramref name="left"/> is greater than the <paramref name="right"/>; otherwise, false.</returns>
     public static bool operator >(double left, GmpFloat right) => right < left;
 
-    /// <summary>Determines whether a double is less than a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines if a <see cref="double"/> value is less than a <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The double value to compare.</param>
+    /// <param name="right">The GmpFloat value to compare.</param>
+    /// <returns>True if the double value is less than the GmpFloat value, otherwise false.</returns>
     public static bool operator <(double left, GmpFloat right) => right > left;
 
-    /// <summary>Determines whether a double is greater than or equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines if a <see cref="double"/> value is greater than or equal to a <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The <see cref="double"/> value to compare.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> value to compare.</param>
+    /// <returns>true if the <see cref="double"/> value is greater than or equal to the <see cref="GmpFloat"/> value; otherwise, false.</returns>
     public static bool operator >=(double left, GmpFloat right) => right <= left;
 
-    /// <summary>Determines whether a double is less than or equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines whether a <see cref="double"/> value is less than or equal to a <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The <see cref="double"/> value to compare.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> value to compare.</param>
+    /// <returns>True if the <see cref="double"/> value is less than or equal to the <see cref="GmpFloat"/> value, otherwise false.</returns>
     public static bool operator <=(double left, GmpFloat right) => right >= left;
 
-    /// <summary>Determines whether an int is equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines whether an integer <paramref name="left"/> is equal to a <see cref="GmpFloat"/> <paramref name="right"/>.
+    /// </summary>
+    /// <param name="left">The integer value to compare.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> value to compare.</param>
+    /// <returns>True if <paramref name="left"/> is equal to <paramref name="right"/>, otherwise false.</returns>
     public static bool operator ==(int left, GmpFloat right) => right == left;
 
-    /// <summary>Determines whether an int is not equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines whether a <see cref="int"/> value is not equal to a <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The integer value to compare.</param>
+    /// <param name="right">The GmpFloat value to compare.</param>
+    /// <returns>True if the <paramref name="left"/> is not equal to the <paramref name="right"/>; otherwise, false.</returns>
     public static bool operator !=(int left, GmpFloat right) => right != left;
 
-    /// <summary>Determines whether an int is greater than a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines whether a specified integer is greater than a specified <see cref="GmpFloat"/>.
+    /// </summary>
+    /// <param name="left">The integer to compare.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> to compare.</param>
+    /// <returns>true if <paramref name="left"/> is greater than <paramref name="right"/>; otherwise, false.</returns>
     public static bool operator >(int left, GmpFloat right) => right < left;
 
-    /// <summary>Determines whether an int is less than a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines if the given integer <paramref name="left"/> is less than the specified <see cref="GmpFloat"/> <paramref name="right"/>.
+    /// </summary>
+    /// <param name="left">The integer value to compare.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> value to compare.</param>
+    /// <returns>true if <paramref name="left"/> is less than <paramref name="right"/>; otherwise, false.</returns>
     public static bool operator <(int left, GmpFloat right) => right > left;
 
-    /// <summary>Determines whether an int is greater than or equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines whether a specified integer is greater than or equal to a specified <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The integer value to compare.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> value to compare.</param>
+    /// <returns>true if the integer value is greater than or equal to the <see cref="GmpFloat"/> value; otherwise, false.</returns>
     public static bool operator >=(int left, GmpFloat right) => right <= left;
 
-    /// <summary>Determines whether an int is less than or equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines if a given integer <paramref name="left"/> is less than or equal to a <see cref="GmpFloat"/> <paramref name="right"/>.
+    /// </summary>
+    /// <param name="left">The integer value to compare.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> value to compare.</param>
+    /// <returns>True if the integer value is less than or equal to the <see cref="GmpFloat"/> value, otherwise false.</returns>
     public static bool operator <=(int left, GmpFloat right) => right >= left;
 
-    /// <summary>Determines whether a uint is equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines if a <see cref="uint"/> value is equal to a <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The unsigned integer value to compare.</param>
+    /// <param name="right">The GmpFloat value to compare.</param>
+    /// <returns>True if the values are equal, false otherwise.</returns>
     public static bool operator ==(uint left, GmpFloat right) => right == left;
 
-    /// <summary>Determines whether a uint is not equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines if a <see cref="uint"/> value is not equal to a <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The uint value to compare.</param>
+    /// <param name="right">The GmpFloat value to compare.</param>
+    /// <returns>True if the values are not equal, false otherwise.</returns>
     public static bool operator !=(uint left, GmpFloat right) => right != left;
 
-    /// <summary>Determines whether a uint is greater than a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines if a <see cref="uint"/> value is greater than a <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The unsigned integer value.</param>
+    /// <param name="right">The GmpFloat value.</param>
+    /// <returns>true if the <paramref name="left"/> is greater than the <paramref name="right"/>; otherwise, false.</returns>
     public static bool operator >(uint left, GmpFloat right) => right < left;
 
-    /// <summary>Determines whether a uint is less than a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines if a <see cref="uint"/> value is less than a <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The left-hand side <see cref="uint"/> value.</param>
+    /// <param name="right">The right-hand side <see cref="GmpFloat"/> value.</param>
+    /// <returns>True if the <paramref name="left"/> is less than <paramref name="right"/>, otherwise false.</returns>
     public static bool operator <(uint left, GmpFloat right) => right > left;
 
-    /// <summary>Determines whether a uint is greater than or equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines if a <see cref="uint"/> value is greater than or equal to a <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The <see cref="uint"/> value to compare.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> value to compare.</param>
+    /// <returns>True if the <paramref name="left"/> is greater than or equal to the <paramref name="right"/>; otherwise, false.</returns>
     public static bool operator >=(uint left, GmpFloat right) => right <= left;
 
-    /// <summary>Determines whether a uint is less than or equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines whether a <see cref="uint"/> value is less than or equal to a <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The <see cref="uint"/> value.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> value.</param>
+    /// <returns>true if the <paramref name="left"/> value is less than or equal to the <paramref name="right"/> value; otherwise, false.</returns>
     public static bool operator <=(uint left, GmpFloat right) => right >= left;
 
-    /// <summary>Determines whether a <see cref="GmpInteger"/> is equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines whether a <see cref="GmpInteger"/> and a <see cref="GmpFloat"/> are equal.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpInteger"/> to compare.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> to compare.</param>
+    /// <returns>True if the <see cref="GmpInteger"/> and <see cref="GmpFloat"/> are equal, otherwise false.</returns>
     public static bool operator ==(GmpInteger left, GmpFloat right) => right == left;
 
-    /// <summary>Determines whether a <see cref="GmpInteger"/> is not equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines whether two instances of <see cref="GmpInteger"/> and <see cref="GmpFloat"/> are not equal.
+    /// </summary>
+    /// <param name="left">The first instance to compare.</param>
+    /// <param name="right">The second instance to compare.</param>
+    /// <returns>true if the instances are not equal; otherwise, false.</returns>
     public static bool operator !=(GmpInteger left, GmpFloat right) => right != left;
 
-    /// <summary>Determines whether a <see cref="GmpInteger"/> is greater than a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines if a <see cref="GmpInteger"/> is greater than a <see cref="GmpFloat"/>.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpInteger"/> to compare.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> to compare.</param>
+    /// <returns>True if the <see cref="GmpInteger"/> is greater than the <see cref="GmpFloat"/>; otherwise, false.</returns>
     public static bool operator >(GmpInteger left, GmpFloat right) => right < left;
 
-    /// <summary>Determines whether a <see cref="GmpInteger"/> is less than a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines if a <see cref="GmpInteger"/> is less than a <see cref="GmpFloat"/>.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpInteger"/> to compare.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> to compare.</param>
+    /// <returns>True if the <see cref="GmpInteger"/> is less than the <see cref="GmpFloat"/>; otherwise, false.</returns>
     public static bool operator <(GmpInteger left, GmpFloat right) => right > left;
 
-    /// <summary>Determines whether a <see cref="GmpInteger"/> is greater than or equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines if the <see cref="GmpInteger"/> value is greater than or equal to the <see cref="GmpFloat"/> value.
+    /// </summary>
+    /// <param name="left">The <see cref="GmpInteger"/> value to compare.</param>
+    /// <param name="right">The <see cref="GmpFloat"/> value to compare.</param>
+    /// <returns>True if the <see cref="GmpInteger"/> value is greater than or equal to the <see cref="GmpFloat"/> value, otherwise false.</returns>
     public static bool operator >=(GmpInteger left, GmpFloat right) => right <= left;
 
-    /// <summary>Determines whether a <see cref="GmpInteger"/> is less than or equal to a <see cref="GmpFloat"/> instance.</summary>
+    /// <summary>
+    /// Determines whether a specified <see cref="GmpInteger"/> is less than or equal to another specified <see cref="GmpFloat"/>.
+    /// </summary>
+    /// <param name="left">The first <see cref="GmpInteger"/> to compare.</param>
+    /// <param name="right">The second <see cref="GmpFloat"/> to compare.</param>
+    /// <returns>true if the value of <paramref name="left"/> is less than or equal to the value of <paramref name="right"/>; otherwise, false.</returns>
     public static bool operator <=(GmpInteger left, GmpFloat right) => right >= left;
 
     /// <summary>
-    /// Compares two <see cref="GmpFloat"/> and <see cref="GmpInteger"/> instances.
+    /// Compares a <see cref="GmpFloat"/> <paramref name="op1"/> with a <see cref="GmpInteger"/> <paramref name="op2"/>.
     /// </summary>
-    /// <param name="op1">The first <see cref="GmpFloat"/> instance to compare.</param>
-    /// <param name="op2">The second <see cref="GmpInteger"/> instance to compare.</param>
-    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
-    /// Value Meaning
-    /// Less than zero: <paramref name="op1"/> is less than <paramref name="op2"/>.
-    /// Zero: <paramref name="op1"/> equals <paramref name="op2"/>.
-    /// Greater than zero: <paramref name="op1"/> is greater than <paramref name="op2"/>.
+    /// <param name="op1">The <see cref="GmpFloat"/> operand.</param>
+    /// <param name="op2">The <see cref="GmpInteger"/> operand.</param>
+    /// <returns>
+    /// A negative value if <paramref name="op1"/> is less than <paramref name="op2"/>,
+    /// zero if they are equal, and a positive value if <paramref name="op1"/> is greater than <paramref name="op2"/>.
     /// </returns>
     public static unsafe int Compare(GmpFloat op1, GmpInteger op2)
     {
@@ -1568,16 +1819,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Compares a <see cref="GmpFloat"/> instance <paramref name="op1"/> with a double <paramref name="op2"/>.
+    /// Compares two <see cref="GmpFloat"/> instances, <paramref name="op1"/> and a <paramref name="op2"/> of type double.
     /// </summary>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to compare.</param>
-    /// <param name="op2">The double value to compare.</param>
-    /// <returns>
-    /// A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>.
-    /// Return value is less than 0 if <paramref name="op1"/> is less than <paramref name="op2"/>,
-    /// 0 if <paramref name="op1"/> is equal to <paramref name="op2"/>,
-    /// and greater than 0 if <paramref name="op1"/> is greater than <paramref name="op2"/>.
-    /// </returns>
+    /// <param name="op1">The first <see cref="GmpFloat"/> instance to compare.</param>
+    /// <param name="op2">The second double value to compare.</param>
+    /// <returns>A negative value if op1 is less than op2, zero if op1 is equal to op2, and a positive value if op1 is greater than op2.</returns>
     public static unsafe int Compare(GmpFloat op1, double op2)
     {
         fixed (Mpf_t* pop1 = &op1.Raw)
@@ -1587,29 +1833,13 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Compares a <see cref="GmpFloat"/> instance with an integer value.
+    /// Compares the value of a <see cref="GmpFloat"/> instance <paramref name="op1"/> to an integer <paramref name="op2"/>.
     /// </summary>
     /// <param name="op1">The <see cref="GmpFloat"/> instance to compare.</param>
     /// <param name="op2">The integer value to compare.</param>
-    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
-    /// <list type="table">
-    ///     <listheader>
-    ///         <term>Value</term>
-    ///         <description>Meaning</description>
-    ///     </listheader>
-    ///     <item>
-    ///         <term>Less than zero</term>
-    ///         <description><paramref name="op1"/> is less than <paramref name="op2"/>.</description>
-    ///     </item>
-    ///     <item>
-    ///         <term>Zero</term>
-    ///         <description><paramref name="op1"/> equals <paramref name="op2"/>.</description>
-    ///     </item>
-    ///     <item>
-    ///         <term>Greater than zero</term>
-    ///         <description><paramref name="op1"/> is greater than <paramref name="op2"/>.</description>
-    ///     </item>
-    /// </list>
+    /// <returns>
+    /// A negative value if <paramref name="op1"/> is less than <paramref name="op2"/>,
+    /// zero if they are equal, and a positive value if <paramref name="op1"/> is greater than <paramref name="op2"/>.
     /// </returns>
     public static unsafe int Compare(GmpFloat op1, int op2)
     {
@@ -1620,15 +1850,13 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Compares a <see cref="GmpFloat"/> instance with an unsigned integer <paramref name="op2"/>.
+    /// Compare two <see cref="GmpFloat"/> instances, <paramref name="op1"/> and <paramref name="op2"/>.
     /// </summary>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to compare.</param>
-    /// <param name="op2">The unsigned integer value to compare.</param>
-    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
-    /// Value Meaning
-    /// Less than zero: <paramref name="op1"/> is less than <paramref name="op2"/>.
-    /// Zero: <paramref name="op1"/> equals <paramref name="op2"/>.
-    /// Greater than zero: <paramref name="op1"/> is greater than <paramref name="op2"/>.
+    /// <param name="op1">The first <see cref="GmpFloat"/> instance to compare.</param>
+    /// <param name="op2">The second <see cref="GmpFloat"/> instance to compare.</param>
+    /// <returns>
+    /// A negative value if <paramref name="op1"/> is less than <paramref name="op2"/>,
+    /// zero if they are equal, and a positive value if <paramref name="op1"/> is greater than <paramref name="op2"/>.
     /// </returns>
     public static unsafe int Compare(GmpFloat op1, uint op2)
     {
@@ -1639,19 +1867,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Determines whether the specified <see cref="GmpFloat"/> instance is equal to the specified unsigned integer.
+    /// Compares a <see cref="GmpFloat"/> value with an unsigned integer value. This function is mathematically ill-defined and should not be used.
     /// </summary>
-    /// <remarks>
-    /// This function is mathematically ill-defined and should not be used.
-    /// </remarks>
-    /// <param name="op1">The <see cref="GmpFloat"/> instance to compare.</param>
-    /// <param name="op2">The unsigned integer to compare.</param>
-    /// <returns>A signed integer that indicates the relative values of <paramref name="op1"/> and <paramref name="op2"/>, as shown in the following table.
-    /// <para>Value Meaning</para>
-    /// <para>0     <paramref name="op1"/> is equal to <paramref name="op2"/>.</para>
-    /// <para>-1    <paramref name="op1"/> is less than <paramref name="op2"/>.</para>
-    /// <para>+1    <paramref name="op1"/> is greater than <paramref name="op2"/>.</para>
-    /// </returns>
+    /// <param name="op1">The <see cref="GmpFloat"/> value to compare.</param>
+    /// <param name="op2">The unsigned integer value to compare.</param>
+    /// <returns>A negative value if <paramref name="op1"/> is less than <paramref name="op2"/>, zero if they are equal, and a positive value if <paramref name="op1"/> is greater than <paramref name="op2"/>.</returns>
+    /// <remarks>This function is marked as obsolete and should not be used.</remarks>
     [Obsolete("This function is mathematically ill-defined and should not be used.")]
     public static unsafe int MpfEquals(GmpFloat op1, uint op2)
     {
@@ -1662,16 +1883,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Calculates the relative difference between two <see cref="GmpFloat"/> values <paramref name="op1"/> and <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
+    /// Computes the relative difference between two <see cref="GmpFloat"/> values <paramref name="op1"/> and <paramref name="op2"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result in.</param>
-    /// <param name="op1">The first <see cref="GmpFloat"/> value to calculate the relative difference.</param>
-    /// <param name="op2">The second <see cref="GmpFloat"/> value to calculate the relative difference.</param>
-    /// <remarks>
-    /// The relative difference is calculated as (op1 - op2) / ((|op1| + |op2|) / 2).
-    /// </remarks>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/>, <paramref name="op1"/> or <paramref name="op2"/> is null.</exception>
-    /// <exception cref="ObjectDisposedException">Thrown when <paramref name="rop"/>, <paramref name="op1"/> or <paramref name="op2"/> has already been disposed.</exception>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance where the result will be stored.</param>
+    /// <param name="op1">The first <see cref="GmpFloat"/> value to compute the relative difference.</param>
+    /// <param name="op2">The second <see cref="GmpFloat"/> value to compute the relative difference.</param>
     public static unsafe void RelDiffInplace(GmpFloat rop, GmpFloat op1, GmpFloat op2)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -1683,12 +1899,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Calculates the relative difference between two <see cref="GmpFloat"/> instances <paramref name="op1"/> and <paramref name="op2"/>.
+    /// Calculate the relative difference between two <see cref="GmpFloat"/> instances, <paramref name="op1"/> and <paramref name="op2"/>.
     /// </summary>
-    /// <param name="op1">The first <see cref="GmpFloat"/> instance.</param>
-    /// <param name="op2">The second <see cref="GmpFloat"/> instance.</param>
-    /// <param name="precision">The precision in bits of the result. If not specified, the default precision will be used.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the relative difference between <paramref name="op1"/> and <paramref name="op2"/>.</returns>
+    /// <param name="op1">The first <see cref="GmpFloat"/> operand.</param>
+    /// <param name="op2">The second <see cref="GmpFloat"/> operand.</param>
+    /// <param name="precision">The precision of the result in bits. If set to 0, the <see cref="DefaultPrecision"/> will be used.</param>
+    /// <returns>A new instance of <see cref="GmpFloat"/> representing the relative difference.</returns>
     public static unsafe GmpFloat RelDiff(GmpFloat op1, GmpFloat op2, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1696,10 +1912,10 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         return rop;
     }
 
-    /// <summary>Gets the sign of the <see cref="GmpFloat"/> instance. </summary>
-    /// <remarks>
-    /// The returned value is -1 if the <see cref="GmpFloat"/> instance is less than zero, 0 if the instance is zero, 1 otherwise.
-    /// </remarks>
+    /// <summary>
+    /// Gets the sign of the <see cref="GmpFloat"/> instance.
+    /// </summary>
+    /// <value>Returns -1 if the value is negative, 1 if the value is positive, and 0 if the value is zero.</value>
     public int Sign => Raw.Size < 0 ? -1 : Raw.Size > 0 ? 1 : 0;
 
     #endregion
@@ -1707,12 +1923,10 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     #region Misc Functions
 
     /// <summary>
-    /// Rounds up the <paramref name="op"/> value to the nearest integer and stores the result in <paramref name="rop"/>.
+    /// Computes the smallest integer greater than or equal to the given <paramref name="op"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
     /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
-    /// <param name="op">The <see cref="GmpFloat"/> instance to round up.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op"/> is null.</exception>
-    /// <remarks>The <paramref name="rop"/> instance will be modified to store the result.</remarks>
+    /// <param name="op">The <see cref="GmpFloat"/> instance to compute the ceiling value for.</param>
     public static unsafe void CeilInplace(GmpFloat rop, GmpFloat op)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -1723,11 +1937,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Returns the smallest integral value greater than or equal to the specified <paramref name="op"/>.
+    /// Calculate the smallest integer, greater than or equal to the specified <paramref name="op"/> and store the result in a new <see cref="GmpFloat"/> instance.
     /// </summary>
-    /// <param name="op">The <see cref="GmpFloat"/> instance to calculate the ceiling value.</param>
-    /// <param name="precision">The precision in bits of the result. If set to 0, the precision will be set to <see cref="GmpFloat.DefaultPrecision"/>.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the ceiling value of <paramref name="op"/>.</returns>
+    /// <param name="op">The input <see cref="GmpFloat"/> value.</param>
+    /// <param name="precision">The precision of the result in bits. If set to 0, the <see cref="DefaultPrecision"/> will be used.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance containing the result of the ceiling operation.</returns>
     public static GmpFloat Ceil(GmpFloat op, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1736,14 +1950,10 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Rounds down the value of <paramref name="op"/> to the nearest integer and stores the result in <paramref name="rop"/>.
+    /// Computes the largest integer not greater than <paramref name="op"/> and stores the result in <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
-    /// <param name="op">The <see cref="GmpFloat"/> instance to round down.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="rop"/> or <paramref name="op"/> is null.</exception>
-    /// <remarks>
-    /// The value of <paramref name="op"/> is not changed.
-    /// </remarks>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance where the result will be stored.</param>
+    /// <param name="op">The <see cref="GmpFloat"/> instance to compute the floor of.</param>
     public static unsafe void FloorInplace(GmpFloat rop, GmpFloat op)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -1754,11 +1964,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Returns the largest <see cref="GmpFloat"/> less than or equal to the specified <paramref name="op"/>.
+    /// Calculate the largest integer value less than or equal to the given <paramref name="op"/> and return the result as a new <see cref="GmpFloat"/> instance.
     /// </summary>
-    /// <param name="op">The <see cref="GmpFloat"/> to floor.</param>
-    /// <param name="precision">The precision in bits of the result. If set to 0, the precision will be set to <see cref="GmpFloat.DefaultPrecision"/>.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the largest integer less than or equal to <paramref name="op"/>.</returns>
+    /// <param name="op">The input <see cref="GmpFloat"/> value.</param>
+    /// <param name="precision">The precision of the result in bits (optional, default is 0).</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance representing the floor value of the input.</returns>
     public static GmpFloat Floor(GmpFloat op, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1767,14 +1977,10 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Rounds the <paramref name="op"/> <see cref="GmpFloat"/> instance to the nearest integer towards zero, and stores the result in the <paramref name="rop"/> instance.
+    /// Rounds the given <paramref name="op"/> <see cref="GmpFloat"/> value towards zero and stores the result in <paramref name="rop"/>.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the result.</param>
-    /// <param name="op">The <see cref="GmpFloat"/> instance to round.</param>
-    /// <exception cref="ArgumentNullException">Thrown when either <paramref name="rop"/> or <paramref name="op"/> is null.</exception>
-    /// <remarks>
-    /// This method modifies the <paramref name="rop"/> instance in place.
-    /// </remarks>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance to store the rounded result.</param>
+    /// <param name="op">The <see cref="GmpFloat"/> value to round.</param>
     public static unsafe void RoundInplace(GmpFloat rop, GmpFloat op)
     {
         fixed (Mpf_t* prop = &rop.Raw)
@@ -1785,11 +1991,11 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Rounds the specified <paramref name="op"/> to the nearest integer, using the specified <paramref name="precision"/> if provided.
+    /// Rounds a <see cref="GmpFloat"/> value to the specified precision.
     /// </summary>
-    /// <param name="op">The <see cref="GmpFloat"/> instance to round.</param>
-    /// <param name="precision">The precision to use for the result, in bits. If not provided, the default precision will be used.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the rounded value.</returns>
+    /// <param name="op">The <see cref="GmpFloat"/> value to round.</param>
+    /// <param name="precision">The precision in bits to round the value to. Default is 0, which uses the current precision of the input value.</param>
+    /// <returns>A new <see cref="GmpFloat"/> instance with the rounded value.</returns>
     public static GmpFloat Round(GmpFloat op, uint precision = 0)
     {
         GmpFloat rop = new(precision);
@@ -1797,7 +2003,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         return rop;
     }
 
-    /// <summary>Indicates whether the value of this instance is an integer.</summary>
+    /// <summary>
+    /// Gets a value indicating whether the current <see cref="GmpFloat"/> instance represents an integer value.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> if the current instance represents an integer value; otherwise, <c>false</c>.
+    /// </value>
     public unsafe bool IsInteger
     {
         get
@@ -1810,9 +2021,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Check if the value of this <see cref="GmpFloat"/> instance can be represented as a 32-bit signed integer.
+    /// Determines whether the current <see cref="GmpFloat"/> value fits into an Int32.
     /// </summary>
-    /// <returns><c>true</c> if the value can be represented as a 32-bit signed integer, <c>false</c> otherwise.</returns>
+    /// <returns>True if the value fits into an Int32, otherwise false.</returns>
     public unsafe bool FitsInt32()
     {
         fixed (Mpf_t* ptr = &Raw)
@@ -1822,9 +2033,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Check if the value of this <see cref="GmpFloat"/> instance can be represented as an unsigned 32-bit integer.
+    /// Determines whether the current <see cref="GmpFloat"/> value can be represented as an unsigned 32-bit integer.
     /// </summary>
-    /// <returns><c>true</c> if the value can be represented as an unsigned 32-bit integer, <c>false</c> otherwise.</returns>
+    /// <returns>Returns true if the value can be represented as an unsigned 32-bit integer, otherwise false.</returns>
     public unsafe bool FitsUInt32()
     {
         fixed (Mpf_t* ptr = &Raw)
@@ -1834,9 +2045,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Check if the value of this <see cref="GmpFloat"/> instance can be represented as a 16-bit signed integer.
+    /// Determines whether the current <see cref="GmpFloat"/> value can be represented as a 16-bit signed integer.
     /// </summary>
-    /// <returns><c>true</c> if the value can be represented as a 16-bit signed integer, <c>false</c> otherwise.</returns>
+    /// <returns><c>true</c> if the value can be represented as a 16-bit signed integer; otherwise, <c>false</c>.</returns>
     public unsafe bool FitsInt16()
     {
         fixed (Mpf_t* ptr = &Raw)
@@ -1846,9 +2057,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Check if the current <see cref="GmpFloat"/> instance can be safely converted to an unsigned 16-bit integer.
+    /// Determines if the <see cref="GmpFloat"/> value fits into a UInt16 without truncation or rounding.
     /// </summary>
-    /// <returns><c>true</c> if the instance can be safely converted to an unsigned 16-bit integer, <c>false</c> otherwise.</returns>
+    /// <returns>True if the value fits into a UInt16, otherwise false.</returns>
     public unsafe bool FitsUInt16()
     {
         fixed (Mpf_t* ptr = &Raw)
@@ -1856,7 +2067,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
             return GmpLib.__gmpf_fits_ushort_p((IntPtr)ptr) != 0;
         }
     }
-    #endregion
+#endregion
 
     #region Dispose and Clear
     private bool _disposed;
@@ -1873,9 +2084,9 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Releases all resources used by the current instance of the <see cref="GmpFloat"/> class.
+    /// Dispose the current <see cref="GmpFloat"/> instance, clearing its resources and marking it as disposed.
     /// </summary>
-    /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+    /// <param name="disposing">Indicates whether the method call comes from a Dispose method (true) or a finalizer (false).</param>
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -1889,7 +2100,12 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         }
     }
 
-    /// <summary>Finalizes an instance of the <see cref="GmpFloat"/> class.</summary>
+    /// <summary>
+    /// Finalizes an instance of the <see cref="GmpFloat"/> class and releases unmanaged resources.
+    /// </summary>
+    /// <remarks>
+    /// Do not modify this code. Instead, put cleanup code in the Dispose(bool disposing) method.
+    /// </remarks>
     ~GmpFloat()
     {
         // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
@@ -1897,7 +2113,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+    /// Disposes the current <see cref="GmpFloat"/> instance and releases associated resources.
     /// </summary>
     public void Dispose()
     {
@@ -1909,18 +2125,13 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
 
     #region Obsoleted Random
     /// <summary>
-    /// Generates a random <see cref="GmpFloat"/> instance with the specified maximum limb count and exponent, and assigns it to the input <paramref name="rop"/>.
+    /// Obsolete. Populates the provided <see cref="GmpFloat"/> instance with a random value using the specified maximum limb count and maximum exponent.
     /// </summary>
-    /// <param name="rop">The <see cref="GmpFloat"/> instance to assign the generated random value to.</param>
-    /// <param name="maxLimbCount">The maximum number of limbs (in base 2) to use for the generated value.</param>
-    /// <param name="maxExp">The maximum exponent to use for the generated value.</param>
-    /// <remarks>
-    /// This method is obsolete, use <see cref="GmpRandom"/> instead.
-    /// </remarks>
+    /// <param name="rop">The <see cref="GmpFloat"/> instance to populate with a random value.</param>
+    /// <param name="maxLimbCount">The maximum number of limbs for the random value.</param>
+    /// <param name="maxExp">The maximum exponent for the random value.</param>
+    /// <remarks>Use <see cref="GmpRandom"/> instead.</remarks>
     /// <seealso cref="GmpRandom"/>
-    /// <exception cref="ArgumentNullException"><paramref name="rop"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentOutOfRangeException"><paramref name="maxLimbCount"/> or <paramref name="maxExp"/> is less than or equal to 0.</exception>
-    /// <exception cref="ArithmeticException">An error occurred while generating the random value.</exception>
     [Obsolete("use GmpRandom")]
     public static unsafe void Random2Inplace(GmpFloat rop, int maxLimbCount, int maxExp)
     {
@@ -1931,13 +2142,13 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="GmpFloat"/> with the specified <paramref name="precision"/> and generates a random number with the specified maximum limb count and maximum exponent.
+    /// Generates a random <see cref="GmpFloat"/> with the specified <paramref name="precision"/>, <paramref name="maxLimbCount"/>, and <paramref name="maxExp"/>. This method is obsolete and it is recommended to use <see cref="GmpRandom"/> instead.
     /// </summary>
-    /// <param name="precision">The precision of the new <see cref="GmpFloat"/> instance.</param>
-    /// <param name="maxLimbCount">The maximum limb count of the generated random number.</param>
-    /// <param name="maxExp">The maximum exponent of the generated random number.</param>
-    /// <returns>A new instance of <see cref="GmpFloat"/> representing the generated random number.</returns>
-    /// <remarks>This method is obsolete, use <see cref="GmpRandom"/> instead.</remarks>
+    /// <param name="precision">The precision of the resulting GmpFloat in bits.</param>
+    /// <param name="maxLimbCount">The maximum number of limbs in the generated GmpFloat.</param>
+    /// <param name="maxExp">The maximum exponent in the generated GmpFloat.</param>
+    /// <returns>A random <see cref="GmpFloat"/> with the specified parameters.</returns>
+    /// <remarks>This method is marked as obsolete and should not be used in new code.</remarks>
     [Obsolete("use GmpRandom")]
     public static GmpFloat Random2(uint precision, int maxLimbCount, int maxExp)
     {
@@ -1947,55 +2158,3 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     }
     #endregion
 }
-
-
-/// <summary>
-/// This struct represents a GMP floating-point number with arbitrary precision.
-/// </summary>
-[StructLayout(LayoutKind.Sequential)]
-public record struct Mpf_t
-{
-    /// <summary>
-    /// The number of significant bits in the number.
-    /// </summary>
-    public int Precision;
-    /// <summary>
-    /// The size of the data block in bytes.
-    /// </summary>
-    public int Size;
-    /// <summary>
-    /// The exponent of the number.
-    /// </summary>
-    public int Exponent;
-    /// <summary>
-    /// A pointer to the data block of the number.
-    /// </summary>
-    public IntPtr Limbs;
-
-    /// <summary>
-    /// The size of the struct in bytes.
-    /// </summary>
-    public static int RawSize => Marshal.SizeOf<Mpf_t>();
-
-
-    private readonly unsafe Span<int> GetLimbData() => new((void*)Limbs, Precision - 1);
-
-    /// <inheritdoc/>
-    public override readonly int GetHashCode()
-    {
-        HashCode c = new();
-        c.Add(Precision);
-        c.Add(Size);
-        c.Add(Exponent);
-        foreach (int i in GetLimbData())
-        {
-            c.Add(i);
-        }
-        return c.ToHashCode();
-    }
-}
-
-/// <summary>
-/// Represents a value consisting of an exponent and a double-precision floating-point number.
-/// </summary>
-public record struct ExpDouble(int Exp, double Value);

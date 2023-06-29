@@ -21,7 +21,7 @@
 #load "work\opensource\sdcb.arithmetic\chatgpt-prompt-cache"
 
 string solutionRoot = GetParentDirectoryUntilContainsFile(new DirectoryInfo(Util.CurrentQueryPath), "Sdcb.Arithmetic.sln").ToString();
-string file = Path.Combine(solutionRoot, @"Sdcb.Arithmetic.Mpfr/MpfrFloat.cs");
+string file = Path.Combine(solutionRoot, @"Sdcb.Arithmetic.Gmp/GmpFloat.cs");
 string code = File.ReadAllText(file);
 
 SyntaxTree tree = CSharpSyntaxTree.ParseText(code, new CSharpParseOptions().WithDocumentationMode(DocumentationMode.Parse));
@@ -29,7 +29,7 @@ CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
 
 ClassDeclarationSyntax theClass = root.DescendantNodes()
 	.OfType<ClassDeclarationSyntax>()
-	.Single(x => x.Identifier.ToString() == "MpfrFloat");
+	.Single(x => x.Identifier.ToString() == "GmpFloat");
 
 (await MethodReplacer.ReplaceMethods(theClass, QueryCancelToken)).ToFullString().Dump();
 
@@ -171,7 +171,7 @@ class MethodReplacer : CSharpSyntaxRewriter
 				""" },
 			new ChatMessage { Role = ChatMessageRole.User, Content = functionCode }
 		};
-		string raw = _gpt(new ChatgptRequest(prompts, ChatgptModels._35, 0.1));
+		string raw = _gpt(new ChatgptRequest(prompts, ChatgptModels._4, 0.5));
 		return string.Join("\n", raw.Split("\n").Where(x => x.StartsWith("///")));
 	}
 
@@ -194,7 +194,6 @@ class MethodReplacer : CSharpSyntaxRewriter
 
 		// build cache
 		var dc = new DumpContainer().Dump("progress");
-		Console.WriteLine($"Req count: {requests.Count}");
 		int completed = 0;
 		await Parallel.ForEachAsync(requests, cancellationToken, async (req, ct) =>
 		{
