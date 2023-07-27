@@ -1,4 +1,4 @@
-# Sdcb.Arithmetic [![main](https://github.com/sdcb/PaddleSharp/actions/workflows/main.yml/badge.svg)](https://github.com/sdcb/PaddleSharp/actions/workflows/main.yml) [![QQ](https://img.shields.io/badge/QQ_Group-495782587-52B6EF?style=social&logo=tencent-qq&logoColor=000&logoWidth=20)]([https://jq.qq.com/?_wv=1027&k=K4fBqpyQ](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=yxyNweakNlFn9Qitjevh6_chImz3Qg11&authKey=787bEG7B2pChJsbS1mUOZtrCWYUal7UirlYTf1JsRFdNpeYKZsCCjt9ObDskIJlk&noverify=0&group_code=495782587))
+# Sdcb.Arithmetic [![main](https://github.com/sdcb/PaddleSharp/actions/workflows/main.yml/badge.svg)](https://github.com/sdcb/PaddleSharp/actions/workflows/main.yml) [![QQ](https://img.shields.io/badge/QQ_Group-495782587-52B6EF?style=social&logo=tencent-qq&logoColor=000&logoWidth=20)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=mma4msRKd372Z6dWpmBp4JZ9RL4Jrf8X&authKey=gccTx0h0RaH5b8B8jtuPJocU7MgFRUznqbV%2FLgsKdsK8RqZE%2BOhnETQ7nYVTp1W0&noverify=0&group_code=495782587)
 
 `Sdcb.Arithmetic` is a modern `.NET` library that can PInvoke to `gmp` and `mpfr`, that enable both high performance and best .NET convenience.
 
