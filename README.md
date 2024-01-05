@@ -23,6 +23,8 @@ Known classes in `Sdcb.Arithmetic`:
 | Sdcb.Arithmetic.Gmp.runtime.win32   | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Gmp.runtime.win32.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Gmp.runtime.win32)     | LGPL    | native lib in windows x86 |
 | Sdcb.Arithmetic.Gmp.runtime.linux64 | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Gmp.runtime.linux64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Gmp.runtime.linux64) | LGPL    | native lib in Linux x64   |
 
+Update: This library also tested and works good in Loongarch64(龙芯)
+
 ### mpfr
 
 | Package Id                           | Version                                                                                                                                              | License | Notes                      |
