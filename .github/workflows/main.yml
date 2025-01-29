@@ -18,6 +18,8 @@ jobs:
             arch: x64
           - os: linux
             arch: x86
+          - os: linux
+            arch: arm64
     env:
       GMP_VERSION: 6.3
       GMP_SO_VERSION: 10.5.0
@@ -26,11 +28,15 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Install 32-bit Toolchain (Only for x86)
-        if: ${{ matrix.arch == 'x86' }}
+      - name: Install Toolchain (arch-specific)
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-multilib g++-multilib
+          if [ "${{ matrix.arch }}" = "x86" ]; then
+            sudo apt-get install -y gcc-multilib g++-multilib
+          elif [ "${{ matrix.arch }}" = "arm64" ]; then
+            # 安装 aarch64 交叉编译工具链
+            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          fi
 
       - name: Download GMP Source
         run: |
@@ -45,9 +51,17 @@ jobs:
         run: |
           cd gmp-${GMP_VERSION}
           if [ "${{ matrix.arch }}" = "x86" ]; then
-            ./configure --host=i686-pc-linux-gnu --enable-shared --disable-static --enable-fat --enable-cxx
+            ./configure \
+              --host=i686-pc-linux-gnu \
+              --enable-shared --disable-static --enable-fat --enable-cxx
+          elif [ "${{ matrix.arch }}" = "arm64" ]; then
+            CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ \
+            ./configure \
+              --host=aarch64-linux-gnu \
+              --enable-shared --disable-static --enable-fat --enable-cxx
           else
-            ./configure --enable-shared --disable-static --enable-fat --enable-cxx
+            ./configure \
+              --enable-shared --disable-static --enable-fat --enable-cxx
           fi
 
       - name: Build GMP
@@ -73,12 +87,28 @@ jobs:
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
+          elif [ "${{ matrix.arch }}" = "arm64" ]; then
+            aarch64-linux-gnu-gcc -o factorial_gmp .github/workflows/factorial_gmp.c \
+              -I${{ github.workspace }}/gmp-${GMP_VERSION} \
+              -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
+              -lgmp
           else
             gcc -o factorial_gmp .github/workflows/factorial_gmp.c \
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
           fi
+
+      - name: Set up QEMU (Only for linux-arm64)
+        if: ${{ matrix.arch == 'arm64' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user qemu-user-static
+
+      - name: Set up Binfmt Support (Only for linux-arm64)
+        if: ${{ matrix.arch == 'arm64' }}
+        run: |
+          sudo update-binfmts --enable qemu-aarch64
 
       - name: Run C Program
         run: |
