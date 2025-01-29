@@ -60,7 +60,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-x64
-          path: ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmp.so.${{ env.GMP_SO_VERSION }}
+          path: |
+            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmp.h
+            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmp.so.${{ env.GMP_SO_VERSION }}
 
   build-linux-x86:
     runs-on: ubuntu-24.04
@@ -97,11 +99,7 @@ jobs:
 
       - name: Check .libs
         run: |
-          cd ./gmp-${GMP_VERSION}
-          ls -l
-          cd include
-          ls -l
-          cd ~/gmp-${GMP_VERSION}/.libs
+          cd gmp-${GMP_VERSION}/.libs
           ls -l
           file libgmp.so.${GMP_SO_VERSION}
 
@@ -112,7 +110,7 @@ jobs:
 
       - name: Compile C Program for x86
         run: |
-          gcc -m32 -o factorial_gmp .github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION}/include -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp
+          gcc -m32 -o factorial_gmp .github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION} -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp
 
       - name: Run C Program
         run: |
@@ -122,4 +120,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-x86
-          path: ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmp.so.${{ env.GMP_SO_VERSION }}
+          path: |
+            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmp.h
+            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmp.so.${{ env.GMP_SO_VERSION }}
