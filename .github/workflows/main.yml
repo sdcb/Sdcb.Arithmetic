@@ -17,8 +17,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          sudo apt-get install texinfo
-
+          # Nothing to do
       - name: Download Source
         run: |
           git clone --depth 1 https://github.com/gmp-mirror/gmp-${GMP_VERSION}.git
@@ -29,11 +28,11 @@ jobs:
       - name: Configure
         run: |
           cd gmp-${GMP_VERSION}
-          ./configure --enable-shared --disable-static --enable-fat --disable-doc
+          ./configure --enable-shared --disable-static --enable-fat
       - name: Build
         run: |
           cd gmp-${GMP_VERSION}
-          make
+          make MAKEINFO=true
       - name: Check .libs
         run: |
           cd ./gmp-${GMP_VERSION}/.libs
