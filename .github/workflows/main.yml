@@ -37,6 +37,8 @@ jobs:
           elif [ "${{ matrix.arch }}" = "arm64" ]; then
             sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
             sudo apt-get install -y qemu-user qemu-user-static binfmt-support
+            sudo apt-get install libc6:arm64 libstdc++6:arm64
+            sudo dpkg --add-architecture arm64
             sudo update-binfmts --enable qemu-aarch64
           fi
 
