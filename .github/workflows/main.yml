@@ -13,19 +13,18 @@ jobs:
   build-native:
     runs-on: ubuntu-latest
     steps:
-      - name: Download GMP Source
+      - name: Download Source
         run: |
           git clone --depth 1 https://github.com/gmp-mirror/gmp-6.3.git
-      - name: Configure GMP
+      - name: Configure & build
         run: |
           cd gmp-6.3
           autoreconf -ivf
           ./configure --enable-shared --disable-static --enable-fat
-      - name: Build GMP
-        run: |
           make
       - name: Check .libs
         run: |
-          cd .libs
+          cd ./gmp-6.3/.libs
+          ls
           file libgmp.so.10.3.0
           objdump -x libgmp.so.10.3.0
