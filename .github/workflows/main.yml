@@ -71,6 +71,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
+      - name: Install 32-bit Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-multilib g++-multilib
+
       - name: Download GMP Source
         run: |
           git clone --depth 1 https://github.com/gmp-mirror/gmp-${GMP_VERSION}.git
