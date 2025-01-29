@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GMP_VERSION: 6.3
-      GMP_SO_VERSION: 10.3.0
+      GMP_SO_VERSION: 10.5.0
     steps:
       - name: Install dependencies
         run: |
@@ -39,3 +39,8 @@ jobs:
           ls
           file libgmp.so.${GMP_SO_VERSION}
           objdump -x libgmp.so.${GMP_SO_VERSION}
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64
+          path: ./gmp-${GMP_VERSION}/.libs/libgmp.so.${GMP_SO_VERSION}
