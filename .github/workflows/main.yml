@@ -109,7 +109,7 @@ jobs:
       - name: Run C Program
         run: |
           if [ "${{ matrix.arch }}" = "arm64" ]; then
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 ${GITHUB_WORKSPACE}/factorial_gmp
+            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ${GITHUB_WORKSPACE}/factorial_gmp
           else
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
           fi
