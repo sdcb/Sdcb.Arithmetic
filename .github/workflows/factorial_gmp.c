@@ -17,13 +17,15 @@ int main() {
     clock_t start, end;
     double cpu_time_used;
 
-    start = clock();
-    calculate_factorial(n, result);
-    end = clock();
+	for (int i = 0; i < 5; i++) {
+        start = clock();
+        calculate_factorial(n, result);
+        end = clock();
 
-    cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+        cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
 
-    printf("Time taken to calculate %lu! is %f seconds.\n", n, cpu_time_used);
+        printf("Round %d time taken to calculate %lu! is %f seconds.\n", i, n, cpu_time_used);
+	}
 
     mpz_clear(result);
     return 0;
