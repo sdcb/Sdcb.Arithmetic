@@ -9,16 +9,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{974528A9
 		build\01-build-native.linq = build\01-build-native.linq
 		build\02-build-packages.linq = build\02-build-packages.linq
 		build\03-publish-proget-nuget.linq = build\03-publish-proget-nuget.linq
+		build\04-chatgpt-parse-code.linq = build\04-chatgpt-parse-code.linq
 		build\05-fast-parse-code.linq = build\05-fast-parse-code.linq
 		build\icon.png = build\icon.png
-		build\04-chatgpt-parse-code.linq = build\04-chatgpt-parse-code.linq
 		build\Sdcb.Arithmetic.Gmp.runtime.nuspec = build\Sdcb.Arithmetic.Gmp.runtime.nuspec
 		build\Sdcb.Arithmetic.Gmp.runtime.props = build\Sdcb.Arithmetic.Gmp.runtime.props
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Arithmetic.Gmp", "Sdcb.Arithmetic.Gmp\Sdcb.Arithmetic.Gmp.csproj", "{3A6347EB-FDBF-4DAD-B561-D4233E26F693}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Arithmetic.Gmp.Tests", "Sdcb.Arithmetic.Gmp.Tests\Sdcb.Arithmetic.Gmp.Tests.csproj", "{515B07FA-525D-4722-A5BC-9A44B0C69475}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决方案项", "{0D3F83AC-A1AE-49C6-87A7-8FEB8A416990}"
 	ProjectSection(SolutionItems) = preProject
@@ -28,9 +24,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决�
 		testEnvironments.json = testEnvironments.json
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Arithmetic.Mpfr", "Sdcb.Arithmetic.Mpfr\Sdcb.Arithmetic.Mpfr.csproj", "{81B70A39-36EE-4A51-B89A-3B685A3B5E0C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdcb.Arithmetic.Gmp", "src\Sdcb.Arithmetic.Gmp\Sdcb.Arithmetic.Gmp.csproj", "{E6225FBC-9E9A-4F58-AAED-5EFFB4EED18F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sdcb.Arithmetic.Mpfr.Tests", "Sdcb.Arithmetic.Mpfr.Tests\Sdcb.Arithmetic.Mpfr.Tests.csproj", "{6BEB1651-ED6A-4D7E-B1C1-CF2F06B41DBF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdcb.Arithmetic.Gmp.Tests", "src\Sdcb.Arithmetic.Gmp.Tests\Sdcb.Arithmetic.Gmp.Tests.csproj", "{DD5571E6-053D-46C3-8296-8405FDBFCE9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdcb.Arithmetic.Mpfr", "src\Sdcb.Arithmetic.Mpfr\Sdcb.Arithmetic.Mpfr.csproj", "{D2E8FDF4-F9F0-4186-BEBE-6869C17FD635}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdcb.Arithmetic.Mpfr.Tests", "src\Sdcb.Arithmetic.Mpfr.Tests\Sdcb.Arithmetic.Mpfr.Tests.csproj", "{983AB1BC-4643-4C19-AD80-AE3CA5C0F6E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,22 +38,22 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3A6347EB-FDBF-4DAD-B561-D4233E26F693}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3A6347EB-FDBF-4DAD-B561-D4233E26F693}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3A6347EB-FDBF-4DAD-B561-D4233E26F693}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3A6347EB-FDBF-4DAD-B561-D4233E26F693}.Release|Any CPU.Build.0 = Release|Any CPU
-		{515B07FA-525D-4722-A5BC-9A44B0C69475}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{515B07FA-525D-4722-A5BC-9A44B0C69475}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{515B07FA-525D-4722-A5BC-9A44B0C69475}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{515B07FA-525D-4722-A5BC-9A44B0C69475}.Release|Any CPU.Build.0 = Release|Any CPU
-		{81B70A39-36EE-4A51-B89A-3B685A3B5E0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{81B70A39-36EE-4A51-B89A-3B685A3B5E0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{81B70A39-36EE-4A51-B89A-3B685A3B5E0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{81B70A39-36EE-4A51-B89A-3B685A3B5E0C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6BEB1651-ED6A-4D7E-B1C1-CF2F06B41DBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6BEB1651-ED6A-4D7E-B1C1-CF2F06B41DBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6BEB1651-ED6A-4D7E-B1C1-CF2F06B41DBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6BEB1651-ED6A-4D7E-B1C1-CF2F06B41DBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6225FBC-9E9A-4F58-AAED-5EFFB4EED18F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6225FBC-9E9A-4F58-AAED-5EFFB4EED18F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6225FBC-9E9A-4F58-AAED-5EFFB4EED18F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6225FBC-9E9A-4F58-AAED-5EFFB4EED18F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD5571E6-053D-46C3-8296-8405FDBFCE9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD5571E6-053D-46C3-8296-8405FDBFCE9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD5571E6-053D-46C3-8296-8405FDBFCE9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD5571E6-053D-46C3-8296-8405FDBFCE9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2E8FDF4-F9F0-4186-BEBE-6869C17FD635}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2E8FDF4-F9F0-4186-BEBE-6869C17FD635}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2E8FDF4-F9F0-4186-BEBE-6869C17FD635}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2E8FDF4-F9F0-4186-BEBE-6869C17FD635}.Release|Any CPU.Build.0 = Release|Any CPU
+		{983AB1BC-4643-4C19-AD80-AE3CA5C0F6E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{983AB1BC-4643-4C19-AD80-AE3CA5C0F6E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{983AB1BC-4643-4C19-AD80-AE3CA5C0F6E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{983AB1BC-4643-4C19-AD80-AE3CA5C0F6E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
