@@ -61,3 +61,56 @@ jobs:
         with:
           name: linux-x64
           path: ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmp.so.${{ env.GMP_SO_VERSION }}
+
+  build-linux-x86:
+    runs-on: ubuntu-24.04
+    env:
+      GMP_VERSION: 6.3
+      GMP_SO_VERSION: 10.5.0
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Download GMP Source
+        run: |
+          git clone --depth 1 https://github.com/gmp-mirror/gmp-${GMP_VERSION}.git
+
+      - name: Autoreconf
+        run: |
+          cd gmp-${GMP_VERSION}
+          autoreconf -ivf
+
+      - name: Configure GMP for x86
+        run: |
+          cd gmp-${GMP_VERSION}
+          ./configure --host=i686-pc-linux-gnu --enable-shared --disable-static --enable-fat
+
+      - name: Build GMP
+        run: |
+          cd gmp-${GMP_VERSION}
+          make MAKEINFO=true
+
+      - name: Check .libs
+        run: |
+          cd ./gmp-${GMP_VERSION}/.libs
+          ls -l
+          file libgmp.so.${GMP_SO_VERSION}
+
+      - name: Strip GMP Library
+        run: |
+          cd ./gmp-${GMP_VERSION}/.libs
+          strip --strip-unneeded libgmp.so.${GMP_SO_VERSION}
+
+      - name: Compile C Program for x86
+        run: |
+          gcc -m32 -o factorial_gmp .github/workflows/factorial_gmp.c -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp
+
+      - name: Run C Program
+        run: |
+          LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x86
+          path: ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmp.so.${{ env.GMP_SO_VERSION }}
