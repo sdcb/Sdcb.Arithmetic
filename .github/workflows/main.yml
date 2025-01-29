@@ -108,7 +108,7 @@ jobs:
 
       - name: Compile C Program for x86
         run: |
-          gcc -m32 -o factorial_gmp .github/workflows/factorial_gmp.c -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp
+          gcc -m32 -o factorial_gmp .github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION}/include -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp
 
       - name: Run C Program
         run: |
