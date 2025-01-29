@@ -7,24 +7,30 @@ on:
       - '**.md'
       - '**.linq'
   workflow_dispatch:
-  
 
 jobs:
   build-native:
     runs-on: ubuntu-latest
+    env:
+      GMP_VERSION: 6.3
+      GMP_SO_VERSION: 10.3.0
     steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get install texinfo
+
       - name: Download Source
         run: |
-          git clone --depth 1 https://github.com/gmp-mirror/gmp-6.3.git
+          git clone --depth 1 https://github.com/gmp-mirror/gmp-${GMP_VERSION}.git
       - name: Configure & build
         run: |
-          cd gmp-6.3
+          cd gmp-${GMP_VERSION}
           autoreconf -ivf
-          ./configure --enable-shared --disable-static --enable-fat
+          ./configure --enable-shared --disable-static --enable-fat --disable-doc
           make
       - name: Check .libs
         run: |
-          cd ./gmp-6.3/.libs
+          cd ./gmp-${GMP_VERSION}/.libs
           ls
-          file libgmp.so.10.3.0
-          objdump -x libgmp.so.10.3.0
+          file libgmp.so.${GMP_SO_VERSION}
+          objdump -x libgmp.so.${GMP_SO_VERSION}
