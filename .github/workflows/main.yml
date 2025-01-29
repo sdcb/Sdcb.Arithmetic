@@ -22,11 +22,17 @@ jobs:
       - name: Download Source
         run: |
           git clone --depth 1 https://github.com/gmp-mirror/gmp-${GMP_VERSION}.git
-      - name: Configure & build
+      - name: autoreconf
         run: |
           cd gmp-${GMP_VERSION}
           autoreconf -ivf
+      - name: Configure
+        run: |
+          cd gmp-${GMP_VERSION}
           ./configure --enable-shared --disable-static --enable-fat --disable-doc
+      - name: Build
+        run: |
+          cd gmp-${GMP_VERSION}
           make
       - name: Check .libs
         run: |
