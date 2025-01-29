@@ -69,22 +69,22 @@ jobs:
           cd gmp-${GMP_VERSION}
           if [ "${{ matrix.arch }}" = "x86" ]; then
             ./configure \
-              CC=clang CXX=clang++ \
+              CC="clang -m32" CXX="clang++ -m32" \
               --host=i686-pc-linux-gnu \
               --enable-shared --disable-static --enable-fat --enable-cxx
           elif [ "${{ matrix.arch }}" = "arm64" ]; then
             ./configure \
-              CC=aarch64-linux-gnu-clang CXX=aarch64-linux-gnu-clang++ \
+              CC="clang --target=aarch64-linux-gnu" CXX="clang++ --target=aarch64-linux-gnu" \
               --host=aarch64-linux-gnu \
               --enable-shared --disable-static --enable-fat --enable-cxx
           elif [ "${{ matrix.arch }}" = "arm" ]; then
             ./configure \
-              CC=arm-linux-gnueabihf-clang CXX=arm-linux-gnueabihf-clang++ \
+              CC="clang --target=arm-linux-gnueabihf" CXX="clang++ --target=arm-linux-gnueabihf" \
               --host=arm-linux-gnueabihf \
               --enable-shared --disable-static --enable-fat --enable-cxx
           elif [ "${{ matrix.os }}" = "win" ]; then
             ./configure \
-              CC=x86_64-w64-mingw32-clang CXX=x86_64-w64-mingw32-clang++ \
+              CC="clang --target=x86_64-w64-mingw32" CXX="clang++ --target=x86_64-w64-mingw32" \
               --host=x86_64-w64-mingw32 \
               --enable-shared --disable-static --enable-fat --enable-cxx
           else
@@ -129,17 +129,17 @@ jobs:
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
           elif [ "${{ matrix.arch }}" = "arm64" ]; then
-            aarch64-linux-gnu-clang -o factorial_gmp .github/workflows/factorial_gmp.c \
+            clang --target=aarch64-linux-gnu -o factorial_gmp .github/workflows/factorial_gmp.c \
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
           elif [ "${{ matrix.arch }}" = "arm" ]; then
-            arm-linux-gnueabihf-clang -o factorial_gmp .github/workflows/factorial_gmp.c \
+            clang --target=arm-linux-gnueabihf -o factorial_gmp .github/workflows/factorial_gmp.c \
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
           elif [ "${{ matrix.os }}" = "win" ]; then
-            x86_64-w64-mingw32-clang -o factorial_gmp.exe .github/workflows/factorial_gmp.c \
+            clang --target=x86_64-w64-mingw32 -o factorial_gmp.exe .github/workflows/factorial_gmp.c \
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
