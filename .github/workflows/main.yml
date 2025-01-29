@@ -53,6 +53,7 @@ jobs:
             sudo apt-get install -y qemu-user
           elif [ "${{ matrix.os }}" = "win" ]; then
             sudo apt-get install -y mingw-w64
+          fi
 
       - name: Download GMP Source
         run: |
