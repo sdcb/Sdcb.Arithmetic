@@ -158,7 +158,7 @@ jobs:
           elif [ "${{ matrix.arch }}" = "arm" ]; then
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ${GITHUB_WORKSPACE}/factorial_gmp
           elif [ "${{ matrix.os }}" = "win" ]; then
-            wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
+            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
           else
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
           fi
