@@ -91,6 +91,7 @@ jobs:
             ./configure \
               CC=clang CXX=clang++ \
               --enable-shared --disable-static --enable-fat --enable-cxx
+          fi
 
       - name: Build GMP
         run: |
@@ -118,6 +119,7 @@ jobs:
           else
             strip --strip-unneeded ${{ matrix.gmp_so }}
             strip --strip-unneeded ${{ matrix.gmp_cpp_so }}
+          fi
 
       - name: Compile C Program
         run: |
@@ -146,6 +148,7 @@ jobs:
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
+          fi
 
       - name: Run C Program
         run: |
@@ -157,6 +160,7 @@ jobs:
             echo "Skipping execution for Windows cross-compiled binary."
           else
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
+          fi
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
