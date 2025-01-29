@@ -16,10 +16,9 @@ jobs:
       - name: Download GMP Source
         run: |
           git clone --depth 1 https://github.com/gmp-mirror/gmp-6.3.git
-          cd gmp-6.3
       - name: Configure GMP
         run: |
-          ls
+          cd gmp-6.3
           autoreconf -ivf
           ./configure --enable-shared --disable-static --enable-fat
       - name: Build GMP
