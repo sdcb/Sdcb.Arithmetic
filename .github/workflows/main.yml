@@ -9,73 +9,25 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-linux-x64:
+  build-linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: linux
+            arch: x64
+          - os: linux
+            arch: x86
     env:
       GMP_VERSION: 6.3
       GMP_SO_VERSION: 10.5.0
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Download GMP Source
-        run: |
-          git clone --depth 1 https://github.com/gmp-mirror/gmp-${GMP_VERSION}.git
-
-      - name: Autoreconf
-        run: |
-          cd gmp-${GMP_VERSION}
-          autoreconf -ivf
-
-      - name: Configure GMP
-        run: |
-          cd gmp-${GMP_VERSION}
-          ./configure --enable-shared --disable-static --enable-fat --enable-cxx
-
-      - name: Build GMP
-        run: |
-          cd gmp-${GMP_VERSION}
-          make MAKEINFO=true
-
-      - name: Check .libs
-        run: |
-          cd ./gmp-${GMP_VERSION}/.libs
-          ls -l
-          file libgmp.so.${GMP_SO_VERSION}
-
-      - name: Strip GMP Library
-        run: |
-          cd ./gmp-${GMP_VERSION}/.libs
-          strip --strip-unneeded libgmp.so.${GMP_SO_VERSION}
-
-      - name: Compile C Program
-        run: |
-          gcc -o factorial_gmp .github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION} -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp
-
-      - name: Run C Program
-        run: |
-          LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-x64
-          path: |
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmp.h
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmpxx.h
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmp.so.${{ env.GMP_SO_VERSION }}
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmpxx.so.${{ env.GMP_SO_VERSION }}
-
-  build-linux-x86:
-    runs-on: ubuntu-24.04
-    env:
-      GMP_VERSION: 6.3
-      GMP_SO_VERSION: 10.5.0
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
-      - name: Install 32-bit Toolchain
+      - name: Install 32-bit Toolchain (Only for x86)
+        if: ${{ matrix.arch == 'x86' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc-multilib g++-multilib
@@ -89,10 +41,14 @@ jobs:
           cd gmp-${GMP_VERSION}
           autoreconf -ivf
 
-      - name: Configure GMP for x86
+      - name: Configure GMP
         run: |
           cd gmp-${GMP_VERSION}
-          ./configure --host=i686-pc-linux-gnu --enable-shared --disable-static --enable-fat --enable-cxx
+          if [ "${{ matrix.arch }}" = "x86" ]; then
+            ./configure --host=i686-pc-linux-gnu --enable-shared --disable-static --enable-fat --enable-cxx
+          else
+            ./configure --enable-shared --disable-static --enable-fat --enable-cxx
+          fi
 
       - name: Build GMP
         run: |
@@ -107,12 +63,22 @@ jobs:
 
       - name: Strip GMP Library
         run: |
-          cd ./gmp-${GMP_VERSION}/.libs
+          cd gmp-${GMP_VERSION}/.libs
           strip --strip-unneeded libgmp.so.${GMP_SO_VERSION}
 
-      - name: Compile C Program for x86
+      - name: Compile C Program
         run: |
-          gcc -m32 -o factorial_gmp .github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION} -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp
+          if [ "${{ matrix.arch }}" = "x86" ]; then
+            gcc -m32 -o factorial_gmp .github/workflows/factorial_gmp.c \
+              -I${{ github.workspace }}/gmp-${GMP_VERSION} \
+              -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
+              -lgmp
+          else
+            gcc -o factorial_gmp .github/workflows/factorial_gmp.c \
+              -I${{ github.workspace }}/gmp-${GMP_VERSION} \
+              -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
+              -lgmp
+          fi
 
       - name: Run C Program
         run: |
@@ -121,7 +87,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linux-x86
+          name: ${{ matrix.os }}-${{ matrix.arch }}
           path: |
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmp.h
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmpxx.h
