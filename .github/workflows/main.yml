@@ -8,23 +8,33 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-linux:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
           - os: linux
             arch: x64
+            gmp_so: libgmp.so.10.5.0
+            gmp_cpp_so: libgmpxx.so.4.7.0
           - os: linux
             arch: x86
+            gmp_so: libgmp.so.10.5.0
+            gmp_cpp_so: libgmpxx.so.4.7.0
           - os: linux
             arch: arm64
+            gmp_so: libgmp.so.10.5.0
+            gmp_cpp_so: libgmpxx.so.4.7.0
           - os: linux
             arch: arm
+            gmp_so: libgmp.so.10.5.0
+            gmp_cpp_so: libgmpxx.so.4.7.0
+          - os: win
+            arch: x64
+            gmp_so: libgmp-10.dll
+            gmp_cpp_so: libgmpxx-4.dll
     env:
       GMP_VERSION: 6.3
-      GMP_SO: libgmp.so.10.5.0
-      GMP_CPP_SO: libgmpxx.so.4.7.0
 
     steps:
       - name: Check out repository
@@ -41,6 +51,8 @@ jobs:
           elif [ "${{ matrix.arch }}" = "arm" ]; then
             sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
             sudo apt-get install -y qemu-user
+          elif [ "${{ matrix.os }}" = "win" ]; then
+            sudo apt-get install -y mingw-w64
           fi
 
       - name: Download GMP Source
@@ -69,6 +81,11 @@ jobs:
             ./configure \
               --host=arm-linux-gnueabihf \
               --enable-shared --disable-static --enable-fat --enable-cxx
+          elif [ "${{ matrix.os }}" = "win" ]; then
+            CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ \
+            ./configure \
+              --host=x86_64-w64-mingw32 \
+              --enable-shared --disable-static --enable-fat --enable-cxx
           else
             ./configure \
               --enable-shared --disable-static --enable-fat --enable-cxx
@@ -83,20 +100,23 @@ jobs:
         run: |
           cd gmp-${GMP_VERSION}/.libs
           ls -l
-          file ${GMP_SO}
+          file ${{ matrix.gmp_so }}
 
       - name: Strip GMP Library
         run: |
           cd gmp-${GMP_VERSION}/.libs
           if [ "${{ matrix.arch }}" = "arm64" ]; then
-            aarch64-linux-gnu-strip --strip-unneeded ${GMP_SO}
-            aarch64-linux-gnu-strip --strip-unneeded ${GMP_CPP_SO}
+            aarch64-linux-gnu-strip --strip-unneeded ${{ matrix.gmp_so }}
+            aarch64-linux-gnu-strip --strip-unneeded ${{ matrix.gmp_cpp_so }}
           elif [ "${{ matrix.arch }}" = "arm" ]; then
-            arm-linux-gnueabihf-strip --strip-unneeded ${GMP_SO}
-            arm-linux-gnueabihf-strip --strip-unneeded ${GMP_CPP_SO}
+            arm-linux-gnueabihf-strip --strip-unneeded ${{ matrix.gmp_so }}
+            arm-linux-gnueabihf-strip --strip-unneeded ${{ matrix.gmp_cpp_so }}
+          elif [ "${{ matrix.os }}" = "win" ]; then
+            x86_64-w64-mingw32-strip --strip-unneeded ${{ matrix.gmp_so }}
+            x86_64-w64-mingw32-strip --strip-unneeded ${{ matrix.gmp_cpp_so }}
           else
-            strip --strip-unneeded ${GMP_SO}
-            strip --strip-unneeded ${GMP_CPP_SO}
+            strip --strip-unneeded ${{ matrix.gmp_so }}
+            strip --strip-unneeded ${{ matrix.gmp_cpp_so }}
           fi
 
       - name: Compile C Program
@@ -116,6 +136,11 @@ jobs:
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
+          elif [ "${{ matrix.os }}" = "win" ]; then
+            x86_64-w64-mingw32-gcc -o factorial_gmp.exe .github/workflows/factorial_gmp.c \
+              -I${{ github.workspace }}/gmp-${GMP_VERSION} \
+              -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
+              -lgmp
           else
             gcc -o factorial_gmp .github/workflows/factorial_gmp.c \
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
@@ -129,6 +154,8 @@ jobs:
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ${GITHUB_WORKSPACE}/factorial_gmp
           elif [ "${{ matrix.arch }}" = "arm" ]; then
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ${GITHUB_WORKSPACE}/factorial_gmp
+          elif [ "${{ matrix.os }}" = "win" ]; then
+            echo "Skipping execution for Windows cross-compiled binary."
           else
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
           fi
@@ -140,5 +167,5 @@ jobs:
           path: |
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmp.h
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmpxx.h
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_SO }}
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_CPP_SO }}
+            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ matrix.gmp_so }}
+            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ matrix.gmp_cpp_so }}
