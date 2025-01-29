@@ -42,4 +42,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-x64
-          path: ./gmp-${GMP_VERSION}/.libs/libgmp.so*
+          path: ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/libgmp.so.${GMP_SO_VERSION}
