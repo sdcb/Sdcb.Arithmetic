@@ -1,0 +1,35 @@
+name: main
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+      - '**.linq'
+  workflow_dispatch:
+  
+
+jobs:
+  build-native:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install deps
+        run: |
+          apt update
+          apt install build-essential m4 -y
+      - name: Download GMP Source
+        run: |
+          wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
+          tar -xf gmp-6.3.0.tar.xz
+          cd gmp-6.3.0
+      - name: Configure GMP
+        run: |
+          ./configure --enable-shared --disable-static --enable-fat
+      - name: Build GMP
+        run: |
+          make
+      - name: Check .libs
+        run: |
+          cd .libs
+          file libgmp.so.10.3.0
+          objdump -x libgmp.so.10.3.0
