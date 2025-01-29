@@ -17,9 +17,9 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/gmp-mirror/gmp-6.3.git
           cd gmp-6.3
-          ls
       - name: Configure GMP
         run: |
+          ls
           autoreconf -ivf
           ./configure --enable-shared --disable-static --enable-fat
       - name: Build GMP
