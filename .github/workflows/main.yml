@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-native:
+  build-linux-x64:
     runs-on: ubuntu-latest
     env:
       GMP_VERSION: 6.3
@@ -42,6 +42,11 @@ jobs:
           cd ./gmp-${GMP_VERSION}/.libs
           ls -l
           file libgmp.so.${GMP_SO_VERSION}
+
+      - name: Strip GMP Library
+        run: |
+          cd ./gmp-${GMP_VERSION}/.libs
+          strip --strip-unneeded libgmp.so.${GMP_SO_VERSION}
 
       - name: Compile C Program
         run: |
