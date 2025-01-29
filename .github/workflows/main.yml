@@ -30,7 +30,7 @@ jobs:
       - name: Configure GMP
         run: |
           cd gmp-${GMP_VERSION}
-          ./configure --enable-shared --disable-static --CFLAGS="-mavx2"
+          ./configure --enable-shared --disable-static CFLAGS="-mavx2"
 
       - name: Build GMP
         run: |
