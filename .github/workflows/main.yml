@@ -30,7 +30,7 @@ jobs:
       - name: Configure GMP
         run: |
           cd gmp-${GMP_VERSION}
-          ./configure --enable-shared --disable-static --enable-fat
+          ./configure --enable-shared --disable-static --enable-fat --enable-cxx
 
       - name: Build GMP
         run: |
@@ -62,7 +62,9 @@ jobs:
           name: linux-x64
           path: |
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmp.h
+            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmpxx.h
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmp.so.${{ env.GMP_SO_VERSION }}
+            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmpxx.so.${{ env.GMP_SO_VERSION }}
 
   build-linux-x86:
     runs-on: ubuntu-24.04
@@ -90,7 +92,7 @@ jobs:
       - name: Configure GMP for x86
         run: |
           cd gmp-${GMP_VERSION}
-          ./configure --host=i686-pc-linux-gnu --enable-shared --disable-static --enable-fat
+          ./configure --host=i686-pc-linux-gnu --enable-shared --disable-static --enable-fat --enable-cxx
 
       - name: Build GMP
         run: |
@@ -122,4 +124,6 @@ jobs:
           name: linux-x86
           path: |
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmp.h
+            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmpxx.h
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmp.so.${{ env.GMP_SO_VERSION }}
+            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmpxx.so.${{ env.GMP_SO_VERSION }}
