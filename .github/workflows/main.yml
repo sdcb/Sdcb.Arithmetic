@@ -52,7 +52,7 @@ jobs:
             sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
             sudo apt-get install -y qemu-user
           elif [ "${{ matrix.os }}" = "win" ]; then
-            sudo apt-get install -y mingw-w64
+            sudo apt-get install -y mingw-w64 qemu-user
           fi
 
       - name: Download GMP Source
@@ -157,7 +157,7 @@ jobs:
           elif [ "${{ matrix.arch }}" = "arm" ]; then
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ${GITHUB_WORKSPACE}/factorial_gmp
           elif [ "${{ matrix.os }}" = "win" ]; then
-            echo "Skipping execution for Windows cross-compiled binary."
+            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-x86_64 -L /usr/x86_64-w64-mingw32/ ${GITHUB_WORKSPACE}/factorial_gmp.exe
           else
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
           fi
