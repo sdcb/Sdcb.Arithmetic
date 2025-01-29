@@ -97,7 +97,11 @@ jobs:
 
       - name: Check .libs
         run: |
-          cd ./gmp-${GMP_VERSION}/.libs
+          cd ./gmp-${GMP_VERSION}
+          ls -l
+          cd include
+          ls -l
+          cd ~/gmp-${GMP_VERSION}/.libs
           ls -l
           file libgmp.so.${GMP_SO_VERSION}
 
