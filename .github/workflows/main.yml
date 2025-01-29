@@ -28,7 +28,7 @@ jobs:
       - name: Configure
         run: |
           cd gmp-${GMP_VERSION}
-          ./configure --enable-shared --disable-static --enable-fat
+          ./configure --enable-shared --disable-static --enable-fat CFLAGS="-mavx"
       - name: Build
         run: |
           cd gmp-${GMP_VERSION}
