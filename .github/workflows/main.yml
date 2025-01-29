@@ -19,6 +19,7 @@ jobs:
           cd gmp-6.3
       - name: Configure GMP
         run: |
+          autoreconf -ivf
           ./configure --enable-shared --disable-static --enable-fat
       - name: Build GMP
         run: |
