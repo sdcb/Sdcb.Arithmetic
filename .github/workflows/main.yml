@@ -28,7 +28,7 @@ jobs:
       - name: Configure
         run: |
           cd gmp-${GMP_VERSION}
-          ./configure --enable-shared --disable-static --enable-fat CFLAGS="-mavx"
+          ./configure --enable-shared --disable-static --enable-fat
       - name: Build
         run: |
           cd gmp-${GMP_VERSION}
@@ -36,11 +36,10 @@ jobs:
       - name: Check .libs
         run: |
           cd ./gmp-${GMP_VERSION}/.libs
-          ls
+          ls -l
           file libgmp.so.${GMP_SO_VERSION}
-          objdump -d libgmp.so.${GMP_SO_VERSION} | grep -E 'v[a-z]+pd|v[a-z]+ps'
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-x64
-          path: libgmp.so.${GMP_SO_VERSION}
+          path: gmp-${GMP_VERSION}/.libs/libgmp.so.${GMP_SO_VERSION}
