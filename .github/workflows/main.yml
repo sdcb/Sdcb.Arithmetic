@@ -38,9 +38,9 @@ jobs:
           cd ./gmp-${GMP_VERSION}/.libs
           ls
           file libgmp.so.${GMP_SO_VERSION}
-          objdump -x libgmp.so.${GMP_SO_VERSION}
+          objdump -d libgmp.so.${GMP_SO_VERSION} | grep -E 'v[a-z]+pd|v[a-z]+ps'
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-x64
-          path: ./gmp-${GMP_VERSION}/.libs/libgmp.so.${GMP_SO_VERSION}
+          path: libgmp.so.${GMP_SO_VERSION}
