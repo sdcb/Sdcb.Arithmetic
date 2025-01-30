@@ -67,6 +67,7 @@ jobs:
           elif [ "${{ matrix.os }}" = "win" ]; then
             sudo apt-get install -y mingw-w64
             sudo apt-get install -y wine
+          fi
 
       - name: Download GMP Source
         run: |
@@ -101,31 +102,19 @@ jobs:
 
       - name: Compile C Program
         run: |
+          COMPILE_OPTIONS=".github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION} -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp"
           if [ "${{ matrix.arch }}" = "x86" ]; then
-            gcc -m32 -o factorial_gmp .github/workflows/factorial_gmp.c \
-              -I${{ github.workspace }}/gmp-${GMP_VERSION} \
-              -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
-              -lgmp
+            gcc -m32 -o factorial_gmp $COMPILE_OPTIONS
           elif [ "${{ matrix.arch }}" = "arm64" ]; then
-            aarch64-linux-gnu-gcc -o factorial_gmp .github/workflows/factorial_gmp.c \
-              -I${{ github.workspace }}/gmp-${GMP_VERSION} \
-              -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
-              -lgmp
+            aarch64-linux-gnu-gcc -o factorial_gmp $COMPILE_OPTIONS
           elif [ "${{ matrix.arch }}" = "arm" ]; then
-            arm-linux-gnueabihf-gcc -o factorial_gmp .github/workflows/factorial_gmp.c \
-              -I${{ github.workspace }}/gmp-${GMP_VERSION} \
-              -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
-              -lgmp
+            arm-linux-gnueabihf-gcc -o factorial_gmp $COMPILE_OPTIONS
           elif [ "${{ matrix.os }}" = "win" ]; then
-            x86_64-w64-mingw32-gcc -o factorial_gmp.exe .github/workflows/factorial_gmp.c \
-              -I${{ github.workspace }}/gmp-${GMP_VERSION} \
-              -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
-              -lgmp
+            x86_64-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
           else
-            gcc -o factorial_gmp .github/workflows/factorial_gmp.c \
-              -I${{ github.workspace }}/gmp-${GMP_VERSION} \
-              -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
-              -lgmp
+            gcc -o factorial_gmp $COMPILE_OPTIONS
+          fi
+
 
       - name: Run C Program
         run: |
@@ -138,6 +127,7 @@ jobs:
             wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
           else
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
+          fi
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
