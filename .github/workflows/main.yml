@@ -7,9 +7,6 @@ on:
       - .github/workflows/main.yml
   workflow_dispatch:
 
-env:
-  GMP_CONFIGURE_OPTIONS: --enable-shared --disable-static --enable-fat --enable-cxx
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -86,8 +83,9 @@ jobs:
 
       - name: Configure GMP
         run: |
+          CONFIGURE_OPTIONS="--enable-shared --disable-static --enable-fat --enable-cxx"
           cd gmp-${GMP_VERSION}
-          ./configure --host=${{ matrix.host }} ${{ env.GMP_CONFIGURE_OPTIONS }}
+          ./configure --host=${{ matrix.host }} ${CONFIGURE_OPTIONS}
 
       - name: Build GMP
         run: |
