@@ -46,6 +46,12 @@ jobs:
             gmp_so: libgmp-10.dll
             gmp_cpp_so: libgmpxx-4.dll
             strip: x86_64-w64-mingw32-strip
+          - os: win
+            arch: x86
+            host: i686-w64-mingw32
+            gmp_so: libgmp-10.dll
+            gmp_cpp_so: libgmpxx-4.dll
+            strip: i686-w64-mingw32-strip
     env:
       GMP_VERSION: 6.3
 
@@ -103,18 +109,31 @@ jobs:
       - name: Compile C Program
         run: |
           COMPILE_OPTIONS=".github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION} -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp"
-          if [ "${{ matrix.arch }}" = "x86" ]; then
-            gcc -m32 -o factorial_gmp $COMPILE_OPTIONS
-          elif [ "${{ matrix.arch }}" = "arm64" ]; then
-            aarch64-linux-gnu-gcc -o factorial_gmp $COMPILE_OPTIONS
-          elif [ "${{ matrix.arch }}" = "arm" ]; then
-            arm-linux-gnueabihf-gcc -o factorial_gmp $COMPILE_OPTIONS
-          elif [ "${{ matrix.os }}" = "win" ]; then
-            x86_64-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
-          else
-            gcc -o factorial_gmp $COMPILE_OPTIONS
-          fi
-
+          TARGET="${{ matrix.os }}-${{ matrix.arch }}"
+          case "$TARGET" in
+            "linux-x86")
+              gcc -m32 -o factorial_gmp $COMPILE_OPTIONS
+              ;;
+            "linux-arm64")
+              aarch64-linux-gnu-gcc -o factorial_gmp $COMPILE_OPTIONS
+              ;;
+            "linux-arm")
+              arm-linux-gnueabihf-gcc -o factorial_gmp $COMPILE_OPTIONS
+              ;;
+            "win-x86")
+              i686-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
+              ;;
+            "win-x64")
+              x86_64-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
+              ;;
+            "linux-x64")
+              gcc -o factorial_gmp $COMPILE_OPTIONS
+              ;;
+            *)
+              echo "Error: Unsupported OS-Architecture combination: $TARGET"
+              exit 1
+              ;;
+          esac
 
       - name: Run C Program
         run: |
