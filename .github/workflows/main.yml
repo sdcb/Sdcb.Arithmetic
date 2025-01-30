@@ -1,3 +1,4 @@
+```yaml
 name: main
 on:
   push:
@@ -18,26 +19,31 @@ jobs:
         include:
           - os: linux
             arch: x64
+            host: x86_64-pc-linux-gnu
             gmp_so: libgmp.so.10.5.0
             gmp_cpp_so: libgmpxx.so.4.7.0
             strip: strip
           - os: linux
             arch: x86
+            host: i686-pc-linux-gnu
             gmp_so: libgmp.so.10.5.0
             gmp_cpp_so: libgmpxx.so.4.7.0
             strip: strip
           - os: linux
             arch: arm64
+            host: aarch64-linux-gnu
             gmp_so: libgmp.so.10.5.0
             gmp_cpp_so: libgmpxx.so.4.7.0
             strip: aarch64-linux-gnu-strip
           - os: linux
             arch: arm
+            host: arm-linux-gnueabihf
             gmp_so: libgmp.so.10.5.0
             gmp_cpp_so: libgmpxx.so.4.7.0
             strip: arm-linux-gnueabihf-strip
           - os: win
             arch: x64
+            host: x86_64-w64-mingw32
             gmp_so: libgmp-10.dll
             gmp_cpp_so: libgmpxx-4.dll
             strip: x86_64-w64-mingw32-strip
@@ -62,7 +68,6 @@ jobs:
           elif [ "${{ matrix.os }}" = "win" ]; then
             sudo apt-get install -y mingw-w64
             sudo apt-get install -y wine
-          fi
 
       - name: Download GMP Source
         run: |
@@ -76,20 +81,7 @@ jobs:
       - name: Configure GMP
         run: |
           cd gmp-${GMP_VERSION}
-          if [ "${{ matrix.arch }}" = "x86" ]; then
-            ./configure --host=i686-pc-linux-gnu ${{ env.GMP_CONFIGURE_OPTIONS }}
-          elif [ "${{ matrix.arch }}" = "arm64" ]; then
-            CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ \
-            ./configure --host=aarch64-linux-gnu ${{ env.GMP_CONFIGURE_OPTIONS }}
-          elif [ "${{ matrix.arch }}" = "arm" ]; then
-            CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ \
-            ./configure --host=arm-linux-gnueabihf ${{ env.GMP_CONFIGURE_OPTIONS }}
-          elif [ "${{ matrix.os }}" = "win" ]; then
-            CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ \
-            ./configure --host=x86_64-w64-mingw32 ${{ env.GMP_CONFIGURE_OPTIONS }}
-          else
-            ./configure ${{ env.GMP_CONFIGURE_OPTIONS }}
-          fi
+          ./configure --host=${{ matrix.host }} ${{ env.GMP_CONFIGURE_OPTIONS }}
 
       - name: Build GMP
         run: |
@@ -135,7 +127,6 @@ jobs:
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
-          fi
 
       - name: Run C Program
         run: |
@@ -148,7 +139,6 @@ jobs:
             wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
           else
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
-          fi
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -159,3 +149,4 @@ jobs:
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmpxx.h
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ matrix.gmp_so }}
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ matrix.gmp_cpp_so }}
+```
