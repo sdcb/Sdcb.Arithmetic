@@ -3,7 +3,7 @@ name: main
 on:
   push:
     branches:
-      - master
+      - win
     paths:
       - .github/workflows/main.yml
   workflow_dispatch:
@@ -194,3 +194,35 @@ jobs:
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmpxx.h
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_SO }}
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_CPP_SO }}
+
+            
+  build-win:
+    runs-on: windows-latest
+    
+    env:
+      GMP_VERSION: 6.3.0
+    
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-toolchain
+
+      - name: Download GMP Source
+        run: |
+          wget https://mirrors.nju.edu.cn/gnu/gmp/gmp-${GMP_VERSION}.tar.xz
+          tar -xf gmp-${GMP_VERSION}.tar.xz
+
+      - name: Build GMP
+        run: |
+          cd gmp-${GMP_VERSION}
+          ./configure --prefix=/usr/local
+          make
+          make check
+          make install
+        shell: msys2 {0}
