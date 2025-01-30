@@ -198,6 +198,41 @@ jobs:
   build-win-arm64:
     runs-on: windows-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Run vcpkg
         run: |
           vcpkg install gmp:arm64-windows
+
+      - name: Compile C Program
+        run: |
+          cl /EHsc /I$VCPKG_ROOT/installed/arm64-windows/include /link /LIBPATH:$VCPKG_ROOT/installed/arm64-windows/lib factorial_gmp.c /Fe:factorial_gmp.exe /MD /DYNAMICBASE /NXCOMPAT /DEBUG
+
+      - name: Prepare artifacts
+        run: |
+          tree /F $VCPKG_ROOT/installed/arm64-windows
+          cp $VCPKG_ROOT/installed/arm64-windows/include/gmp.h .
+          cp $VCPKG_ROOT/installed/arm64-windows/include/gmpxx.h .
+          mkdir .libs
+          cd .libs
+          cp $VCPKG_ROOT/installed/arm64-windows/lib/libgmp-10.dll .
+          cp $VCPKG_ROOT/installed/arm64-windows/lib/libgmp-10.lib .
+          cp $VCPKG_ROOT/installed/arm64-windows/lib/libgmp-10.pdb .
+          cp $VCPKG_ROOT/installed/arm64-windows/lib/libgmpxx-4.dll .
+          cp $VCPKG_ROOT/installed/arm64-windows/lib/libgmpxx-4.lib .
+          cp $VCPKG_ROOT/installed/arm64-windows/lib/libgmpxx-4.pdb .
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: win-arm64
+          path: |
+            gmp.h
+            gmpxx.h
+            .libs/libgmp-10.dll
+            .libs/libgmp-10.lib
+            .libs/libgmp-10.pdb
+            .libs/libgmpxx-4.dll
+            .libs/libgmpxx-4.lib
+            .libs/libgmpxx-4.pdb
