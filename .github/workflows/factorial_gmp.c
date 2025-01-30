@@ -17,7 +17,7 @@ int main() {
     clock_t start, end;
     double cpu_time_used;
 
-	for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++) {
         start = clock();
         calculate_factorial(n, result);
         end = clock();
@@ -25,7 +25,10 @@ int main() {
         cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
 
         printf("Round %d time taken to calculate %lu! is %f seconds.\n", i, n, cpu_time_used);
-	}
+    }
+
+    // 输出最后一次计算的结果
+    gmp_printf("The factorial of %lu is %Zd\n", n, result);
 
     mpz_clear(result);
     return 0;
