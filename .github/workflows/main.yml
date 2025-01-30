@@ -107,7 +107,7 @@ jobs:
               sudo apt-get install -y wine
               ;;
             "linux-x64")
-              # 如果有额外需要，可在此处安装
+              # 濡傛灉鏈夐澶栭渶瑕侊紝鍙湪姝ゅ瀹夎
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
