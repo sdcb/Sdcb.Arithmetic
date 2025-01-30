@@ -7,6 +7,9 @@ on:
       - .github/workflows/main.yml
   workflow_dispatch:
 
+env:
+  GMP_CONFIGURE_OPTIONS: --enable-shared --disable-static --enable-fat --enable-cxx
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -69,29 +72,18 @@ jobs:
         run: |
           cd gmp-${GMP_VERSION}
           if [ "${{ matrix.arch }}" = "x86" ]; then
-            ./configure \
-              CC="clang -m32" CXX="clang++ -m32" \
-              --host=i686-pc-linux-gnu \
-              --enable-shared --disable-static --enable-fat --enable-cxx
+            ./configure --host=i686-pc-linux-gnu ${{ env.GMP_CONFIGURE_OPTIONS }}
           elif [ "${{ matrix.arch }}" = "arm64" ]; then
-            ./configure \
-              CC="clang --target=aarch64-linux-gnu" CXX="clang++ --target=aarch64-linux-gnu" \
-              --host=aarch64-linux-gnu \
-              --enable-shared --disable-static --enable-fat --enable-cxx
+            CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ \
+            ./configure --host=aarch64-linux-gnu ${{ env.GMP_CONFIGURE_OPTIONS }}
           elif [ "${{ matrix.arch }}" = "arm" ]; then
-            ./configure \
-              CC="clang --target=arm-linux-gnueabihf" CXX="clang++ --target=arm-linux-gnueabihf" \
-              --host=arm-linux-gnueabihf \
-              --enable-shared --disable-static --enable-fat --enable-cxx
+            CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ \
+            ./configure --host=arm-linux-gnueabihf ${{ env.GMP_CONFIGURE_OPTIONS }}
           elif [ "${{ matrix.os }}" = "win" ]; then
-            ./configure \
-              CC="clang --target=x86_64-w64-mingw32" CXX="clang++ --target=x86_64-w64-mingw32" \
-              --host=x86_64-w64-mingw32 \
-              --enable-shared --disable-static --enable-fat --enable-cxx
+            CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ \
+            ./configure --host=x86_64-w64-mingw32 ${{ env.GMP_CONFIGURE_OPTIONS }}
           else
-            ./configure \
-              CC=clang CXX=clang++ \
-              --enable-shared --disable-static --enable-fat --enable-cxx
+            ./configure ${{ env.GMP_CONFIGURE_OPTIONS }}
           fi
 
       - name: Build GMP
@@ -125,27 +117,27 @@ jobs:
       - name: Compile C Program
         run: |
           if [ "${{ matrix.arch }}" = "x86" ]; then
-            clang -m32 -o factorial_gmp .github/workflows/factorial_gmp.c \
+            gcc -m32 -o factorial_gmp .github/workflows/factorial_gmp.c \
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
           elif [ "${{ matrix.arch }}" = "arm64" ]; then
-            clang --target=aarch64-linux-gnu -o factorial_gmp .github/workflows/factorial_gmp.c \
+            aarch64-linux-gnu-gcc -o factorial_gmp .github/workflows/factorial_gmp.c \
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
           elif [ "${{ matrix.arch }}" = "arm" ]; then
-            clang --target=arm-linux-gnueabihf -o factorial_gmp .github/workflows/factorial_gmp.c \
+            arm-linux-gnueabihf-gcc -o factorial_gmp .github/workflows/factorial_gmp.c \
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
           elif [ "${{ matrix.os }}" = "win" ]; then
-            clang --target=x86_64-w64-mingw32 -o factorial_gmp.exe .github/workflows/factorial_gmp.c \
+            x86_64-w64-mingw32-gcc -o factorial_gmp.exe .github/workflows/factorial_gmp.c \
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
           else
-            clang -o factorial_gmp .github/workflows/factorial_gmp.c \
+            gcc -o factorial_gmp .github/workflows/factorial_gmp.c \
               -I${{ github.workspace }}/gmp-${GMP_VERSION} \
               -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
               -lgmp
