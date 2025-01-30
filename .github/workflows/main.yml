@@ -1,4 +1,3 @@
-```yaml
 name: main
 on:
   push:
@@ -149,4 +148,3 @@ jobs:
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmpxx.h
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ matrix.gmp_so }}
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ matrix.gmp_cpp_so }}
-```
