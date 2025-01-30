@@ -205,10 +205,6 @@ jobs:
         run: |
           vcpkg install gmp:arm64-windows
 
-      - name: Compile C Program
-        run: |
-          cl /EHsc /I$VCPKG_ROOT/installed/arm64-windows/include /link /LIBPATH:$VCPKG_ROOT/installed/arm64-windows/lib factorial_gmp.c /Fe:factorial_gmp.exe /MD /DYNAMICBASE /NXCOMPAT /DEBUG
-
       - name: Prepare artifacts
         run: |
           tree /F $VCPKG_ROOT/installed/arm64-windows
