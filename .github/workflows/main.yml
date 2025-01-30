@@ -1,4 +1,5 @@
-name: main
+ name: main
+
 on:
   push:
     branches:
@@ -9,52 +10,82 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
+
     strategy:
       matrix:
+        runner: [ubuntu-latest]
         include:
-          - os: linux
+          - runner: ubuntu-latest
+            os: linux
             arch: x64
-            host: x86_64-pc-linux-gnu
-            gmp_so: libgmp.so.10.5.0
-            gmp_cpp_so: libgmpxx.so.4.7.0
-            strip: strip
-          - os: linux
+          - runner: ubuntu-latest
+            os: linux
             arch: x86
-            host: i686-pc-linux-gnu
-            gmp_so: libgmp.so.10.5.0
-            gmp_cpp_so: libgmpxx.so.4.7.0
-            strip: strip
-          - os: linux
+          - runner: ubuntu-latest
+            os: linux
             arch: arm64
-            host: aarch64-linux-gnu
-            gmp_so: libgmp.so.10.5.0
-            gmp_cpp_so: libgmpxx.so.4.7.0
-            strip: aarch64-linux-gnu-strip
-          - os: linux
+          - runner: ubuntu-latest
+            os: linux
             arch: arm
-            host: arm-linux-gnueabihf
-            gmp_so: libgmp.so.10.5.0
-            gmp_cpp_so: libgmpxx.so.4.7.0
-            strip: arm-linux-gnueabihf-strip
-          - os: win
+          - runner: ubuntu-latest
+            os: win
             arch: x64
-            host: x86_64-w64-mingw32
-            gmp_so: libgmp-10.dll
-            gmp_cpp_so: libgmpxx-4.dll
-            strip: x86_64-w64-mingw32-strip
-          - os: win
+          - runner: ubuntu-latest
+            os: win
             arch: x86
-            host: i686-w64-mingw32
-            gmp_so: libgmp-10.dll
-            gmp_cpp_so: libgmpxx-4.dll
-            strip: i686-w64-mingw32-strip
+
     env:
       GMP_VERSION: 6.3
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+
+      - name: Set environment variables
+        run: |
+          case "${{ matrix.os }}-${{ matrix.arch }}" in
+            "linux-x64")
+              echo "HOST=x86_64-pc-linux-gnu" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
+              echo "STRIP=strip" >> $GITHUB_ENV
+              ;;
+            "linux-x86")
+              echo "HOST=i686-pc-linux-gnu" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
+              echo "STRIP=strip" >> $GITHUB_ENV
+              ;;
+            "linux-arm64")
+              echo "HOST=aarch64-linux-gnu" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
+              echo "STRIP=aarch64-linux-gnu-strip" >> $GITHUB_ENV
+              ;;
+            "linux-arm")
+              echo "HOST=arm-linux-gnueabihf" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
+              echo "STRIP=arm-linux-gnueabihf-strip" >> $GITHUB_ENV
+              ;;
+            "win-x64")
+              echo "HOST=x86_64-w64-mingw32" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
+              echo "STRIP=x86_64-w64-mingw32-strip" >> $GITHUB_ENV
+              ;;
+            "win-x86")
+              echo "HOST=i686-w64-mingw32" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
+              echo "STRIP=i686-w64-mingw32-strip" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
+              exit 1
+              ;;
+          esac
 
       - name: Install Toolchain (arch-specific)
         run: |
@@ -104,7 +135,7 @@ jobs:
         run: |
           CONFIGURE_OPTIONS="--enable-shared --disable-static --enable-fat --enable-cxx"
           cd gmp-${GMP_VERSION}
-          ./configure --host=${{ matrix.host }} ${CONFIGURE_OPTIONS}
+          ./configure --host=${{ env.HOST }} ${CONFIGURE_OPTIONS}
 
       - name: Build GMP
         run: |
@@ -115,13 +146,13 @@ jobs:
         run: |
           cd gmp-${GMP_VERSION}/.libs
           ls -l
-          file ${{ matrix.gmp_so }}
+          file ${{ env.GMP_SO }}
 
       - name: Strip GMP Library
         run: |
           cd gmp-${GMP_VERSION}/.libs
-          ${{ matrix.strip }} --strip-unneeded ${{ matrix.gmp_so }}
-          ${{ matrix.strip }} --strip-unneeded ${{ matrix.gmp_cpp_so }}
+          ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_SO }}
+          ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_CPP_SO }}
 
       - name: Compile C Program
         run: |
@@ -159,7 +190,7 @@ jobs:
           elif [ "${{ matrix.arch }}" = "arm" ]; then
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ${GITHUB_WORKSPACE}/factorial_gmp
           elif [ "${{ matrix.os }}" = "win" ]; then
-            cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ matrix.gmp_so }} .
+            cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} .
             wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
           else
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
@@ -172,5 +203,5 @@ jobs:
           path: |
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmp.h
             ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmpxx.h
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ matrix.gmp_so }}
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ matrix.gmp_cpp_so }}
+            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_SO }}
+            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_CPP_SO }}
