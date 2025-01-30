@@ -35,7 +35,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     
     env:
-      GMP_VERSION: 6.3
+      GMP_VERSION: 6.3.0
     
     steps:
       - name: Check out repository
@@ -120,15 +120,11 @@ jobs:
               exit 1
               ;;
           esac
-    
+
       - name: Download GMP Source
         run: |
-          git clone --depth 1 https://github.com/gmp-mirror/gmp-${GMP_VERSION}.git
-    
-      - name: Autoreconf
-        run: |
-          cd gmp-${GMP_VERSION}
-          autoreconf -ivf
+          wget https://mirrors.nju.edu.cn/gnu/gmp/gmp-${GMP_VERSION}.tar.xz
+          tar -xf gmp-${GMP_VERSION}.tar.xz
     
       - name: Configure GMP
         run: |
