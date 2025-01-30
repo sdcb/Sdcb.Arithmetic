@@ -20,22 +20,27 @@ jobs:
             arch: x64
             gmp_so: libgmp.so.10.5.0
             gmp_cpp_so: libgmpxx.so.4.7.0
+            strip: strip
           - os: linux
             arch: x86
             gmp_so: libgmp.so.10.5.0
             gmp_cpp_so: libgmpxx.so.4.7.0
+            strip: strip
           - os: linux
             arch: arm64
             gmp_so: libgmp.so.10.5.0
             gmp_cpp_so: libgmpxx.so.4.7.0
+            strip: aarch64-linux-gnu-strip
           - os: linux
             arch: arm
             gmp_so: libgmp.so.10.5.0
             gmp_cpp_so: libgmpxx.so.4.7.0
+            strip: arm-linux-gnueabihf-strip
           - os: win
             arch: x64
             gmp_so: libgmp-10.dll
             gmp_cpp_so: libgmpxx-4.dll
+            strip: x86_64-w64-mingw32-strip
     env:
       GMP_VERSION: 6.3
 
@@ -100,19 +105,8 @@ jobs:
       - name: Strip GMP Library
         run: |
           cd gmp-${GMP_VERSION}/.libs
-          if [ "${{ matrix.arch }}" = "arm64" ]; then
-            aarch64-linux-gnu-strip --strip-unneeded ${{ matrix.gmp_so }}
-            aarch64-linux-gnu-strip --strip-unneeded ${{ matrix.gmp_cpp_so }}
-          elif [ "${{ matrix.arch }}" = "arm" ]; then
-            arm-linux-gnueabihf-strip --strip-unneeded ${{ matrix.gmp_so }}
-            arm-linux-gnueabihf-strip --strip-unneeded ${{ matrix.gmp_cpp_so }}
-          elif [ "${{ matrix.os }}" = "win" ]; then
-            x86_64-w64-mingw32-strip --strip-unneeded ${{ matrix.gmp_so }}
-            x86_64-w64-mingw32-strip --strip-unneeded ${{ matrix.gmp_cpp_so }}
-          else
-            strip --strip-unneeded ${{ matrix.gmp_so }}
-            strip --strip-unneeded ${{ matrix.gmp_cpp_so }}
-          fi
+          ${{ matrix.strip }} --strip-unneeded ${{ matrix.gmp_so }}
+          ${{ matrix.strip }} --strip-unneeded ${{ matrix.gmp_cpp_so }}
 
       - name: Compile C Program
         run: |
