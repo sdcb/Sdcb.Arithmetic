@@ -206,17 +206,17 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
+      - name: Download GMP Source
+        run: |
+          Invoke-WebRequest -Uri https://mirrors.nju.edu.cn/gnu/gmp/gmp-${env:GMP_VERSION}.tar.xz -OutFile gmp-${env:GMP_VERSION}.tar.xz
+          tar -xf gmp-${env:GMP_VERSION}.tar.xz
+
       - name: Set up MSYS2
         uses: msys2/setup-msys2@v2
         with:
           update: true
           install: >-
             mingw-w64-x86_64-toolchain
-
-      - name: Download GMP Source
-        run: |
-          wget https://mirrors.nju.edu.cn/gnu/gmp/gmp-${GMP_VERSION}.tar.xz
-          tar -xf gmp-${GMP_VERSION}.tar.xz
 
       - name: Build GMP
         run: |
