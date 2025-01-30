@@ -12,196 +12,196 @@ jobs:
   build:
     runs-on: ${{ matrix.runner }}
 
-    strategy:
-      matrix:
-        runner: [ubuntu-latest]
-        include:
-          - runner: ubuntu-latest
-            os: linux
-            arch: x64
-          - runner: ubuntu-latest
-            os: linux
-            arch: x86
-          - runner: ubuntu-latest
-            os: linux
-            arch: arm64
-          - runner: ubuntu-latest
-            os: linux
-            arch: arm
-          - runner: ubuntu-latest
-            os: win
-            arch: x64
-          - runner: ubuntu-latest
-            os: win
-            arch: x86
+  strategy:
+    matrix:
+      runner: [ubuntu-latest]
+      include:
+        - runner: ubuntu-latest
+          os: linux
+          arch: x64
+        - runner: ubuntu-latest
+          os: linux
+          arch: x86
+        - runner: ubuntu-latest
+          os: linux
+          arch: arm64
+        - runner: ubuntu-latest
+          os: linux
+          arch: arm
+        - runner: ubuntu-latest
+          os: win
+          arch: x64
+        - runner: ubuntu-latest
+          os: win
+          arch: x86
 
-    env:
-      GMP_VERSION: 6.3
+  env:
+    GMP_VERSION: 6.3
 
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
+  steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
 
-      - name: Set environment variables
-        run: |
-          case "${{ matrix.os }}-${{ matrix.arch }}" in
-            "linux-x64")
-              echo "HOST=x86_64-pc-linux-gnu" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
-              echo "STRIP=strip" >> $GITHUB_ENV
-              ;;
-            "linux-x86")
-              echo "HOST=i686-pc-linux-gnu" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
-              echo "STRIP=strip" >> $GITHUB_ENV
-              ;;
-            "linux-arm64")
-              echo "HOST=aarch64-linux-gnu" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
-              echo "STRIP=aarch64-linux-gnu-strip" >> $GITHUB_ENV
-              ;;
-            "linux-arm")
-              echo "HOST=arm-linux-gnueabihf" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
-              echo "STRIP=arm-linux-gnueabihf-strip" >> $GITHUB_ENV
-              ;;
-            "win-x64")
-              echo "HOST=x86_64-w64-mingw32" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
-              echo "STRIP=x86_64-w64-mingw32-strip" >> $GITHUB_ENV
-              ;;
-            "win-x86")
-              echo "HOST=i686-w64-mingw32" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
-              echo "STRIP=i686-w64-mingw32-strip" >> $GITHUB_ENV
-              ;;
-            *)
-              echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
-              exit 1
-              ;;
-          esac
+    - name: Set environment variables
+      run: |
+        case "${{ matrix.os }}-${{ matrix.arch }}" in
+          "linux-x64")
+            echo "HOST=x86_64-pc-linux-gnu" >> $GITHUB_ENV
+            echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
+            echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
+            echo "STRIP=strip" >> $GITHUB_ENV
+            ;;
+          "linux-x86")
+            echo "HOST=i686-pc-linux-gnu" >> $GITHUB_ENV
+            echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
+            echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
+            echo "STRIP=strip" >> $GITHUB_ENV
+            ;;
+          "linux-arm64")
+            echo "HOST=aarch64-linux-gnu" >> $GITHUB_ENV
+            echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
+            echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
+            echo "STRIP=aarch64-linux-gnu-strip" >> $GITHUB_ENV
+            ;;
+          "linux-arm")
+            echo "HOST=arm-linux-gnueabihf" >> $GITHUB_ENV
+            echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
+            echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
+            echo "STRIP=arm-linux-gnueabihf-strip" >> $GITHUB_ENV
+            ;;
+          "win-x64")
+            echo "HOST=x86_64-w64-mingw32" >> $GITHUB_ENV
+            echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
+            echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
+            echo "STRIP=x86_64-w64-mingw32-strip" >> $GITHUB_ENV
+            ;;
+          "win-x86")
+            echo "HOST=i686-w64-mingw32" >> $GITHUB_ENV
+            echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
+            echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
+            echo "STRIP=i686-w64-mingw32-strip" >> $GITHUB_ENV
+            ;;
+          *)
+            echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
+            exit 1
+            ;;
+        esac
 
-      - name: Install Toolchain (arch-specific)
-        run: |
-          sudo apt-get update
-          TARGET="${{ matrix.os }}-${{ matrix.arch }}"
-          case "$TARGET" in
-            "linux-x86")
-              sudo apt-get install -y gcc-multilib g++-multilib
-              ;;
-            "linux-arm64")
-              sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-              sudo apt-get install -y qemu-user
-              ;;
-            "linux-arm")
-              sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
-              sudo apt-get install -y qemu-user
-              ;;
-            "win-x86")
-              sudo apt-get install -y mingw-w64
-              sudo dpkg --add-architecture i386
-              sudo apt-get update
-              sudo apt-get install wine32:i386
-              ;;
-            "win-x64")
-              sudo apt-get install -y mingw-w64
-              sudo apt-get install -y wine
-              ;;
-            "linux-x64")
-              # 如果有额外需要，可在此处安装
-              ;;
-            *)
-              echo "Error: Unsupported OS-Architecture combination: $TARGET"
-              exit 1
-              ;;
-          esac
+    - name: Install Toolchain (arch-specific)
+      run: |
+        sudo apt-get update
+        TARGET="${{ matrix.os }}-${{ matrix.arch }}"
+        case "$TARGET" in
+          "linux-x86")
+            sudo apt-get install -y gcc-multilib g++-multilib
+            ;;
+          "linux-arm64")
+            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+            sudo apt-get install -y qemu-user
+            ;;
+          "linux-arm")
+            sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+            sudo apt-get install -y qemu-user
+            ;;
+          "win-x86")
+            sudo apt-get install -y mingw-w64
+            sudo dpkg --add-architecture i386
+            sudo apt-get update
+            sudo apt-get install wine32:i386
+            ;;
+          "win-x64")
+            sudo apt-get install -y mingw-w64
+            sudo apt-get install -y wine
+            ;;
+          "linux-x64")
+            # 如果有额外需要，可在此处安装
+            ;;
+          *)
+            echo "Error: Unsupported OS-Architecture combination: $TARGET"
+            exit 1
+            ;;
+        esac
 
-      - name: Download GMP Source
-        run: |
-          git clone --depth 1 https://github.com/gmp-mirror/gmp-${GMP_VERSION}.git
+    - name: Download GMP Source
+      run: |
+        git clone --depth 1 https://github.com/gmp-mirror/gmp-${GMP_VERSION}.git
 
-      - name: Autoreconf
-        run: |
-          cd gmp-${GMP_VERSION}
-          autoreconf -ivf
+    - name: Autoreconf
+      run: |
+        cd gmp-${GMP_VERSION}
+        autoreconf -ivf
 
-      - name: Configure GMP
-        run: |
-          CONFIGURE_OPTIONS="--enable-shared --disable-static --enable-fat --enable-cxx"
-          cd gmp-${GMP_VERSION}
-          ./configure --host=${{ env.HOST }} ${CONFIGURE_OPTIONS}
+    - name: Configure GMP
+      run: |
+        CONFIGURE_OPTIONS="--enable-shared --disable-static --enable-fat --enable-cxx"
+        cd gmp-${GMP_VERSION}
+        ./configure --host=${{ env.HOST }} ${CONFIGURE_OPTIONS}
 
-      - name: Build GMP
-        run: |
-          cd gmp-${GMP_VERSION}
-          make MAKEINFO=true
+    - name: Build GMP
+      run: |
+        cd gmp-${GMP_VERSION}
+        make MAKEINFO=true
 
-      - name: Check .libs
-        run: |
-          cd gmp-${GMP_VERSION}/.libs
-          ls -l
-          file ${{ env.GMP_SO }}
+    - name: Check .libs
+      run: |
+        cd gmp-${GMP_VERSION}/.libs
+        ls -l
+        file ${{ env.GMP_SO }}
 
-      - name: Strip GMP Library
-        run: |
-          cd gmp-${GMP_VERSION}/.libs
-          ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_SO }}
-          ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_CPP_SO }}
+    - name: Strip GMP Library
+      run: |
+        cd gmp-${GMP_VERSION}/.libs
+        ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_SO }}
+        ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_CPP_SO }}
 
-      - name: Compile C Program
-        run: |
-          COMPILE_OPTIONS=".github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION} -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp"
-          TARGET="${{ matrix.os }}-${{ matrix.arch }}"
-          case "$TARGET" in
-            "linux-x86")
-              gcc -m32 -o factorial_gmp $COMPILE_OPTIONS
-              ;;
-            "linux-arm64")
-              aarch64-linux-gnu-gcc -o factorial_gmp $COMPILE_OPTIONS
-              ;;
-            "linux-arm")
-              arm-linux-gnueabihf-gcc -o factorial_gmp $COMPILE_OPTIONS
-              ;;
-            "win-x86")
-              i686-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
-              ;;
-            "win-x64")
-              x86_64-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
-              ;;
-            "linux-x64")
-              gcc -o factorial_gmp $COMPILE_OPTIONS
-              ;;
-            *)
-              echo "Error: Unsupported OS-Architecture combination: $TARGET"
-              exit 1
-              ;;
-          esac
+    - name: Compile C Program
+      run: |
+        COMPILE_OPTIONS=".github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION} -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp"
+        TARGET="${{ matrix.os }}-${{ matrix.arch }}"
+        case "$TARGET" in
+          "linux-x86")
+            gcc -m32 -o factorial_gmp $COMPILE_OPTIONS
+            ;;
+          "linux-arm64")
+            aarch64-linux-gnu-gcc -o factorial_gmp $COMPILE_OPTIONS
+            ;;
+          "linux-arm")
+            arm-linux-gnueabihf-gcc -o factorial_gmp $COMPILE_OPTIONS
+            ;;
+          "win-x86")
+            i686-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
+            ;;
+          "win-x64")
+            x86_64-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
+            ;;
+          "linux-x64")
+            gcc -o factorial_gmp $COMPILE_OPTIONS
+            ;;
+          *)
+            echo "Error: Unsupported OS-Architecture combination: $TARGET"
+            exit 1
+            ;;
+        esac
 
-      - name: Run C Program
-        run: |
-          if [ "${{ matrix.arch }}" = "arm64" ]; then
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ${GITHUB_WORKSPACE}/factorial_gmp
-          elif [ "${{ matrix.arch }}" = "arm" ]; then
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ${GITHUB_WORKSPACE}/factorial_gmp
-          elif [ "${{ matrix.os }}" = "win" ]; then
-            cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} .
-            wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
-          else
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
-          fi
+    - name: Run C Program
+      run: |
+        if [ "${{ matrix.arch }}" = "arm64" ]; then
+          LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ${GITHUB_WORKSPACE}/factorial_gmp
+        elif [ "${{ matrix.arch }}" = "arm" ]; then
+          LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ${GITHUB_WORKSPACE}/factorial_gmp
+        elif [ "${{ matrix.os }}" = "win" ]; then
+          cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} .
+          wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
+        else
+          LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
+        fi
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.os }}-${{ matrix.arch }}
-          path: |
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmp.h
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmpxx.h
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_SO }}
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_CPP_SO }}
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.os }}-${{ matrix.arch }}
+        path: |
+          ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmp.h
+          ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmpxx.h
+          ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_SO }}
+          ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_CPP_SO }}
