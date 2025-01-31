@@ -167,6 +167,7 @@ jobs:
           cd gmp-${GMP_VERSION}/.libs
           ls -l
           file ${{ env.GMP_SO }}
+          ldd ${{ env.GMP_SO }}
 
       - name: Strip GMP Library
         run: |
