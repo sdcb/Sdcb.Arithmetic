@@ -24,7 +24,7 @@ jobs:
 
     - name: Download GMP Source
       run: |
-        Invoke-WebRequest -Uri https://ftpmirror.gnu.org/gmp/gmp-${env:GMP_VERSION}.tar.xz -OutFile .
+        curl -L -o gmp-${env:GMP_VERSION}.tar.xz https://ftpmirror.gnu.org/gmp/gmp-${env:GMP_VERSION}.tar.xz
         tar -xf gmp-${env:GMP_VERSION}.tar.xz
         ls
 
