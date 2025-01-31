@@ -142,6 +142,9 @@ jobs:
           COMPILE_OPTIONS=".github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION} -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp"
           TARGET="${{ matrix.os }}-${{ matrix.arch }}"
           case "$TARGET" in
+            "linux-x64")
+              gcc -o factorial_gmp $COMPILE_OPTIONS
+              ;;
             "linux-x86")
               gcc -m32 -o factorial_gmp $COMPILE_OPTIONS
               ;;
@@ -151,14 +154,11 @@ jobs:
             "linux-arm")
               arm-linux-gnueabihf-gcc -o factorial_gmp $COMPILE_OPTIONS
               ;;
-            "win-x86")
-              i686-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
-              ;;
             "win-x64")
               x86_64-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
               ;;
-            "linux-x64")
-              gcc -o factorial_gmp $COMPILE_OPTIONS
+            "win-x86")
+              i686-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
