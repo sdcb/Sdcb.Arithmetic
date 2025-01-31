@@ -37,36 +37,42 @@ jobs:
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=strip" >> $GITHUB_ENV
+              echo "CC=gcc" >> $GITHUB_ENV
               ;;
             "linux-x86")
               echo "HOST=i686-pc-linux-gnu" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=strip" >> $GITHUB_ENV
+              echo "CC='gcc -m32'" >> $GITHUB_ENV
               ;;
             "linux-arm64")
               echo "HOST=aarch64-linux-gnu" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=aarch64-linux-gnu-strip" >> $GITHUB_ENV
+              echo "CC=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
               ;;
             "linux-arm")
               echo "HOST=arm-linux-gnueabihf" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=arm-linux-gnueabihf-strip" >> $GITHUB_ENV
+              echo "CC=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
               ;;
             "win-x64")
               echo "HOST=x86_64-w64-mingw32" >> $GITHUB_ENV
               echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
               echo "STRIP=x86_64-w64-mingw32-strip" >> $GITHUB_ENV
+              echo "CC=x86_64-w64-mingw32-gcc" >> $GITHUB_ENV
               ;;
             "win-x86")
               echo "HOST=i686-w64-mingw32" >> $GITHUB_ENV
               echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
               echo "STRIP=i686-w64-mingw32-strip" >> $GITHUB_ENV
+              echo "CC=i686-w64-mingw32-gcc" >> $GITHUB_ENV
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
@@ -140,43 +146,19 @@ jobs:
       - name: Compile C Program
         run: |
           COMPILE_OPTIONS=".github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION} -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp"
-          TARGET="${{ matrix.os }}-${{ matrix.arch }}"
-          case "$TARGET" in
-            "linux-x64")
-              gcc -o factorial_gmp $COMPILE_OPTIONS
-              ;;
-            "linux-x86")
-              gcc -m32 -o factorial_gmp $COMPILE_OPTIONS
-              ;;
-            "linux-arm64")
-              aarch64-linux-gnu-gcc -o factorial_gmp $COMPILE_OPTIONS
-              ;;
-            "linux-arm")
-              arm-linux-gnueabihf-gcc -o factorial_gmp $COMPILE_OPTIONS
-              ;;
-            "win-x64")
-              x86_64-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
-              ;;
-            "win-x86")
-              i686-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
-              ;;
-            *)
-              echo "Error: Unsupported OS-Architecture combination: $TARGET"
-              exit 1
-              ;;
-          esac
+          ${{ env.CC }} -o factorial_gmp.exe $COMPILE_OPTIONS
     
       - name: Run C Program
         run: |
           if [ "${{ matrix.arch }}" = "arm64" ]; then
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ${GITHUB_WORKSPACE}/factorial_gmp
+            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
           elif [ "${{ matrix.arch }}" = "arm" ]; then
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ${GITHUB_WORKSPACE}/factorial_gmp
+            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
           elif [ "${{ matrix.os }}" = "win" ]; then
             cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} .
             wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
           else
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
+            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
           fi
     
       - name: Upload Artifact
