@@ -152,6 +152,7 @@ jobs:
       - name: Strip GMP Library
         run: |
           cd gmp-${GMP_VERSION}/.libs
+          ls -l /usr/local/lib/android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin
           ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_SO }}
           ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_CPP_SO }}
 
