@@ -15,22 +15,10 @@ jobs:
 
     - name: Dump MSYS2 folder(for troubleshooting)
       run: |
-        tree /F C:\msys64
+        tree /F C:\msys64\usr\bin
 
     - name: Add MSYS2 to PATH
       run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
-
-    - name: Update MSYS2
-      run: |
-        pacman -Syu --noconfirm
-
-    - name: Install a package with MSYS2
-      run: |
-        pacman -S --noconfirm make
-
-    - name: List installed packages
-      run: |
-        pacman -Q
 
     - name: Run a MSYS2 command
       run: |
