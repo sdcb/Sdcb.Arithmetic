@@ -161,13 +161,16 @@ jobs:
           ls -l
           file ${{ env.GMP_SO }}
 
-      - name: Compile C Program
+      - name: Compile Test C Program
         run: |
-          COMPILE_OPTIONS=".github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION} -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp"
-          ${{ env.TEST_CC }} -o factorial_gmp.exe $COMPILE_OPTIONS
+          ${{ env.TEST_CC }} -o factorial_gmp.exe \
+            .github/workflows/factorial_gmp.c \
+            -I${{ github.workspace }}/gmp-${GMP_VERSION} \
+            -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
+            -lgmp
           file factorial_gmp.exe
 
-      - name: Run C Program
+      - name: Run Test C Program
         run: |
           if [ "${{ matrix.arch }}" = "arm64" ]; then
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
