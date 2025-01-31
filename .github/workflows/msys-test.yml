@@ -15,8 +15,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Dump MSYS2 folder(for troubleshooting)
+      run: |
+        tree /F C:\msys2
+
     - name: Add MSYS2 to PATH
-      run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
+      run: echo "C:\msys2\usr\bin" >> $GITHUB_PATH
 
     - name: Update MSYS2
       run: |
