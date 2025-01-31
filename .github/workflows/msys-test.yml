@@ -15,6 +15,10 @@ jobs:
       GMP_VERSION: 6.3.0
 
     steps:
+    - name: Add msys64 path
+      run: |
+        echo "C:\msys64\usr\bin" >> $GITHUB_PATH
+
     - name: Install Dependencies
       run: |
         pacman -S m4
