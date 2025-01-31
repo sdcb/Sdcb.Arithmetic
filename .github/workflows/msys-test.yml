@@ -28,7 +28,7 @@ jobs:
     - name: Download GMP Source
       run: |
         wget https://ftpmirror.gnu.org/gmp/gmp-${env:GMP_VERSION}.tar.xz
-        tar -xf gmp-${env:GMP_VERSION}.tar.xz
+        # tar -xf gmp-${env:GMP_VERSION}.tar.xz
         ls
 
     - name: Build GMP
