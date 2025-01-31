@@ -17,7 +17,7 @@ jobs:
     steps:
     - name: Add C:\MSYS64\usr\bin into Path
       run: |
-        $env:Path += ";C:\MSYS64\usr\bin"
+        echo "PATH=C:\MSYS64\usr\bin;$env:Path" >> $env:GITHUB_ENV
         echo "$env:Path"
         where.exe pacman
 
