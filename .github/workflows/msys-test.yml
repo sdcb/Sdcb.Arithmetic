@@ -13,13 +13,10 @@ jobs:
 
     steps:
 
-    - name: Dump MSYS2 folder(for troubleshooting)
-      run: |
-        tree /F C:\msys64\usr\bin
-
     - name: Add MSYS2 to PATH
       run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
 
     - name: Run a MSYS2 command
       run: |
+        where make
         make --version
