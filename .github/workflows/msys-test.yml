@@ -27,7 +27,7 @@ jobs:
         Invoke-WebRequest -Uri https://ftpmirror.gnu.org/gmp/gmp-${env:GMP_VERSION}.tar.xz -OutFile .
         where.exe tar
         ls
-        tar -xvf gmp-${env:GMP_VERSION}.tar.xz
+        & "C:\Program Files\Git\usr\bin\tar.exe" -xvf gmp-${env:GMP_VERSION}.tar.xz
         ls
 
     - name: Build GMP
