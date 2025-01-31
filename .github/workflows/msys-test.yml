@@ -29,13 +29,13 @@ jobs:
         & "C:\Program Files\Git\usr\bin\tar.exe" -xf gmp-${env:GMP_VERSION}.tar.xz
 
     - name: Configure
-      shell: msys2 {0}
+      shell: msys2_shell {0}
       run: |
         cd gmp-${GMP_VERSION}
         ./configure --enable-shared --disable-static --enable-fat --enable-cxx
 
     - name: Make
-      shell: msys2 {0}
+      shell: msys2_shell {0}
       run: |
         cd gmp-${GMP_VERSION}
         make
