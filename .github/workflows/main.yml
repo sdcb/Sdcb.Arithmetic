@@ -77,23 +77,17 @@ jobs:
               echo "TEST_CC=i686-w64-mingw32-gcc" >> $GITHUB_ENV
               ;;
             "android-x64")
-              echo "ANDROID_API=21" >> $GITHUB_ENV
+              ANDROID_API="21"
               echo "HOST=x86_64-linux-android" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
               echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" >> $GITHUB_ENV
-
-              echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang \
-                --target=x86_64-linux-android\${ANDROID_API} \
+              ARGS="--target=x86_64-linux-android\${ANDROID_API} \
                 --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
-                -fPIE -pie" >> $GITHUB_ENV
-              echo "CC=${TEST_CC}" >> $GITHUB_ENV
-              echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \
-                --target=x86_64-linux-android${ANDROID_API} \
-                --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
-                -fPIE -fPIC" >> $GITHUB_ENV
-              echo "CFLAGS=-fPIC" >> $GITHUB_ENV
-              echo "CXXFLAGS=-fPIC" >> $GITHUB_ENV
+                -fPIE -pie"
+              echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+              echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+              echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
