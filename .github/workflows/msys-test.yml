@@ -52,8 +52,13 @@ jobs:
       shell: msys2 {0}
       run: |
         cd gmp-${GMP_VERSION}
-        export CC=${{ matrix.host }}-gcc
-        export CXX=${{ matrix.host }}-g++
+        if [ "${{ matrix.arch }}" == "arm64" ]; then
+          export CC=${{ matrix.host }}-clang
+          export CXX=${{ matrix.host }}-clang++
+        else
+          export CC=${{ matrix.host }}-gcc
+          export CXX=${{ matrix.host }}-g++
+        fi
         ./configure --host=${{ matrix.host }} --enable-shared --disable-static --enable-cxx --disable-fat
 
     - name: Make
