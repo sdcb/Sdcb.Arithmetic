@@ -13,18 +13,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: linux
-            arch: x64
-          - os: linux
-            arch: x86
-          - os: linux
-            arch: arm64
-          - os: linux
-            arch: arm
-          - os: win
-            arch: x64
-          - os: win
-            arch: x86
+          - { os: linux, arch: x64 }
+          - { os: linux, arch: x86 }
+          - { os: linux, arch: arm64 }
+          - { os: linux, arch: arm }
+          - { os: win, arch: x64 }
+          - { os: win, arch: x86 }
 
     runs-on: ${{ matrix.os == 'linux' && 'ubuntu-latest' || 'ubuntu-latest' }}
     
