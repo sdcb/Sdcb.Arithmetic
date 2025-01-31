@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - .github/workflows/main.yml
+      - .github/workflows/factorial_gmp.c
   workflow_dispatch:
 
 jobs:
