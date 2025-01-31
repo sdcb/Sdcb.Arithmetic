@@ -27,8 +27,8 @@ int main() {
         printf("Round %d time taken to calculate %lu! is %f seconds.\n", i, n, cpu_time_used);
     }
 
-    // 输出最后一次计算的结果
-    gmp_printf("The factorial of %lu is %Zd\n", n, result);
+    // 杈撳嚭鏈�鍚庝竴娆¤绠楃殑缁撴灉
+    gmp_printf("The factorial of %lu is %.10Fe\n", n, result);
 
     mpz_clear(result);
     return 0;
