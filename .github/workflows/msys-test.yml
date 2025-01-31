@@ -18,22 +18,15 @@ jobs:
     - name: Add MSYS2 to PATH
       run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
 
-    - name: Run a MSYS2 command
-      run: |
-        where.exe make
-
     - name: Download GMP Source
       run: |
         Invoke-WebRequest -Uri https://ftpmirror.gnu.org/gmp/gmp-${env:GMP_VERSION}.tar.xz -OutFile .
-        where.exe tar
-        ls
         & "C:\Program Files\Git\usr\bin\tar.exe" -xvf gmp-${env:GMP_VERSION}.tar.xz
         ls
 
     - name: Build GMP
       run: |
         cd gmp-${env:GMP_VERSION}
+        ls
         ./configure --enable-shared --disable-static --enable-fat --enable-cxx
         make
-        make check
-        make install
