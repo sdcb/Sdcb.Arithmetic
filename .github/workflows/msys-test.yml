@@ -35,7 +35,7 @@ jobs:
         ./configure --enable-shared --disable-static --enable-fat --enable-cxx
 
     - name: Make
-      shell: bash
+      shell: msys2 {0}
       run: |
         cd gmp-${GMP_VERSION}
         make
