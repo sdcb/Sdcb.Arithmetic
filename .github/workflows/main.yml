@@ -87,7 +87,7 @@ jobs:
                 --target=x86_64-linux-android\${ANDROID_API} \
                 --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
                 -fPIE -pie" >> $GITHUB_ENV
-              echo "CC=${{ env.TEST_CC }}" >> $GITHUB_ENV
+              echo "CC=${TEST_CC}" >> $GITHUB_ENV
               echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \
                 --target=x86_64-linux-android${ANDROID_API} \
                 --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
