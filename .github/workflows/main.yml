@@ -133,7 +133,7 @@ jobs:
         run: |
           cd gmp-${GMP_VERSION}
           if [ "${{ matrix.os }}" = "android" ]; then
-            export CC="${{ env.TEST_CC }}
+            export CC="${{ env.TEST_CC }}"
             export CXX="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++"
           fi
           ./configure --enable-shared --disable-static --enable-fat --enable-cxx --host=${{ env.HOST }}
