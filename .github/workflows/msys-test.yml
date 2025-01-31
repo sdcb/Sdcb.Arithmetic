@@ -15,9 +15,6 @@ jobs:
       GMP_VERSION: 6.3.0
 
     steps:
-    - name: Install wget
-      run: |
-        choco install wget -y
     - name: Add MSYS2 to PATH
       run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
 
@@ -30,7 +27,7 @@ jobs:
         Invoke-WebRequest -Uri https://ftpmirror.gnu.org/gmp/gmp-${env:GMP_VERSION}.tar.xz -OutFile .
         where.exe tar
         ls
-        tar -xf gmp-${env:GMP_VERSION}.tar.xz
+        tar -xvf gmp-${env:GMP_VERSION}.tar.xz
         ls
 
     - name: Build GMP
