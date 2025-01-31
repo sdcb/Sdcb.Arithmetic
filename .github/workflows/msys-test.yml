@@ -3,7 +3,7 @@ name: MSYS2 Setup
 on:
   push:
     branches:
-      - win
+      - master
     paths:
       - .github/workflows/msys-test.yml
 
@@ -46,6 +46,7 @@ jobs:
     - name: Configure
       shell: msys2 {0}
       run: |
+        cd gmp-${GMP_VERSION}
         ./configure --enable-shared --disable-static --enable-cxx --disable-fat
 
     - name: Make
