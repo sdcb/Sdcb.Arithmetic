@@ -18,10 +18,11 @@ jobs:
           - { os: linux, arch: x86 }
           - { os: linux, arch: arm64 }
           - { os: linux, arch: arm }
-          - { os: win, arch: x64 }
-          - { os: win, arch: x86 }
+          - { os: win,   arch: x64 }
+          - { os: win,   arch: x86 }
           - { os: android, arch: x64 }
-
+          - { os: android, arch: arm64 }
+          
     runs-on: ${{ matrix.os == 'linux' && 'ubuntu-latest' || 'ubuntu-latest' }}
 
     env:
@@ -88,6 +89,18 @@ jobs:
               echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
               echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
               ;;
+            "android-arm64")
+              echo "HOST=aarch64-linux-android" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
+              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" >> $GITHUB_ENV
+              ARGS="--target=aarch64-linux-android21 \
+                --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
+                -fPIE -pie"
+              echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+              echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+              echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
+              ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
               exit 1
@@ -125,7 +138,7 @@ jobs:
               ;;
             "linux-x64")
               ;;
-            "android-x64")
+            "android-x64" | "android-arm64")
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
