@@ -25,6 +25,7 @@ jobs:
         ls
 
     - name: Build GMP
+      shell: bash
       run: |
         cd gmp-${env:GMP_VERSION}
         ls
