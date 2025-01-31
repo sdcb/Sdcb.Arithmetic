@@ -20,8 +20,7 @@ jobs:
 
     - name: Run a MSYS2 command
       run: |
-        where make
-        make --version
+        where.exe make
 
     - name: Download GMP Source
       run: |
