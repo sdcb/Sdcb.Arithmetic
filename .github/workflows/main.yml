@@ -79,7 +79,7 @@ jobs:
               echo "HOST=x86_64-linux-android" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
-              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-strip" >> $GITHUB_ENV
+              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" >> $GITHUB_ENV
               echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" >> $GITHUB_ENV
               ;;
             *)
@@ -90,27 +90,31 @@ jobs:
 
       - name: Install Toolchain (arch-specific)
         run: |
-          sudo apt-get update
           TARGET="${{ matrix.os }}-${{ matrix.arch }}"
           case "$TARGET" in
             "linux-x86")
+              sudo apt-get update
               sudo apt-get install -y gcc-multilib g++-multilib
               ;;
             "linux-arm64")
+              sudo apt-get update
               sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
               sudo apt-get install -y qemu-user
               ;;
             "linux-arm")
+              sudo apt-get update
               sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
               sudo apt-get install -y qemu-user
               ;;
             "win-x86")
+              sudo apt-get update
               sudo apt-get install -y mingw-w64
               sudo dpkg --add-architecture i386
               sudo apt-get update
               sudo apt-get install wine32:i386
               ;;
             "win-x64")
+              sudo apt-get update
               sudo apt-get install -y mingw-w64
               sudo apt-get install -y wine
               ;;
@@ -152,7 +156,6 @@ jobs:
       - name: Strip GMP Library
         run: |
           cd gmp-${GMP_VERSION}/.libs
-          ls -l /usr/local/lib/android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin
           ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_SO }}
           ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_CPP_SO }}
 
