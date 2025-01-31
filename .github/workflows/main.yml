@@ -19,16 +19,17 @@ jobs:
           - { os: linux, arch: arm }
           - { os: win, arch: x64 }
           - { os: win, arch: x86 }
+          - { os: android, arch: x64 }
 
     runs-on: ${{ matrix.os == 'linux' && 'ubuntu-latest' || 'ubuntu-latest' }}
-    
+
     env:
       GMP_VERSION: 6.3.0
-    
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
-    
+
       - name: Set environment variables
         run: |
           case "${{ matrix.os }}-${{ matrix.arch }}" in
@@ -74,12 +75,19 @@ jobs:
               echo "STRIP=i686-w64-mingw32-strip" >> $GITHUB_ENV
               echo "TEST_CC=i686-w64-mingw32-gcc" >> $GITHUB_ENV
               ;;
+            "android-x64")
+              echo "HOST=x86_64-linux-android" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
+              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-strip" >> $GITHUB_ENV
+              echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" >> $GITHUB_ENV
+              ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
               exit 1
               ;;
           esac
-    
+
       - name: Install Toolchain (arch-specific)
         run: |
           sudo apt-get update
@@ -107,7 +115,8 @@ jobs:
               sudo apt-get install -y wine
               ;;
             "linux-x64")
-              # 如果有额外需要，可在此处安装
+              ;;
+            "android-x64")
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
@@ -119,35 +128,34 @@ jobs:
         run: |
           wget https://mirrors.nju.edu.cn/gnu/gmp/gmp-${GMP_VERSION}.tar.xz
           tar -xf gmp-${GMP_VERSION}.tar.xz
-    
+
       - name: Configure GMP
         run: |
-          CONFIGURE_OPTIONS="--enable-shared --disable-static --enable-fat --enable-cxx"
           cd gmp-${GMP_VERSION}
-          ./configure --host=${{ env.HOST }} ${CONFIGURE_OPTIONS}
-    
+          ./configure --enable-shared --disable-static --enable-fat --enable-cxx --host=${{ env.HOST }}
+
       - name: Build GMP
         run: |
           cd gmp-${GMP_VERSION}
           make MAKEINFO=true
-    
+
       - name: Check .libs
         run: |
           cd gmp-${GMP_VERSION}/.libs
           ls -l
           file ${{ env.GMP_SO }}
-    
+
       - name: Strip GMP Library
         run: |
           cd gmp-${GMP_VERSION}/.libs
           ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_SO }}
           ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_CPP_SO }}
-    
+
       - name: Compile C Program
         run: |
           COMPILE_OPTIONS=".github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION} -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp"
           ${{ env.TEST_CC }} -o factorial_gmp.exe $COMPILE_OPTIONS
-    
+
       - name: Run C Program
         run: |
           if [ "${{ matrix.arch }}" = "arm64" ]; then
@@ -157,10 +165,12 @@ jobs:
           elif [ "${{ matrix.os }}" = "win" ]; then
             cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} .
             wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
+          elif [ "${{ matrix.os }}" = "android" ]; then
+            echo "Skip running program on Android"
           else
             LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
           fi
-    
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
