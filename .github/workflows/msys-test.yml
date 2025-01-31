@@ -24,7 +24,7 @@ jobs:
 
     - name: Download GMP Source
       run: |
-        curl -o gmp-${GMP_VERSION}.tar.xz https://ftp.gnu.org/gnu/gmp/gmp-${GMP_VERSION}.tar.xz
+        curl -o gmp-${env:GMP_VERSION}.tar.xz https://ftp.gnu.org/gnu/gmp/gmp-${env:GMP_VERSION}.tar.xz
         tar -xf gmp-${env:GMP_VERSION}.tar.xz
 
     - name: Build GMP
