@@ -45,7 +45,7 @@ jobs:
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=strip" >> $GITHUB_ENV
-              echo "TEST_CC='gcc -m32'" >> $GITHUB_ENV
+              echo "TEST_CC=gcc -m32" >> $GITHUB_ENV
               ;;
             "linux-arm64")
               echo "HOST=aarch64-linux-gnu" >> $GITHUB_ENV
