@@ -121,8 +121,6 @@ jobs:
             "linux-x64")
               ;;
             "android-x64")
-              sudo apt-get update
-              sudo apt-get install qemu-user-static -y
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
