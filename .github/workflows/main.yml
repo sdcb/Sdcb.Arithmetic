@@ -181,11 +181,11 @@ jobs:
         run: |
           TARGET="${{ matrix.os }}-${{ matrix.arch }}"
           case "$TARGET" in
-            "win-*")
+            win-*)
               cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} .
               wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
               ;;
-            "linux-*")
+            linux-*)
               LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
               ;;
             *)
