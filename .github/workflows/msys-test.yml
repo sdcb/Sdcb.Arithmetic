@@ -20,9 +20,29 @@ jobs:
         Invoke-WebRequest -Uri https://ftpmirror.gnu.org/gmp/gmp-${env:GMP_VERSION}.tar.xz -OutFile .
         & "C:\Program Files\Git\usr\bin\tar.exe" -xvf gmp-${env:GMP_VERSION}.tar.xz
 
-    - name: Build GMP
+    - name: Configure
       shell: bash
       run: |
         cd gmp-${GMP_VERSION}
         ./configure --enable-shared --disable-static --enable-fat --enable-cxx
+
+    - name: Make
+      shell: bash
+      run: |
+        cd gmp-${GMP_VERSION}
         make
+
+    - name: Check libs
+      shell: bash
+      run: |
+        ls -l gmp-${GMP_VERSION}/.libs
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: win-x64-native
+        path: |
+          gmp-${GMP_VERSION}/.libs/libgmp-10.dll
+          gmp-${GMP_VERSION}/.libs/libgmpxx-6.dll
+          gmp-${GMP_VERSION}/gmp.h
+          gmp-${GMP_VERSION}/gmpxx.h
