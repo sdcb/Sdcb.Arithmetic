@@ -177,6 +177,7 @@ jobs:
           file factorial_gmp.exe
 
       - name: Run Test C Program
+        if: ${{ matrix.os != 'android' }}
         run: |
           TARGET="${{ matrix.os }}-${{ matrix.arch }}"
           case "$TARGET" in
@@ -189,9 +190,6 @@ jobs:
             "win-x86" | "win-x64")
               cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} .
               wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
-              ;;
-            "android-x64")
-              echo "$TARGET binary built. (Not attempting to run on Ubuntu host.)"
               ;;
             "linux-x64" | "linux-x86")
               LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
