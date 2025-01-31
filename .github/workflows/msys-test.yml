@@ -15,9 +15,10 @@ jobs:
       GMP_VERSION: 6.3.0
 
     steps:
-    - name: Add msys64 path
+    - name: Add C:\MSYS64\usr\bin into Path
       run: |
-        echo "C:\msys64\usr\bin" >> $GITHUB_PATH
+        $env:Path += ";C:\MSYS64\usr\bin"
+        echo "##[set-env name=PATH]$env:Path"
 
     - name: Install Dependencies
       run: |
