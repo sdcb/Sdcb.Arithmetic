@@ -25,8 +25,8 @@ jobs:
             artifact-name: win-x86-native
             host: i686-w64-mingw32
           - arch: arm64
-            msystem: CLANGARM64
-            gcc-package: mingw-w64-clang-aarch64-gcc
+            msystem: MINGW64
+            gcc-package: mingw-w64-aarch64-gcc
             artifact-name: win-arm64-native
             host: aarch64-w64-mingw32
 
@@ -51,14 +51,6 @@ jobs:
     - name: Configure
       shell: msys2 {0}
       run: |
-        cd gmp-${GMP_VERSION}
-        if [ "${{ matrix.arch }}" == "arm64" ]; then
-          export CC=${{ matrix.host }}-clang
-          export CXX=${{ matrix.host }}-clang++
-        else
-          export CC=${{ matrix.host }}-gcc
-          export CXX=${{ matrix.host }}-g++
-        fi
         ./configure --host=${{ matrix.host }} --enable-shared --disable-static --enable-cxx --disable-fat
 
     - name: Make
