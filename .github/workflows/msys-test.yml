@@ -27,7 +27,7 @@ jobs:
     - name: Build GMP
       shell: bash
       run: |
-        cd gmp-${env:GMP_VERSION}
+        cd gmp-${GMP_VERSION}
         ls
         ./configure --enable-shared --disable-static --enable-fat --enable-cxx
         make
