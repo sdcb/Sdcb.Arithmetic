@@ -21,6 +21,8 @@ jobs:
         msystem: MINGW64
         install: >-
           m4
+          base-devel
+          mingw-w64-x86_64-gcc
 
     - name: Download GMP Source
       run: |
