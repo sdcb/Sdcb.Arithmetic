@@ -51,7 +51,7 @@ jobs:
       with:
         name: win-x64-native
         path: |
-          gmp-${{ env.GMP_VERSION }}/.libs/libgmp-10.dll
-          gmp-${{ env.GMP_VERSION }}/.libs/libgmpxx-6.dll
-          gmp-${{ env.GMP_VERSION }}/gmp.h
-          gmp-${{ env.GMP_VERSION }}/gmpxx.h
+          ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmp-10.dll
+          ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmpxx-6.dll
+          ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmp.h
+          ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmpxx.h
