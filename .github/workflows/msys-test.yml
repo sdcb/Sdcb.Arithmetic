@@ -26,6 +26,7 @@ jobs:
       run: |
         curl -o gmp-${env:GMP_VERSION}.tar.xz https://ftpmirror.gnu.org/gmp/gmp-${env:GMP_VERSION}.tar.xz
         tar -xf gmp-${env:GMP_VERSION}.tar.xz
+        ls
 
     - name: Build GMP
       run: |
