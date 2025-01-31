@@ -3,7 +3,7 @@ name: main
 on:
   push:
     branches:
-      - win
+      - master
     paths:
       - .github/workflows/main.yml
   workflow_dispatch:
