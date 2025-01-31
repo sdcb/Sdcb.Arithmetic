@@ -11,6 +11,18 @@ jobs:
   build:
     runs-on: windows-latest
 
+    strategy:
+      matrix:
+        include:
+          - arch: x64
+            msystem: MINGW64
+            gcc-package: mingw-w64-x86_64-gcc
+            artifact-name: win-x64-native
+          - arch: x86
+            msystem: MINGW32
+            gcc-package: mingw-w64-i686-gcc
+            artifact-name: win-x86-native
+
     env:
       GMP_VERSION: 6.3.0
 
@@ -18,11 +30,11 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         release: false
-        msystem: MINGW64
+        msystem: ${{ matrix.msystem }}
         install: >-
           m4
           base-devel
-          mingw-w64-x86_64-gcc
+          ${{ matrix.gcc-package }}
 
     - name: Download GMP Source
       run: |
@@ -49,7 +61,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: win-x64-native
+        name: ${{ matrix.artifact-name }}
         path: |
           ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmp-10.dll
           ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/libgmpxx-6.dll
