@@ -17,15 +17,11 @@ jobs:
     steps:
     - name: Add C:\MSYS64\usr\bin into Path
       run: |
-        echo "PATH=C:\MSYS64\usr\bin;$env:PATH" >> $env:GITHUB_ENV
-        echo "$env:PATH"
-        echo "$env:GITHUB_ENV"
+        echo "PATH=$env:PATH;C:\MSYS64\usr\bin" >> $env:GITHUB_ENV
 
     - name: Install Dependencies
       run: |
-        echo "$env:PATH"
-        where.exe pacman
-        pacman -S m4
+        pacman -S --noconfirm m4
 
     - name: Download GMP Source
       run: |
