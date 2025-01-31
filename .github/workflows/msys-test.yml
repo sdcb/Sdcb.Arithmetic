@@ -15,19 +15,14 @@ jobs:
       GMP_VERSION: 6.3.0
 
     steps:
-    - name: Add MSYS2 to PATH
-      run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
-
     - name: Download GMP Source
       run: |
         Invoke-WebRequest -Uri https://ftpmirror.gnu.org/gmp/gmp-${env:GMP_VERSION}.tar.xz -OutFile .
         & "C:\Program Files\Git\usr\bin\tar.exe" -xvf gmp-${env:GMP_VERSION}.tar.xz
-        ls
 
     - name: Build GMP
       shell: bash
       run: |
         cd gmp-${GMP_VERSION}
-        ls
         ./configure --enable-shared --disable-static --enable-fat --enable-cxx
         make
