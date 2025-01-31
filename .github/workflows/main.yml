@@ -172,20 +172,26 @@ jobs:
 
       - name: Run Test C Program
         run: |
-          if [ "${{ matrix.arch }}" = "arm64" ]; then
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
-          elif [ "${{ matrix.arch }}" = "arm" ]; then
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
-          elif [ "${{ matrix.os }}" = "android" ]; then
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
-          elif [ "${{ matrix.os }}" = "win" ]; then
-            cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} .
-            wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
-          elif [ "${{ matrix.os }}" = "android" ]; then
-            echo "Skip running program on Android"
-          else
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
-          fi
+          TARGET="${{ matrix.os }}-${{ matrix.arch }}"
+          case "$TARGET" in
+            "linux-arm64")
+              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
+              ;;
+            "linux-arm")
+              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
+              ;;
+            "win-x86" | "win-x64")
+              cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} .
+              wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
+              ;;
+            "android-x64" | "linux-x64" | "linux-x86")
+              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
+              ;;
+            *)
+              echo "Error: Unsupported OS-Architecture combination: $TARGET"
+              exit 1
+              ;;
+          esac
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
