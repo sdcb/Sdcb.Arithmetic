@@ -20,3 +20,16 @@ jobs:
       run: |
         where make
         make --version
+
+    - name: Download GMP Source
+      run: |
+        Invoke-WebRequest -Uri https://mirrors.nju.edu.cn/gnu/gmp/gmp-${env:GMP_VERSION}.tar.xz -OutFile gmp-${env:GMP_VERSION}.tar.xz
+        tar -xf gmp-${env:GMP_VERSION}.tar.xz
+
+    - name: Build GMP
+      run: |
+        cd gmp-${GMP_VERSION}
+        ./configure --enable-shared --disable-static --enable-fat --enable-cxx
+        make
+        make check
+        make install
