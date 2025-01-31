@@ -18,12 +18,12 @@ jobs:
     - name: Add C:\MSYS64\usr\bin into Path
       run: |
         echo "PATH=C:\MSYS64\usr\bin;$env:PATH" >> $env:GITHUB_ENV
-        echo "$env:Path"
-        where.exe pacman
+        echo "$env:PATH"
+        echo "$env:GITHUB_ENV"
 
     - name: Install Dependencies
       run: |
-        echo "$env:Path"
+        echo "$env:PATH"
         where.exe pacman
         pacman -S m4
 
