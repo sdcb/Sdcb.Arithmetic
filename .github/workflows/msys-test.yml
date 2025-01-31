@@ -15,6 +15,10 @@ jobs:
       GMP_VERSION: 6.3.0
 
     steps:
+    - name: Install Dependencies
+      run: |
+        pacman -S m4
+
     - name: Download GMP Source
       run: |
         Invoke-WebRequest -Uri https://ftpmirror.gnu.org/gmp/gmp-${env:GMP_VERSION}.tar.xz -OutFile .
