@@ -18,14 +18,17 @@ jobs:
             msystem: MINGW64
             gcc-package: mingw-w64-x86_64-gcc
             artifact-name: win-x64-native
+            host: x86_64-w64-mingw32
           - arch: x86
             msystem: MINGW32
             gcc-package: mingw-w64-i686-gcc
             artifact-name: win-x86-native
+            host: i686-w64-mingw32
           - arch: arm64
             msystem: CLANGARM64
             gcc-package: mingw-w64-clang-aarch64-gcc
             artifact-name: win-arm64-native
+            host: aarch64-w64-mingw32
 
     env:
       GMP_VERSION: 6.3.0
@@ -49,7 +52,9 @@ jobs:
       shell: msys2 {0}
       run: |
         cd gmp-${GMP_VERSION}
-        ./configure --enable-shared --disable-static --enable-fat --enable-cxx
+        export CC=${{ matrix.host }}-gcc
+        export CXX=${{ matrix.host }}-g++
+        ./configure --host=${{ matrix.host }} --enable-shared --disable-static --enable-cxx --disable-fat
 
     - name: Make
       shell: msys2 {0}
