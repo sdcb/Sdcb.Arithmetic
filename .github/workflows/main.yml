@@ -82,10 +82,15 @@ jobs:
               echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
               echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" >> $GITHUB_ENV
-              
+
               echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang \
                 --target=x86_64-linux-android\${ANDROID_API} \
                 --sysroot=\${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
+                -fPIE -pie" >> $GITHUB_ENV
+              echo CC="${{ env.TEST_CC }}"
+              echo CXX="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \
+                --target=x86_64-linux-android${ANDROID_API} \
+                --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
                 -fPIE -pie" >> $GITHUB_ENV
               ;;
             *)
@@ -141,15 +146,6 @@ jobs:
       - name: Configure GMP
         run: |
           cd gmp-${GMP_VERSION}
-          if [ "${{ matrix.os }}" = "android" ]; then
-            export CC="${{ env.TEST_CC }}"
-            export CXX="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \
-              --target=x86_64-linux-android${ANDROID_API} \
-              --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
-              -fPIE -fPIC"
-            export CFLAGS="-fPIC"
-            export CXXFLAGS="-fPIC"
-          fi
           ./configure \
             --enable-shared \
             --disable-static \
@@ -167,7 +163,6 @@ jobs:
           cd gmp-${GMP_VERSION}/.libs
           ls -l
           file ${{ env.GMP_SO }}
-          ldd ${{ env.GMP_SO }}
 
       - name: Strip GMP Library
         run: |
@@ -201,7 +196,7 @@ jobs:
               wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
               ;;
             "android-x64")
-              echo "Android x64 binary built. (Not attempting to run on Ubuntu host.)"
+              echo "$TARGET binary built. (Not attempting to run on Ubuntu host.)"
               ;;
             "linux-x64" | "linux-x86")
               LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
