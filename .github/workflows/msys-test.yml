@@ -19,9 +19,11 @@ jobs:
       run: |
         $env:Path += ";C:\MSYS64\usr\bin"
         echo "$env:Path"
+        where.exe pacman
 
     - name: Install Dependencies
       run: |
+        echo "$env:Path"
         where.exe pacman
         pacman -S m4
 
