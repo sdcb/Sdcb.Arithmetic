@@ -18,7 +18,7 @@ jobs:
     - name: Add C:\MSYS64\usr\bin into Path
       run: |
         $env:Path += ";C:\MSYS64\usr\bin"
-        echo "##[set-env name=PATH]$env:Path"
+        echo "$env:Path"
 
     - name: Install Dependencies
       run: |
