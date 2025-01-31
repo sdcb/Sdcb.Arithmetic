@@ -15,13 +15,11 @@ jobs:
       GMP_VERSION: 6.3.0
 
     steps:
-    - name: Add MSYS64 into Path
-      run: |
-        echo "PATH=$env:PATH;C:\MSYS64\usr\bin;C:\MSYS64" >> $env:GITHUB_ENV
-
-    - name: Install Dependencies
-      run: |
-        pacman -S --noconfirm m4
+    - uses: msys2/setup-msys2@v2
+      with:
+        release: false
+        install: >-
+          m4
 
     - name: Download GMP Source
       run: |
@@ -29,13 +27,13 @@ jobs:
         & "C:\Program Files\Git\usr\bin\tar.exe" -xf gmp-${env:GMP_VERSION}.tar.xz
 
     - name: Configure
-      shell: msys2_shell {0}
+      shell: msys2 {0}
       run: |
         cd gmp-${GMP_VERSION}
         ./configure --enable-shared --disable-static --enable-fat --enable-cxx
 
     - name: Make
-      shell: msys2_shell {0}
+      shell: msys2 {0}
       run: |
         cd gmp-${GMP_VERSION}
         make
