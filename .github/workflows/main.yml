@@ -180,20 +180,19 @@ jobs:
         if: ${{ matrix.os != 'android' }}
         run: |
           TARGET="${{ matrix.os }}-${{ matrix.arch }}"
-          LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs 
           case "$TARGET" in
             win-*)
               cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} .
               wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
               ;;
             "linux-x64" | "linux-x86")
-              ./factorial_gmp.exe
+              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
               ;;
             "linux-arm64")
-              qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
+              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
               ;;
             "linux-arm")
-              qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
+              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
