@@ -26,7 +26,7 @@ jobs:
     - name: Download GMP Source
       run: |
         Invoke-WebRequest -Uri https://ftpmirror.gnu.org/gmp/gmp-${env:GMP_VERSION}.tar.xz -OutFile .
-        & "C:\Program Files\Git\usr\bin\tar.exe" -xvf gmp-${env:GMP_VERSION}.tar.xz
+        & "C:\Program Files\Git\usr\bin\tar.exe" -xf gmp-${env:GMP_VERSION}.tar.xz
 
     - name: Configure
       shell: bash
