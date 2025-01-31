@@ -11,8 +11,10 @@ jobs:
   build:
     runs-on: windows-latest
 
-    steps:
+    env:
+      GMP_VERSION: 6.3.0
 
+    steps:
     - name: Add MSYS2 to PATH
       run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
 
