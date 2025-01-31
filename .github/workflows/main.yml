@@ -191,7 +191,7 @@ jobs:
               ;;
             "linux-arm64")
               qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
-              ;;"
+              ;;
             "linux-arm")
               qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
               ;;
