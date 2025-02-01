@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - .github/workflows/main.yml
+      - .github/workflows/factorial_gmp.c
   workflow_dispatch:
 
 jobs:
@@ -13,28 +14,24 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: linux
-            arch: x64
-          - os: linux
-            arch: x86
-          - os: linux
-            arch: arm64
-          - os: linux
-            arch: arm
-          - os: win
-            arch: x64
-          - os: win
-            arch: x86
-
+          - { os: linux, arch: x64 }
+          - { os: linux, arch: x86 }
+          - { os: linux, arch: arm64 }
+          - { os: linux, arch: arm }
+          - { os: win,   arch: x64 }
+          - { os: win,   arch: x86 }
+          - { os: android, arch: x64 }
+          - { os: android, arch: arm64 }
+          
     runs-on: ${{ matrix.os == 'linux' && 'ubuntu-latest' || 'ubuntu-latest' }}
-    
+
     env:
       GMP_VERSION: 6.3.0
-    
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
-    
+
       - name: Set environment variables
         run: |
           case "${{ matrix.os }}-${{ matrix.arch }}" in
@@ -43,71 +40,105 @@ jobs:
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=strip" >> $GITHUB_ENV
+              echo "TEST_CC=gcc" >> $GITHUB_ENV
               ;;
             "linux-x86")
               echo "HOST=i686-pc-linux-gnu" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=strip" >> $GITHUB_ENV
+              echo "TEST_CC=gcc -m32" >> $GITHUB_ENV
               ;;
             "linux-arm64")
               echo "HOST=aarch64-linux-gnu" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=aarch64-linux-gnu-strip" >> $GITHUB_ENV
+              echo "TEST_CC=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
               ;;
             "linux-arm")
               echo "HOST=arm-linux-gnueabihf" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=arm-linux-gnueabihf-strip" >> $GITHUB_ENV
+              echo "TEST_CC=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
               ;;
             "win-x64")
               echo "HOST=x86_64-w64-mingw32" >> $GITHUB_ENV
               echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
               echo "STRIP=x86_64-w64-mingw32-strip" >> $GITHUB_ENV
+              echo "TEST_CC=x86_64-w64-mingw32-gcc" >> $GITHUB_ENV
               ;;
             "win-x86")
               echo "HOST=i686-w64-mingw32" >> $GITHUB_ENV
               echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
               echo "STRIP=i686-w64-mingw32-strip" >> $GITHUB_ENV
+              echo "TEST_CC=i686-w64-mingw32-gcc" >> $GITHUB_ENV
+              ;;
+            "android-x64")
+              echo "HOST=x86_64-linux-android" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
+              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" >> $GITHUB_ENV
+              ARGS="--target=x86_64-linux-android21 \
+                --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
+                -fPIE -pie"
+              echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+              echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+              echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
+              ;;
+            "android-arm64")
+              echo "HOST=aarch64-linux-android" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
+              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" >> $GITHUB_ENV
+              ARGS="--target=aarch64-linux-android21 \
+                --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
+                -fPIE -pie"
+              echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+              echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+              echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
               exit 1
               ;;
           esac
-    
+
       - name: Install Toolchain (arch-specific)
         run: |
-          sudo apt-get update
           TARGET="${{ matrix.os }}-${{ matrix.arch }}"
           case "$TARGET" in
             "linux-x86")
+              sudo apt-get update
               sudo apt-get install -y gcc-multilib g++-multilib
               ;;
             "linux-arm64")
+              sudo apt-get update
               sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
               sudo apt-get install -y qemu-user
               ;;
             "linux-arm")
+              sudo apt-get update
               sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
               sudo apt-get install -y qemu-user
               ;;
             "win-x86")
-              sudo apt-get install -y mingw-w64
               sudo dpkg --add-architecture i386
               sudo apt-get update
+              sudo apt-get install -y mingw-w64
               sudo apt-get install wine32:i386
               ;;
             "win-x64")
+              sudo apt-get update
               sudo apt-get install -y mingw-w64
-              sudo apt-get install -y wine
+              sudo apt-get install --no-install-recommends -y wine
               ;;
             "linux-x64")
-              # 如果有额外需要，可在此处安装
+              ;;
+            "android-x64" | "android-arm64")
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
@@ -119,78 +150,75 @@ jobs:
         run: |
           wget https://mirrors.nju.edu.cn/gnu/gmp/gmp-${GMP_VERSION}.tar.xz
           tar -xf gmp-${GMP_VERSION}.tar.xz
-    
+
       - name: Configure GMP
         run: |
-          CONFIGURE_OPTIONS="--enable-shared --disable-static --enable-fat --enable-cxx"
           cd gmp-${GMP_VERSION}
-          ./configure --host=${{ env.HOST }} ${CONFIGURE_OPTIONS}
-    
+          ./configure \
+            --enable-shared \
+            --disable-static \
+            --enable-fat \
+            --enable-cxx \
+            --host=${{ env.HOST }}
+
       - name: Build GMP
         run: |
           cd gmp-${GMP_VERSION}
-          make MAKEINFO=true
-    
+          make
+
       - name: Check .libs
         run: |
           cd gmp-${GMP_VERSION}/.libs
           ls -l
           file ${{ env.GMP_SO }}
-    
+
       - name: Strip GMP Library
         run: |
           cd gmp-${GMP_VERSION}/.libs
           ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_SO }}
           ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_CPP_SO }}
-    
-      - name: Compile C Program
+          ls -l
+          file ${{ env.GMP_SO }}
+
+      - name: Compile Test C Program
         run: |
-          COMPILE_OPTIONS=".github/workflows/factorial_gmp.c -I${{ github.workspace }}/gmp-${GMP_VERSION} -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs -lgmp"
+          ${{ env.TEST_CC }} -o factorial_gmp.exe \
+            .github/workflows/factorial_gmp.c \
+            -I${{ github.workspace }}/gmp-${GMP_VERSION} \
+            -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
+            -lgmp
+          file factorial_gmp.exe
+
+      - name: Run Test C Program
+        if: ${{ matrix.os != 'android' }}
+        run: |
           TARGET="${{ matrix.os }}-${{ matrix.arch }}"
           case "$TARGET" in
-            "linux-x86")
-              gcc -m32 -o factorial_gmp $COMPILE_OPTIONS
+            win-*)
+              cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} .
+              wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
+              ;;
+            "linux-x64" | "linux-x86")
+              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
               ;;
             "linux-arm64")
-              aarch64-linux-gnu-gcc -o factorial_gmp $COMPILE_OPTIONS
+              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
               ;;
             "linux-arm")
-              arm-linux-gnueabihf-gcc -o factorial_gmp $COMPILE_OPTIONS
-              ;;
-            "win-x86")
-              i686-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
-              ;;
-            "win-x64")
-              x86_64-w64-mingw32-gcc -o factorial_gmp.exe $COMPILE_OPTIONS
-              ;;
-            "linux-x64")
-              gcc -o factorial_gmp $COMPILE_OPTIONS
+              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
               exit 1
               ;;
           esac
-    
-      - name: Run C Program
-        run: |
-          if [ "${{ matrix.arch }}" = "arm64" ]; then
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ${GITHUB_WORKSPACE}/factorial_gmp
-          elif [ "${{ matrix.arch }}" = "arm" ]; then
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ${GITHUB_WORKSPACE}/factorial_gmp
-          elif [ "${{ matrix.os }}" = "win" ]; then
-            cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} .
-            wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
-          else
-            LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp
-          fi
-    
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-${{ matrix.arch }}
           path: |
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmp.h
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/gmpxx.h
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_SO }}
-            ${{ github.workspace }}/gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_CPP_SO }}
+            gmp-${{ env.GMP_VERSION }}/gmp.h
+            gmp-${{ env.GMP_VERSION }}/gmpxx.h
+            gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_SO }}
+            gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_CPP_SO }}
