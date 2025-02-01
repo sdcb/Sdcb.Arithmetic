@@ -28,7 +28,7 @@ int main() {
 
     mpf_init2(fresult, 1000000);
     mpf_set_z(fresult, result);
-    mpf_printf("The factorial of %lu is %.20Fe\n", n, fresult);
+    gmp_printf("The factorial of %lu is %.20Fe\n", n, fresult);
 
     mpf_clear(fresult);
     mpz_clear(result);
