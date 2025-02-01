@@ -21,15 +21,16 @@ int main() {
         start = clock();
         calculate_factorial(n, result);
         end = clock();
-
         cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
-
         printf("Round %d time taken to calculate %lu! is %f seconds.\n", i, n, cpu_time_used);
     }
 
-    // 输出最后一次计算的结果
-    gmp_printf("The factorial of %lu is %Zd\n", n, result);
+    mpf_t fresult;
+    mpf_init2(fresult, 1000000);
+    mpf_set_z(fresult, result);
+    mpf_printf("The factorial of %lu is %.20Fe\n", n, fresult);
 
+    mpf_clear(fresult);
     mpz_clear(result);
     return 0;
 }
