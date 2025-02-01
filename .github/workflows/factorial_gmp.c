@@ -12,6 +12,7 @@ void calculate_factorial(unsigned long n, mpz_t result) {
 int main() {
     unsigned long n = 100000;
     mpz_t result;
+    mpf_t fresult;
     mpz_init(result);
 
     clock_t start, end;
@@ -25,7 +26,6 @@ int main() {
         printf("Round %d time taken to calculate %lu! is %f seconds.\n", i, n, cpu_time_used);
     }
 
-    mpf_t fresult;
     mpf_init2(fresult, 1000000);
     mpf_set_z(fresult, result);
     mpf_printf("The factorial of %lu is %.20Fe\n", n, fresult);
