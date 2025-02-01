@@ -222,4 +222,4 @@ jobs:
             gmp-${{ env.GMP_VERSION }}/gmpxx.h
             gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_SO }}
             gmp-${{ env.GMP_VERSION }}/.libs/${{ env.GMP_CPP_SO }}
-            gmp-${{ env.GMP_VERSION }}/.libs/*.lib
+            gmp-${{ env.GMP_VERSION }}/.libs/*.def
