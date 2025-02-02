@@ -240,7 +240,7 @@ jobs:
           cd gmp-${GMP_VERSION}/.libs
           case "$TARGET" in
             win-*)
-              ${HOST_PREFIX}-objdump -x ${{ env.GMP_SO }} | grep NEEDED
+              echo "Not supported on Windows""
               ;;
             osx-*)
               otool -L ${{ env.GMP_SO }}
