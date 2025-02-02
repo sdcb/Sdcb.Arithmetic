@@ -171,7 +171,6 @@ jobs:
           cd gmp-${GMP_VERSION}/.libs
           ls -l
           file ${{ env.GMP_SO }}
-          objdump -x ${{ env.GMP_SO }} | grep NEEDED
 
       - name: Post-Build GMP
         run: |
@@ -201,7 +200,7 @@ jobs:
               echo "Converted .def files to .lib for Windows."
               ;;
             *)
-              echo "Nothing to do for $TARGET"
+              objdump -x ${{ env.GMP_SO }} | grep NEEDED
               ;;
           esac
 
