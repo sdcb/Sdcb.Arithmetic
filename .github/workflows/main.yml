@@ -146,7 +146,6 @@ jobs:
               echo "TEST_CC=clang -arch x86_64" >> $GITHUB_ENV
               echo "CFLAGS=-arch x86_64 -mcmodel=medium" >> $GITHUB_ENV
               echo "LDFLAGS=-arch x86_64 -mcmodel=medium -ld64" >> $GITHUB_ENV
-              echo "GMP_CONFIGURE=--enable-shared --disable-static --enable-cxx" >> $GITHUB_ENV
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
