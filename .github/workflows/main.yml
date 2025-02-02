@@ -240,7 +240,7 @@ jobs:
           cd gmp-${GMP_VERSION}/.libs
           case "$TARGET" in
             win-*)
-              echo "Not supported on Windows""
+              echo "Not supported on Windows"
               ;;
             osx-*)
               otool -L ${{ env.GMP_SO }}
