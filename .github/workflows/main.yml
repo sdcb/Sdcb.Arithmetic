@@ -213,33 +213,31 @@ jobs:
         if: ${{ matrix.os == 'win' }}
         run: |
           cd gmp-${GMP_VERSION}/.libs
-
-          case "$TARGET" in
-            win-*)
-              if [ "$TARGET" = "win-x86" ]; then
-                HOST_PREFIX=i686-w64-mingw32
-              elif [ "$TARGET" = "win-x64" ]; then
-                HOST_PREFIX=x86_64-w64-mingw32
-              else
-                echo "Error: Unsupported OS-Architecture combination: $TARGET"
-                exit 1
-              fi
-              
-              ${HOST_PREFIX}-dlltool \
-                --input-def libgmp-3.dll.def \
-                --output-lib libgmp-10.lib \
-                --dllname ${{ env.GMP_SO }}
+          
+          if [ "$TARGET" = "win-x86" ]; then
+            HOST_PREFIX=i686-w64-mingw32
+          elif [ "$TARGET" = "win-x64" ]; then
+            HOST_PREFIX=x86_64-w64-mingw32
+          else
+            echo "Error: Unsupported OS-Architecture combination: $TARGET"
+            exit 1
+          fi
                 
-              ${HOST_PREFIX}-dlltool \
-                --input-def libgmpxx-3.dll.def \
-                --output-lib libgmpxx-4.lib \
-                --dllname ${{ env.GMP_CPP_SO }}
-
-              echo "Converted .def files to .lib for Windows."
-          esac
+          ${HOST_PREFIX}-dlltool \
+            --input-def  libgmp-3.dll.def \
+            --output-lib libgmp-10.lib \
+            --dllname    ${{ env.GMP_SO }}
+                  
+          ${HOST_PREFIX}-dlltool \
+            --input-def  libgmpxx-3.dll.def \
+            --output-lib libgmpxx-4.lib \
+            --dllname    ${{ env.GMP_CPP_SO }}
+          
+          echo "Converted .def files to .lib for Windows."
 
       - name: Dump lib dependencies
         run: |
+          cd gmp-${GMP_VERSION}/.libs
           case "$TARGET" in
             win-*)
               ${HOST_PREFIX}-objdump -x ${{ env.GMP_SO }} | grep NEEDED
