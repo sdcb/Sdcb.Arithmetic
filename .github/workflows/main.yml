@@ -14,12 +14,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - { os: linux, arch: x64 }
-          - { os: linux, arch: x86 }
-          - { os: linux, arch: arm64 }
-          - { os: linux, arch: arm }
-          - { os: win,   arch: x64 }
-          - { os: win,   arch: x86 }
+          - { os: linux,   arch: x64 }
+          - { os: linux,   arch: x86 }
+          - { os: linux,   arch: arm64 }
+          - { os: linux,   arch: arm }
+          - { os: win,     arch: x64 }
+          - { os: win,     arch: x86 }
           - { os: android, arch: x64 }
           - { os: android, arch: arm64 }
           
@@ -191,12 +191,12 @@ jobs:
               ${HOST_PREFIX}-dlltool \
                 --input-def libgmp-3.dll.def \
                 --output-lib libgmp-10.lib \
-                --dllname libgmp-10.dll
+                --dllname ${{ env.GMP_SO }}
                 
               ${HOST_PREFIX}-dlltool \
                 --input-def libgmpxx-3.dll.def \
                 --output-lib libgmpxx-4.lib \
-                --dllname libgmpxx-4.dll
+                --dllname ${{ env.GMP_CPP_SO }}
 
               echo "Converted .def files to .lib for Windows."
               ;;
