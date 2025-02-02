@@ -247,13 +247,16 @@ jobs:
       - name: Prepare Artifact folder
         run: |
           mkdir artifacts
-          cp gmp-${GMP_VERSION}/gmp.h ./artifacts
-          cp gmp-${GMP_VERSION}/gmpxx.h ./artifacts
-          cp gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} ./artifacts
-          cp gmp-${GMP_VERSION}/.libs/${{ env.GMP_CPP_SO }} ./artifacts
-          cp gmp-${GMP_VERSION}/.libs/*.lib ./artifacts || true
-          cp gmp-${GMP_VERSION}/.libs/*.def ./artifacts || true
-          cp gmp-${GMP_VERSION}/.libs/*.lai ./artifacts
+          mkdir artifacts/bin
+          mkdir artifacts/include
+          mkdir artifacts/misc
+          cp gmp-${GMP_VERSION}/gmp.h ./artifacts/include
+          cp gmp-${GMP_VERSION}/gmpxx.h ./artifacts/include
+          cp gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} ./artifacts/bin
+          cp gmp-${GMP_VERSION}/.libs/${{ env.GMP_CPP_SO }} ./artifacts/bin
+          cp gmp-${GMP_VERSION}/.libs/*.lib ./artifacts/misc || true
+          cp gmp-${GMP_VERSION}/.libs/*.def ./artifacts/misc || true
+          cp gmp-${GMP_VERSION}/.libs/*.lai ./artifacts/misc
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
