@@ -247,7 +247,7 @@ jobs:
             osx-*)
               otool -L ${{ env.GMP_SO }}
               ;;
-            linux-*)
+            linux-* | android-*)
               objdump -x ${{ env.GMP_SO }} | grep NEEDED
               ;;
             *)
