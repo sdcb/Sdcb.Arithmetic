@@ -26,8 +26,9 @@ jobs:
           - { os: android, arch: arm }
           - { os: osx,     arch: arm64 }
           - { os: osx,     arch: x64 }
-
-    runs-on: ${{ matrix.os == 'osx' && (matrix.arch == 'x64' && 'macos-13' || 'macos-latest') || 'ubuntu-latest' }}
+          - { os: ios,     arch: arm64 }
+          
+    runs-on: ${{ (matrix.os == 'osx' || matrix.os == "ios") && (matrix.arch == 'x64' && 'macos-13' || 'macos-latest') || 'ubuntu-latest' }}
 
     env:
       GMP_VERSION: 6.3.0
@@ -145,6 +146,14 @@ jobs:
               echo "TEST_CC=clang" >> $GITHUB_ENV
               echo "LDFLAGS=-ld_classic" >> $GITHUB_ENV # to fix: ld: branch8 out of range 362869 in ___gmpn_add_nc_x86_64
               ;;
+            "ios-arm64")
+              echo "HOST=aarch64-apple-darwin" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.dylib" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.dylib" >> $GITHUB_ENV
+              echo "STRIP=strip -x" >> $GITHUB_ENV
+              # 使用 xcrun 调用 iOS SDK 中的 clang，注意 -isysroot 参数将在编译时动态计算
+              echo "TEST_CC=xcrun -sdk iphoneos clang -arch arm64 -isysroot \$(xcrun --sdk iphoneos --show-sdk-path)" >> $GITHUB_ENV
+              ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
               exit 1
@@ -183,8 +192,8 @@ jobs:
               ;;
             "android-x64" | "android-arm64" | "android-x86" | "android-arm")
               ;;
-            "osx-arm64" | "osx-x64")
-              echo "No toolchain installation needed on macOS."
+            "osx-arm64" | "osx-x64" | "ios-arm64")
+              echo "No toolchain installation needed on macOS/iOS."
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
@@ -251,7 +260,7 @@ jobs:
             win-*)
               echo "Not supported on Windows"
               ;;
-            osx-*)
+            osx-* | ios-*)
               otool -L ${{ env.GMP_SO }}
               ;;
             linux-* | android-*)
@@ -281,7 +290,7 @@ jobs:
           file factorial_gmp.exe
 
       - name: Run Test C Program
-        if: ${{ matrix.os != 'android' }}
+        if: ${{ matrix.os != 'android' && matrix.os != 'ios' }}
         run: |
           case "$TARGET" in
             win-*)
