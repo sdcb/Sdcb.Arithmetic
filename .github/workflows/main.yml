@@ -143,6 +143,8 @@ jobs:
               echo "GMP_CPP_SO=libgmpxx.dylib" >> $GITHUB_ENV
               echo "STRIP=strip -x" >> $GITHUB_ENV
               echo "TEST_CC=clang -arch x86_64" >> $GITHUB_ENV
+              echo "CFLAGS=-arch x86_64 -mcmodel=medium" >> $GITHUB_ENV
+              echo "LDFLAGS=-arch x86_64 -mcmodel=medium" >> $GITHUB_ENV
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
