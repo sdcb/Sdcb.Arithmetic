@@ -199,10 +199,7 @@ jobs:
       - name: Configure GMP
         run: |
           if [[ "$TARGET" == "osx-x64" ]]; then
-              echo "Checking Xcode version..."
-              xcodebuild -version
-              echo "Xcode version >=15, adding -ld64 to LDFLAGS"
-              export LDFLAGS="$LDFLAGS -ld64"
+              export LDFLAGS="-ld_classic"
           fi
           cd gmp-${GMP_VERSION}
           ./configure \
