@@ -171,6 +171,7 @@ jobs:
           cd gmp-${GMP_VERSION}/.libs
           ls -l
           file ${{ env.GMP_SO }}
+          objdump -x ${{ env.GMP_SO }} | grep NEEDED
 
       - name: Post-Build GMP
         run: |
