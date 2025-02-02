@@ -25,6 +25,7 @@ jobs:
           - { os: android, arch: x86 }
           - { os: android, arch: arm }
           - { os: osx,     arch: arm64 }
+          - { os: osx,     arch: x64 }
 
     runs-on: ${{ matrix.os == 'osx' && 'macos-latest' || 'ubuntu-latest' }}
 
@@ -136,6 +137,13 @@ jobs:
               echo "STRIP=strip -x" >> $GITHUB_ENV
               echo "TEST_CC=clang -arch arm64" >> $GITHUB_ENV
               ;;
+            "osx-x64")
+              echo "HOST=x86_64-apple-darwin" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.dylib" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.dylib" >> $GITHUB_ENV
+              echo "STRIP=strip -x" >> $GITHUB_ENV
+              echo "TEST_CC=clang -arch x86_64" >> $GITHUB_ENV
+              ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
               exit 1
@@ -174,7 +182,7 @@ jobs:
               ;;
             "android-x64" | "android-arm64" | "android-x86" | "android-arm")
               ;;
-            "osx-arm64")
+            "osx-arm64" | "osx-x64")
               echo "No toolchain installation needed on macOS."
               ;;
             *)
@@ -288,7 +296,7 @@ jobs:
             "linux-arm")
               LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
               ;;
-            "osx-arm64")
+            osx-*)
               DYLD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
               ;;
             *)
