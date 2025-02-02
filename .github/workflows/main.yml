@@ -200,13 +200,9 @@ jobs:
         run: |
           if [[ "$TARGET" == "osx-x64" ]]; then
               echo "Checking Xcode version..."
-              XCODE_VERSION=$(xcodebuild -version | sed -n 's;Xcode $.*$;\1;p')
-              XCODE_MAJOR_VERSION=$(expr "$XCODE_VERSION" : '$[0-9][0-9]*$.*')
-              echo "Xcode major version: $XCODE_MAJOR_VERSION"
-              if [ "$XCODE_MAJOR_VERSION" -ge 15 ]; then
-                  echo "Xcode version >=15, adding -ld64 to LDFLAGS"
-                  export LDFLAGS="$LDFLAGS -ld64"
-              fi
+              xcodebuild -version
+              echo "Xcode version >=15, adding -ld64 to LDFLAGS"
+              export LDFLAGS="$LDFLAGS -ld64"
           fi
           cd gmp-${GMP_VERSION}
           ./configure \
