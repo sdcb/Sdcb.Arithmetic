@@ -43,49 +43,49 @@ jobs:
               echo "HOST=x86_64-pc-linux-gnu" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
-              echo "STRIP=strip" >> $GITHUB_ENV
+              echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=gcc" >> $GITHUB_ENV
               ;;
             "linux-x86")
               echo "HOST=i686-pc-linux-gnu" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
-              echo "STRIP=strip" >> $GITHUB_ENV
+              echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=gcc -m32" >> $GITHUB_ENV
               ;;
             "linux-arm64")
               echo "HOST=aarch64-linux-gnu" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
-              echo "STRIP=aarch64-linux-gnu-strip" >> $GITHUB_ENV
+              echo "STRIP=aarch64-linux-gnu-strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
               ;;
             "linux-arm")
               echo "HOST=arm-linux-gnueabihf" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
-              echo "STRIP=arm-linux-gnueabihf-strip" >> $GITHUB_ENV
+              echo "STRIP=arm-linux-gnueabihf-strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
               ;;
             "win-x64")
               echo "HOST=x86_64-w64-mingw32" >> $GITHUB_ENV
               echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
-              echo "STRIP=x86_64-w64-mingw32-strip" >> $GITHUB_ENV
+              echo "STRIP=x86_64-w64-mingw32-strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=x86_64-w64-mingw32-gcc" >> $GITHUB_ENV
               ;;
             "win-x86")
               echo "HOST=i686-w64-mingw32" >> $GITHUB_ENV
               echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
-              echo "STRIP=i686-w64-mingw32-strip" >> $GITHUB_ENV
+              echo "STRIP=i686-w64-mingw32-strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=i686-w64-mingw32-gcc" >> $GITHUB_ENV
               ;;
             "android-x64")
               echo "HOST=x86_64-linux-android" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
-              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" >> $GITHUB_ENV
+              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded" >> $GITHUB_ENV
               ARGS="--target=x86_64-linux-android21 \
                 --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
                 -fPIE -pie"
@@ -97,7 +97,7 @@ jobs:
               echo "HOST=aarch64-linux-android" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
-              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" >> $GITHUB_ENV
+              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded" >> $GITHUB_ENV
               ARGS="--target=aarch64-linux-android21 \
                 --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
                 -fPIE -pie"
@@ -109,7 +109,7 @@ jobs:
               echo "HOST=i686-linux-android" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
-              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" >> $GITHUB_ENV
+              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded" >> $GITHUB_ENV
               ARGS="--target=i686-linux-android21 \
                 --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
                 -fPIE -pie"
@@ -121,7 +121,7 @@ jobs:
               echo "HOST=armv7a-linux-android" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
-              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" >> $GITHUB_ENV
+              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded" >> $GITHUB_ENV
               ARGS="--target=armv7a-linux-android21 \
                 --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
                 -fPIE -pie"
@@ -131,9 +131,9 @@ jobs:
               ;;
             "osx-arm64")
               echo "HOST=aarch64-apple-darwin" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.10.dylib" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.4.dylib" >> $GITHUB_ENV
-              echo "STRIP=strip" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.dylib" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.dylib" >> $GITHUB_ENV
+              echo "STRIP=strip -x" >> $GITHUB_ENV
               echo "TEST_CC=clang -arch arm64" >> $GITHUB_ENV
               ;;
             *)
