@@ -131,8 +131,8 @@ jobs:
               ;;
             "osx-arm64")
               echo "HOST=aarch64-apple-darwin" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.dylib" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.dylib" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.10.dylib" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.4.dylib" >> $GITHUB_ENV
               echo "STRIP=strip" >> $GITHUB_ENV
               echo "TEST_CC=clang -arch arm64" >> $GITHUB_ENV
               ;;
@@ -209,7 +209,8 @@ jobs:
           ls -l
           file ${{ env.GMP_SO }}
 
-      - name: Post-Build GMP
+      - name: Generate .lib files(Windows only)
+        if: ${{ matrix.os == 'win' }}
         run: |
           cd gmp-${GMP_VERSION}/.libs
 
@@ -235,10 +236,24 @@ jobs:
                 --dllname ${{ env.GMP_CPP_SO }}
 
               echo "Converted .def files to .lib for Windows."
+          esac
+
+      - name: Dump lib dependencies
+        run: |
+          case "$TARGET" in
+            win-*)
+              ${HOST_PREFIX}-objdump -x ${{ env.GMP_SO }} | grep NEEDED
               ;;
-            *)
+            osx-*)
+              otool -L ${{ env.GMP_SO }}
+              ;;
+            linux-*)
               objdump -x ${{ env.GMP_SO }} | grep NEEDED
               ;;
+            *)
+              echo "Error: Unsupported OS-Architecture combination: $TARGET"
+              exit 1
+            ;;
           esac
 
       - name: Strip GMP Library
