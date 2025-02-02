@@ -28,7 +28,7 @@ jobs:
           - { os: osx,     arch: x64 }
           - { os: ios,     arch: arm64 }
           
-    runs-on: ${{ (matrix.os == 'osx' || matrix.os == "ios") && (matrix.arch == 'x64' && 'macos-13' || 'macos-latest') || 'ubuntu-latest' }}
+    runs-on: ${{ (matrix.os == 'osx' || matrix.os == 'ios') && (matrix.arch == 'x64' && 'macos-13' || 'macos-latest') || 'ubuntu-latest' }}
 
     env:
       GMP_VERSION: 6.3.0
