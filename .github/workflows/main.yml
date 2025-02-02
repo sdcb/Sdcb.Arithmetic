@@ -179,7 +179,7 @@ jobs:
             win-*)
               if [ "$TARGET" = "win-x86" ]; then
                 HOST_PREFIX=i686-w64-mingw32
-              else if [ "$TARGET" = "win-x64" ]; then
+              elif [ "$TARGET" = "win-x64" ]; then
                 HOST_PREFIX=x86_64-w64-mingw32
               else
                 echo "Error: Unsupported OS-Architecture combination: $TARGET"
