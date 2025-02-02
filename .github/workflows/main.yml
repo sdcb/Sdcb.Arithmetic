@@ -257,8 +257,8 @@ jobs:
       - name: Strip GMP Library
         run: |
           cd gmp-${GMP_VERSION}/.libs
-          ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_SO }}
-          ${{ env.STRIP }} --strip-unneeded ${{ env.GMP_CPP_SO }}
+          ${{ env.STRIP }} ${{ env.GMP_SO }}
+          ${{ env.STRIP }} ${{ env.GMP_CPP_SO }}
           ls -l
           file ${{ env.GMP_SO }}
 
