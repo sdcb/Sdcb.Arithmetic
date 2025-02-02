@@ -142,7 +142,8 @@ jobs:
               echo "GMP_SO=libgmp.dylib" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.dylib" >> $GITHUB_ENV
               echo "STRIP=strip -x" >> $GITHUB_ENV
-              echo "TEST_CC=clang -arch x86_64" >> $GITHUB_ENV
+              echo "TEST_CC=clang" >> $GITHUB_ENV
+              echo "LDFLAGS=-ld_classic" >> $GITHUB_ENV # to fix: ld: branch8 out of range 362869 in ___gmpn_add_nc_x86_64
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
@@ -198,9 +199,6 @@ jobs:
 
       - name: Configure GMP
         run: |
-          if [[ "$TARGET" == "osx-x64" ]]; then
-              export LDFLAGS="-ld_classic"
-          fi
           cd gmp-${GMP_VERSION}
           ./configure \
             --enable-shared \
