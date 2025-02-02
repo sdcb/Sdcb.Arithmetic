@@ -39,6 +39,7 @@ jobs:
       - name: Set environment variables
         run: |
           echo "TARGET=${{ matrix.os }}-${{ matrix.arch }}" >> $GITHUB_ENV
+          echo "GMP_CONFIGURE=--enable-shared --disable-static --enable-fat --enable-cxx" >> $GITHUB_ENV
           case "${{ matrix.os }}-${{ matrix.arch }}" in
             "linux-x64")
               echo "HOST=x86_64-pc-linux-gnu" >> $GITHUB_ENV
@@ -143,8 +144,7 @@ jobs:
               echo "GMP_CPP_SO=libgmpxx.dylib" >> $GITHUB_ENV
               echo "STRIP=strip -x" >> $GITHUB_ENV
               echo "TEST_CC=clang -arch x86_64" >> $GITHUB_ENV
-              echo "CFLAGS=-arch x86_64 -mcmodel=medium" >> $GITHUB_ENV
-              echo "LDFLAGS=-arch x86_64 -mcmodel=medium" >> $GITHUB_ENV
+              echo "GMP_CONFIGURE=--enable-shared --disable-static --enable-cxx" >> $GITHUB_ENV
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
@@ -201,12 +201,7 @@ jobs:
       - name: Configure GMP
         run: |
           cd gmp-${GMP_VERSION}
-          ./configure \
-            --enable-shared \
-            --disable-static \
-            --enable-fat \
-            --enable-cxx \
-            --host=${{ env.HOST }}
+          ./configure ${{ env.GMP_CONFIGURE }} --host=${{ env.HOST }}
 
       - name: Build GMP
         run: |
