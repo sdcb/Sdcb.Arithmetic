@@ -147,11 +147,12 @@ jobs:
               echo "LDFLAGS=-ld_classic" >> $GITHUB_ENV # to fix: ld: branch8 out of range 362869 in ___gmpn_add_nc_x86_64
               ;;
             "ios-arm64")
-              echo "HOST=aarch64-apple-darwin" >> $GITHUB_ENV
+              echo "HOST=aarch64-apple-ios" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.dylib" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.dylib" >> $GITHUB_ENV
               echo "STRIP=strip -x" >> $GITHUB_ENV
-              # 使用 xcrun 调用 iOS SDK 中的 clang，注意 -isysroot 参数将在编译时动态计算
+              echo "CFLAGS=-arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=12.0" >> $GITHUB_ENV
+              echo "LDFLAGS=-arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=12.0" >> $GITHUB_ENV
               echo "TEST_CC=xcrun -sdk iphoneos clang -arch arm64 -isysroot \$(xcrun --sdk iphoneos --show-sdk-path)" >> $GITHUB_ENV
               ;;
             *)
