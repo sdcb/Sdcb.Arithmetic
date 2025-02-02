@@ -291,7 +291,6 @@ jobs:
               LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
               ;;
             "osx-arm64")
-              # 在 macOS 环境下可直接执行
               DYLD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
               ;;
             *)
