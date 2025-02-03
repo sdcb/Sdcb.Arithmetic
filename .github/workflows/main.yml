@@ -177,7 +177,7 @@ jobs:
               echo "HOST=none" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.a" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.a" >> $GITHUB_ENV
-              echo "STRIP=llvm-strip" >> $GITHUB_ENV
+              echo "STRIP=strip" >> $GITHUB_ENV
               echo "TEST_CC=emcc" >> $GITHUB_ENV
               ;;
             *)
