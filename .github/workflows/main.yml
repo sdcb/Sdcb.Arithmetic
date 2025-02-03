@@ -19,6 +19,7 @@ jobs:
           - { os: linux,      arch: arm64 }
           - { os: linux,      arch: arm }
           - { os: linux-musl, arch: x64 }
+          - { os: linux-musl, arch: arm64 }
           - { os: win,        arch: x64 }
           - { os: win,        arch: x86 }
           - { os: android,    arch: x64 }
@@ -76,6 +77,13 @@ jobs:
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=musl-gcc" >> $GITHUB_ENV
+              ;;
+            "linux-musl-arm64")
+              echo "HOST=aarch64-linux-musl" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
+              echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
+              echo "TEST_CC=aarch64-linux-musl-gcc" >> $GITHUB_ENV
               ;;
             "win-x64")
               echo "HOST=x86_64-w64-mingw32" >> $GITHUB_ENV
@@ -172,6 +180,8 @@ jobs:
       - name: Install Toolchain (arch-specific)
         run: |
           case "$TARGET" in
+            "linux-x64")
+              ;;
             "linux-x86")
               sudo apt-get update
               sudo apt-get install -y gcc-multilib g++-multilib
@@ -186,6 +196,14 @@ jobs:
               sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
               sudo apt-get install -y qemu-user
               ;;
+            "linux-musl-x64")
+              sudo apt-get update
+              sudo apt-get install -y musl-tools
+              ;;
+            "linux-musl-arm64")
+              sudo apt-get update
+              sudo apt-get install -y musl-tools qemu-user
+              ;;
             "win-x86")
               sudo dpkg --add-architecture i386
               sudo apt-get update
@@ -196,12 +214,6 @@ jobs:
               sudo apt-get update
               sudo apt-get install -y mingw-w64
               sudo apt-get install --no-install-recommends -y wine
-              ;;
-            "linux-x64")
-              ;;
-            "linux-musl-x64")
-              sudo apt-get update
-              sudo apt-get install -y musl-tools
               ;;
             "android-x64" | "android-arm64" | "android-x86" | "android-arm")
               ;;
@@ -313,7 +325,7 @@ jobs:
             "linux-x64" | "linux-x86")
               LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
               ;;
-            "linux-arm64")
+            "linux-arm64" | "linux-musl-arm64")
               LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
               ;;
             "linux-arm")
@@ -333,10 +345,7 @@ jobs:
 
       - name: Prepare Artifact folder
         run: |
-          mkdir artifacts
-          mkdir artifacts/bin
-          mkdir artifacts/include
-          mkdir artifacts/misc
+          mkdir -p artifacts/bin artifacts/include artifacts/misc
           cp gmp-${GMP_VERSION}/gmp.h ./artifacts/include
           cp gmp-${GMP_VERSION}/gmpxx.h ./artifacts/include
           cp gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} ./artifacts/bin
