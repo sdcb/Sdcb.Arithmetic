@@ -387,7 +387,7 @@ jobs:
           cp gmp-${GMP_VERSION}/.libs/*.lib ./artifacts/misc || true
           cp gmp-${GMP_VERSION}/.libs/*.def ./artifacts/misc || true
           cp gmp-${GMP_VERSION}/.libs/*.lai ./artifacts/misc
-          cp factorial_gmp.exe ./artifacts/test
+          cp factorial_gmp.* ./artifacts/test
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
