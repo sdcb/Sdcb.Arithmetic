@@ -208,9 +208,8 @@ jobs:
               sudo mkdir -p /opt/x-tools
               wget -nv https://github.com/musl-cross/musl-cross/releases/download/20241103/aarch64-unknown-linux-musl.tar.xz
               sudo tar -xf aarch64-unknown-linux-musl.tar.xz -C /opt/x-tools
-              ls -l /opt/x-tools/aarch64-unknown-linux-musl/bin
               /opt/x-tools/aarch64-unknown-linux-musl/bin/aarch64-unknown-linux-musl-gcc --version
-              echo "PATH=/opt/x-tools/aarch64-unknown-linux-musl/bin:" + (echo $PATH) >> $GITHUB_ENV
+              echo "PATH=/opt/x-tools/aarch64-unknown-linux-musl/bin" >> $GITHUB_ENV
               ;;
             "win-x86")
               sudo dpkg --add-architecture i386
