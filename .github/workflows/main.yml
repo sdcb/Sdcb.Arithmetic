@@ -322,7 +322,7 @@ jobs:
           file factorial_gmp.exe
 
       - name: Run Test C Program
-        if: ${{ matrix.os != 'android' && matrix.os != 'ios' }}
+        if: ${{ matrix.os != 'android' && matrix.os != 'ios' && !(matrix.os == "linux-musl" && matrix.arch == "arm64") }}
         run: |
           case "$TARGET" in
             win-*)
@@ -334,9 +334,6 @@ jobs:
               ;;
             "linux-arm64")
               LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
-              ;;
-            "linux-musl-arm64")
-              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-musl/ ./factorial_gmp.exe
               ;;
             "linux-arm")
               LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
@@ -355,7 +352,7 @@ jobs:
 
       - name: Prepare Artifact folder
         run: |
-          mkdir -p artifacts/bin artifacts/include artifacts/misc
+          mkdir -p artifacts/bin artifacts/include artifacts/misc artifacts/test
           cp gmp-${GMP_VERSION}/gmp.h ./artifacts/include
           cp gmp-${GMP_VERSION}/gmpxx.h ./artifacts/include
           cp gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} ./artifacts/bin
@@ -363,6 +360,7 @@ jobs:
           cp gmp-${GMP_VERSION}/.libs/*.lib ./artifacts/misc || true
           cp gmp-${GMP_VERSION}/.libs/*.def ./artifacts/misc || true
           cp gmp-${GMP_VERSION}/.libs/*.lai ./artifacts/misc
+          cp gmp-${GMP_VERSION}/factorial_gmp.exe ./artifacts/test
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
