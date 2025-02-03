@@ -189,13 +189,11 @@ jobs:
               ;;
             "linux-arm64")
               sudo apt-get update
-              sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-              sudo apt-get install -y --no-install-recommends qemu-user
+              sudo apt-get install -y --no-install-recommends qemu-user gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
               ;;
             "linux-arm")
               sudo apt-get update
-              sudo apt-get install -y --no-install-recommends gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
-              sudo apt-get install -y --no-install-recommends qemu-user
+              sudo apt-get install -y --no-install-recommends qemu-user gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
               ;;
             "linux-musl-x64")
               sudo apt-get update
@@ -215,7 +213,7 @@ jobs:
               sudo dpkg --add-architecture i386
               sudo apt-get update
               sudo apt-get install -y --no-install-recommends mingw-w64
-              sudo apt-get install wine32:i386
+              sudo apt-get install -y wine32:i386
               ;;
             "win-x64")
               sudo apt-get update
