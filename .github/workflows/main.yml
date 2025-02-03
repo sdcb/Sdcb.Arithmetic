@@ -349,7 +349,7 @@ jobs:
           file factorial_gmp.exe
 
       - name: Run Test C Program
-        if: ${{ matrix.os != 'android' && matrix.os != 'ios' && matrix.os != 'browser' && !(matrix.os == 'linux-musl' && matrix.arch == 'arm64') }}
+        if: ${{ matrix.os != 'android' && matrix.os != 'ios' && !(matrix.os == 'linux-musl' && matrix.arch == 'arm64') }}
         run: |
           case "$TARGET" in
             win-*)
@@ -370,6 +370,9 @@ jobs:
               ;;
             osx-*)
               DYLD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
+              ;;
+            browser-wasm)
+              node ./factorial_gmp.exe
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
