@@ -239,7 +239,12 @@ jobs:
               cd emsdk
               ./emsdk install latest
               ./emsdk activate latest
-              echo "source $(pwd)/emsdk_env.sh" >> $GITHUB_ENV
+              echo "emsdk folder:"
+              ls -l
+              echo "emsdk/upstream/emscripten folder:"
+              ls -l upstream/emscripten
+              echo "${{ github.workspace }}/emsdk" >> $GITHUB_PATH
+              echo "${{ github.workspace }}/emsdk/upstream/emscripten" >> $GITHUB_PATH
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
