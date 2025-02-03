@@ -263,6 +263,7 @@ jobs:
               ;;
             ios-*)
               ar -t ${{ env.GMP_SO }}
+              ;;
             linux-* | android-*)
               objdump -x ${{ env.GMP_SO }} | grep NEEDED
               ;;
