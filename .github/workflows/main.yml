@@ -80,7 +80,7 @@ jobs:
               echo "TEST_CC=musl-gcc" >> $GITHUB_ENV
               ;;
             "linux-musl-arm64")
-              echo "HOST=aarch64-linux-musl" >> $GITHUB_ENV
+              echo "HOST=aarch64-unknown-linux-musl" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=aarch64-unknown-linux-musl-strip --strip-unneeded" >> $GITHUB_ENV
