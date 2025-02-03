@@ -174,7 +174,7 @@ jobs:
               echo "TEST_CC=xcrun -sdk iphoneos clang -arch arm64 -isysroot \$(xcrun --sdk iphoneos --show-sdk-path)" >> $GITHUB_ENV
               ;;
             "browser-wasm")
-              echo "HOST=emcc" >> $GITHUB_ENV
+              echo "HOST=none" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.a" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.a" >> $GITHUB_ENV
               echo "STRIP=llvm-strip" >> $GITHUB_ENV
@@ -262,15 +262,16 @@ jobs:
           cd gmp-${GMP_VERSION}
           
           case "$TARGET" in
-            "ios-arm64" | "browser-wasm")
-              GMP_CONFIGURE_ARGS="--enable-static --disable-shared --enable-cxx --disable-assembly"
+            "ios-arm64")
+              ./configure --enable-static --disable-shared --enable-cxx --disable-assembly --host=${{ env.HOST }}
+              ;;
+            "browser-wasm")
+              emconfigure ./configure --enable-static --disable-shared --enable-cxx --disable-assembly --host=${{ env.HOST }}
               ;;
             *)
-              GMP_CONFIGURE_ARGS="--enable-shared --disable-static --enable-fat --enable-cxx"
+              ./configure --enable-shared --disable-static --enable-fat --enable-cxx --host=${{ env.HOST }}
               ;;
           esac
-          
-          ./configure $GMP_CONFIGURE_ARGS --host=${{ env.HOST }}
 
       - name: Build GMP
         run: |
