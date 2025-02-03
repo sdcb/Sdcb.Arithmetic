@@ -18,7 +18,7 @@ int main() {
     clock_t start, end;
     double cpu_time_used;
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 3; i++) {
         start = clock();
         calculate_factorial(n, result);
         end = clock();
