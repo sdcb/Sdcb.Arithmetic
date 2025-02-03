@@ -202,7 +202,11 @@ jobs:
               ;;
             "linux-musl-arm64")
               sudo apt-get update
-              sudo apt-get install -y musl-tools qemu-user gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+              sudo apt-get install -y musl-tools qemu-user
+              sudo mkdir -p /opt/x-tools
+              wget https://github.com/musl-cross/musl-cross/releases/download/20241103/aarch64-unknown-linux-musl.tar.xz
+              sudo tar -xf aarch64-unknown-linux-musl.tar.xz -C /opt/x-tools
+              echo 'export PATH="/opt/x-tools/aarch64-unknown-linux-musl/bin:$PATH"' >> $GITHUB_ENV
               ;;
             "win-x86")
               sudo dpkg --add-architecture i386
