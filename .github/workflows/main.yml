@@ -83,10 +83,8 @@ jobs:
               echo "HOST=aarch64-linux-musl" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
-              echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
+              echo "STRIP=aarch64-unknown-linux-musl-strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=aarch64-unknown-linux-musl-gcc" >> $GITHUB_ENV
-              echo "CC=aarch64-unknown-linux-musl-gcc" >> $GITHUB_ENV
-              echo "CXX=aarch64-unknown-linux-musl-g++" >> $GITHUB_ENV
               ;;
             "win-x64")
               echo "HOST=x86_64-w64-mingw32" >> $GITHUB_ENV
@@ -208,6 +206,7 @@ jobs:
               sudo apt-get install -y musl-tools qemu-user
               sudo mkdir -p /opt/x-tools
               wget -nv https://github.com/musl-cross/musl-cross/releases/download/20241103/aarch64-unknown-linux-musl.tar.xz
+              ls -l /opt/x-tools/aarch64-unknown-linux-musl/bin
               sudo tar -xf aarch64-unknown-linux-musl.tar.xz -C /opt/x-tools
               /opt/x-tools/aarch64-unknown-linux-musl/bin/aarch64-unknown-linux-musl-gcc --version
               echo "/opt/x-tools/aarch64-unknown-linux-musl/bin" >> $GITHUB_PATH
