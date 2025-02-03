@@ -29,6 +29,7 @@ jobs:
           - { os: osx,        arch: arm64 }
           - { os: osx,        arch: x64 }
           - { os: ios,        arch: arm64 }
+          - { os: browser,    arch: wasm }
 
     runs-on: ${{ (matrix.os == 'osx' || matrix.os == 'ios') && (matrix.arch == 'x64' && 'macos-13' || 'macos-latest') || 'ubuntu-latest' }}
 
@@ -172,6 +173,13 @@ jobs:
               echo "LDFLAGS=-arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=12.0" >> $GITHUB_ENV
               echo "TEST_CC=xcrun -sdk iphoneos clang -arch arm64 -isysroot \$(xcrun --sdk iphoneos --show-sdk-path)" >> $GITHUB_ENV
               ;;
+            "browser-wasm")
+              echo "HOST=emcc" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.a" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.a" >> $GITHUB_ENV
+              echo "STRIP=llvm-strip" >> $GITHUB_ENV
+              echo "TEST_CC=emcc" >> $GITHUB_ENV
+              ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
               exit 1
@@ -224,6 +232,15 @@ jobs:
             "osx-arm64" | "osx-x64" | "ios-arm64")
               echo "No toolchain installation needed on macOS/iOS."
               ;;
+            "browser-wasm")
+              # °²×° Emscripten
+              sudo apt-get update
+              git clone https://github.com/emscripten-core/emsdk.git
+              cd emsdk
+              ./emsdk install latest
+              ./emsdk activate latest
+              echo "source $(pwd)/emsdk_env.sh" >> $GITHUB_ENV
+              ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
               exit 1
@@ -238,10 +255,16 @@ jobs:
       - name: Configure GMP
         run: |
           cd gmp-${GMP_VERSION}
-          GMP_CONFIGURE_ARGS="--enable-shared --disable-static --enable-fat --enable-cxx"
-          if [ "$TARGET" = "ios-arm64" ]; then
+          
+          case "$TARGET" in
+            "ios-arm64" | "browser-wasm")
               GMP_CONFIGURE_ARGS="--enable-static --disable-shared --enable-cxx --disable-assembly"
-          fi
+              ;;
+            *)
+              GMP_CONFIGURE_ARGS="--enable-shared --disable-static --enable-fat --enable-cxx"
+              ;;
+          esac
+          
           ./configure $GMP_CONFIGURE_ARGS --host=${{ env.HOST }}
 
       - name: Build GMP
@@ -282,7 +305,7 @@ jobs:
           echo "Converted .def files to .lib for Windows."
 
       - name: Dump lib dependencies
-        if: ${{ matrix.os != 'win' }}
+        if: ${{ matrix.os != 'win' && matrix.os != 'browser' }}
         run: |
           cd gmp-${GMP_VERSION}/.libs
           case "$TARGET" in
@@ -319,7 +342,7 @@ jobs:
           file factorial_gmp.exe
 
       - name: Run Test C Program
-        if: ${{ matrix.os != 'android' && matrix.os != 'ios' && !(matrix.os == 'linux-musl' && matrix.arch == 'arm64') }}
+        if: ${{ matrix.os != 'android' && matrix.os != 'ios' && matrix.os != 'browser' && !(matrix.os == 'linux-musl' && matrix.arch == 'arm64') }}
         run: |
           case "$TARGET" in
             win-*)
