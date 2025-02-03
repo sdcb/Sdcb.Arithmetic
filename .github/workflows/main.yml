@@ -206,6 +206,7 @@ jobs:
               sudo mkdir -p /opt/x-tools
               wget https://github.com/musl-cross/musl-cross/releases/download/20241103/aarch64-unknown-linux-musl.tar.xz
               sudo tar -xf aarch64-unknown-linux-musl.tar.xz -C /opt/x-tools
+              ls -l /opt/x-tools/aarch64-unknown-linux-musl/bin
               echo 'export PATH="/opt/x-tools/aarch64-unknown-linux-musl/bin:$PATH"' >> $GITHUB_ENV
               ;;
             "win-x86")
