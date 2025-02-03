@@ -233,16 +233,10 @@ jobs:
               echo "No toolchain installation needed on macOS/iOS."
               ;;
             "browser-wasm")
-              # °²×° Emscripten
-              sudo apt-get update
-              git clone https://github.com/emscripten-core/emsdk.git
+              git clone --depth 1 https://github.com/emscripten-core/emsdk.git
               cd emsdk
               ./emsdk install latest
               ./emsdk activate latest
-              echo "emsdk folder:"
-              ls -l
-              echo "emsdk/upstream/emscripten folder:"
-              ls -l upstream/emscripten
               echo "${{ github.workspace }}/emsdk" >> $GITHUB_PATH
               echo "${{ github.workspace }}/emsdk/upstream/emscripten" >> $GITHUB_PATH
               ;;
