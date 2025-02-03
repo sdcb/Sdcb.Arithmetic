@@ -79,7 +79,7 @@ jobs:
               echo "TEST_CC=musl-gcc" >> $GITHUB_ENV
               ;;
             "linux-musl-arm64")
-              echo "HOST=aarch64-linux-musl CC=aarch64-linux-musl-gcc" >> $GITHUB_ENV
+              echo "HOST=aarch64-linux-musl" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
@@ -202,7 +202,7 @@ jobs:
               ;;
             "linux-musl-arm64")
               sudo apt-get update
-              sudo apt-get install -y musl-tools qemu-user crossbuild-essential-arm64
+              sudo apt-get install -y musl-tools qemu-user musl-cross
               ;;
             "win-x86")
               sudo dpkg --add-architecture i386
