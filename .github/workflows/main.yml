@@ -285,6 +285,7 @@ jobs:
           echo "Converted .def files to .lib for Windows."
 
       - name: Dump lib dependencies
+        if: ${{ matrix.os != 'win' }}
         run: |
           cd gmp-${GMP_VERSION}/.libs
           case "$TARGET" in
@@ -293,9 +294,6 @@ jobs:
               ;;
             ios-*)
               ar -t ${{ env.GMP_SO }}
-              ;;
-            win-*)
-              ${{ env.HOST }}-objdump -p ${{ env.GMP_SO }} | grep NEEDED
               ;;
             linux-* | android-*)
               objdump -x ${{ env.GMP_SO }} | grep NEEDED
