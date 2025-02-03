@@ -254,13 +254,11 @@ jobs:
           echo "Converted .def files to .lib for Windows."
 
       - name: Dump lib dependencies
+        if: ${{ matrix.os != 'win' && matrix.os != 'ios' }}
         run: |
           cd gmp-${GMP_VERSION}/.libs
           case "$TARGET" in
-            win-*)
-              echo "Not supported on Windows"
-              ;;
-            osx-* | ios-*)
+            osx-*)
               otool -L ${{ env.GMP_SO }}
               ;;
             linux-* | android-*)
@@ -269,7 +267,7 @@ jobs:
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
               exit 1
-            ;;
+              ;;
           esac
 
       - name: Strip GMP Library
