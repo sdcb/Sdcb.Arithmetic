@@ -194,8 +194,8 @@ jobs:
               ;;
             "linux-arm")
               sudo apt-get update
-              sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
-              sudo apt-get install -y qemu-user
+              sudo apt-get install -y --no-install-recommends gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+              sudo apt-get install -y --no-install-recommends qemu-user
               ;;
             "linux-musl-x64")
               sudo apt-get update
