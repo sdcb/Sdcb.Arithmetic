@@ -295,7 +295,7 @@ jobs:
               ar -t ${{ env.GMP_SO }}
               ;;
             win-*)
-              ${HOST}-objdump -x ${{ env.GMP_SO }} | grep NEEDED
+              ntldd ${{ env.GMP_SO }}
               ;;
             linux-* | android-*)
               objdump -x ${{ env.GMP_SO }} | grep NEEDED
