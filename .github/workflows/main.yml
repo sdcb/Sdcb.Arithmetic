@@ -210,7 +210,7 @@ jobs:
               sudo tar -xf aarch64-unknown-linux-musl.tar.xz -C /opt/x-tools
               ls -l /opt/x-tools/aarch64-unknown-linux-musl/bin
               /opt/x-tools/aarch64-unknown-linux-musl/bin/aarch64-unknown-linux-musl-gcc --version
-              echo "PATH=/opt/x-tools/aarch64-unknown-linux-musl/bin:$PATH" >> $GITHUB_ENV
+              echo "PATH=/opt/x-tools/aarch64-unknown-linux-musl/bin:" + (echo $PATH) >> $GITHUB_ENV
               ;;
             "win-x86")
               sudo dpkg --add-architecture i386
