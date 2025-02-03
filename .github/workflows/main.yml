@@ -231,7 +231,7 @@ jobs:
       - name: Build GMP
         run: |
           cd gmp-${GMP_VERSION}
-          make
+          make -j4
 
       - name: Check .libs
         run: |
