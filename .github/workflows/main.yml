@@ -337,6 +337,7 @@ jobs:
               ;;
             "linux-musl-arm64")
               LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-musl/ ./factorial_gmp.exe
+              ;;
             "linux-arm")
               LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
               ;;
