@@ -345,6 +345,7 @@ jobs:
             -I${{ github.workspace }}/gmp-${GMP_VERSION} \
             -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
             -lgmp
+          ls -l
           file factorial_gmp.exe
 
       - name: Run Test C Program
