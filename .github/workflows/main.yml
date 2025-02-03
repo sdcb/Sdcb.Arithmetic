@@ -322,7 +322,7 @@ jobs:
           file factorial_gmp.exe
 
       - name: Run Test C Program
-        if: ${{ matrix.os != 'android' && matrix.os != 'ios' && !(matrix.os == "linux-musl" && matrix.arch == "arm64") }}
+        if: ${{ matrix.os != 'android' && matrix.os != 'ios' && !(matrix.os == 'linux-musl' && matrix.arch == 'arm64') }}
         run: |
           case "$TARGET" in
             win-*)
