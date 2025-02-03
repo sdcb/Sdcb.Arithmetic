@@ -210,12 +210,11 @@ jobs:
       - name: Configure GMP
         run: |
           cd gmp-${GMP_VERSION}
-          ./configure \
-            --enable-shared \
-            --disable-static \
-            --enable-fat \
-            --enable-cxx \
-            --host=${{ env.HOST }}
+          GMP_CONFIGURE_ARGS="--enable-shared --disable-static --enable-fat --enable-cxx"
+          if [ "$TARGET" = "ios-arm64" ]; then
+              GMP_CONFIGURE_ARGS="--enable-shared --disable-static --enable-cxx --disable-assembly"
+          fi
+          ./configure --enable-shared --disable-static --enable-fat --enable-cxx --host=${{ env.HOST }}
 
       - name: Build GMP
         run: |
