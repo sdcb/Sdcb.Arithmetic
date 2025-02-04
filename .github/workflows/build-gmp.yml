@@ -328,7 +328,7 @@ jobs:
 
       - name: Compile Test C Program
         run: |
-          ${TEST_CC} -o factorial_gmp.exe \
+          ${{ env.TEST_CC }} -o factorial_gmp.exe \
             .github/workflows/factorial_gmp.c \
             -I${{ github.workspace }}/gmp-${GMP_VERSION} \
             -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
