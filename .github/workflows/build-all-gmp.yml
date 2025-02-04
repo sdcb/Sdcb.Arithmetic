@@ -28,7 +28,7 @@ jobs:
           - { os: ios,        arch: arm64 }
           - { os: browser,    arch: wasm }
   
-    uses: ./.github/workflows/build.yml
+    uses: ./build-gmp.yml
     with:
       os: ${{ matrix.os }}
       arch: ${{ matrix.arch }}
