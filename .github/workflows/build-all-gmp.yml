@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - master
+    paths:
+      - .github/workflows/build-all-gmp.yml
+      - .github/workflows/build-gmp.yml
+      - .github/workflows/factorial-gmp.c
   workflow_dispatch:
 
 jobs:
@@ -28,7 +32,7 @@ jobs:
           - { os: ios,        arch: arm64 }
           - { os: browser,    arch: wasm }
   
-    uses: ./build-gmp.yml
+    uses: ./.github/workflows/build-gmp.yml
     with:
       os: ${{ matrix.os }}
       arch: ${{ matrix.arch }}
