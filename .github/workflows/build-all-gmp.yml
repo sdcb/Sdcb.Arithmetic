@@ -1,0 +1,34 @@
+name: Build All GMP
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build_all:
+    strategy:
+      matrix:
+        include:
+          - { os: linux,      arch: x64 }
+          - { os: linux,      arch: x86 }
+          - { os: linux,      arch: arm64 }
+          - { os: linux,      arch: arm }
+          - { os: linux-musl, arch: x64 }
+          - { os: linux-musl, arch: arm64 }
+          - { os: win,        arch: x64 }
+          - { os: win,        arch: x86 }
+          - { os: android,    arch: x64 }
+          - { os: android,    arch: arm64 }
+          - { os: android,    arch: x86 }
+          - { os: android,    arch: arm }
+          - { os: osx,        arch: arm64 }
+          - { os: osx,        arch: x64 }
+          - { os: ios,        arch: arm64 }
+          - { os: browser,    arch: wasm }
+  
+    uses: ./.github/workflows/build.yml
+    with:
+      os: ${{ matrix.os }}
+      arch: ${{ matrix.arch }}

@@ -1,50 +1,44 @@
-name: main
+name: Build GMP
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - .github/workflows/main.yml
-      - .github/workflows/factorial_gmp.c
+  workflow_call:
+    inputs:
+      os:
+        description: 'Operating System'
+        required: true
+        type: string
+      arch:
+        description: 'Architecture'
+        required: true
+        type: string
+        
   workflow_dispatch:
+    inputs:
+      os:
+        description: 'Operating System'
+        required: true
+        default: linux
+      arch:
+        description: 'Architecture'
+        required: true
+        default: x64
 
 jobs:
   build:
-    strategy:
-      matrix:
-        include:
-          - { os: linux,      arch: x64 }
-          - { os: linux,      arch: x86 }
-          - { os: linux,      arch: arm64 }
-          - { os: linux,      arch: arm }
-          - { os: linux-musl, arch: x64 }
-          - { os: linux-musl, arch: arm64 }
-          - { os: win,        arch: x64 }
-          - { os: win,        arch: x86 }
-          - { os: android,    arch: x64 }
-          - { os: android,    arch: arm64 }
-          - { os: android,    arch: x86 }
-          - { os: android,    arch: arm }
-          - { os: osx,        arch: arm64 }
-          - { os: osx,        arch: x64 }
-          - { os: ios,        arch: arm64 }
-          - { os: browser,    arch: wasm }
-
-    runs-on: ${{ (matrix.os == 'osx' || matrix.os == 'ios') && (matrix.arch == 'x64' && 'macos-13' || 'macos-latest') || 'ubuntu-latest' }}
-
+    runs-on: ${{ (inputs.os == 'osx' || inputs.os == 'ios') && (inputs.arch == 'x64' && 'macos-13' || 'macos-latest') || 'ubuntu-latest' }}
     env:
       GMP_VERSION: 6.3.0
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
         with:
           show-progress: false
 
       - name: Set environment variables
         run: |
-          echo "TARGET=${{ matrix.os }}-${{ matrix.arch }}" >> $GITHUB_ENV
-          case "${{ matrix.os }}-${{ matrix.arch }}" in
+          echo "TARGET=${{ inputs.os }}-${{ inputs.arch }}" >> $GITHUB_ENV
+          case "${{ inputs.os }}-${{ inputs.arch }}" in
             "linux-x64")
               echo "HOST=x86_64-pc-linux-gnu" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
@@ -162,7 +156,7 @@ jobs:
               echo "GMP_CPP_SO=libgmpxx.dylib" >> $GITHUB_ENV
               echo "STRIP=strip -x" >> $GITHUB_ENV
               echo "TEST_CC=clang" >> $GITHUB_ENV
-              echo "LDFLAGS=-ld_classic" >> $GITHUB_ENV # to fix: ld: branch8 out of range 362869 in ___gmpn_add_nc_x86_64
+              echo "LDFLAGS=-ld_classic" >> $GITHUB_ENV # fixed: ld: branch8 out of range 362869 in ___gmpn_add_nc_x86_64
               ;;
             "ios-arm64")
               echo "HOST=aarch64-apple-ios" >> $GITHUB_ENV
@@ -181,7 +175,7 @@ jobs:
               echo "TEST_CC=emcc" >> $GITHUB_ENV
               ;;
             *)
-              echo "Error: Unsupported OS-Architecture combination: ${{ matrix.os }}-${{ matrix.arch }}"
+              echo "Error: Unsupported OS-Architecture combination: ${{ inputs.os }}-${{ inputs.arch }}"
               exit 1
               ;;
           esac
@@ -257,13 +251,13 @@ jobs:
           
           case "$TARGET" in
             "ios-arm64")
-              ./configure --enable-static --disable-shared --enable-cxx --disable-assembly --host=${{ env.HOST }}
+              ./configure --enable-static --disable-shared --enable-cxx --disable-assembly --host=${HOST}
               ;;
             "browser-wasm")
-              emconfigure ./configure --enable-static --disable-shared --enable-cxx --disable-assembly --host=${{ env.HOST }}
+              emconfigure ./configure --enable-static --disable-shared --enable-cxx --disable-assembly --host=${HOST}
               ;;
             *)
-              ./configure --enable-shared --disable-static --enable-fat --enable-cxx --host=${{ env.HOST }}
+              ./configure --enable-shared --disable-static --enable-fat --enable-cxx --host=${HOST}
               ;;
           esac
 
@@ -276,10 +270,10 @@ jobs:
         run: |
           cd gmp-${GMP_VERSION}/.libs
           ls -l
-          file ${{ env.GMP_SO }}
+          file ${GMP_SO}
 
-      - name: Generate .lib files(Windows only)
-        if: ${{ matrix.os == 'win' }}
+      - name: Generate .lib files (Windows only)
+        if: ${{ inputs.os == 'win' }}
         run: |
           cd gmp-${GMP_VERSION}/.libs
           
@@ -295,28 +289,28 @@ jobs:
           ${HOST_PREFIX}-dlltool \
             --input-def  libgmp-3.dll.def \
             --output-lib libgmp-10.lib \
-            --dllname    ${{ env.GMP_SO }}
+            --dllname    ${GMP_SO}
                   
           ${HOST_PREFIX}-dlltool \
             --input-def  libgmpxx-3.dll.def \
             --output-lib libgmpxx-4.lib \
-            --dllname    ${{ env.GMP_CPP_SO }}
+            --dllname    ${GMP_CPP_SO}
           
           echo "Converted .def files to .lib for Windows."
 
       - name: Dump lib dependencies
-        if: ${{ matrix.os != 'win' && matrix.os != 'browser' }}
+        if: ${{ inputs.os != 'win' && inputs.os != 'browser' }}
         run: |
           cd gmp-${GMP_VERSION}/.libs
           case "$TARGET" in
             osx-*)
-              otool -L ${{ env.GMP_SO }}
+              otool -L ${GMP_SO}
               ;;
             ios-*)
-              ar -t ${{ env.GMP_SO }}
+              ar -t ${GMP_SO}
               ;;
             linux-* | android-*)
-              objdump -x ${{ env.GMP_SO }} | grep NEEDED
+              objdump -x ${GMP_SO} | grep NEEDED
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
@@ -327,14 +321,14 @@ jobs:
       - name: Strip GMP Library
         run: |
           cd gmp-${GMP_VERSION}/.libs
-          ${{ env.STRIP }} ${{ env.GMP_SO }}
-          ${{ env.STRIP }} ${{ env.GMP_CPP_SO }}
+          ${STRIP} ${GMP_SO}
+          ${STRIP} ${GMP_CPP_SO}
           ls -l
-          file ${{ env.GMP_SO }}
+          file ${GMP_SO}
 
       - name: Compile Test C Program
         run: |
-          ${{ env.TEST_CC }} -o factorial_gmp.exe \
+          ${TEST_CC} -o factorial_gmp.exe \
             .github/workflows/factorial_gmp.c \
             -I${{ github.workspace }}/gmp-${GMP_VERSION} \
             -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
@@ -343,11 +337,11 @@ jobs:
           file factorial_gmp.exe
 
       - name: Run Test C Program
-        if: ${{ matrix.os != 'android' && matrix.os != 'ios' && !(matrix.os == 'linux-musl' && matrix.arch == 'arm64') }}
+        if: ${{ inputs.os != 'android' && inputs.os != 'ios' && !(inputs.os == 'linux-musl' && inputs.arch == 'arm64') }}
         run: |
           case "$TARGET" in
             win-*)
-              cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} .
+              cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${GMP_SO} .
               wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
               ;;
             "linux-x64" | "linux-x86")
@@ -379,8 +373,8 @@ jobs:
           mkdir -p artifacts/bin artifacts/include artifacts/misc artifacts/test
           cp gmp-${GMP_VERSION}/gmp.h ./artifacts/include
           cp gmp-${GMP_VERSION}/gmpxx.h ./artifacts/include
-          cp gmp-${GMP_VERSION}/.libs/${{ env.GMP_SO }} ./artifacts/bin
-          cp gmp-${GMP_VERSION}/.libs/${{ env.GMP_CPP_SO }} ./artifacts/bin
+          cp gmp-${GMP_VERSION}/.libs/${GMP_SO} ./artifacts/bin
+          cp gmp-${GMP_VERSION}/.libs/${GMP_CPP_SO} ./artifacts/bin
           cp gmp-${GMP_VERSION}/.libs/*.lib ./artifacts/misc || true
           cp gmp-${GMP_VERSION}/.libs/*.def ./artifacts/misc || true
           cp gmp-${GMP_VERSION}/.libs/*.lai ./artifacts/misc
@@ -389,5 +383,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gmp-${{ matrix.os }}-${{ matrix.arch }}
+          name: gmp-${{ inputs.os }}-${{ inputs.arch }}
           path: artifacts

@@ -34,9 +34,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdcb.Arithmetic.Mpfr.Tests"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github-workflows", "github-workflows", "{D77F2CC3-07A7-4C30-900F-D1D804946185}"
 	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build-all-gmp.yml = .github\workflows\build-all-gmp.yml
+		.github\workflows\build-gmp.yml = .github\workflows\build-gmp.yml
 		.github\workflows\factorial_gmp.c = .github\workflows\factorial_gmp.c
-		.github\workflows\main.yml = .github\workflows\main.yml
-		.github\workflows\msys-test.yml = .github\workflows\msys-test.yml
 	EndProjectSection
 EndProject
 Global
