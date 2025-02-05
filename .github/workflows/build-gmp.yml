@@ -163,7 +163,7 @@ jobs:
                 "x64")
                   echo "HOST=x86_64-apple-darwin" >> $GITHUB_ENV
                   echo "TEST_CC=clang" >> $GITHUB_ENV
-                  echo "LDFLAGS=-ld_classic" >> $GITHUB_ENV
+                  # echo "LDFLAGS=-ld_classic" >> $GITHUB_ENV
                   ;;
               esac
               ;;
