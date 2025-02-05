@@ -46,133 +46,153 @@ jobs:
       - name: Set environment variables
         run: |
           echo "TARGET=${{ inputs.os }}-${{ inputs.arch }}" >> $GITHUB_ENV
-          echo "GMP_SO=libgmp.so.10" >> $GITHUB_ENV
-          echo "GMP_CPP_SO=libgmpxx.so.4" >> $GITHUB_ENV
+      
+          case "${{ inputs.os }}" in
+            "linux")
+              echo "GMP_SO=libgmp.so.10" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.so.4" >> $GITHUB_ENV
+      
+              case "${{ inputs.arch }}" in
+                "x64")
+                  echo "HOST=x86_64-pc-linux-gnu" >> $GITHUB_ENV
+                  echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
+                  echo "TEST_CC=gcc" >> $GITHUB_ENV
+                  ;;
+                "x86")
+                  echo "HOST=i686-pc-linux-gnu" >> $GITHUB_ENV
+                  echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
+                  echo "TEST_CC=gcc -m32" >> $GITHUB_ENV
+                  ;;
+                "arm64")
+                  echo "HOST=aarch64-linux-gnu" >> $GITHUB_ENV
+                  echo "STRIP=aarch64-linux-gnu-strip --strip-unneeded" >> $GITHUB_ENV
+                  echo "TEST_CC=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+                  ;;
+                "arm")
+                  echo "HOST=arm-linux-gnueabihf" >> $GITHUB_ENV
+                  echo "STRIP=arm-linux-gnueabihf-strip --strip-unneeded" >> $GITHUB_ENV
+                  echo "TEST_CC=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
+                  ;;
+              esac
+              ;;
+      
+            "linux-musl")
+              echo "GMP_SO=libgmp.so.10" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.so.4" >> $GITHUB_ENV
+      
+              case "${{ inputs.arch }}" in
+                "x64")
+                  echo "HOST=x86_64-linux-musl" >> $GITHUB_ENV
+                  echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
+                  echo "TEST_CC=musl-gcc" >> $GITHUB_ENV
+                  ;;
+                "arm64")
+                  echo "HOST=aarch64-unknown-linux-musl" >> $GITHUB_ENV
+                  echo "STRIP=aarch64-unknown-linux-musl-strip --strip-unneeded" >> $GITHUB_ENV
+                  echo "TEST_CC=aarch64-unknown-linux-musl-gcc" >> $GITHUB_ENV
+                  ;;
+              esac
+              ;;
 
-          case "${{ inputs.os }}-${{ inputs.arch }}" in
-            "linux-x64")
-              echo "HOST=x86_64-pc-linux-gnu" >> $GITHUB_ENV
-              echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
-              echo "TEST_CC=gcc" >> $GITHUB_ENV
-              ;;
-            "linux-x86")
-              echo "HOST=i686-pc-linux-gnu" >> $GITHUB_ENV
-              echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
-              echo "TEST_CC=gcc -m32" >> $GITHUB_ENV
-              ;;
-            "linux-arm64")
-              echo "HOST=aarch64-linux-gnu" >> $GITHUB_ENV
-              echo "STRIP=aarch64-linux-gnu-strip --strip-unneeded" >> $GITHUB_ENV
-              echo "TEST_CC=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
-              ;;
-            "linux-arm")
-              echo "HOST=arm-linux-gnueabihf" >> $GITHUB_ENV
-              echo "STRIP=arm-linux-gnueabihf-strip --strip-unneeded" >> $GITHUB_ENV
-              echo "TEST_CC=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
-              ;;
-            "linux-musl-x64")
-              echo "HOST=x86_64-linux-musl" >> $GITHUB_ENV
-              echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
-              echo "TEST_CC=musl-gcc" >> $GITHUB_ENV
-              ;;
-            "linux-musl-arm64")
-              echo "HOST=aarch64-unknown-linux-musl" >> $GITHUB_ENV
-              echo "STRIP=aarch64-unknown-linux-musl-strip --strip-unneeded" >> $GITHUB_ENV
-              echo "TEST_CC=aarch64-unknown-linux-musl-gcc" >> $GITHUB_ENV
-              ;;
-            "win-x64")
-              echo "HOST=x86_64-w64-mingw32" >> $GITHUB_ENV
+            "win")
               echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
-              echo "STRIP=x86_64-w64-mingw32-strip --strip-unneeded" >> $GITHUB_ENV
-              echo "TEST_CC=x86_64-w64-mingw32-gcc" >> $GITHUB_ENV
+      
+              case "${{ inputs.arch }}" in
+                "x64")
+                  echo "HOST=x86_64-w64-mingw32" >> $GITHUB_ENV
+                  echo "STRIP=x86_64-w64-mingw32-strip --strip-unneeded" >> $GITHUB_ENV
+                  echo "TEST_CC=x86_64-w64-mingw32-gcc" >> $GITHUB_ENV
+                  ;;
+                "x86")
+                  echo "HOST=i686-w64-mingw32" >> $GITHUB_ENV
+                  echo "STRIP=i686-w64-mingw32-strip --strip-unneeded" >> $GITHUB_ENV
+                  echo "TEST_CC=i686-w64-mingw32-gcc" >> $GITHUB_ENV
+                  ;;
+              esac
               ;;
-            "win-x86")
-              echo "HOST=i686-w64-mingw32" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
-              echo "STRIP=i686-w64-mingw32-strip --strip-unneeded" >> $GITHUB_ENV
-              echo "TEST_CC=i686-w64-mingw32-gcc" >> $GITHUB_ENV
-              ;;
-            "android-x64")
-              echo "HOST=x86_64-linux-android" >> $GITHUB_ENV
+      
+            "android")
               echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
               echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded" >> $GITHUB_ENV
-              ARGS="--target=x86_64-linux-android21 \
-                --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
-                -fPIE -pie"
-              echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-              echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-              echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
+      
+              case "${{ inputs.arch }}" in
+                "x64")
+                  ARGS="--target=x86_64-linux-android21 \
+                      --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
+                      -fPIE -pie"
+                  echo "HOST=x86_64-linux-android" >> $GITHUB_ENV
+                  echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+                  echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+                  echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
+                  ;;
+                "arm64")
+                  ARGS="--target=aarch64-linux-android21 \
+                      --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
+                      -fPIE -pie"
+                  echo "HOST=aarch64-linux-android" >> $GITHUB_ENV
+                  echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+                  echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+                  echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
+                  ;;
+                "x86")
+                  ARGS="--target=i686-linux-android21 \
+                      --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
+                      -fPIE -pie"
+                  echo "HOST=i686-linux-android" >> $GITHUB_ENV
+                  echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+                  echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+                  echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
+                  ;;
+                "arm")
+                  ARGS="--target=armv7a-linux-android21 \
+                      --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
+                      -fPIE -pie"
+                  echo "HOST=armv7a-linux-android" >> $GITHUB_ENV
+                  echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+                  echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
+                  echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
+                  ;;
+              esac
               ;;
-            "android-arm64")
-              echo "HOST=aarch64-linux-android" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
-              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded" >> $GITHUB_ENV
-              ARGS="--target=aarch64-linux-android21 \
-                --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
-                -fPIE -pie"
-              echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-              echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-              echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
-              ;;
-            "android-x86")
-              echo "HOST=i686-linux-android" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
-              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded" >> $GITHUB_ENV
-              ARGS="--target=i686-linux-android21 \
-                --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
-                -fPIE -pie"
-              echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-              echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-              echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
-              ;;
-            "android-arm")
-              echo "HOST=armv7a-linux-android" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
-              echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded" >> $GITHUB_ENV
-              ARGS="--target=armv7a-linux-android21 \
-                --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
-                -fPIE -pie"
-              echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-              echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-              echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
-              ;;
-            "osx-arm64")
-              echo "HOST=aarch64-apple-darwin" >> $GITHUB_ENV
+      
+            "osx")
               echo "GMP_SO=libgmp.dylib" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.dylib" >> $GITHUB_ENV
               echo "STRIP=strip -x" >> $GITHUB_ENV
-              echo "TEST_CC=clang -arch arm64" >> $GITHUB_ENV
+      
+              case "${{ inputs.arch }}" in
+                "arm64")
+                  echo "HOST=aarch64-apple-darwin" >> $GITHUB_ENV
+                  echo "TEST_CC=clang -arch arm64" >> $GITHUB_ENV
+                  ;;
+                "x64")
+                  echo "HOST=x86_64-apple-darwin" >> $GITHUB_ENV
+                  echo "TEST_CC=clang" >> $GITHUB_ENV
+                  echo "LDFLAGS=-ld_classic" >> $GITHUB_ENV
+                  ;;
+              esac
               ;;
-            "osx-x64")
-              echo "HOST=x86_64-apple-darwin" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.dylib" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.dylib" >> $GITHUB_ENV
-              echo "STRIP=strip -x" >> $GITHUB_ENV
-              echo "TEST_CC=clang" >> $GITHUB_ENV
-              echo "LDFLAGS=-ld_classic" >> $GITHUB_ENV # fixed: ld: branch8 out of range 362869 in ___gmpn_add_nc_x86_64
-              ;;
-            "ios-arm64")
-              echo "HOST=aarch64-apple-ios" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.a" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.a" >> $GITHUB_ENV
-              echo "STRIP=strip -x" >> $GITHUB_ENV
-              echo "CFLAGS=-arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=12.0" >> $GITHUB_ENV
-              echo "LDFLAGS=-arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=12.0" >> $GITHUB_ENV
-              echo "TEST_CC=xcrun -sdk iphoneos clang -arch arm64 -isysroot \$(xcrun --sdk iphoneos --show-sdk-path)" >> $GITHUB_ENV
-              ;;
-            "browser-wasm")
-              echo "HOST=none" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.a" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.a" >> $GITHUB_ENV
-              echo "STRIP=strip" >> $GITHUB_ENV
-              echo "TEST_CC=emcc" >> $GITHUB_ENV
-              ;;
+      
+            "ios")
+                echo "HOST=aarch64-apple-ios" >> $GITHUB_ENV
+                echo "GMP_SO=libgmp.a" >> $GITHUB_ENV
+                echo "GMP_CPP_SO=libgmpxx.a" >> $GITHUB_ENV
+                echo "STRIP=strip -x" >> $GITHUB_ENV
+                echo "CFLAGS=-arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=12.0" >> $GITHUB_ENV
+                echo "LDFLAGS=-arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=12.0" >> $GITHUB_ENV
+                echo "TEST_CC=xcrun -sdk iphoneos clang -arch arm64 -isysroot \$(xcrun --sdk iphoneos --show-sdk-path)" >> $GITHUB_ENV
+                ;;
+      
+            "browser")
+                echo "HOST=none" >> $GITHUB_ENV
+                echo "GMP_SO=libgmp.a" >> $GITHUB_ENV
+                echo "GMP_CPP_SO=libgmpxx.a" >> $GITHUB_ENV
+                echo "STRIP=strip" >> $GITHUB_ENV
+                echo "TEST_CC=emcc" >> $GITHUB_ENV
+                ;;
+
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ inputs.os }}-${{ inputs.arch }}"
               exit 1
