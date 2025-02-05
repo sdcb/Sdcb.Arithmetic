@@ -42,5 +42,4 @@ jobs:
     with:
       os: ${{ matrix.os }}
       arch: ${{ matrix.arch }}
-      # 当本 workflow 被手动触发时，如果用户没有输入则默认使用 6.3.0
       gmp-version: ${{ github.event.inputs.gmp-version || '6.3.0' }}
