@@ -7,8 +7,14 @@ on:
     paths:
       - .github/workflows/build-all-gmp.yml
       - .github/workflows/build-gmp.yml
-      - .github/workflows/factorial-gmp.c
+      - .github/workflows/factorial_gmp.c
   workflow_dispatch:
+    inputs:
+      gmp-version:
+        description: 'GMP Version'
+        type: string
+        required: false
+        default: '6.3.0'
 
 jobs:
   build_all:
@@ -31,8 +37,10 @@ jobs:
           - { os: osx,        arch: x64 }
           - { os: ios,        arch: arm64 }
           - { os: browser,    arch: wasm }
-  
+
     uses: ./.github/workflows/build-gmp.yml
     with:
       os: ${{ matrix.os }}
       arch: ${{ matrix.arch }}
+      # 当本 workflow 被手动触发时，如果用户没有输入则默认使用 6.3.0
+      gmp-version: ${{ github.event.inputs.gmp-version || '6.3.0' }}

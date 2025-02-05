@@ -11,7 +11,11 @@ on:
         description: 'Architecture'
         required: true
         type: string
-        
+      gmp_version:
+        description: 'GMP version'
+        required: true
+        type: string
+
   workflow_dispatch:
     inputs:
       os:
@@ -22,12 +26,16 @@ on:
         description: 'Architecture'
         required: true
         default: x64
+      gmp_version:
+        description: 'GMP version'
+        required: true
+        default: 6.3.0
 
 jobs:
   build:
     runs-on: ${{ (inputs.os == 'osx' || inputs.os == 'ios') && (inputs.arch == 'x64' && 'macos-13' || 'macos-latest') || 'ubuntu-latest' }}
     env:
-      GMP_VERSION: 6.3.0
+      GMP_VERSION: ${{ inputs.gmp_version }}
 
     steps:
       - name: Checkout Repository
