@@ -294,7 +294,7 @@ jobs:
       - name: Configure GMP
         run: |
           cd gmp-${{ inputs.gmp-version }}
-          ${{ env.GMP_CONFIGURE }} ${{ env.GMP_CONFIGURE_ARGS }} --host=${HOST}
+          ${{ env.GMP_CONFIGURE }} ${{ env.GMP_CONFIGURE_ARGS }} --host=${{ env.HOST }}
 
       - name: Build GMP
         run: |
@@ -305,7 +305,7 @@ jobs:
         run: |
           cd gmp-${{ inputs.gmp-version }}/.libs
           ls -l
-          file ${GMP_SO}
+          file ${{ env.GMP_SO }}
 
       - name: Generate .lib files (Windows only)
         if: ${{ inputs.os == 'win' }}
@@ -324,12 +324,12 @@ jobs:
           ${HOST_PREFIX}-dlltool \
             --input-def  libgmp-3.dll.def \
             --output-lib libgmp-10.lib \
-            --dllname    ${GMP_SO}
+            --dllname    ${{ env.GMP_SO }}
                   
           ${HOST_PREFIX}-dlltool \
             --input-def  libgmpxx-3.dll.def \
             --output-lib libgmpxx-4.lib \
-            --dllname    ${GMP_CPP_SO}
+            --dllname    ${{ env.GMP_SO }}
           
           echo "Converted .def files to .lib for Windows."
 
@@ -339,13 +339,13 @@ jobs:
           cd gmp-${{ inputs.gmp-version }}/.libs
           case "$TARGET" in
             osx-*)
-              otool -L ${GMP_SO}
+              otool -L ${{ env.GMP_SO }}
               ;;
             ios-*)
-              ar -t ${GMP_SO}
+              ar -t ${{ env.GMP_SO }}
               ;;
             linux-* | android-*)
-              objdump -x ${GMP_SO} | grep NEEDED
+              objdump -x ${{ env.GMP_SO }} | grep NEEDED
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
@@ -408,8 +408,8 @@ jobs:
           mkdir -p artifacts/bin artifacts/include artifacts/misc artifacts/test
           cp gmp-${{ inputs.gmp-version }}/gmp.h ./artifacts/include
           cp gmp-${{ inputs.gmp-version }}/gmpxx.h ./artifacts/include
-          cp -L gmp-${{ inputs.gmp-version }}/.libs/${GMP_SO}     ./artifacts/bin
-          cp -L gmp-${{ inputs.gmp-version }}/.libs/${GMP_CPP_SO} ./artifacts/bin
+          cp -L gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_SO }}     ./artifacts/bin
+          cp -L gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_CPP_SO }} ./artifacts/bin
           cp gmp-${{ inputs.gmp-version }}/.libs/*.lib ./artifacts/misc || true
           cp gmp-${{ inputs.gmp-version }}/.libs/*.def ./artifacts/misc || true
           cp gmp-${{ inputs.gmp-version }}/.libs/*.lai ./artifacts/misc
