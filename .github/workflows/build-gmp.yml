@@ -45,6 +45,7 @@ jobs:
     runs-on: ${{ (inputs.os == 'osx' || inputs.os == 'ios') && (inputs.arch == 'x64' && 'macos-13' || 'macos-latest') || 'ubuntu-latest' }}
     env:
       GMP_CONFIGURE: ${{ inputs.os == 'browser' && 'emconfigure ./configure' || './configure' }}
+      BUILD_TYPE: ${{ inputs.build-type }}
 
     steps:
       - name: Checkout Repository
@@ -55,18 +56,7 @@ jobs:
       - name: Set environment variables
         run: |
           echo "TARGET=${{ inputs.os }}-${{ inputs.arch }}" >> $GITHUB_ENV
-          case "${{ inputs.build-type }}" in
-            "shared")
-              GMP_CONFIGURE_ARGS="--enable-shared --disable-static --enable-cxx --enable-fat"
-              ;;
-            "static")
-              GMP_CONFIGURE_ARGS="--enable-static --disable-shared --enable-cxx --enable-fat"
-              ;;
-            *)
-              echo "Error: Unsupported build type: ${{ inputs.build-type }}"
-              exit 1
-            ;;
-          esac
+          GMP_CONFIGURE_ARGS="--enable-cxx --enable-fat"
       
           case "${{ inputs.os }}" in
             "linux")
@@ -197,31 +187,44 @@ jobs:
               ;;
       
             "ios")
-                echo "HOST=aarch64-apple-ios" >> $GITHUB_ENV
-                echo "GMP_SO=libgmp.a" >> $GITHUB_ENV
-                echo "GMP_CPP_SO=libgmpxx.a" >> $GITHUB_ENV
-                echo "STRIP=strip -x" >> $GITHUB_ENV
-                echo "CFLAGS=-arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=12.0" >> $GITHUB_ENV
-                echo "LDFLAGS=-arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=12.0" >> $GITHUB_ENV
-                echo "TEST_CC=xcrun -sdk iphoneos clang -arch arm64 -isysroot \$(xcrun --sdk iphoneos --show-sdk-path)" >> $GITHUB_ENV
-                GMP_CONFIGURE_ARGS="${GMP_CONFIGURE_ARGS//--enable-fat/--disable-assembly}"
-                ;;
+              BUILD_TYPE=static # iOS does not support shared libraries
+              echo "BUILD_TYPE=static" >> $GITHUB_ENV
+              echo "HOST=aarch64-apple-ios" >> $GITHUB_ENV
+              echo "STRIP=strip -x" >> $GITHUB_ENV
+              echo "CFLAGS=-arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=12.0" >> $GITHUB_ENV
+              echo "LDFLAGS=-arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=12.0" >> $GITHUB_ENV
+              echo "TEST_CC=xcrun -sdk iphoneos clang -arch arm64 -isysroot \$(xcrun --sdk iphoneos --show-sdk-path)" >> $GITHUB_ENV
+              GMP_CONFIGURE_ARGS="${GMP_CONFIGURE_ARGS//--enable-fat/--disable-assembly}" # iOS does not support fat binaries & assembly
+              ;;
       
             "browser")
-                echo "HOST=none" >> $GITHUB_ENV
-                echo "GMP_SO=libgmp.a" >> $GITHUB_ENV
-                echo "GMP_CPP_SO=libgmpxx.a" >> $GITHUB_ENV
-                echo "STRIP=strip" >> $GITHUB_ENV
-                echo "TEST_CC=emcc" >> $GITHUB_ENV
-                GMP_CONFIGURE_ARGS="${GMP_CONFIGURE_ARGS//--enable-fat/--disable-assembly}"
-                ;;
+              BUILD_TYPE=static # WebAssembly does not support shared libraries
+              echo "BUILD_TYPE=static" >> $GITHUB_ENV
+              echo "HOST=none" >> $GITHUB_ENV
+              echo "STRIP=strip" >> $GITHUB_ENV
+              echo "TEST_CC=emcc" >> $GITHUB_ENV
+              GMP_CONFIGURE_ARGS="${GMP_CONFIGURE_ARGS//--enable-fat/--disable-assembly}" # WebAssembly does not support fat binaries & assembly
+              ;;
 
             *)
               echo "Error: Unsupported OS-Architecture combination: ${{ inputs.os }}-${{ inputs.arch }}"
               exit 1
               ;;
           esac
-          echo "GMP_CONFIGURE_ARGS=${GMP_CONFIGURE_ARGS}" >> $GITHUB_ENV
+          case "$BUILD_TYPE" in
+            "shared")
+              echo "GMP_CONFIGURE_ARGS=--enable-shared --disable-static ${GMP_CONFIGURE_ARGS}" >> $GITHUB_ENV
+              ;;
+            "static")
+              echo "GMP_CONFIGURE_ARGS=--enable-static --disable-shared ${GMP_CONFIGURE_ARGS}" >> $GITHUB_ENV
+              echo "GMP_SO=libgmp.a" >> $GITHUB_ENV
+              echo "GMP_CPP_SO=libgmpxx.a" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "Error: Unsupported build type: ${{ inputs.build-type }}"
+              exit 1
+            ;;
+          esac
 
       - name: Install Toolchain (arch-specific)
         run: |
