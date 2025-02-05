@@ -353,6 +353,7 @@ jobs:
             -I${{ github.workspace }}/gmp-${{ inputs.gmp-version }} $LINK_OPTION
           ls -l
           file factorial_gmp.exe
+          otool -L factorial_gmp.exe
 
       - name: Run Test C Program
         if: ${{ inputs.os != 'android' && inputs.os != 'ios' && !(inputs.os == 'linux-musl' && inputs.arch == 'arm64') }}
