@@ -130,43 +130,23 @@ jobs:
       
               case "${{ inputs.arch }}" in
                 "x64")
-                  ARGS="--target=x86_64-linux-android21 \
-                      --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
-                      -fPIE -pie"
                   echo "HOST=x86_64-linux-android" >> $GITHUB_ENV
-                  echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-                  echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-                  echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
                   ;;
                 "arm64")
-                  ARGS="--target=aarch64-linux-android21 \
-                      --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
-                      -fPIE -pie"
                   echo "HOST=aarch64-linux-android" >> $GITHUB_ENV
-                  echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-                  echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-                  echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
                   ;;
                 "x86")
-                  ARGS="--target=i686-linux-android21 \
-                      --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
-                      -fPIE -pie"
                   echo "HOST=i686-linux-android" >> $GITHUB_ENV
-                  echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-                  echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-                  echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
                   ;;
                 "arm")
-                  ARGS="--target=armv7a-linux-android21 \
-                      --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
-                      -fPIE -pie"
                   echo "HOST=armv7a-linux-android" >> $GITHUB_ENV
-                  echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-                  echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS}" >> $GITHUB_ENV
-                  echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS}" >> $GITHUB_ENV
                   ;;
               esac
               ;;
+              ARGS="--target=${HOST}21 --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot -pie"
+              echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS} -fPIE" >> $GITHUB_ENV
+              echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS} -fPIC" >> $GITHUB_ENV
+              echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS} -fPIC" >> $GITHUB_ENV
       
             "osx")
               echo "GMP_SO=libgmp.dylib" >> $GITHUB_ENV
@@ -333,7 +313,7 @@ jobs:
           
           echo "Converted .def files to .lib for Windows."
 
-      - name: Dump lib dependencies
+      - name: Dump lib dependencies(Shared Libraries only)
         if: ${{ inputs.os != 'win' && env.BUILD_TYPE != 'static' }}
         run: |
           cd gmp-${{ inputs.gmp-version }}/.libs
