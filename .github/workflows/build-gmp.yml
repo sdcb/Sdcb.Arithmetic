@@ -342,11 +342,15 @@ jobs:
 
       - name: Compile Test C Program
         run: |
+          if [ "$BUILD_TYPE" = "static" ]; then
+            LINK_OPTION="-lm ${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/${{ env.GMP_SO }}"
+          else
+            LINK_OPTION="-L${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs -lgmp"
+          fi
+
           ${{ env.TEST_CC }} -o factorial_gmp.exe \
             .github/workflows/factorial_gmp.c \
-            -I${{ github.workspace }}/gmp-${{ inputs.gmp-version }} \
-            -L${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs \
-            -lgmp
+            -I${{ github.workspace }}/gmp-${{ inputs.gmp-version }} $LINK_OPTION
           ls -l
           file factorial_gmp.exe
 

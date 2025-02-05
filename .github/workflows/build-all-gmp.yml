@@ -3,7 +3,7 @@ name: Build All GMP
 on:
   push:
     branches:
-      - master
+      - gmp-macos-x64-static
     paths:
       - .github/workflows/build-all-gmp.yml
       - .github/workflows/build-gmp.yml
@@ -25,26 +25,26 @@ jobs:
     strategy:
       matrix:
         include:
-          - { os: linux,      arch: x64 }
-          - { os: linux,      arch: x86 }
-          - { os: linux,      arch: arm64 }
-          - { os: linux,      arch: arm }
-          - { os: linux-musl, arch: x64 }
-          - { os: linux-musl, arch: arm64 }
-          - { os: win,        arch: x64 }
-          - { os: win,        arch: x86 }
-          - { os: android,    arch: x64 }
-          - { os: android,    arch: arm64 }
-          - { os: android,    arch: x86 }
-          - { os: android,    arch: arm }
-          - { os: osx,        arch: arm64 }
+          # - { os: linux,      arch: x64 }
+          # - { os: linux,      arch: x86 }
+          # - { os: linux,      arch: arm64 }
+          # - { os: linux,      arch: arm }
+          # - { os: linux-musl, arch: x64 }
+          # - { os: linux-musl, arch: arm64 }
+          # - { os: win,        arch: x64 }
+          # - { os: win,        arch: x86 }
+          # - { os: android,    arch: x64 }
+          # - { os: android,    arch: arm64 }
+          # - { os: android,    arch: x86 }
+          # - { os: android,    arch: arm }
+          # - { os: osx,        arch: arm64 }
           - { os: osx,        arch: x64 }
-          - { os: ios,        arch: arm64 }
-          - { os: browser,    arch: wasm }
+          # - { os: ios,        arch: arm64 }
+          # - { os: browser,    arch: wasm }
 
     uses: ./.github/workflows/build-gmp.yml
     with:
       os: ${{ matrix.os }}
       arch: ${{ matrix.arch }}
       gmp-version: ${{ github.event.inputs.gmp-version || '6.3.0' }}
-      build-type: ${{ github.event.inputs.build-type || 'shared' }}
+      build-type: ${{ github.event.inputs.build-type || 'static' }}
