@@ -289,8 +289,8 @@ jobs:
           ls -l
           file ${{ env.GMP_SO }}
 
-      - name: Generate .lib files (Windows only)
-        if: ${{ inputs.os == 'win' }}
+      - name: Generate .lib files (Windows shared only)
+        if: ${{ inputs.os == 'win' && env.BUILD_TYPE == 'shared' }}
         run: |
           cd gmp-${{ inputs.gmp-version }}/.libs
           
