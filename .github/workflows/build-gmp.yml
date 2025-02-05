@@ -343,7 +343,7 @@ jobs:
       - name: Compile Test C Program
         run: |
           if [ "$BUILD_TYPE" = "static" ]; then
-            LINK_OPTION="-lm ${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/${{ env.GMP_SO }}"
+            LINK_OPTION="${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_SO }}"
           else
             LINK_OPTION="-L${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs -lgmp"
           fi
