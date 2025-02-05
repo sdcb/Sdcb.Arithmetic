@@ -291,18 +291,7 @@ jobs:
       - name: Configure GMP
         run: |
           cd gmp-${{ inputs.gmp-version }}
-          
-          case "$TARGET" in
-            "ios-arm64")
-              ./configure --enable-static --disable-shared --enable-cxx --disable-assembly --host=${HOST}
-              ;;
-            "browser-wasm")
-              emconfigure ./configure --enable-static --disable-shared --enable-cxx --disable-assembly --host=${HOST}
-              ;;
-            *)
-              ./configure --enable-shared --disable-static --enable-fat --enable-cxx --host=${HOST}
-              ;;
-          esac
+          ${{ env.GMP_CONFIGURE }} ${{ env.GMP_CONFIGURE_ARGS }} --host=${HOST}
 
       - name: Build GMP
         run: |
