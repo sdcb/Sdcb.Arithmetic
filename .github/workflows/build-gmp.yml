@@ -376,7 +376,7 @@ jobs:
               LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs ./factorial_gmp.exe
               ;;
             osx-*)
-              DYLD_LIBRARY_PATH=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs ./factorial_gmp.exe
+              ./factorial_gmp.exe
               ;;
             browser-wasm)
               node ./factorial_gmp.exe
