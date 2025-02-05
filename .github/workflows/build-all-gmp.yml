@@ -15,6 +15,10 @@ on:
         type: string
         required: false
         default: '6.3.0'
+      build-type:
+        description: 'Build type (shared or static)'
+        required: true
+        default: 'shared'
 
 jobs:
   build_all:
@@ -43,3 +47,4 @@ jobs:
       os: ${{ matrix.os }}
       arch: ${{ matrix.arch }}
       gmp-version: ${{ github.event.inputs.gmp-version || '6.3.0' }}
+      build-type: ${{ github.event.inputs.build-type || 'shared' }}

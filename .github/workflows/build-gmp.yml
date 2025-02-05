@@ -15,6 +15,11 @@ on:
         description: 'GMP version'
         required: true
         type: string
+      build-type:
+        description: 'Build type (shared or static)'
+        required: true
+        type: string
+        default: 'shared'
 
   workflow_dispatch:
     inputs:
@@ -30,12 +35,16 @@ on:
         description: 'GMP version'
         required: true
         default: 6.3.0
+      build-type:
+        description: 'Build type (shared or static)'
+        required: true
+        default: 'shared'
 
 jobs:
   build:
     runs-on: ${{ (inputs.os == 'osx' || inputs.os == 'ios') && (inputs.arch == 'x64' && 'macos-13' || 'macos-latest') || 'ubuntu-latest' }}
     env:
-      GMP_VERSION: ${{ inputs.gmp-version }}
+      GMP_CONFIGURE: ${{ inputs.os == 'browser' && 'emconfigure ./configure' || './configure' }}
 
     steps:
       - name: Checkout Repository
@@ -46,6 +55,18 @@ jobs:
       - name: Set environment variables
         run: |
           echo "TARGET=${{ inputs.os }}-${{ inputs.arch }}" >> $GITHUB_ENV
+          case "${{ inputs.build-type }}" in
+            "shared")
+              GMP_CONFIGURE_ARGS="--enable-shared --disable-static --enable-cxx --enable-fat"
+              ;;
+            "static")
+              GMP_CONFIGURE_ARGS="--enable-static --disable-shared --enable-cxx --enable-fat"
+              ;;
+            *)
+              echo "Error: Unsupported build type: ${{ inputs.build-type }}"
+              exit 1
+            ;;
+          esac
       
           case "${{ inputs.os }}" in
             "linux")
@@ -183,6 +204,7 @@ jobs:
                 echo "CFLAGS=-arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=12.0" >> $GITHUB_ENV
                 echo "LDFLAGS=-arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -miphoneos-version-min=12.0" >> $GITHUB_ENV
                 echo "TEST_CC=xcrun -sdk iphoneos clang -arch arm64 -isysroot \$(xcrun --sdk iphoneos --show-sdk-path)" >> $GITHUB_ENV
+                GMP_CONFIGURE_ARGS="${GMP_CONFIGURE_ARGS//--enable-fat/--disable-assembly}"
                 ;;
       
             "browser")
@@ -191,6 +213,7 @@ jobs:
                 echo "GMP_CPP_SO=libgmpxx.a" >> $GITHUB_ENV
                 echo "STRIP=strip" >> $GITHUB_ENV
                 echo "TEST_CC=emcc" >> $GITHUB_ENV
+                GMP_CONFIGURE_ARGS="${GMP_CONFIGURE_ARGS//--enable-fat/--disable-assembly}"
                 ;;
 
             *)
@@ -198,6 +221,7 @@ jobs:
               exit 1
               ;;
           esac
+          echo "GMP_CONFIGURE_ARGS=${GMP_CONFIGURE_ARGS}" >> $GITHUB_ENV
 
       - name: Install Toolchain (arch-specific)
         run: |
@@ -261,12 +285,12 @@ jobs:
 
       - name: Download GMP Source
         run: |
-          wget -nv https://mirrors.nju.edu.cn/gnu/gmp/gmp-${GMP_VERSION}.tar.xz
-          tar -xf gmp-${GMP_VERSION}.tar.xz
+          wget -nv https://mirrors.nju.edu.cn/gnu/gmp/gmp-${{ inputs.gmp-version }}.tar.xz
+          tar -xf gmp-${{ inputs.gmp-version }}.tar.xz
 
       - name: Configure GMP
         run: |
-          cd gmp-${GMP_VERSION}
+          cd gmp-${{ inputs.gmp-version }}
           
           case "$TARGET" in
             "ios-arm64")
@@ -282,19 +306,19 @@ jobs:
 
       - name: Build GMP
         run: |
-          cd gmp-${GMP_VERSION}
+          cd gmp-${{ inputs.gmp-version }}
           make -j4
 
       - name: Check .libs
         run: |
-          cd gmp-${GMP_VERSION}/.libs
+          cd gmp-${{ inputs.gmp-version }}/.libs
           ls -l
           file ${GMP_SO}
 
       - name: Generate .lib files (Windows only)
         if: ${{ inputs.os == 'win' }}
         run: |
-          cd gmp-${GMP_VERSION}/.libs
+          cd gmp-${{ inputs.gmp-version }}/.libs
           
           if [ "$TARGET" = "win-x86" ]; then
             HOST_PREFIX=i686-w64-mingw32
@@ -320,7 +344,7 @@ jobs:
       - name: Dump lib dependencies
         if: ${{ inputs.os != 'win' && inputs.os != 'browser' }}
         run: |
-          cd gmp-${GMP_VERSION}/.libs
+          cd gmp-${{ inputs.gmp-version }}/.libs
           case "$TARGET" in
             osx-*)
               otool -L ${GMP_SO}
@@ -339,7 +363,7 @@ jobs:
 
       - name: Strip GMP Library
         run: |
-          cd gmp-${GMP_VERSION}/.libs
+          cd gmp-${{ inputs.gmp-version }}/.libs
           ${STRIP} ${GMP_SO}
           ${STRIP} ${GMP_CPP_SO}
           ls -l
@@ -349,8 +373,8 @@ jobs:
         run: |
           ${{ env.TEST_CC }} -o factorial_gmp.exe \
             .github/workflows/factorial_gmp.c \
-            -I${{ github.workspace }}/gmp-${GMP_VERSION} \
-            -L${{ github.workspace }}/gmp-${GMP_VERSION}/.libs \
+            -I${{ github.workspace }}/gmp-${{ inputs.gmp-version }} \
+            -L${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs \
             -lgmp
           ls -l
           file factorial_gmp.exe
@@ -360,23 +384,23 @@ jobs:
         run: |
           case "$TARGET" in
             win-*)
-              cp ${{ github.workspace }}/gmp-${GMP_VERSION}/.libs/${GMP_SO} .
+              cp ${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs/${GMP_SO} .
               wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
               ;;
             "linux-x64" | "linux-x86")
-              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
+              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs ./factorial_gmp.exe
               ;;
             "linux-arm64")
-              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
+              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
               ;;
             "linux-arm")
-              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
+              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
               ;;
             "linux-musl-x64")
-              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
+              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs ./factorial_gmp.exe
               ;;
             osx-*)
-              DYLD_LIBRARY_PATH=${{ github.workspace }}/gmp-${GMP_VERSION}/.libs ./factorial_gmp.exe
+              DYLD_LIBRARY_PATH=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs ./factorial_gmp.exe
               ;;
             browser-wasm)
               node ./factorial_gmp.exe
@@ -390,13 +414,13 @@ jobs:
       - name: Prepare Artifact folder
         run: |
           mkdir -p artifacts/bin artifacts/include artifacts/misc artifacts/test
-          cp gmp-${GMP_VERSION}/gmp.h ./artifacts/include
-          cp gmp-${GMP_VERSION}/gmpxx.h ./artifacts/include
-          cp -L gmp-${GMP_VERSION}/.libs/${GMP_SO}     ./artifacts/bin
-          cp -L gmp-${GMP_VERSION}/.libs/${GMP_CPP_SO} ./artifacts/bin
-          cp gmp-${GMP_VERSION}/.libs/*.lib ./artifacts/misc || true
-          cp gmp-${GMP_VERSION}/.libs/*.def ./artifacts/misc || true
-          cp gmp-${GMP_VERSION}/.libs/*.lai ./artifacts/misc
+          cp gmp-${{ inputs.gmp-version }}/gmp.h ./artifacts/include
+          cp gmp-${{ inputs.gmp-version }}/gmpxx.h ./artifacts/include
+          cp -L gmp-${{ inputs.gmp-version }}/.libs/${GMP_SO}     ./artifacts/bin
+          cp -L gmp-${{ inputs.gmp-version }}/.libs/${GMP_CPP_SO} ./artifacts/bin
+          cp gmp-${{ inputs.gmp-version }}/.libs/*.lib ./artifacts/misc || true
+          cp gmp-${{ inputs.gmp-version }}/.libs/*.def ./artifacts/misc || true
+          cp gmp-${{ inputs.gmp-version }}/.libs/*.lai ./artifacts/misc
           cp factorial_gmp.* ./artifacts/test
 
       - name: Upload Artifact
