@@ -46,46 +46,37 @@ jobs:
       - name: Set environment variables
         run: |
           echo "TARGET=${{ inputs.os }}-${{ inputs.arch }}" >> $GITHUB_ENV
+          echo "GMP_SO=libgmp.so.10" >> $GITHUB_ENV
+          echo "GMP_CPP_SO=libgmpxx.so.4" >> $GITHUB_ENV
+
           case "${{ inputs.os }}-${{ inputs.arch }}" in
             "linux-x64")
               echo "HOST=x86_64-pc-linux-gnu" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=gcc" >> $GITHUB_ENV
               ;;
             "linux-x86")
               echo "HOST=i686-pc-linux-gnu" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=gcc -m32" >> $GITHUB_ENV
               ;;
             "linux-arm64")
               echo "HOST=aarch64-linux-gnu" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=aarch64-linux-gnu-strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
               ;;
             "linux-arm")
               echo "HOST=arm-linux-gnueabihf" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=arm-linux-gnueabihf-strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
               ;;
             "linux-musl-x64")
               echo "HOST=x86_64-linux-musl" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=musl-gcc" >> $GITHUB_ENV
               ;;
             "linux-musl-arm64")
               echo "HOST=aarch64-unknown-linux-musl" >> $GITHUB_ENV
-              echo "GMP_SO=libgmp.so.10.5.0" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so.4.7.0" >> $GITHUB_ENV
               echo "STRIP=aarch64-unknown-linux-musl-strip --strip-unneeded" >> $GITHUB_ENV
               echo "TEST_CC=aarch64-unknown-linux-musl-gcc" >> $GITHUB_ENV
               ;;
@@ -381,8 +372,8 @@ jobs:
           mkdir -p artifacts/bin artifacts/include artifacts/misc artifacts/test
           cp gmp-${GMP_VERSION}/gmp.h ./artifacts/include
           cp gmp-${GMP_VERSION}/gmpxx.h ./artifacts/include
-          cp gmp-${GMP_VERSION}/.libs/${GMP_SO} ./artifacts/bin
-          cp gmp-${GMP_VERSION}/.libs/${GMP_CPP_SO} ./artifacts/bin
+          cp -L gmp-${GMP_VERSION}/.libs/${GMP_SO}     ./artifacts/bin
+          cp -L gmp-${GMP_VERSION}/.libs/${GMP_CPP_SO} ./artifacts/bin
           cp gmp-${GMP_VERSION}/.libs/*.lib ./artifacts/misc || true
           cp gmp-${GMP_VERSION}/.libs/*.def ./artifacts/misc || true
           cp gmp-${GMP_VERSION}/.libs/*.lai ./artifacts/misc
