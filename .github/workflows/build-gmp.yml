@@ -130,18 +130,19 @@ jobs:
       
               case "${{ inputs.arch }}" in
                 "x64")
-                  echo "HOST=x86_64-linux-android" >> $GITHUB_ENV
+                  HOST=x86_64-linux-android
                   ;;
                 "arm64")
-                  echo "HOST=aarch64-linux-android" >> $GITHUB_ENV
+                  HOST=aarch64-linux-android
                   ;;
                 "x86")
-                  echo "HOST=i686-linux-android" >> $GITHUB_ENV
+                  HOST=i686-linux-android
                   ;;
                 "arm")
-                  echo "HOST=armv7a-linux-android" >> $GITHUB_ENV
+                  HOST=armv7a-linux-android
                   ;;
               esac
+              echo "HOST=$HOST" >> $GITHUB_ENV
               ARGS="--target=${HOST}21 --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot -pie"
               echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS} -fPIE" >> $GITHUB_ENV
               echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS} -fPIC" >> $GITHUB_ENV
