@@ -164,7 +164,7 @@ jobs:
                   echo "HOST=x86_64-apple-darwin" >> $GITHUB_ENV
                   echo "TEST_CC=clang" >> $GITHUB_ENV
                   echo "LDFLAGS=-ld_classic" >> $GITHUB_ENV
-                  if [ $"{{ env.BUILD_TYPE }}" == "static" ]; then
+                  if [ "${{ env.BUILD_TYPE }}" == "static" ]; then
                     GMP_CONFIGURE_ARGS="${GMP_CONFIGURE_ARGS//--enable-fat/--disable-assembly}" # macOS static does not support fat binaries & assembly
                   fi
                   ;;
