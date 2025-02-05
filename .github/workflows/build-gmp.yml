@@ -144,7 +144,7 @@ jobs:
               esac
               echo "HOST=$HOST" >> $GITHUB_ENV
               ARGS="--target=${HOST}21 --sysroot=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot -pie"
-              echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS} -fPIE" >> $GITHUB_ENV
+              echo "TEST_CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS} -fPIC" >> $GITHUB_ENV
               echo "CC=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang ${ARGS} -fPIC" >> $GITHUB_ENV
               echo "CXX=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ${ARGS} -fPIC" >> $GITHUB_ENV
               ;;
