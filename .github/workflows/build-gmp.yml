@@ -334,7 +334,7 @@ jobs:
           echo "Converted .def files to .lib for Windows."
 
       - name: Dump lib dependencies
-        if: ${{ inputs.os != 'win' && inputs.os != 'browser' }}
+        if: ${{ inputs.os != 'win' && env.BUILD_TYPE != 'static' }}
         run: |
           cd gmp-${{ inputs.gmp-version }}/.libs
           case "$TARGET" in
