@@ -56,7 +56,7 @@ jobs:
       - name: Set environment variables
         run: |
           echo "TARGET=${{ inputs.os }}-${{ inputs.arch }}" >> $GITHUB_ENV
-          GMP_CONFIGURE_ARGS="--enable-cxx --enable-fat"
+          GMP_CONFIGURE_ARGS="--enable-cxx"
       
           case "${{ inputs.os }}" in
             "linux")
