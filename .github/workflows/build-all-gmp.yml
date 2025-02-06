@@ -3,7 +3,7 @@ name: Build All GMP
 on:
   push:
     branches:
-      - master
+      - add-mpfr
     paths:
       - .github/workflows/build-all-gmp.yml
       - .github/workflows/build-gmp.yml
@@ -15,6 +15,11 @@ on:
         type: string
         required: false
         default: '6.3.0'
+      mpfr-version:
+        description: 'MPFR Version'
+        type: string
+        required: false
+        default: '4.2.1'
       build-type:
         description: 'Build type (shared or static)'
         required: true
@@ -26,21 +31,21 @@ jobs:
       matrix:
         include:
           - { os: linux,      arch: x64 }
-          - { os: linux,      arch: x86 }
-          - { os: linux,      arch: arm64 }
-          - { os: linux,      arch: arm }
-          - { os: linux-musl, arch: x64 }
-          - { os: linux-musl, arch: arm64 }
-          - { os: win,        arch: x64 }
-          - { os: win,        arch: x86 }
-          - { os: android,    arch: x64 }
-          - { os: android,    arch: arm64 }
-          - { os: android,    arch: x86 }
-          - { os: android,    arch: arm }
-          - { os: osx,        arch: arm64 }
-          - { os: osx,        arch: x64 }
-          - { os: ios,        arch: arm64 }
-          - { os: browser,    arch: wasm }
+          # - { os: linux,      arch: x86 }
+          # - { os: linux,      arch: arm64 }
+          # - { os: linux,      arch: arm }
+          # - { os: linux-musl, arch: x64 }
+          # - { os: linux-musl, arch: arm64 }
+          # - { os: win,        arch: x64 }
+          # - { os: win,        arch: x86 }
+          # - { os: android,    arch: x64 }
+          # - { os: android,    arch: arm64 }
+          # - { os: android,    arch: x86 }
+          # - { os: android,    arch: arm }
+          # - { os: osx,        arch: arm64 }
+          # - { os: osx,        arch: x64 }
+          # - { os: ios,        arch: arm64 }
+          # - { os: browser,    arch: wasm }
 
     uses: ./.github/workflows/build-gmp.yml
     with:

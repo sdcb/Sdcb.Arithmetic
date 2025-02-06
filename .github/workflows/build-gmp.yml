@@ -15,6 +15,10 @@ on:
         description: 'GMP version'
         required: true
         type: string
+      mpfr-version:
+        description: 'MPFR version'
+        required: true
+        type: string
       build-type:
         description: 'Build type (shared or static)'
         required: true
@@ -35,6 +39,10 @@ on:
         description: 'GMP version'
         required: true
         default: 6.3.0
+      mpfr-version:
+        description: 'MPFR version'
+        required: true
+        default: 4.2.1
       build-type:
         description: 'Build type (shared or static)'
         required: true
@@ -198,10 +206,12 @@ jobs:
           esac
           case "$BUILD_TYPE" in
             "shared")
-              echo "GMP_CONFIGURE_ARGS=--enable-shared --disable-static ${GMP_CONFIGURE_ARGS}" >> $GITHUB_ENV
+              echo "GMP_CONFIGURE_ARGS=${GMP_CONFIGURE_ARGS}" >> $GITHUB_ENV
+              echo "BUILD_TYPE_ARGS=--enable-shared --disable-static" >> $GITHUB_ENV
               ;;
             "static")
-              echo "GMP_CONFIGURE_ARGS=--enable-static --disable-shared ${GMP_CONFIGURE_ARGS}" >> $GITHUB_ENV
+              echo "GMP_CONFIGURE_ARGS=${GMP_CONFIGURE_ARGS}" >> $GITHUB_ENV
+              echo "BUILD_TYPE_ARGS=--enable-static --disable-shared" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.a" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.a" >> $GITHUB_ENV
               ;;
@@ -279,11 +289,26 @@ jobs:
       - name: Configure GMP
         run: |
           cd gmp-${{ inputs.gmp-version }}
-          ${{ env.GMP_CONFIGURE }} ${{ env.GMP_CONFIGURE_ARGS }} --host=${{ env.HOST }}
+          ${{ env.GMP_CONFIGURE }} ${{ env.BUILD_TYPE_ARGS }} ${{ env.GMP_CONFIGURE_ARGS }} --host=${{ env.HOST }}
 
       - name: Build GMP
         run: |
           cd gmp-${{ inputs.gmp-version }}
+          make -j4
+
+      - name: Download MPFR Source
+        run: |
+          wget -nv https://mirrors.nju.edu.cn/gnu/mpfr/mpfr-${{ inputs.mpfr-version }}.tar.xz
+          tar -xf mpfr-${{ inputs.mpfr-version }}.tar.xz
+
+      - name: Configure MPFR
+        run: |
+          cd mpfr-${{ inputs.mpfr-version }}
+          ./configure --with-gmp-include=${{ github.workspace }}/gmp-${{ inputs.gmp-version }} --with-gmp-lib=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs ${{ env.BUILD_TYPE_ARGS }} --host=${{ env.HOST }}
+
+      - name: Build MPFR
+        run: |
+          cd mpfr-${{ inputs.mpfr-version }}
           make -j4
 
       - name: Check .libs
@@ -291,6 +316,9 @@ jobs:
           cd gmp-${{ inputs.gmp-version }}/.libs
           ls -l
           file ${{ env.GMP_SO }}
+
+          cd gmp-${{ inputs.mpfr-version }}/.libs
+          ls -l
 
       - name: Generate .lib files (Windows shared only)
         if: ${{ inputs.os == 'win' && env.BUILD_TYPE == 'shared' }}
