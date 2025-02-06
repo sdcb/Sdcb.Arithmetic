@@ -319,9 +319,8 @@ jobs:
           ls -l
           file ${{ env.GMP_SO }}
 
-          cd ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}/.libs
+          cd ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}
           ls -l
-          file ${{ env.MPFR_SO }}
 
       - name: Generate .lib files (Windows shared only)
         if: ${{ inputs.os == 'win' && env.BUILD_TYPE == 'shared' }}
