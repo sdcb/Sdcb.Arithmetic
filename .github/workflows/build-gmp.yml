@@ -67,7 +67,7 @@ jobs:
           GMP_CONFIGURE_ARGS="--enable-cxx --enable-fat"
           echo "GMP_SO=libgmp.so.10" >> $GITHUB_ENV
           echo "GMP_CPP_SO=libgmpxx.so.4" >> $GITHUB_ENV
-          echo "MPFR_SO=libmpfr.so.6" >> $GITHUB_ENV"
+          echo "MPFR_SO=libmpfr.so.6" >> $GITHUB_ENV
       
           case "${{ inputs.os }}" in
             "linux")
