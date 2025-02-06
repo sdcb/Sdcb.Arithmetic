@@ -65,11 +65,12 @@ jobs:
         run: |
           echo "TARGET=${{ inputs.os }}-${{ inputs.arch }}" >> $GITHUB_ENV
           GMP_CONFIGURE_ARGS="--enable-cxx --enable-fat"
+          echo "GMP_SO=libgmp.so.10" >> $GITHUB_ENV
+          echo "GMP_CPP_SO=libgmpxx.so.4" >> $GITHUB_ENV
+          echo "MPFR_SO=libmpfr.so.6" >> $GITHUB_ENV"
       
           case "${{ inputs.os }}" in
             "linux")
-              echo "GMP_SO=libgmp.so.10" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so.4" >> $GITHUB_ENV
       
               case "${{ inputs.arch }}" in
                 "x64")
@@ -95,10 +96,7 @@ jobs:
               esac
               ;;
       
-            "linux-musl")
-              echo "GMP_SO=libgmp.so.10" >> $GITHUB_ENV
-              echo "GMP_CPP_SO=libgmpxx.so.4" >> $GITHUB_ENV
-      
+            "linux-musl")      
               case "${{ inputs.arch }}" in
                 "x64")
                   echo "HOST=x86_64-linux-musl" >> $GITHUB_ENV
@@ -116,6 +114,7 @@ jobs:
             "win")
               echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
+              echo "MPFR_SO=libmpfr-6.dll" >> $GITHUB_ENV"
       
               case "${{ inputs.arch }}" in
                 "x64")
@@ -134,6 +133,7 @@ jobs:
             "android")
               echo "GMP_SO=libgmp.so" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.so" >> $GITHUB_ENV
+              echo "MPFR_SO=libmpfr.so" >> $GITHUB_ENV"
               echo "STRIP=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded" >> $GITHUB_ENV
       
               case "${{ inputs.arch }}" in
@@ -161,6 +161,7 @@ jobs:
             "osx")
               echo "GMP_SO=libgmp.dylib" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.dylib" >> $GITHUB_ENV
+              echo "MPFR_SO=libmpfr.dylib" >> $GITHUB_ENV"
               echo "STRIP=strip -x" >> $GITHUB_ENV
       
               case "${{ inputs.arch }}" in
@@ -214,6 +215,7 @@ jobs:
               echo "BUILD_TYPE_ARGS=--enable-static --disable-shared" >> $GITHUB_ENV
               echo "GMP_SO=libgmp.a" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.a" >> $GITHUB_ENV
+              echo "MPFR_SO=libmpfr.a" >> $GITHUB_ENV"
               ;;
             *)
               echo "Error: Unsupported build type: ${{ inputs.build-type }}"
@@ -317,8 +319,9 @@ jobs:
           ls -l
           file ${{ env.GMP_SO }}
 
-          cd ${{ github.workspace }}/gmp-${{ inputs.mpfr-version }}/.libs
+          cd ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}/.libs
           ls -l
+          file ${{ env.MPFR_SO }}
 
       - name: Generate .lib files (Windows shared only)
         if: ${{ inputs.os == 'win' && env.BUILD_TYPE == 'shared' }}
