@@ -346,8 +346,6 @@ jobs:
             --input-def  libgmpxx-3.dll.def \
             --output-lib libgmpxx-4.lib \
             --dllname    ${{ env.GMP_SO }}
-          
-          echo "Converted .def files to .lib for Windows."
 
       - name: Dump lib dependencies(Shared Libraries only)
         if: ${{ inputs.os != 'win' && env.BUILD_TYPE != 'static' }}
@@ -356,9 +354,11 @@ jobs:
           case "$TARGET" in
             osx-*)
               otool -L ${{ env.GMP_SO }}
+              otoll -L ${{ env.MPFR_SO }}
               ;;
             linux-* | android-*)
               objdump -x ${{ env.GMP_SO }} | grep NEEDED
+              objdump -x ${{ env.MPFR_SO }} | grep NEEDED
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
@@ -368,11 +368,14 @@ jobs:
 
       - name: Strip GMP Library
         run: |
-          cd gmp-${{ inputs.gmp-version }}/.libs
+          cd ${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs
           ${STRIP} ${GMP_SO}
           ${STRIP} ${GMP_CPP_SO}
           ls -l
-          file ${GMP_SO}
+
+          cd ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}/src/.libs
+          ${STRIP} ${MPFR_SO}
+          file ${MPFR_SO}
 
       - name: Compile Test C Program
         run: |
@@ -427,6 +430,7 @@ jobs:
           cp gmp-${{ inputs.gmp-version }}/.libs/*.lib ./artifacts/misc || true
           cp gmp-${{ inputs.gmp-version }}/.libs/*.def ./artifacts/misc || true
           cp gmp-${{ inputs.gmp-version }}/.libs/*.lai ./artifacts/misc
+          cp mpfr-${{ inputs.mpfr-version }}/src/.libs/*.lai ./artifacts/misc
           cp factorial_gmp.* ./artifacts/test
 
       - name: Upload Artifact
