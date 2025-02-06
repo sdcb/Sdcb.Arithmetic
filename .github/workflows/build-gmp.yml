@@ -353,7 +353,7 @@ jobs:
           case "$TARGET" in
             osx-*)
               otool -L ${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_SO }}
-              otoll -L ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}/src/.libs/${{ env.MPFR_SO }}
+              otool -L ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}/src/.libs/${{ env.MPFR_SO }}
               ;;
             linux-* | android-*)
               objdump -x ${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_SO }} | grep NEEDED
