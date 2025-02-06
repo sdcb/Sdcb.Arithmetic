@@ -319,8 +319,9 @@ jobs:
           ls -l
           file ${{ env.GMP_SO }}
 
-          cd ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}
+          cd ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}/src/.libs
           ls -l
+          file ${{ env.MPFR_SO }}
 
       - name: Generate .lib files (Windows shared only)
         if: ${{ inputs.os == 'win' && env.BUILD_TYPE == 'shared' }}
@@ -422,6 +423,7 @@ jobs:
           cp gmp-${{ inputs.gmp-version }}/gmpxx.h ./artifacts/include
           cp -L gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_SO }}     ./artifacts/bin
           cp -L gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_CPP_SO }} ./artifacts/bin
+          cp -L mpfr-${{ inputs.mpfr-version }}/src/.libs/${{ env.MPFR_SO }} ./artifacts/bin
           cp gmp-${{ inputs.gmp-version }}/.libs/*.lib ./artifacts/misc || true
           cp gmp-${{ inputs.gmp-version }}/.libs/*.def ./artifacts/misc || true
           cp gmp-${{ inputs.gmp-version }}/.libs/*.lai ./artifacts/misc
