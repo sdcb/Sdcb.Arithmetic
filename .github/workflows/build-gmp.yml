@@ -350,15 +350,14 @@ jobs:
       - name: Dump lib dependencies(Shared Libraries only)
         if: ${{ inputs.os != 'win' && env.BUILD_TYPE != 'static' }}
         run: |
-          cd gmp-${{ inputs.gmp-version }}/.libs
           case "$TARGET" in
             osx-*)
-              otool -L ${{ env.GMP_SO }}
-              otoll -L ${{ env.MPFR_SO }}
+              otool -L ${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_SO }}
+              otoll -L ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}/src/.libs/${{ env.MPFR_SO }}
               ;;
             linux-* | android-*)
-              objdump -x ${{ env.GMP_SO }} | grep NEEDED
-              objdump -x ${{ env.MPFR_SO }} | grep NEEDED
+              objdump -x ${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_SO }} | grep NEEDED
+              objdump -x ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}/src/.libs/${{ env.MPFR_SO }} | grep NEEDED
               ;;
             *)
               echo "Error: Unsupported OS-Architecture combination: $TARGET"
@@ -368,14 +367,12 @@ jobs:
 
       - name: Strip GMP Library
         run: |
-          cd ${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs
-          ${STRIP} ${GMP_SO}
-          ${STRIP} ${GMP_CPP_SO}
-          ls -l
-
-          cd ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}/src/.libs
-          ${STRIP} ${MPFR_SO}
-          file ${MPFR_SO}
+          ${STRIP} ${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs/${GMP_SO}
+          ${STRIP} ${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs/${GMP_CPP_SO}
+          file ${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs/${GMP_SO}
+          
+          ${STRIP} ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}/src/.libs/${MPFR_SO}
+          file ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}/src/.libs/${MPFR_SO}
 
       - name: Compile Test C Program
         run: |
