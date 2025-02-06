@@ -161,7 +161,7 @@ jobs:
             "osx")
               echo "GMP_SO=libgmp.dylib" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx.dylib" >> $GITHUB_ENV
-              echo "MPFR_SO=libmpfr6.dylib" >> $GITHUB_ENV
+              echo "MPFR_SO=libmpfr.6.dylib" >> $GITHUB_ENV
               echo "STRIP=strip -x" >> $GITHUB_ENV
       
               case "${{ inputs.arch }}" in
