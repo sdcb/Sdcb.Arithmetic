@@ -393,8 +393,8 @@ jobs:
         run: |
           ${{ env.TEST_CC }} -o factorial_gmp.exe \
             .github/workflows/factorial_gmp.c \
-            -I${{ github.workspace }}/artifacts/include \
-            -L${{ github.workspace }}/artifacts/bin \
+            -Iartifacts/include \
+            -Lgmp-${{ inputs.gmp-version }}/.libs \
             -lgmp
           ls -l
           file factorial_gmp.exe
@@ -435,9 +435,10 @@ jobs:
         run: |
           ${{ env.TEST_CC }} -o pi_mpfr.exe \
             .github/workflows/pi_mpfr.c \
-            -I${{ github.workspace }}/artifacts/include \
-            -L${{ github.workspace }}/artifacts/bin \
-            -l${{ env.GMP_SO }} -l${{ env.MPFR_SO }}
+            -Iartifacts/include \
+            -Lgmp-${{ inputs.gmp-version }}/.libs
+            -Lmpfr-${{ inputs.mpfr-version }}/src/.libs \
+            -lgmp -lmpfr
           ls -l
           file pi_mpfr.exe
 
