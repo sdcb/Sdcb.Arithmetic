@@ -376,23 +376,16 @@ jobs:
 
       - name: Prepare Artifact folder
         run: |
-          mkdir -p artifacts/bin artifacts/include artifacts/misc artifacts/test
-          cp gmp-${{ inputs.gmp-version }}/gmp.h ./artifacts/include
-          cp gmp-${{ inputs.gmp-version }}/gmpxx.h ./artifacts/include
-          cp -L gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_SO }}     ./artifacts/bin
-          cp -L gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_CPP_SO }} ./artifacts/bin
-          cp -L mpfr-${{ inputs.mpfr-version }}/src/.libs/${{ env.MPFR_SO }} ./artifacts/bin
-          cp gmp-${{ inputs.gmp-version }}/.libs/*.lib ./artifacts/misc || true
-          cp gmp-${{ inputs.gmp-version }}/.libs/*.def ./artifacts/misc || true
-          cp gmp-${{ inputs.gmp-version }}/.libs/*.lai ./artifacts/misc
-          cp mpfr-${{ inputs.mpfr-version }}/src/.libs/*.lai ./artifacts/misc
-          cp factorial_gmp.* ./artifacts/test
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: gmp-${{ inputs.os }}-${{ inputs.arch }}
-          path: artifacts
+          mkdir -p artifacts/bin artifacts/include artifacts/misc            artifacts/test
+          cp gmp-${{ inputs.gmp-version }}/gmp.h                             artifacts/include
+          cp gmp-${{ inputs.gmp-version }}/gmpxx.h                           artifacts/include
+          cp -L gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_SO }}        artifacts/bin
+          cp -L gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_CPP_SO }}    artifacts/bin
+          cp -L mpfr-${{ inputs.mpfr-version }}/src/.libs/${{ env.MPFR_SO }} artifacts/bin
+          cp gmp-${{ inputs.gmp-version }}/.libs/*.lib                       artifacts/misc || true
+          cp gmp-${{ inputs.gmp-version }}/.libs/*.def                       artifacts/misc || true
+          cp gmp-${{ inputs.gmp-version }}/.libs/*.lai                       artifacts/misc
+          cp mpfr-${{ inputs.mpfr-version }}/src/.libs/*.lai                 artifacts/misc
 
       - name: Compile Test C GMP Program
         run: |
@@ -478,3 +471,14 @@ jobs:
               exit 1
               ;;
           esac
+
+      - name: Prepare test artifacts
+        run: |
+          cp factorial_gmp.* ./artifacts/test
+          cp pi_mpfr.*       ./artifacts/test
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gmp-${{ inputs.os }}-${{ inputs.arch }}
+          path: artifacts
