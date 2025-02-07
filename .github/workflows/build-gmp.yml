@@ -436,7 +436,7 @@ jobs:
           ${{ env.TEST_CC }} -o pi_mpfr.exe \
             .github/workflows/pi_mpfr.c \
             -Iartifacts/include \
-            -Lgmp-${{ inputs.gmp-version }}/.libs
+            -Lgmp-${{ inputs.gmp-version }}/.libs \
             -Lmpfr-${{ inputs.mpfr-version }}/src/.libs \
             -lgmp -lmpfr
           ls -l
