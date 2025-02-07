@@ -437,7 +437,7 @@ jobs:
             .github/workflows/pi_mpfr.c \
             -I${{ github.workspace }}/artifacts/include \
             -L${{ github.workspace }}/artifacts/bin \
-            -lgmp -lmpfr
+            -l${{ env.GMP_SO }} -l${{ env.MPFR_SO }}
           ls -l
           file pi_mpfr.exe
 
