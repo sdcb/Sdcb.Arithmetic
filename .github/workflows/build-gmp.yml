@@ -379,6 +379,7 @@ jobs:
           mkdir -p artifacts/bin artifacts/include artifacts/misc            artifacts/test
           cp gmp-${{ inputs.gmp-version }}/gmp.h                             artifacts/include
           cp gmp-${{ inputs.gmp-version }}/gmpxx.h                           artifacts/include
+          cp mpfr-${{ inputs.mpfr-version }}/mpfr.h                          artifacts/include
           cp -L gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_SO }}        artifacts/bin
           cp -L gmp-${{ inputs.gmp-version }}/.libs/${{ env.GMP_CPP_SO }}    artifacts/bin
           cp -L mpfr-${{ inputs.mpfr-version }}/src/.libs/${{ env.MPFR_SO }} artifacts/bin
