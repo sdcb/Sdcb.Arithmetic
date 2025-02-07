@@ -374,48 +374,6 @@ jobs:
           ${STRIP} ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}/src/.libs/${MPFR_SO}
           file ${{ github.workspace }}/mpfr-${{ inputs.mpfr-version }}/src/.libs/${MPFR_SO}
 
-      - name: Compile Test C Program
-        run: |
-          ${{ env.TEST_CC }} -o factorial_gmp.exe \
-            .github/workflows/factorial_gmp.c \
-            -I${{ github.workspace }}/gmp-${{ inputs.gmp-version }} \
-            -L${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs \
-            -lgmp
-          ls -l
-          file factorial_gmp.exe
-
-      - name: Run Test C Program
-        if: ${{ inputs.os != 'android' && inputs.os != 'ios' && !(inputs.os == 'linux-musl' && inputs.arch == 'arm64') }}
-        run: |
-          case "$TARGET" in
-            win-*)
-              cp ${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs/${GMP_SO} .
-              wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
-              ;;
-            "linux-x64" | "linux-x86")
-              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs ./factorial_gmp.exe
-              ;;
-            "linux-arm64")
-              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
-              ;;
-            "linux-arm")
-              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
-              ;;
-            "linux-musl-x64")
-              LD_LIBRARY_PATH=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs ./factorial_gmp.exe
-              ;;
-            osx-*)
-              DYLD_LIBRARY_PATH=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs ./factorial_gmp.exe
-              ;;
-            browser-wasm)
-              node ./factorial_gmp.exe
-              ;;
-            *)
-              echo "Error: Unsupported OS-Architecture combination: $TARGET"
-              exit 1
-              ;;
-          esac
-
       - name: Prepare Artifact folder
         run: |
           mkdir -p artifacts/bin artifacts/include artifacts/misc artifacts/test
@@ -435,3 +393,88 @@ jobs:
         with:
           name: gmp-${{ inputs.os }}-${{ inputs.arch }}
           path: artifacts
+
+      - name: Compile Test C GMP Program
+        run: |
+          ${{ env.TEST_CC }} -o factorial_gmp.exe \
+            .github/workflows/factorial_gmp.c \
+            -I${{ github.workspace }}/artifacts/include \
+            -L${{ github.workspace }}/artifacts/bin \
+            -lgmp
+          ls -l
+          file factorial_gmp.exe
+
+      - name: Run Test C GMP Program
+        if: ${{ inputs.os != 'android' && inputs.os != 'ios' && !(inputs.os == 'linux-musl' && inputs.arch == 'arm64') }}
+        run: |
+          case "$TARGET" in
+            win-*)
+              cp ${{ github.workspace }}/artifacts/bin/${GMP_SO} .
+              wine ${GITHUB_WORKSPACE}/factorial_gmp.exe
+              ;;
+            "linux-x64" | "linux-x86")
+              LD_LIBRARY_PATH=${{ github.workspace }}/artifacts/bin ./factorial_gmp.exe
+              ;;
+            "linux-arm64")
+              LD_LIBRARY_PATH=${{ github.workspace }}/artifacts/bin qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./factorial_gmp.exe
+              ;;
+            "linux-arm")
+              LD_LIBRARY_PATH=${{ github.workspace }}/artifacts/bin qemu-arm -L /usr/arm-linux-gnueabihf/ ./factorial_gmp.exe
+              ;;
+            "linux-musl-x64")
+              LD_LIBRARY_PATH=${{ github.workspace }}/artifacts/bin ./factorial_gmp.exe
+              ;;
+            osx-*)
+              DYLD_LIBRARY_PATH=${{ github.workspace }}/artifacts/bin ./factorial_gmp.exe
+              ;;
+            browser-wasm)
+              node ./factorial_gmp.exe
+              ;;
+            *)
+              echo "Error: Unsupported OS-Architecture combination: $TARGET"
+              exit 1
+              ;;
+          esac
+
+      - name: Compile Test C MPFR Program
+        run: |
+          ${{ env.TEST_CC }} -o pi_mpfr.exe \
+            .github/workflows/pi_mpfr.c \
+            -I${{ github.workspace }}/artifacts/include \
+            -L${{ github.workspace }}/artifacts/bin \
+            -lgmp -lmpfr
+          ls -l
+          file pi_mpfr.exe
+
+      - name: Run Test C MPFR Program
+        if: ${{ inputs.os != 'android' && inputs.os != 'ios' && !(inputs.os == 'linux-musl' && inputs.arch == 'arm64') }}
+        run: |
+          case "$TARGET" in
+            win-*)
+              cp ${{ github.workspace }}/artifacts/bin/${GMP_SO} .
+              cp ${{ github.workspace }}/artifacts/bin/${MPFR_SO} .
+              wine ${GITHUB_WORKSPACE}/pi_mpfr.exe
+              ;;
+            "linux-x64" | "linux-x86")
+              LD_LIBRARY_PATH=${{ github.workspace }}/artifacts/bin ./pi_mpfr.exe
+              ;;
+            "linux-arm64")
+              LD_LIBRARY_PATH=${{ github.workspace }}/artifacts/bin qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./pi_mpfr.exe
+              ;;
+            "linux-arm")
+              LD_LIBRARY_PATH=${{ github.workspace }}/artifacts/bin qemu-arm -L /usr/arm-linux-gnueabihf/ ./pi_mpfr.exe
+              ;;
+            "linux-musl-x64")
+              LD_LIBRARY_PATH=${{ github.workspace }}/artifacts/bin ./pi_mpfr.exe
+              ;;
+            osx-*)
+              DYLD_LIBRARY_PATH=${{ github.workspace }}/artifacts/bin ./pi_mpfr.exe
+              ;;
+            browser-wasm)
+              node ./pi_mpfr.exe
+              ;;
+            *)
+              echo "Error: Unsupported OS-Architecture combination: $TARGET"
+              exit 1
+              ;;
+          esac
