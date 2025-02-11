@@ -1,13 +1,14 @@
-name: Build All GMP
+name: Build All
 
 on:
   push:
     branches:
-      - add-mpfr
+      - master
     paths:
-      - .github/workflows/build-all-gmp.yml
-      - .github/workflows/build-gmp.yml
+      - .github/workflows/build-all.yml
+      - .github/workflows/build.yml
       - .github/workflows/factorial_gmp.c
+      - .github/workflows/pi_mpfr.c
   workflow_dispatch:
     inputs:
       gmp-version:
@@ -47,10 +48,10 @@ jobs:
           - { os: ios,        arch: arm64 }
           - { os: browser,    arch: wasm }
 
-    uses: ./.github/workflows/build-gmp.yml
+    uses: ./.github/workflows/build.yml
     with:
       os: ${{ matrix.os }}
       arch: ${{ matrix.arch }}
       gmp-version: ${{ github.event.inputs.gmp-version || '6.3.0' }}
       mpfr-version: ${{ github.event.inputs.mpfr-version || '4.2.1' }}
-      build-type: ${{ github.event.inputs.build-type || 'static' }}
+      build-type: ${{ github.event.inputs.build-type || 'shared' }}
