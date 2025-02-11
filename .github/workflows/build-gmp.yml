@@ -440,7 +440,7 @@ jobs:
             -Iartifacts/include \
             -Lgmp-${{ inputs.gmp-version }}/.libs \
             -Lmpfr-${{ inputs.mpfr-version }}/src/.libs \
-            -lgmp -lmpfr
+            -lmpfr -lgmp
           ls -l
           file pi_mpfr.exe
 
