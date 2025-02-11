@@ -115,8 +115,8 @@ jobs:
               echo "GMP_SO=libgmp-10.dll" >> $GITHUB_ENV
               echo "GMP_CPP_SO=libgmpxx-4.dll" >> $GITHUB_ENV
               echo "MPFR_SO=libmpfr-6.dll" >> $GITHUB_ENV
-              echo "CFLAGS=-O3 -static-libgcc" >> $GITHUB_ENV
-              echo "LDFLAGS=-O3 -static-libgcc" >> $GITHUB_ENV
+              echo "CFLAGS=-O2 -static-libgcc" >> $GITHUB_ENV
+              echo "LDFLAGS=-O2 -static-libgcc" >> $GITHUB_ENV
       
               case "${{ inputs.arch }}" in
                 "x64")
