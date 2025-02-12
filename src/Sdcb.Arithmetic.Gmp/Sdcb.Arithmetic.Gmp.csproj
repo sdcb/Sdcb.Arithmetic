@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6;netcoreapp31</TargetFrameworks>
-    <LangVersion>11</LangVersion>
+    <LangVersion>12</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
     <PackageIcon>Sdcb.Arithmetic.Gmp.png</PackageIcon>

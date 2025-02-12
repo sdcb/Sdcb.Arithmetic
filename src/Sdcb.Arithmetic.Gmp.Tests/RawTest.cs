@@ -46,9 +46,10 @@ public class RawTest
             malloc: n => Marshal.AllocHGlobal(n),
             realloc: (ptr, size) => Marshal.ReAllocHGlobal(ptr, size),
             free: (ptr, size) => Marshal.FreeHGlobal(ptr));
-
-        using GmpFloat a = new(precision: 100);
-        _console.WriteLine(a.ToString());
+        {
+            using GmpFloat a = new(precision: 100);
+            _console.WriteLine(a.ToString());
+        }
         GmpMemory.ResetAllocator();
     }
 }

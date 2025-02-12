@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sdcb.Arithmetic.Gmp;
+using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -18,26 +19,45 @@ internal static class MpfrNativeLoader
 
     private static IntPtr MpfrImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
     {
+        static bool IsAndroid()
+        {
+            return Environment.OSVersion.Platform == PlatformID.Unix && Environment.GetEnvironmentVariable("ANDROID_ROOT") != null;
+        }
+
         if (libraryName == MpfrLib.Dll)
         {
+            GmpNativeLoader.Load(assembly, searchPath);
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                NativeLibrary.Load("gmp-10.dll", assembly, searchPath);
-                return NativeLibrary.Load("mpfr-6.dll", assembly, searchPath);
+                string[] trys =
+                [
+                    "libmpfr-6.dll",
+                    "mpfr-6.dll", // for compatibility with older versions
+                ];
+                foreach (string tryName in trys)
+                {
+                    if (NativeLibrary.TryLoad(tryName, assembly, searchPath, out IntPtr handle))
+                    {
+                        return handle;
+                    }
+                }
+                throw new DllNotFoundException(trys[0]);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                NativeLibrary.Load("gmp.so.10", assembly, searchPath);
                 return NativeLibrary.Load("mpfr.so.6", assembly, searchPath);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                NativeLibrary.Load("libgmp.10.dylib", assembly, searchPath);
                 return NativeLibrary.Load("libmpfr.6.dylib", assembly, searchPath);
+            }
+            else if (IsAndroid())
+            {
+                return NativeLibrary.Load("libmpfr.so", assembly, searchPath);
             }
             else
             {
-                NativeLibrary.Load("gmp.10", assembly, searchPath);
                 return NativeLibrary.Load("mpfr.6", assembly, searchPath);
             }
         }
