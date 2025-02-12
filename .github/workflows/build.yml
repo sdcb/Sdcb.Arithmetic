@@ -485,5 +485,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gmp-${{ inputs.os }}-${{ inputs.arch }}
+          name: ${{ env.BUILD_TYPE }}-${{ inputs.os }}-${{ inputs.arch }}
           path: artifacts
