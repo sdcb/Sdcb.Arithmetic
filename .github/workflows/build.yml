@@ -308,7 +308,10 @@ jobs:
       - name: Configure MPFR
         run: |
           cd mpfr-${{ inputs.mpfr-version }}
-          ./configure --with-gmp-include=${{ github.workspace }}/gmp-${{ inputs.gmp-version }} --with-gmp-lib=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs ${{ env.BUILD_TYPE_ARGS }} --host=${{ env.HOST }}
+          ./configure --host=${{ env.HOST }} --enable-thread-safe \
+            --with-gmp-include=${{ github.workspace }}/gmp-${{ inputs.gmp-version }} \
+            --with-gmp-lib=${{ github.workspace }}/gmp-${{ inputs.gmp-version }}/.libs \
+            ${{ env.BUILD_TYPE_ARGS }}
 
       - name: Build MPFR
         run: |
