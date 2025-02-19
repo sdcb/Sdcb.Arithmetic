@@ -22,7 +22,7 @@ static void Run(string exe, string args, Encoding encoding) => Util.Cmd(exe, arg
 static ProjectVersion[] Projects = new[]
 {
 	new ProjectVersion("Sdcb.Arithmetic.Gmp", "6.3.0-preview.1"), 
-	new ProjectVersion("Sdcb.Arithmetic.Mpfr", "4.2.1-preview.1"), 
+	new ProjectVersion("Sdcb.Arithmetic.Mpfr", "4.2.1-preview.2"), 
 };
 
 static async Task DownloadFile(Uri uri, string localFile, CancellationToken cancellationToken = default)

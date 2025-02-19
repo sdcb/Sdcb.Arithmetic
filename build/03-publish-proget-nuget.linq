@@ -44,7 +44,8 @@ void Refresh()
 		Functions = Util.HorizontalRun(true,
 			new Button("✅Publish All", _ => pkgs.ToList().ForEach(pkg => PublishProGet(pkg))),
 			new Button("⚠Publish All to NuGet", _ => pkgs.ToList().ForEach(pkg => PublishNuGet(pkg))),
-			new Button("📂Open Folder", _ => Process.Start("explorer", @$"/select, ""{dir}"""))
+			new Button("📂Open Folder", _ => Process.Start("explorer", @$"/select, ""{dir}""")),
+			new Button("❌Delete ALL", _ => { pkgs.ToList().ForEach(x => File.Delete(x)); Refresh(); })
 			),
 		Table = BuildTable()
 	};
