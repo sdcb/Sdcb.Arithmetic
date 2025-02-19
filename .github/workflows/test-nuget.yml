@@ -27,23 +27,22 @@ jobs:
     - name: Build and Test
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
-        dotnet build -c Release
-        dotnet test -c Release --no-build
+        dotnet test -c Release
   test-mpfr:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
     - name: Ensure NuGet Packages
       run: |
-        cd ~/src/Sdcb.Arithmetic.Gmp
+        cd src/Sdcb.Arithmetic.Gmp
         nuget install Sdcb.Arithmetic.Gmp -Version ${{ env.GMP_NUGET_VERSION }} -Source ${{ env.NUGET_REGISTRY }}
         cat Sdcb.Arithmetic.Gmp.csproj
-
-        cd ~/src/Sdcb.Arithmetic.Mpfr.Tests
+    - name: Ensure Test NuGet Packages
+      run: |
+        cd src/Sdcb.Arithmetic.Mpfr.Tests
         nuget install Sdcb.Arithmetic.Mpfr.runtime.win-x64 -Version ${{ env.MPFR_NUGET_VERSION }} -Source ${{ env.NUGET_REGISTRY }}
         cat Sdcb.Arithmetic.Mpfr.Tests.csproj
     - name: Build and Test
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
-        dotnet build -c Release
-        dotnet test -c Release --no-build
+        dotnet test -c Release
