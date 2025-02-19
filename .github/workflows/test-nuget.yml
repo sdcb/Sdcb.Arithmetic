@@ -45,7 +45,7 @@ jobs:
     - name: Download MPFR Native NuGet
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
-        dotnet add package Sdcb.Arithmetic.Gmp.runtime.${{ matrix.os }}-${{ matrix.arch }} -v ${{ env.GMP_NUGET_VERSION }} --no-restore
+        dotnet add package Sdcb.Arithmetic.Mpfr.runtime.${{ matrix.os }}-${{ matrix.arch }} -v ${{ env.GMP_NUGET_VERSION }} --no-restore
         cat Sdcb.Arithmetic.Mpfr.Tests.csproj
     - name: DotNet Build for MPFR
       run: |
