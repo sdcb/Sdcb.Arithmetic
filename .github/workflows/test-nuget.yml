@@ -21,22 +21,18 @@ jobs:
         include: 
           - { os: win, arch: x64 }
           - { os: win, arch: x86 }
-          - { os: linux, arch: x64 }
     runs-on: ${{ matrix.os == 'win' && 'windows-latest' || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v4
+    # GMP
     - name: Configure NuGet Source
       run: dotnet nuget add source ${{ env.NUGET_REGISTRY }} --name ProGet
+
     - name: Download GMP Native NuGet
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
         dotnet add package Sdcb.Arithmetic.Gmp.runtime.${{ matrix.os }}-${{ matrix.arch }} -v ${{ env.GMP_NUGET_VERSION }} --no-restore
         cat Sdcb.Arithmetic.Gmp.Tests.csproj
-    - name: Download MPFR Native NuGet
-      run: |
-        cd src/Sdcb.Arithmetic.Mpfr.Tests
-        dotnet add package Sdcb.Arithmetic.Gmp.runtime.${{ matrix.os }}-${{ matrix.arch }} -v ${{ env.GMP_NUGET_VERSION }} --no-restore
-        cat Sdcb.Arithmetic.Mpfr.Tests.csproj
     - name: DotNet Build for GMP
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
@@ -45,6 +41,12 @@ jobs:
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
         dotnet test -c Release --no-build --runtime ${{ matrix.os }}-${{ matrix.arch }}
+    # MPFR
+    - name: Download MPFR Native NuGet
+      run: |
+        cd src/Sdcb.Arithmetic.Mpfr.Tests
+        dotnet add package Sdcb.Arithmetic.Gmp.runtime.${{ matrix.os }}-${{ matrix.arch }} -v ${{ env.GMP_NUGET_VERSION }} --no-restore
+        cat Sdcb.Arithmetic.Mpfr.Tests.csproj
     - name: DotNet Build for MPFR
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
