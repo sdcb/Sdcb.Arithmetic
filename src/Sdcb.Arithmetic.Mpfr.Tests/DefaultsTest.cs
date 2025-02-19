@@ -39,8 +39,16 @@ public class DefaultsTest
     [Fact]
     public void AssignRounding()
     {
-        MpfrFloat.DefaultRounding = MpfrRounding.ToPositiveInfinity;
-        Assert.Equal(MpfrRounding.ToPositiveInfinity, MpfrFloat.DefaultRounding);
+        MpfrRounding old = MpfrFloat.DefaultRounding;
+        try
+        {
+            MpfrFloat.DefaultRounding = MpfrRounding.ToPositiveInfinity;
+            Assert.Equal(MpfrRounding.ToPositiveInfinity, MpfrFloat.DefaultRounding);
+        }
+        finally
+        {
+            MpfrFloat.DefaultRounding = old;
+        }
     }
 
     [Fact]
@@ -64,24 +72,48 @@ public class DefaultsTest
     [Fact]
     public void AssignDefaultPrecision()
     {
-        MpfrFloat.DefaultPrecision = 100;
-        Assert.Equal(100, MpfrFloat.DefaultPrecision);
+        int old = MpfrFloat.DefaultPrecision;
+        try
+        {
+            MpfrFloat.DefaultPrecision = 100;
+            Assert.Equal(100, MpfrFloat.DefaultPrecision);
+        }
+        finally
+        {
+            MpfrFloat.DefaultPrecision = old;
+        }
     }
 
     [Fact]
     public void AssignDefaultPrecisionEffectDefaultFloat()
     {
-        MpfrFloat.DefaultPrecision = 100;
-        using MpfrFloat flt = new();
-        Assert.Equal(100, flt.Precision);
+        int old = MpfrFloat.DefaultPrecision;
+        try
+        {
+            MpfrFloat.DefaultPrecision = 100;
+            using MpfrFloat flt = new();
+            Assert.Equal(100, flt.Precision);
+        }
+        finally
+        {
+            MpfrFloat.DefaultPrecision = old;
+        }
     }
 
     [Fact]
     public void SpecifiedPrecisionShouldWork()
     {
-        MpfrFloat.DefaultPrecision = 100;
-        using MpfrFloat flt = new(precision: 80);
-        Assert.Equal(80, flt.Precision);
+        int old = MpfrFloat.DefaultPrecision;
+        try
+        {
+            MpfrFloat.DefaultPrecision = 100;
+            using MpfrFloat flt = new(precision: 80);
+            Assert.Equal(80, flt.Precision);
+        }
+        finally
+        {
+            MpfrFloat.DefaultPrecision = old;
+        }
     }
 
     [Theory]
