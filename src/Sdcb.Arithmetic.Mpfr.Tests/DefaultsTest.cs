@@ -46,10 +46,12 @@ public class DefaultsTest
     [Fact]
     public void AssignRoundingDifferentThread()
     {
-        Task.Run(() =>
+        Thread t = new((p) =>
         {
             MpfrFloat.DefaultRounding = MpfrRounding.ToPositiveInfinity;
-        }).Wait();
+        });
+        t.Start();
+        t.Join();
         Assert.Equal(MpfrRounding.ToEven, MpfrFloat.DefaultRounding);
     }
 

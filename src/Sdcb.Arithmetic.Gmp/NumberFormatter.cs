@@ -33,7 +33,7 @@ internal static class NumberFormatter
 
 /// <param name="NumberString">the whole string, might starts with '-' means negative, without decimal point</param>
 /// <param name="DecimalPosition">the decimal point position</param>
-internal record struct DecimalNumberString(string NumberString, int DecimalPosition)
+internal record struct DecimalNumberString(string? NumberString, int DecimalPosition)
 {
     /// <summary>
     /// Split number into integer part, decimal part and sign.

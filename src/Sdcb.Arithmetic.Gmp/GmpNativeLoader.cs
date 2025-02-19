@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+[assembly: InternalsVisibleTo("Sdcb.Arithmetic.Mpfr")]
 
 namespace Sdcb.Arithmetic.Gmp;
 
-public static class GmpNativeLoader
+internal static class GmpNativeLoader
 {
     static GmpNativeLoader()
     {

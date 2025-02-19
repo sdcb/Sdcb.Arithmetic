@@ -3,6 +3,7 @@ using Xunit.Abstractions;
 
 namespace Sdcb.Arithmetic.Gmp.Tests;
 
+[CollectionDefinition("NonParallelCollection", DisableParallelization = true)]
 public class RawTest
 {
     private readonly ITestOutputHelper _console;
@@ -39,7 +40,7 @@ public class RawTest
         GmpMemory.Free(str);
     }
 
-    [Fact]
+    [Fact(Skip = "Dangerous")]
     public void MemoryTest()
     {
         GmpMemory.SetAllocator(

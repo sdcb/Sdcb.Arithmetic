@@ -361,11 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-win32-gmp-10/
-win32-mpfr-6/
-win64-gmp-10/
-win64-mpfr-6/
-/build/linux64-libgmp.so
-/build/linux64-libmpfr.so
+
+
 *.nuspec
 *.props
+/src/Sdcb.Arithmetic.Mpfr/Sdcb.Arithmetic.Gmp.6.3.0-preview.1

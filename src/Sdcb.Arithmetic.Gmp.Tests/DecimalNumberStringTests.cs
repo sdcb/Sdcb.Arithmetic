@@ -25,7 +25,7 @@ public class DecimalNumberStringTests
 
     [Theory]
     [InlineData(null, 2)]
-    public void TestSplitNumberString_ThrowsArgumentException(string numberString, int decimalPosition)
+    public void TestSplitNumberString_ThrowsArgumentException(string? numberString, int decimalPosition)
     {
         Assert.Throws<ArgumentNullException>(() => new DecimalNumberString(numberString, decimalPosition).SplitNumberString());
     }

@@ -45,7 +45,7 @@ public class GmpRationalArithmeticTests
     {
         using GmpRational op1 = GmpRational.Parse(op1String);
         using GmpRational op2 = GmpRational.Parse(op2String);
-        using GmpRational result = new GmpRational();
+        using GmpRational result = new();
 
         GmpRational.AddInplace(result, op1, op2);
         Assert.Equal(expected, result.ToString());

@@ -19,7 +19,7 @@ public class GmpIntegerAllocTest
         "12345678901234567890123456789012345678901234567890123456")]
     public void RellocToFitShouldOk(string num)
     {
-        using GmpInteger n = new GmpInteger(bitCount: 65536);
+        using GmpInteger n = new(bitCount: 65536);
         n.Assign(num);
         n.ReallocToFit();
         Assert.True(n.Raw.Allocated * GmpLib.LimbBitSize < 65536);

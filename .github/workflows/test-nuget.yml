@@ -1,0 +1,49 @@
+name: Test NuGet
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/test-nuget.yml
+      - src/**
+  workflow_dispatch:
+
+env:
+  NUGET_REGISTRY: https://proget.starworks.cc:88/nuget/test/v3/index.json
+  GMP_NUGET_VERSION: 6.3.0-preview.1
+  MPFR_NUGET_VERSION: 4.2.1-preview.2
+  
+jobs:
+  test-gmp:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Ensure NuGet Packages
+      run: |
+        cd src/Sdcb.Arithmetic.Gmp.Tests
+        nuget install Sdcb.Arithmetic.Gmp.runtime.win-x64 -Version ${{ env.GMP_NUGET_VERSION }} -Source ${{ env.NUGET_REGISTRY }}
+        cat Sdcb.Arithmetic.Gmp.Tests.csproj
+    - name: Build and Test
+      run: |
+        cd src/Sdcb.Arithmetic.Gmp.Tests
+        dotnet build -c Release
+        dotnet test -c Release --no-build
+  test-mpfr:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Ensure NuGet Packages
+      run: |
+        cd ~/src/Sdcb.Arithmetic.Gmp
+        nuget install Sdcb.Arithmetic.Gmp -Version ${{ env.GMP_NUGET_VERSION }} -Source ${{ env.NUGET_REGISTRY }}
+        cat Sdcb.Arithmetic.Gmp.csproj
+
+        cd ~/src/Sdcb.Arithmetic.Mpfr.Tests
+        nuget install Sdcb.Arithmetic.Mpfr.runtime.win-x64 -Version ${{ env.MPFR_NUGET_VERSION }} -Source ${{ env.NUGET_REGISTRY }}
+        cat Sdcb.Arithmetic.Mpfr.Tests.csproj
+    - name: Build and Test
+      run: |
+        cd src/Sdcb.Arithmetic.Mpfr.Tests
+        dotnet build -c Release
+        dotnet test -c Release --no-build

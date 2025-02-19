@@ -36,7 +36,7 @@
 
   <ItemGroup>
     <ProjectReference Condition="'$(Configuration)' == 'Debug'" Include="..\Sdcb.Arithmetic.Gmp\Sdcb.Arithmetic.Gmp.csproj" />
-    <PackageReference Condition="'$(Configuration)' != 'Debug'" Include="Sdcb.Arithmetic.Gmp" Version="6.2.1" />
+    <PackageReference Condition="'$(Configuration)' != 'Debug'" Include="Sdcb.Arithmetic.Gmp" Version="6.3.0-preview.1" />
   </ItemGroup>
 
 </Project>

@@ -104,10 +104,10 @@ public class DecimalStringPartsTests
     [InlineData(false, "", "123", 2)]
     [InlineData(false, " ", "123", 2)]
     [InlineData(false, "123", null, 2)]
-    public void TestFormatAsGroupedInteger_ThrowsException(bool isNegative, string integerPart, string decimalPart, int decimalLength)
+    public void TestFormatAsGroupedInteger_ThrowsException(bool isNegative, string? integerPart, string? decimalPart, int decimalLength)
     {
         // Arrange
-        DecimalStringParts parts = new(isNegative, integerPart, decimalPart);
+        DecimalStringParts parts = new(isNegative, integerPart!, decimalPart!);
 
         // Act and Assert
         Assert.ThrowsAny<ArgumentException>(() =>
