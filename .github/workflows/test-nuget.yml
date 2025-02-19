@@ -21,30 +21,12 @@ jobs:
     - uses: actions/checkout@v4
     - name: Configure NuGet Source
       run: nuget sources add -Name StarWorks -Source ${{ env.NUGET_REGISTRY }}
-    - name: Ensure NuGet Packages
+    - name: Download GMP Native NuGet
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
         dotnet add package Sdcb.Arithmetic.Gmp.runtime.win-x64 -v ${{ env.GMP_NUGET_VERSION }} --no-restore
         cat Sdcb.Arithmetic.Gmp.Tests.csproj
-    - name: DotNet Restore
-      run: |
-        cd src/Sdcb.Arithmetic.Gmp.Tests
-        dotnet restore
-    - name: DotNet Build
-      run: |
-        cd src/Sdcb.Arithmetic.Gmp.Tests
-        dotnet build -c Release --no-restore
-    - name: Test
-      run: |
-        cd src/Sdcb.Arithmetic.Gmp.Tests
-        dotnet test -c Release --no-build
-  test-mpfr:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Configure NuGet Source
-      run: nuget sources add -Name StarWorks -Source ${{ env.NUGET_REGISTRY }}
-    - name: Ensure Test NuGet Packages
+    - name: Download MPFR Native NuGet
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
         dotnet add package Sdcb.Arithmetic.Gmp.runtime.win-x64 -v ${{ env.GMP_NUGET_VERSION }} --no-restore
@@ -52,7 +34,11 @@ jobs:
     - name: DotNet Build
       run: |
         dotnet build -c Release
-    - name: Test
+    - name: Test GMP
+      run: |
+        cd src/Sdcb.Arithmetic.Gmp.Tests
+        dotnet test -c Release --no-build
+    - name: Test MPFR
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
         dotnet test -c Release --no-build
