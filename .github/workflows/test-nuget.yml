@@ -48,12 +48,13 @@ jobs:
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
         dotnet add package Sdcb.Arithmetic.Gmp.runtime.win-x64 -v ${{ env.GMP_NUGET_VERSION }} --no-restore
+        cat Sdcb.Arithmetic.Mpfr.Tests.csproj
     - name: DotNet Restore
       run: |
         dotnet restore
     - name: DotNet Build
       run: |
-        dotnet build -c Release
+        dotnet build -c Release --no-restore
     - name: Test
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
