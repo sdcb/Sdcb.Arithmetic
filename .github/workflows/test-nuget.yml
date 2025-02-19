@@ -37,13 +37,18 @@ jobs:
         cd src/Sdcb.Arithmetic.Mpfr.Tests
         dotnet add package Sdcb.Arithmetic.Gmp.runtime.${{ matrix.os }}-${{ matrix.arch }} -v ${{ env.GMP_NUGET_VERSION }} --no-restore
         cat Sdcb.Arithmetic.Mpfr.Tests.csproj
-    - name: DotNet Build
+    - name: DotNet Build for GMP
       run: |
-        dotnet build -c Release
+        cd src/Sdcb.Arithmetic.Gmp.Tests
+        dotnet build -c Release --runtime ${{ matrix.os }}-${{ matrix.arch }}
     - name: Test GMP
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
         dotnet test -c Release --no-build --runtime ${{ matrix.os }}-${{ matrix.arch }}
+    - name: DotNet Build for MPFR
+      run: |
+        cd src/Sdcb.Arithmetic.Mpfr.Tests
+        dotnet build -c Release --runtime ${{ matrix.os }}-${{ matrix.arch }}
     - name: Test MPFR
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
