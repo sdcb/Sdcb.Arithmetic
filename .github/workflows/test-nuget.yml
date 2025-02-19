@@ -39,7 +39,7 @@ jobs:
         cat Sdcb.Arithmetic.Mpfr.Tests.csproj
     - name: DotNet Build
       run: |
-        dotnet build -c Release --runtime ${{ matrix.os }}-${{ matrix.arch }}
+        dotnet build -c Release
     - name: Test GMP
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
