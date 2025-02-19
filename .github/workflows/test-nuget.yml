@@ -19,30 +19,44 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Configure NuGet Source
+      run: nuget sources add -Name StarWorks -Source ${{ env.NUGET_REGISTRY }}
     - name: Ensure NuGet Packages
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
-        nuget install Sdcb.Arithmetic.Gmp.runtime.win-x64 -Version ${{ env.GMP_NUGET_VERSION }} -Source ${{ env.NUGET_REGISTRY }}
+        dotnet add package Sdcb.Arithmetic.Gmp.runtime.win-x64 -v ${{ env.GMP_NUGET_VERSION }}
         cat Sdcb.Arithmetic.Gmp.Tests.csproj
-    - name: Build and Test
+    - name: DotNet Restore
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
-        dotnet test -c Release
+        dotnet restore
+    - name: DotNet Build
+      run: |
+        cd src/Sdcb.Arithmetic.Gmp.Tests
+        dotnet build -c Release --no-restore
+    - name: Test
+      run: |
+        cd src/Sdcb.Arithmetic.Gmp.Tests
+        dotnet test -c Release --no-build
   test-mpfr:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Ensure NuGet Packages
-      run: |
-        cd src/Sdcb.Arithmetic.Gmp
-        nuget install Sdcb.Arithmetic.Gmp -Version ${{ env.GMP_NUGET_VERSION }} -Source ${{ env.NUGET_REGISTRY }}
-        cat Sdcb.Arithmetic.Gmp.csproj
+    - name: Configure NuGet Source
+      run: nuget sources add -Name StarWorks -Source ${{ env.NUGET_REGISTRY }}
     - name: Ensure Test NuGet Packages
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
-        nuget install Sdcb.Arithmetic.Mpfr.runtime.win-x64 -Version ${{ env.MPFR_NUGET_VERSION }} -Source ${{ env.NUGET_REGISTRY }}
-        cat Sdcb.Arithmetic.Mpfr.Tests.csproj
-    - name: Build and Test
+        dotnet add package Sdcb.Arithmetic.Gmp.runtime.win-x64 -v ${{ env.GMP_NUGET_VERSION }}
+    - name: DotNet Restore
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
-        dotnet test -c Release
+        dotnet restore
+    - name: DotNet Build
+      run: |
+        cd src/Sdcb.Arithmetic.Mpfr.Tests
+        dotnet build -c Release --no-restore
+    - name: Test
+      run: |
+        cd src/Sdcb.Arithmetic.Mpfr.Tests
+        dotnet test -c Release --no-build
