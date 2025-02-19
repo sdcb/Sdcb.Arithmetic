@@ -1900,7 +1900,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         fixed (Mpz_t* pq = &q.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            GmpLib.__gmpz_divexact_ui((IntPtr)pq, (IntPtr)pn, d);
+            GmpLib.__gmpz_divexact_ui((IntPtr)pq, (IntPtr)pn, new CULong(d));
         }
     }
 
@@ -1945,7 +1945,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* pn = &n.Raw)
         {
-            return GmpLib.__gmpz_congruent_ui_p((IntPtr)pn, c, d) != 0;
+            return GmpLib.__gmpz_congruent_ui_p((IntPtr)pn, new CULong(c), new CULong(d)) != 0;
         }
     }
 
@@ -1961,7 +1961,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         fixed (Mpz_t* pn = &n.Raw)
         fixed (Mpz_t* pc = &c.Raw)
         {
-            return GmpLib.__gmpz_congruent_2exp_p((IntPtr)pn, (IntPtr)pc, b) != 0;
+            return GmpLib.__gmpz_congruent_2exp_p((IntPtr)pn, (IntPtr)pc, new CULong(b)) != 0;
         }
     }
     #endregion
@@ -2022,7 +2022,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         fixed (Mpz_t* pbase = &@base.Raw)
         fixed (Mpz_t* pmod = &mod.Raw)
         {
-            GmpLib.__gmpz_powm_ui((IntPtr)pr, (IntPtr)pbase, exp, (IntPtr)pmod);
+            GmpLib.__gmpz_powm_ui((IntPtr)pr, (IntPtr)pbase, new CULong(exp), (IntPtr)pmod);
         }
     }
 
@@ -2088,7 +2088,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pbase = &@base.Raw)
         {
-            GmpLib.__gmpz_pow_ui((IntPtr)pr, (IntPtr)pbase, exp);
+            GmpLib.__gmpz_pow_ui((IntPtr)pr, (IntPtr)pbase, new CULong(exp));
         }
     }
 
@@ -2116,7 +2116,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* pr = &r.Raw)
         {
-            GmpLib.__gmpz_ui_pow_ui((IntPtr)pr, @base, exp);
+            GmpLib.__gmpz_ui_pow_ui((IntPtr)pr, new CULong(@base), new CULong(exp));
         }
     }
 
@@ -2153,7 +2153,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         fixed (Mpz_t* pr = &r.Raw)
         fixed (Mpz_t* pop = &op.Raw)
         {
-            return GmpLib.__gmpz_root((IntPtr)pr, (IntPtr)pop, n) != 0;
+            return GmpLib.__gmpz_root((IntPtr)pr, (IntPtr)pop,  new CULong(n)) != 0;
         }
     }
 
@@ -2186,7 +2186,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         fixed (Mpz_t* preminder = &reminder.Raw)
         fixed (Mpz_t* pop = &op.Raw)
         {
-            GmpLib.__gmpz_rootrem((IntPtr)pr, (IntPtr)preminder, (IntPtr)pop, n);
+            GmpLib.__gmpz_rootrem((IntPtr)pr, (IntPtr)preminder, (IntPtr)pop, new CULong(n));
         }
     }
 
@@ -2327,7 +2327,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
         {
-            return GmpLib.__gmpz_gcd_ui((IntPtr)pr, (IntPtr)p1, op2);
+            return (uint)GmpLib.__gmpz_gcd_ui((IntPtr)pr, (IntPtr)p1, new CULong(op2)).Value;
         }
     }
 
@@ -2426,7 +2426,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* p1 = &op1.Raw)
         {
-            GmpLib.__gmpz_lcm_ui((IntPtr)pr, (IntPtr)p1, op2);
+            GmpLib.__gmpz_lcm_ui((IntPtr)pr, (IntPtr)p1, new CULong(op2));
         }
     }
 
@@ -2518,7 +2518,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* p1 = &a.Raw)
         {
-            return GmpLib.__gmpz_kronecker_si((IntPtr)p1, b);
+            return GmpLib.__gmpz_kronecker_si((IntPtr)p1, new CLong(b));
         }
     }
 
@@ -2532,7 +2532,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* p1 = &a.Raw)
         {
-            return GmpLib.__gmpz_kronecker_ui((IntPtr)p1, b);
+            return GmpLib.__gmpz_kronecker_ui((IntPtr)p1, new CULong(b));
         }
     }
 
@@ -2577,7 +2577,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         fixed (Mpz_t* pop = &op.Raw)
         fixed (Mpz_t* pf = &f.Raw)
         {
-            return GmpLib.__gmpz_remove((IntPtr)pr, (IntPtr)pop, (IntPtr)pf);
+            return (uint)GmpLib.__gmpz_remove((IntPtr)pr, (IntPtr)pop, (IntPtr)pf).Value;
         }
     }
 
@@ -2614,7 +2614,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* pr = &rop.Raw)
         {
-            GmpLib.__gmpz_fac_ui((IntPtr)pr, n);
+            GmpLib.__gmpz_fac_ui((IntPtr)pr, new CULong(n));
         }
     }
 
@@ -2640,7 +2640,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* pr = &rop.Raw)
         {
-            GmpLib.__gmpz_2fac_ui((IntPtr)pr, n);
+            GmpLib.__gmpz_2fac_ui((IntPtr)pr, new CULong(n));
         }
     }
 
@@ -2673,7 +2673,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* pr = &rop.Raw)
         {
-            GmpLib.__gmpz_mfac_uiui((IntPtr)pr, n, m);
+            GmpLib.__gmpz_mfac_uiui((IntPtr)pr, new CULong(n), new CULong(m));
         }
     }
 
@@ -2704,7 +2704,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (Mpz_t* pn = &n.Raw)
         {
-            GmpLib.__gmpz_bin_ui((IntPtr)pr, (IntPtr)pn, k);
+            GmpLib.__gmpz_bin_ui((IntPtr)pr, (IntPtr)pn, new CULong(k));
         }
     }
 
@@ -2734,7 +2734,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* pr = &rop.Raw)
         {
-            GmpLib.__gmpz_bin_uiui((IntPtr)pr, n, k);
+            GmpLib.__gmpz_bin_uiui((IntPtr)pr, new CULong(n), new CULong(k));
         }
     }
 
@@ -2763,7 +2763,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* pr = &fn.Raw)
         {
-            GmpLib.__gmpz_fib_ui((IntPtr)pr, n);
+            GmpLib.__gmpz_fib_ui((IntPtr)pr, new CULong(n));
         }
     }
 
@@ -2794,7 +2794,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         fixed (Mpz_t* pr = &fn.Raw)
         fixed (Mpz_t* pr1 = &fnsub1.Raw)
         {
-            GmpLib.__gmpz_fib2_ui((IntPtr)pr, (IntPtr)pr1, n);
+            GmpLib.__gmpz_fib2_ui((IntPtr)pr, (IntPtr)pr1, new CULong(n));
         }
     }
 
@@ -2823,7 +2823,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* pr = &fn.Raw)
         {
-            GmpLib.__gmpz_lucnum_ui((IntPtr)pr, n);
+            GmpLib.__gmpz_lucnum_ui((IntPtr)pr, new CULong(n));
         }
     }
 
@@ -2857,7 +2857,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         fixed (Mpz_t* pr = &fn.Raw)
         fixed (Mpz_t* pr1 = &fnsub1.Raw)
         {
-            GmpLib.__gmpz_lucnum2_ui((IntPtr)pr, (IntPtr)pr1, n);
+            GmpLib.__gmpz_lucnum2_ui((IntPtr)pr, (IntPtr)pr1, new CULong(n));
         }
     }
 
@@ -3037,7 +3037,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* p1 = &op1.Raw)
         {
-            return GmpLib.__gmpz_cmp_si((IntPtr)p1, op2);
+            return GmpLib.__gmpz_cmp_si((IntPtr)p1, new CLong(op2));
         }
     }
 
@@ -3106,7 +3106,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* p1 = &op1.Raw)
         {
-            return GmpLib.__gmpz_cmp_ui((IntPtr)p1, op2);
+            return GmpLib.__gmpz_cmp_ui((IntPtr)p1, new CULong(op2));
         }
     }
 
@@ -3235,7 +3235,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* p1 = &op1.Raw)
         {
-            return GmpLib.__gmpz_cmpabs_ui((IntPtr)p1, op2);
+            return GmpLib.__gmpz_cmpabs_ui((IntPtr)p1, new CULong(op2));
         }
     }
 
@@ -3383,7 +3383,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            return GmpLib.__gmpz_popcount((IntPtr)ptr);
+            return (uint)GmpLib.__gmpz_popcount((IntPtr)ptr).Value;
         }
     }
 
@@ -3398,7 +3398,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
         fixed (Mpz_t* p1 = &op1.Raw)
         fixed (Mpz_t* p2 = &op2.Raw)
         {
-            return GmpLib.__gmpz_hamdist((IntPtr)p1, (IntPtr)p2);
+            return (uint)GmpLib.__gmpz_hamdist((IntPtr)p1, (IntPtr)p2).Value;
         }
     }
 
@@ -3411,7 +3411,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            return GmpLib.__gmpz_scan0((IntPtr)ptr, startingBit);
+            return (uint)GmpLib.__gmpz_scan0((IntPtr)ptr, new CULong(startingBit)).Value;
         }
     }
 
@@ -3424,7 +3424,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            return GmpLib.__gmpz_scan1((IntPtr)ptr, startingBit);
+            return (uint)GmpLib.__gmpz_scan1((IntPtr)ptr, new CULong(startingBit)).Value;
         }
     }
 
@@ -3439,7 +3439,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            GmpLib.__gmpz_setbit((IntPtr)ptr, bitIndex);
+            GmpLib.__gmpz_setbit((IntPtr)ptr, new CULong(bitIndex));
         }
     }
 
@@ -3454,7 +3454,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            GmpLib.__gmpz_clrbit((IntPtr)ptr, bitIndex);
+            GmpLib.__gmpz_clrbit((IntPtr)ptr, new CULong(bitIndex));
         }
     }
 
@@ -3469,7 +3469,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            GmpLib.__gmpz_combit((IntPtr)ptr, bitIndex);
+            GmpLib.__gmpz_combit((IntPtr)ptr, new CULong(bitIndex));
         }
     }
 
@@ -3482,7 +3482,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            return GmpLib.__gmpz_tstbit((IntPtr)ptr, bitIndex);
+            return GmpLib.__gmpz_tstbit((IntPtr)ptr, new CULong(bitIndex));
         }
     }
 
@@ -3499,7 +3499,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* ptr = &rop.Raw)
         {
-            GmpLib.__gmpz_random((IntPtr)ptr, maxLimbCount);
+            GmpLib.__gmpz_random((IntPtr)ptr, new CLong(maxLimbCount));
         }
     }
 
@@ -3530,7 +3530,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* ptr = &rop.Raw)
         {
-            GmpLib.__gmpz_random((IntPtr)ptr, maxLimbCount);
+            GmpLib.__gmpz_random((IntPtr)ptr, new CLong(maxLimbCount));
         }
     }
 

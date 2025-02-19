@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
 namespace Sdcb.Arithmetic.Gmp;
@@ -100,7 +101,7 @@ public class GmpRandom : IDisposable
     {
         fixed (GmpRandomState* ptr = &Raw)
         {
-            GmpLib.__gmp_randseed_ui((IntPtr)ptr, seed);
+            GmpLib.__gmp_randseed_ui((IntPtr)ptr, new CULong(seed));
         }
     }
 
@@ -216,7 +217,7 @@ public class GmpRandom : IDisposable
         GmpRandomState state = new();
         fixed (Mpz_t* pa = &a.Raw)
         {
-            GmpLib.__gmp_randinit_lc_2exp((IntPtr)(&state), (IntPtr)pa, c, m2exp);
+            GmpLib.__gmp_randinit_lc_2exp((IntPtr)(&state), (IntPtr)pa, new CULong(c), new CULong(m2exp));
         }
 
         return new GmpRandom(state);
@@ -235,7 +236,7 @@ public class GmpRandom : IDisposable
         GmpRandomState state = new();
         fixed (Mpz_t* pa = &a.Raw)
         {
-            GmpLib.__gmp_randinit_lc_2exp((IntPtr)(&state), (IntPtr)pa, c, m2exp);
+            GmpLib.__gmp_randinit_lc_2exp((IntPtr)(&state), (IntPtr)pa, new CULong(c), new CULong(m2exp));
         }
 
         return new GmpRandom(state, seed);
@@ -254,7 +255,7 @@ public class GmpRandom : IDisposable
         GmpRandomState state = new();
         fixed (Mpz_t* pa = &a.Raw)
         {
-            GmpLib.__gmp_randinit_lc_2exp((IntPtr)(&state), (IntPtr)pa, c, m2exp);
+            GmpLib.__gmp_randinit_lc_2exp((IntPtr)(&state), (IntPtr)pa, new CULong(c), new CULong(m2exp));
         }
 
         return new GmpRandom(state, seed);
@@ -269,7 +270,7 @@ public class GmpRandom : IDisposable
     public static unsafe GmpRandom CreateLC2ExpSize(uint size = 128)
     {
         GmpRandomState state = new();
-        if (GmpLib.__gmp_randinit_lc_2exp_size((IntPtr)(&state), size) == 0)
+        if (GmpLib.__gmp_randinit_lc_2exp_size((IntPtr)(&state), new CULong(size)) == 0)
         {
             throw new ArgumentOutOfRangeException(nameof(size));
         }
@@ -286,7 +287,7 @@ public class GmpRandom : IDisposable
     public static unsafe GmpRandom CreateLC2ExpSize(uint size, uint seed)
     {
         GmpRandomState state = new();
-        if (GmpLib.__gmp_randinit_lc_2exp_size((IntPtr)(&state), size) == 0)
+        if (GmpLib.__gmp_randinit_lc_2exp_size((IntPtr)(&state), new CULong(size)) == 0)
         {
             throw new ArgumentOutOfRangeException(nameof(size));
         }
@@ -303,7 +304,7 @@ public class GmpRandom : IDisposable
     public static unsafe GmpRandom CreateLC2ExpSize(uint size, GmpInteger seed)
     {
         GmpRandomState state = new();
-        if (GmpLib.__gmp_randinit_lc_2exp_size((IntPtr)(&state), size) == 0)
+        if (GmpLib.__gmp_randinit_lc_2exp_size((IntPtr)(&state), new CULong(size)) == 0)
         {
             throw new ArgumentOutOfRangeException(nameof(size));
         }
@@ -322,7 +323,7 @@ public class GmpRandom : IDisposable
         fixed (GmpRandomState* ptr = &Raw)
         {
             const int bitCount = 32;
-            return (int)GmpLib.__gmp_urandomb_ui((IntPtr)ptr, bitCount);
+            return (int)GmpLib.__gmp_urandomb_ui((IntPtr)ptr, new CULong(bitCount)).Value;
         }
     }
 
@@ -340,7 +341,7 @@ public class GmpRandom : IDisposable
         }
         fixed (GmpRandomState* ptr = &Raw)
         {
-            return (int)GmpLib.__gmp_urandomm_ui((IntPtr)ptr, (uint)maxValue);
+            return (int)GmpLib.__gmp_urandomm_ui((IntPtr)ptr, new CULong((uint)maxValue)).Value;
         }
     }
 
@@ -360,7 +361,7 @@ public class GmpRandom : IDisposable
         uint diff = (uint)(maxValue - minValue);
         fixed (GmpRandomState* ptr = &Raw)
         {
-            return (int)(minValue + GmpLib.__gmp_urandomm_ui((IntPtr)ptr, diff));
+            return (int)(minValue + (uint)GmpLib.__gmp_urandomm_ui((IntPtr)ptr, new CULong(diff)).Value);
         }
     }
 
@@ -383,7 +384,7 @@ public class GmpRandom : IDisposable
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (GmpRandomState* prandom = &Raw)
         {
-            GmpLib.__gmpz_urandomb((IntPtr)pr, (IntPtr)prandom, bitCount);
+            GmpLib.__gmpz_urandomb((IntPtr)pr, (IntPtr)prandom, new CULong(bitCount));
         }
     }
 
@@ -418,7 +419,7 @@ public class GmpRandom : IDisposable
         fixed (Mpz_t* pr = &rop.Raw)
         fixed (GmpRandomState* prandom = &Raw)
         {
-            GmpLib.__gmpz_rrandomb((IntPtr)pr, (IntPtr)prandom, bitCount);
+            GmpLib.__gmpz_rrandomb((IntPtr)pr, (IntPtr)prandom, new CULong(bitCount));
         }
     }
 
@@ -483,7 +484,7 @@ public class GmpRandom : IDisposable
         fixed (Mpf_t* pr = &rop.Raw)
         fixed (GmpRandomState* prandom = &Raw)
         {
-            GmpLib.__gmpf_urandomb((IntPtr)pr, (IntPtr)prandom, bitCount);
+            GmpLib.__gmpf_urandomb((IntPtr)pr, (IntPtr)prandom, new CULong(bitCount));
         }
     }
 

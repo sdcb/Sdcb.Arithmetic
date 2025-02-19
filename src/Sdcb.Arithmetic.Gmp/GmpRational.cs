@@ -261,7 +261,7 @@ public class GmpRational : IDisposable, IComparable, IComparable<GmpInteger>, IE
         if (den == 0) throw new DivideByZeroException();
         fixed (Mpq_t* pthis = &Raw)
         {
-            GmpLib.__gmpq_set_ui((IntPtr)pthis, num, den);
+            GmpLib.__gmpq_set_ui((IntPtr)pthis, new CULong(num), new CULong(den));
         }
     }
 
@@ -279,7 +279,7 @@ public class GmpRational : IDisposable, IComparable, IComparable<GmpInteger>, IE
         if (den == 0) throw new DivideByZeroException();
         fixed (Mpq_t* pthis = &Raw)
         {
-            GmpLib.__gmpq_set_si((IntPtr)pthis, num, den);
+            GmpLib.__gmpq_set_si((IntPtr)pthis, new CLong(num), new CULong(den));
         }
     }
 
@@ -584,7 +584,7 @@ public class GmpRational : IDisposable, IComparable, IComparable<GmpInteger>, IE
         fixed (Mpq_t* pr = &rop.Raw)
         fixed (Mpq_t* p1 = &op1.Raw)
         {
-            GmpLib.__gmpq_mul_2exp((IntPtr)pr, (IntPtr)p1, bitCount);
+            GmpLib.__gmpq_mul_2exp((IntPtr)pr, (IntPtr)p1, new CULong(bitCount));
         }
     }
 
@@ -667,7 +667,7 @@ public class GmpRational : IDisposable, IComparable, IComparable<GmpInteger>, IE
         fixed (Mpq_t* pr = &rop.Raw)
         fixed (Mpq_t* p1 = &op1.Raw)
         {
-            GmpLib.__gmpq_div_2exp((IntPtr)pr, (IntPtr)p1, bitCount);
+            GmpLib.__gmpq_div_2exp((IntPtr)pr, (IntPtr)p1, new CULong(bitCount));
         }
     }
 
@@ -1048,7 +1048,7 @@ public class GmpRational : IDisposable, IComparable, IComparable<GmpInteger>, IE
     {
         fixed (Mpq_t* p1 = &op1.Raw)
         {
-            return GmpLib.__gmpq_cmp_ui((IntPtr)p1, num, den);
+            return GmpLib.__gmpq_cmp_ui((IntPtr)p1, new CULong(num), new CULong(den));
         }
     }
 
@@ -1064,7 +1064,7 @@ public class GmpRational : IDisposable, IComparable, IComparable<GmpInteger>, IE
     {
         fixed (Mpq_t* p1 = &op1.Raw)
         {
-            return GmpLib.__gmpq_cmp_si((IntPtr)p1, num, den);
+            return GmpLib.__gmpq_cmp_si((IntPtr)p1, new CLong(num), new CULong(den));
         }
     }
 

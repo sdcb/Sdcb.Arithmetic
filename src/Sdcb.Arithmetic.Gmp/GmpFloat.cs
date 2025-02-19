@@ -18,8 +18,8 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     /// <value>The default precision in bits.</value>
     public static uint DefaultPrecision
     {
-        get => GmpLib.__gmpf_get_default_prec();
-        set => GmpLib.__gmpf_set_default_prec(value);
+        get => (uint)GmpLib.__gmpf_get_default_prec().Value;
+        set => GmpLib.__gmpf_set_default_prec(new CULong(value));
     }
 
     internal Mpf_t Raw;
@@ -60,7 +60,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
             }
             else
             {
-                GmpLib.__gmpf_init2((IntPtr)ptr, precision);
+                GmpLib.__gmpf_init2((IntPtr)ptr, new CULong(precision));
             }
         }
     }
@@ -99,7 +99,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         Mpf_t raw = new();
         Mpf_t* ptr = &raw;
-        GmpLib.__gmpf_init_set_si((IntPtr)ptr, val);
+        GmpLib.__gmpf_init_set_si((IntPtr)ptr, new CLong(val));
         return new GmpFloat(raw);
     }
 
@@ -132,7 +132,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         Mpf_t raw = new();
         Mpf_t* ptr = &raw;
-        GmpLib.__gmpf_init_set_ui((IntPtr)ptr, val);
+        GmpLib.__gmpf_init_set_ui((IntPtr)ptr, new CULong(val));
         return new GmpFloat(raw);
     }
 
@@ -332,14 +332,14 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         {
             fixed (Mpf_t* ptr = &Raw)
             {
-                return GmpLib.__gmpf_get_prec((IntPtr)ptr);
+                return (uint)GmpLib.__gmpf_get_prec((IntPtr)ptr).Value;
             }
         }
         set
         {
             fixed (Mpf_t* ptr = &Raw)
             {
-                GmpLib.__gmpf_set_prec((IntPtr)ptr, value);
+                GmpLib.__gmpf_set_prec((IntPtr)ptr, new CULong(value));
             }
         }
     }
@@ -356,7 +356,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         fixed (Mpf_t* ptr = &Raw)
         {
-            GmpLib.__gmpf_set_prec_raw((IntPtr)ptr, value);
+            GmpLib.__gmpf_set_prec_raw((IntPtr)ptr, new CULong(value));
         }
     }
     #endregion
@@ -384,7 +384,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         fixed (Mpf_t* pthis = &Raw)
         {
-            GmpLib.__gmpf_set_ui((IntPtr)pthis, op);
+            GmpLib.__gmpf_set_ui((IntPtr)pthis, new CULong(op));
         }
     }
 
@@ -396,7 +396,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         fixed (Mpf_t* pthis = &Raw)
         {
-            GmpLib.__gmpf_set_si((IntPtr)pthis, op);
+            GmpLib.__gmpf_set_si((IntPtr)pthis, new CLong(op));
         }
     }
 
@@ -518,7 +518,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         fixed (Mpf_t* ptr = &Raw)
         {
-            return GmpLib.__gmpf_get_si((IntPtr)ptr);
+            return (int)GmpLib.__gmpf_get_si((IntPtr)ptr).Value;
         }
     }
 
@@ -537,7 +537,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         fixed (Mpf_t* ptr = &Raw)
         {
-            return GmpLib.__gmpf_get_ui((IntPtr)ptr);
+            return (uint)GmpLib.__gmpf_get_ui((IntPtr)ptr).Value;
         }
     }
 
@@ -717,7 +717,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         fixed (Mpf_t* prop = &rop.Raw)
         fixed (Mpf_t* pop1 = &op1.Raw)
         {
-            GmpLib.__gmpf_add_ui((IntPtr)prop, (IntPtr)pop1, op2);
+            GmpLib.__gmpf_add_ui((IntPtr)prop, (IntPtr)pop1, new CULong(op2));
         }
     }
 
@@ -748,7 +748,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         fixed (Mpf_t* prop = &rop.Raw)
         fixed (Mpf_t* pop1 = &op1.Raw)
         {
-            GmpLib.__gmpf_sub_ui((IntPtr)prop, (IntPtr)pop1, op2);
+            GmpLib.__gmpf_sub_ui((IntPtr)prop, (IntPtr)pop1, new CULong(op2));
         }
     }
 
@@ -763,7 +763,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         fixed (Mpf_t* prop = &rop.Raw)
         fixed (Mpf_t* pop2 = &op2.Raw)
         {
-            GmpLib.__gmpf_ui_sub((IntPtr)prop, op1, (IntPtr)pop2);
+            GmpLib.__gmpf_ui_sub((IntPtr)prop, new CULong(op1), (IntPtr)pop2);
         }
     }
 
@@ -794,7 +794,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         fixed (Mpf_t* prop = &rop.Raw)
         fixed (Mpf_t* pop1 = &op1.Raw)
         {
-            GmpLib.__gmpf_mul_ui((IntPtr)prop, (IntPtr)pop1, op2);
+            GmpLib.__gmpf_mul_ui((IntPtr)prop, (IntPtr)pop1, new CULong(op2));
         }
     }
 
@@ -825,7 +825,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         fixed (Mpf_t* prop = &rop.Raw)
         fixed (Mpf_t* pop1 = &op1.Raw)
         {
-            GmpLib.__gmpf_div_ui((IntPtr)prop, (IntPtr)pop1, op2);
+            GmpLib.__gmpf_div_ui((IntPtr)prop, (IntPtr)pop1, new CULong(op2));
         }
     }
 
@@ -840,7 +840,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         fixed (Mpf_t* prop = &rop.Raw)
         fixed (Mpf_t* pop2 = &op2.Raw)
         {
-            GmpLib.__gmpf_ui_div((IntPtr)prop, op1, (IntPtr)pop2);
+            GmpLib.__gmpf_ui_div((IntPtr)prop, new CULong(op1), (IntPtr)pop2);
         }
     }
 
@@ -855,7 +855,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         fixed (Mpf_t* prop = &rop.Raw)
         fixed (Mpf_t* pop1 = &op1.Raw)
         {
-            GmpLib.__gmpf_pow_ui((IntPtr)prop, (IntPtr)pop1, op2);
+            GmpLib.__gmpf_pow_ui((IntPtr)prop, (IntPtr)pop1, new CULong(op2));
         }
     }
 
@@ -896,7 +896,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         fixed (Mpf_t* prop = &rop.Raw)
         {
-            GmpLib.__gmpf_sqrt_ui((IntPtr)prop, op);
+            GmpLib.__gmpf_sqrt_ui((IntPtr)prop, new CULong(op));
         }
     }
 
@@ -925,7 +925,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         fixed (Mpf_t* prop = &rop.Raw)
         fixed (Mpf_t* pop1 = &op1.Raw)
         {
-            GmpLib.__gmpf_mul_2exp((IntPtr)prop, (IntPtr)pop1, op2);
+            GmpLib.__gmpf_mul_2exp((IntPtr)prop, (IntPtr)pop1, new CULong(op2));
         }
     }
 
@@ -940,7 +940,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         fixed (Mpf_t* prop = &rop.Raw)
         fixed (Mpf_t* pop1 = &op1.Raw)
         {
-            GmpLib.__gmpf_div_2exp((IntPtr)prop, (IntPtr)pop1, op2);
+            GmpLib.__gmpf_div_2exp((IntPtr)prop, (IntPtr)pop1, new CULong(op2));
         }
     }
 
@@ -1845,7 +1845,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         fixed (Mpf_t* pop1 = &op1.Raw)
         {
-            return GmpLib.__gmpf_cmp_si((IntPtr)pop1, op2);
+            return GmpLib.__gmpf_cmp_si((IntPtr)pop1, new CLong(op2));
         }
     }
 
@@ -1862,7 +1862,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         fixed (Mpf_t* pop1 = &op1.Raw)
         {
-            return GmpLib.__gmpf_cmp_ui((IntPtr)pop1, op2);
+            return GmpLib.__gmpf_cmp_ui((IntPtr)pop1, new CULong(op2));
         }
     }
 
@@ -1878,7 +1878,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         fixed (Mpf_t* pop1 = &op1.Raw)
         {
-            return GmpLib.__gmpf_cmp_ui((IntPtr)pop1, op2);
+            return GmpLib.__gmpf_cmp_ui((IntPtr)pop1, new CULong(op2));
         }
     }
 
@@ -2137,7 +2137,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         fixed (Mpf_t* ptr = &rop.Raw)
         {
-            GmpLib.__gmpf_random2((IntPtr)ptr, maxLimbCount, maxExp);
+            GmpLib.__gmpf_random2((IntPtr)ptr, new CLong(maxLimbCount), new CLong(maxExp));
         }
     }
 
