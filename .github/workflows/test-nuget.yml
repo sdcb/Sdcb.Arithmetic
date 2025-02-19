@@ -29,7 +29,7 @@ jobs:
     - name: DotNet Restore
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
-        dotnet restore
+        dotnet restore -c Release
     - name: DotNet Build
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
@@ -51,7 +51,7 @@ jobs:
         cat Sdcb.Arithmetic.Mpfr.Tests.csproj
     - name: DotNet Restore
       run: |
-        dotnet restore
+        dotnet restore -c Release
     - name: DotNet Build
       run: |
         dotnet build -c Release --no-restore
