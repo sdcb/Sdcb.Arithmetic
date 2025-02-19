@@ -26,7 +26,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Configure NuGet Source
-      run: nuget sources add -Name StarWorks -Source ${{ env.NUGET_REGISTRY }}
+      run: dotnet nuget add source --name StarWorks --source "${{ env.NUGET_REGISTRY }}"
     - name: Download GMP Native NuGet
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
