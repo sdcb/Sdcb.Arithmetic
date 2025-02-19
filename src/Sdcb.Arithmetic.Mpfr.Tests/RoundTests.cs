@@ -61,7 +61,7 @@ public class RoundTests
     [Fact]
     public void MinimalPrecisionTest()
     {
-        MpfrFloat r50to100 = MpfrFloat.ConstPi(50);
+        MpfrFloat r50to100 = MpfrFloat.ConstPi(50, MpfrRounding.ToZero);
         r50to100.Precision = 100;
         Assert.Equal(50, r50to100.MinimalPrecision);
         Assert.Equal(3.1415926535897931, r50to100.ToDouble());
