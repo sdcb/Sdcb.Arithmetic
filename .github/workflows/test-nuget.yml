@@ -24,7 +24,7 @@ jobs:
     - name: Ensure NuGet Packages
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
-        dotnet add package Sdcb.Arithmetic.Gmp.runtime.win-x64 -v ${{ env.GMP_NUGET_VERSION }}
+        dotnet add package Sdcb.Arithmetic.Gmp.runtime.win-x64 -v ${{ env.GMP_NUGET_VERSION }} --no-restore
         cat Sdcb.Arithmetic.Gmp.Tests.csproj
     - name: DotNet Restore
       run: |
@@ -47,10 +47,9 @@ jobs:
     - name: Ensure Test NuGet Packages
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
-        dotnet add package Sdcb.Arithmetic.Gmp.runtime.win-x64 -v ${{ env.GMP_NUGET_VERSION }}
+        dotnet add package Sdcb.Arithmetic.Gmp.runtime.win-x64 -v ${{ env.GMP_NUGET_VERSION }} --no-restore
     - name: DotNet Restore
       run: |
-        cd src/Sdcb.Arithmetic.Mpfr.Tests
         dotnet restore
     - name: DotNet Build
       run: |
