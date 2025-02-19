@@ -53,8 +53,7 @@ jobs:
         dotnet restore
     - name: DotNet Build
       run: |
-        cd src/Sdcb.Arithmetic.Mpfr.Tests
-        dotnet build -c Release --no-restore
+        dotnet build -c Release
     - name: Test
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
