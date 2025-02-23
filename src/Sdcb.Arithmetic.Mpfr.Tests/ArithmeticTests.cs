@@ -136,23 +136,27 @@ public class ArithmeticTests
     }
 
     [Fact]
-    public void ExplicitConvertToTest()
+    public void ExplicitConvertToTest_GmpInteger()
     {
-        {
-            using GmpInteger z = -99;
-            using MpfrFloat zr = (MpfrFloat)z;
-            Assert.Equal(-99, zr.ToInt32());
-        }
-        {
-            using GmpFloat f = -99;
-            using MpfrFloat fr = (MpfrFloat)f;
-            Assert.Equal(-99, fr.ToDouble());
-        }
-        {
-            using GmpRational q = -99;
-            using MpfrFloat qr = (MpfrFloat)q;
-            Assert.Equal(-99, qr.ToInt32());
-        }
+        using GmpInteger z = -99;
+        using MpfrFloat zr = (MpfrFloat)z;
+        Assert.Equal(-99, zr.ToInt32());
+    }
+
+    [Fact]
+    public void ExplicitConvertToTest_GmpFloat()
+    {
+        using GmpFloat f = -99;
+        using MpfrFloat fr = (MpfrFloat)f;
+        Assert.Equal(-99, fr.ToDouble());
+    }
+
+    [Fact]
+    public void ExplicitConvertToTest_GmpRational()
+    {
+        using GmpRational q = -99;
+        using MpfrFloat qr = (MpfrFloat)q;
+        Assert.Equal(-99, qr.ToInt32());
     }
 
     [Fact]
