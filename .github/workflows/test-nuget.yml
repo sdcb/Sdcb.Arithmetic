@@ -1,4 +1,4 @@
-name: Test NuGet
+﻿name: Test NuGet
 
 on:
   push:
