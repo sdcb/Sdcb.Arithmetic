@@ -53,6 +53,6 @@ public class RandomTests
     {
         using GmpRandom r = new();
         using MpfrFloat f = r.NextEMpfrFloat(precision: 100);
-        Assert.True(f < 20u);
+        Assert.True(f < (nuint)20);
     }
 }

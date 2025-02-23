@@ -1,4 +1,5 @@
-﻿using Xunit.Abstractions;
+﻿using System.Runtime.InteropServices;
+using Xunit.Abstractions;
 
 namespace Sdcb.Arithmetic.Mpfr.Tests;
 
@@ -17,7 +18,7 @@ public class RawApiTest
         byte[] t = new byte[MpfrFloat.RawSize];
         fixed (byte* pt = &t[0])
         {
-            MpfrLib.mpfr_init2((IntPtr)pt, 128);
+            MpfrLib.mpfr_init2((IntPtr)pt, new CLong(128));
             MpfrLib.mpfr_clear((IntPtr)pt);
             _console.WriteLine("Good!");
         }

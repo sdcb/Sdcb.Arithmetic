@@ -55,35 +55,35 @@ public static class MpfrLib
 
 
     [DllImport(Dll)]
-    public static extern int mpfr_get_emin();
+    public static extern CLong mpfr_get_emin();
 
     /// <param name="p0" />
     [DllImport(Dll)]
-    public static extern int mpfr_set_emin(int p0);
+    public static extern int mpfr_set_emin(CLong p0);
 
 
     [DllImport(Dll)]
-    public static extern int mpfr_get_emin_min();
+    public static extern CLong mpfr_get_emin_min();
 
 
     [DllImport(Dll)]
-    public static extern int mpfr_get_emin_max();
+    public static extern CLong mpfr_get_emin_max();
 
 
     [DllImport(Dll)]
-    public static extern int mpfr_get_emax();
+    public static extern CLong mpfr_get_emax();
 
     /// <param name="p0" />
     [DllImport(Dll)]
-    public static extern int mpfr_set_emax(int p0);
+    public static extern int mpfr_set_emax(CLong p0);
 
 
     [DllImport(Dll)]
-    public static extern int mpfr_get_emax_min();
+    public static extern CLong mpfr_get_emax_min();
 
 
     [DllImport(Dll)]
-    public static extern int mpfr_get_emax_max();
+    public static extern CLong mpfr_get_emax_max();
 
     /// <param name="p0">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
@@ -203,7 +203,7 @@ public static class MpfrLib
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     [DllImport(Dll)]
-    public static extern void mpfr_init2(IntPtr p0, int p1);
+    public static extern void mpfr_init2(IntPtr p0, CLong p1);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     [DllImport(Dll)]
@@ -216,7 +216,7 @@ public static class MpfrLib
     /// <param name="p0" />
     /// <param name="p1">(C type: mpfr_ptr) </param>
     [DllImport(Dll)]
-    public static extern void mpfr_inits2(int p0, IntPtr p1);
+    public static extern void mpfr_inits2(CLong p0, IntPtr p1);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     [DllImport(Dll)]
@@ -230,7 +230,7 @@ public static class MpfrLib
     /// <param name="p1" />
     /// <param name="p2">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_prec_round(IntPtr p0, int p1, mpfr_rnd_t p2);
+    public static extern int mpfr_prec_round(IntPtr p0, CLong p1, mpfr_rnd_t p2);
 
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     /// <param name="p1" />
@@ -238,42 +238,42 @@ public static class MpfrLib
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     /// <param name="p4" />
     [DllImport(Dll)]
-    public static extern int mpfr_can_round(IntPtr p0, int p1, mpfr_rnd_t p2, mpfr_rnd_t p3, int p4);
+    public static extern int mpfr_can_round(IntPtr p0, CLong p1, mpfr_rnd_t p2, mpfr_rnd_t p3, CLong p4);
 
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_min_prec(IntPtr p0);
+    public static extern CLong mpfr_min_prec(IntPtr p0);
 
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_get_exp(IntPtr p0);
+    public static extern CLong mpfr_get_exp(IntPtr p0);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     [DllImport(Dll)]
-    public static extern int mpfr_set_exp(IntPtr p0, int p1);
+    public static extern int mpfr_set_exp(IntPtr p0, CLong p1);
 
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_get_prec(IntPtr p0);
+    public static extern CLong mpfr_get_prec(IntPtr p0);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     [DllImport(Dll)]
-    public static extern void mpfr_set_prec(IntPtr p0, int p1);
+    public static extern void mpfr_set_prec(IntPtr p0, CLong p1);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     [DllImport(Dll)]
-    public static extern void mpfr_set_prec_raw(IntPtr p0, int p1);
+    public static extern void mpfr_set_prec_raw(IntPtr p0, CLong p1);
 
     /// <param name="p0" />
     [DllImport(Dll)]
-    public static extern void mpfr_set_default_prec(int p0);
+    public static extern void mpfr_set_default_prec(CLong p0);
 
 
     [DllImport(Dll)]
-    public static extern int mpfr_get_default_prec();
+    public static extern CLong mpfr_get_default_prec();
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
@@ -304,7 +304,7 @@ public static class MpfrLib
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_set_z_2exp(IntPtr p0, IntPtr p1, int p2, mpfr_rnd_t p3);
+    public static extern int mpfr_set_z_2exp(IntPtr p0, IntPtr p1, CLong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     [DllImport(Dll)]
@@ -341,27 +341,27 @@ public static class MpfrLib
     /// <param name="p1" />
     /// <param name="p2">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_set_si(IntPtr p0, int p1, mpfr_rnd_t p2);
+    public static extern int mpfr_set_si(IntPtr p0, CLong p1, mpfr_rnd_t p2);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     /// <param name="p2">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_set_ui(IntPtr p0, uint p1, mpfr_rnd_t p2);
+    public static extern int mpfr_set_ui(IntPtr p0, CULong p1, mpfr_rnd_t p2);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_set_si_2exp(IntPtr p0, int p1, int p2, mpfr_rnd_t p3);
+    public static extern int mpfr_set_si_2exp(IntPtr p0, CLong p1, CLong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_set_ui_2exp(IntPtr p0, uint p1, int p2, mpfr_rnd_t p3);
+    public static extern int mpfr_set_ui_2exp(IntPtr p0, CULong p1, CLong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpq_srcptr) </param>
@@ -467,7 +467,7 @@ public static class MpfrLib
     /// <param name="p0">(C type: mpz_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_get_z_2exp(IntPtr p0, IntPtr p1);
+    public static extern CLong mpfr_get_z_2exp(IntPtr p0, IntPtr p1);
 
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     /// <param name="p1">(C type: mpfr_rnd_t) </param>
@@ -488,13 +488,13 @@ public static class MpfrLib
     [DllImport(Dll)]
     public static extern double mpfr_get_d1(IntPtr p0);
 
-    /// <param name="p0">(C type: int*) </param>
+    /// <param name="p0">(C type: CLong*) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
     public static extern double mpfr_get_d_2exp(IntPtr p0, IntPtr p1, mpfr_rnd_t p2);
 
-    /// <param name="p0">(C type: int*) </param>
+    /// <param name="p0">(C type: CLong*) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
@@ -510,17 +510,17 @@ public static class MpfrLib
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     /// <param name="p1">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_get_si(IntPtr p0, mpfr_rnd_t p1);
+    public static extern CLong mpfr_get_si(IntPtr p0, mpfr_rnd_t p1);
 
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     /// <param name="p1">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern uint mpfr_get_ui(IntPtr p0, mpfr_rnd_t p1);
+    public static extern CULong mpfr_get_ui(IntPtr p0, mpfr_rnd_t p1);
 
     /// <param name="p0" />
     /// <param name="p1" />
     [DllImport(Dll)]
-    public static extern nint mpfr_get_str_ndigits(int p0, int p1);
+    public static extern nint mpfr_get_str_ndigits(int p0, CLong p1);
 
     /// <param name="p0">(C type: byte*) </param>
     /// <param name="p1">(C type: mpfr_exp_t*) </param>
@@ -623,35 +623,35 @@ public static class MpfrLib
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_pow_si(IntPtr p0, IntPtr p1, int p2, mpfr_rnd_t p3);
+    public static extern int mpfr_pow_si(IntPtr p0, IntPtr p1, CLong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_compound_si(IntPtr p0, IntPtr p1, int p2, mpfr_rnd_t p3);
+    public static extern int mpfr_compound_si(IntPtr p0, IntPtr p1, CLong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_pow_ui(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_pow_ui(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_ui_pow_ui(IntPtr p0, uint p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_ui_pow_ui(IntPtr p0, CULong p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     /// <param name="p2">(C type: mpfr_srcptr) </param>
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_ui_pow(IntPtr p0, uint p1, IntPtr p2, mpfr_rnd_t p3);
+    public static extern int mpfr_ui_pow(IntPtr p0, CULong p1, IntPtr p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
@@ -670,7 +670,7 @@ public static class MpfrLib
     /// <param name="p1" />
     /// <param name="p2">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_sqrt_ui(IntPtr p0, uint p1, mpfr_rnd_t p2);
+    public static extern int mpfr_sqrt_ui(IntPtr p0, CULong p1, mpfr_rnd_t p2);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
@@ -711,84 +711,84 @@ public static class MpfrLib
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_add_ui(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_add_ui(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_sub_ui(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_sub_ui(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     /// <param name="p2">(C type: mpfr_srcptr) </param>
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_ui_sub(IntPtr p0, uint p1, IntPtr p2, mpfr_rnd_t p3);
+    public static extern int mpfr_ui_sub(IntPtr p0, CULong p1, IntPtr p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_mul_ui(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_mul_ui(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_div_ui(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_div_ui(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     /// <param name="p2">(C type: mpfr_srcptr) </param>
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_ui_div(IntPtr p0, uint p1, IntPtr p2, mpfr_rnd_t p3);
+    public static extern int mpfr_ui_div(IntPtr p0, CULong p1, IntPtr p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_add_si(IntPtr p0, IntPtr p1, int p2, mpfr_rnd_t p3);
+    public static extern int mpfr_add_si(IntPtr p0, IntPtr p1, CLong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_sub_si(IntPtr p0, IntPtr p1, int p2, mpfr_rnd_t p3);
+    public static extern int mpfr_sub_si(IntPtr p0, IntPtr p1, CLong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     /// <param name="p2">(C type: mpfr_srcptr) </param>
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_si_sub(IntPtr p0, int p1, IntPtr p2, mpfr_rnd_t p3);
+    public static extern int mpfr_si_sub(IntPtr p0, CLong p1, IntPtr p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_mul_si(IntPtr p0, IntPtr p1, int p2, mpfr_rnd_t p3);
+    public static extern int mpfr_mul_si(IntPtr p0, IntPtr p1, CLong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_div_si(IntPtr p0, IntPtr p1, int p2, mpfr_rnd_t p3);
+    public static extern int mpfr_div_si(IntPtr p0, IntPtr p1, CLong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     /// <param name="p2">(C type: mpfr_srcptr) </param>
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_si_div(IntPtr p0, int p1, IntPtr p2, mpfr_rnd_t p3);
+    public static extern int mpfr_si_div(IntPtr p0, CLong p1, IntPtr p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
@@ -905,7 +905,7 @@ public static class MpfrLib
     /// <param name="p1" />
     /// <param name="p2">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_log_ui(IntPtr p0, uint p1, mpfr_rnd_t p2);
+    public static extern int mpfr_log_ui(IntPtr p0, CULong p1, mpfr_rnd_t p2);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
@@ -979,24 +979,24 @@ public static class MpfrLib
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     /// <param name="p1" />
     [DllImport(Dll)]
-    public static extern int mpfr_cmp_ui(IntPtr p0, uint p1);
+    public static extern int mpfr_cmp_ui(IntPtr p0, CULong p1);
 
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     /// <param name="p1" />
     [DllImport(Dll)]
-    public static extern int mpfr_cmp_si(IntPtr p0, int p1);
-
-    /// <param name="p0">(C type: mpfr_srcptr) </param>
-    /// <param name="p1" />
-    /// <param name="p2" />
-    [DllImport(Dll)]
-    public static extern int mpfr_cmp_ui_2exp(IntPtr p0, uint p1, int p2);
+    public static extern int mpfr_cmp_si(IntPtr p0, CLong p1);
 
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     /// <param name="p1" />
     /// <param name="p2" />
     [DllImport(Dll)]
-    public static extern int mpfr_cmp_si_2exp(IntPtr p0, int p1, int p2);
+    public static extern int mpfr_cmp_ui_2exp(IntPtr p0, CULong p1, CLong p2);
+
+    /// <param name="p0">(C type: mpfr_srcptr) </param>
+    /// <param name="p1" />
+    /// <param name="p2" />
+    [DllImport(Dll)]
+    public static extern int mpfr_cmp_si_2exp(IntPtr p0, CLong p1, CLong p2);
 
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
@@ -1006,7 +1006,7 @@ public static class MpfrLib
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     /// <param name="p1" />
     [DllImport(Dll)]
-    public static extern int mpfr_cmpabs_ui(IntPtr p0, uint p1);
+    public static extern int mpfr_cmpabs_ui(IntPtr p0, CULong p1);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
@@ -1019,7 +1019,7 @@ public static class MpfrLib
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     [DllImport(Dll)]
-    public static extern int mpfr_eq(IntPtr p0, IntPtr p1, uint p2);
+    public static extern int mpfr_eq(IntPtr p0, IntPtr p1, CULong p2);
 
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     [DllImport(Dll)]
@@ -1030,42 +1030,42 @@ public static class MpfrLib
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_mul_2exp(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_mul_2exp(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_div_2exp(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_div_2exp(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_mul_2ui(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_mul_2ui(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_div_2ui(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_div_2ui(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_mul_2si(IntPtr p0, IntPtr p1, int p2, mpfr_rnd_t p3);
+    public static extern int mpfr_mul_2si(IntPtr p0, IntPtr p1, CLong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_div_2si(IntPtr p0, IntPtr p1, int p2, mpfr_rnd_t p3);
+    public static extern int mpfr_div_2si(IntPtr p0, IntPtr p1, CLong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
@@ -1142,7 +1142,7 @@ public static class MpfrLib
     public static extern int mpfr_modf(IntPtr p0, IntPtr p1, IntPtr p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
-    /// <param name="p1">(C type: int*) </param>
+    /// <param name="p1">(C type: CLong*) </param>
     /// <param name="p2">(C type: mpfr_srcptr) </param>
     /// <param name="p3">(C type: mpfr_srcptr) </param>
     /// <param name="p4">(C type: mpfr_rnd_t) </param>
@@ -1168,10 +1168,10 @@ public static class MpfrLib
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_fmod_ui(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_fmod_ui(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
-    /// <param name="p1">(C type: int*) </param>
+    /// <param name="p1">(C type: CLong*) </param>
     /// <param name="p2">(C type: mpfr_srcptr) </param>
     /// <param name="p3">(C type: mpfr_srcptr) </param>
     /// <param name="p4">(C type: mpfr_rnd_t) </param>
@@ -1426,42 +1426,42 @@ public static class MpfrLib
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_sinu(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_sinu(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_cosu(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_cosu(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_tanu(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_tanu(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_acosu(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_acosu(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_asinu(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_asinu(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_atanu(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_atanu(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
@@ -1469,7 +1469,7 @@ public static class MpfrLib
     /// <param name="p3" />
     /// <param name="p4">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_atan2u(IntPtr p0, IntPtr p1, IntPtr p2, uint p3, mpfr_rnd_t p4);
+    public static extern int mpfr_atan2u(IntPtr p0, IntPtr p1, IntPtr p2, CULong p3, mpfr_rnd_t p4);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
@@ -1544,21 +1544,21 @@ public static class MpfrLib
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_root(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_root(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_rootn_ui(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_rootn_ui(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_rootn_si(IntPtr p0, IntPtr p1, int p2, mpfr_rnd_t p3);
+    public static extern int mpfr_rootn_si(IntPtr p0, IntPtr p1, CLong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
@@ -1609,13 +1609,13 @@ public static class MpfrLib
     /// <param name="p1" />
     /// <param name="p2">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_zeta_ui(IntPtr p0, uint p1, mpfr_rnd_t p2);
+    public static extern int mpfr_zeta_ui(IntPtr p0, CULong p1, mpfr_rnd_t p2);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1" />
     /// <param name="p2">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_fac_ui(IntPtr p0, uint p1, mpfr_rnd_t p2);
+    public static extern int mpfr_fac_ui(IntPtr p0, CULong p1, mpfr_rnd_t p2);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
@@ -1634,7 +1634,7 @@ public static class MpfrLib
     /// <param name="p2">(C type: mpfr_srcptr) </param>
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_jn(IntPtr p0, int p1, IntPtr p2, mpfr_rnd_t p3);
+    public static extern int mpfr_jn(IntPtr p0, CLong p1, IntPtr p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
@@ -1653,7 +1653,7 @@ public static class MpfrLib
     /// <param name="p2">(C type: mpfr_srcptr) </param>
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_yn(IntPtr p0, int p1, IntPtr p2, mpfr_rnd_t p3);
+    public static extern int mpfr_yn(IntPtr p0, CLong p1, IntPtr p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_srcptr) </param>
@@ -1761,7 +1761,7 @@ public static class MpfrLib
     /// <param name="p2" />
     /// <param name="p3">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_sum(IntPtr p0, IntPtr p1, uint p2, mpfr_rnd_t p3);
+    public static extern int mpfr_sum(IntPtr p0, IntPtr p1, CULong p2, mpfr_rnd_t p3);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: mpfr_ptr*) </param>
@@ -1769,7 +1769,7 @@ public static class MpfrLib
     /// <param name="p3" />
     /// <param name="p4">(C type: mpfr_rnd_t) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_dot(IntPtr p0, IntPtr p1, IntPtr p2, uint p3, mpfr_rnd_t p4);
+    public static extern int mpfr_dot(IntPtr p0, IntPtr p1, IntPtr p2, CULong p3, mpfr_rnd_t p4);
 
 
     [DllImport(Dll)]
@@ -1812,12 +1812,12 @@ public static class MpfrLib
 
     /// <param name="p0" />
     [DllImport(Dll)]
-    public static extern nint mpfr_custom_get_size(int p0);
+    public static extern nint mpfr_custom_get_size(CLong p0);
 
     /// <param name="p0">(C type: void*) </param>
     /// <param name="p1" />
     [DllImport(Dll)]
-    public static extern void mpfr_custom_init(IntPtr p0, int p1);
+    public static extern void mpfr_custom_init(IntPtr p0, CLong p1);
 
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     [DllImport(Dll)]
@@ -1825,7 +1825,7 @@ public static class MpfrLib
 
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     [DllImport(Dll)]
-    public static extern int mpfr_custom_get_exp(IntPtr p0);
+    public static extern CLong mpfr_custom_get_exp(IntPtr p0);
 
     /// <param name="p0">(C type: mpfr_ptr) </param>
     /// <param name="p1">(C type: void*) </param>
@@ -1838,7 +1838,7 @@ public static class MpfrLib
     /// <param name="p3" />
     /// <param name="p4">(C type: void*) </param>
     [DllImport(Dll)]
-    public static extern void mpfr_custom_init_set(IntPtr p0, int p1, int p2, int p3, IntPtr p4);
+    public static extern void mpfr_custom_init_set(IntPtr p0, int p1, CLong p2, CLong p3, IntPtr p4);
 
     /// <param name="p0">(C type: mpfr_srcptr) </param>
     [DllImport(Dll)]

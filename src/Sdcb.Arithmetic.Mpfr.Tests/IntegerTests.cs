@@ -57,7 +57,7 @@ public class IntegerTests
     public void ModUITest()
     {
         using MpfrFloat a = MpfrFloat.ConstPi(100);
-        MpfrFloat.MultiplyInplace(a, a, 2); // 6.28
+        MpfrFloat.MultiplyInplace(a, a, (nuint)2); // 6.28
 
         using MpfrFloat mod = a % 3;
         using MpfrFloat expectedMod = a - 6;
@@ -68,7 +68,7 @@ public class IntegerTests
     public void ModQuoTest()
     {
         using MpfrFloat a = MpfrFloat.ConstPi(100);
-        MpfrFloat.MultiplyInplace(a, a, 2); // 6.28
+        MpfrFloat.MultiplyInplace(a, a, (nuint)2); // 6.28
         using MpfrFloat b = MpfrFloat.From(1.5);
 
         (MpfrFloat mod, int q, int round) = MpfrFloat.ModQuotient(a, b, precision: 100);
@@ -95,7 +95,7 @@ public class IntegerTests
     public void ReminderQuoTest()
     {
         using MpfrFloat a = MpfrFloat.ConstPi(100);
-        MpfrFloat.MultiplyInplace(a, a, 2); // 6.28
+        MpfrFloat.MultiplyInplace(a, a, (nuint)2); // 6.28
         using MpfrFloat b = MpfrFloat.From(4);
 
         (MpfrFloat rem, int q, int round) = MpfrFloat.ReminderQuotient(a, b, precision: 100);

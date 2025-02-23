@@ -26,7 +26,7 @@ public class ExceptionFunctionsTests
     [Fact]
     public void SetEMin()
     {
-        int org = MpfrFloat.EMin;
+        nint org = MpfrFloat.EMin;
         MpfrFloat.EMin = 100;
         Assert.Equal(100, MpfrFloat.EMin);
         MpfrFloat.EMin = org;
@@ -36,7 +36,7 @@ public class ExceptionFunctionsTests
     [Fact]
     public void SetEMax()
     {
-        int org = MpfrFloat.EMax;
+        nint org = MpfrFloat.EMax;
         MpfrFloat.EMax = 100;
         Assert.Equal(100, MpfrFloat.EMax);
         MpfrFloat.EMax = org;
@@ -55,7 +55,7 @@ public class ExceptionFunctionsTests
     [Fact]
     public void SubNormalizeTest()
     {
-        int org = MpfrFloat.EMin;
+        nint org = MpfrFloat.EMin;
         using MpfrFloat a = MpfrFloat.Parse("0.00001111000011110101010101", @base: 2, precision: 24);
 
         MpfrFloat.EMin = -23;
@@ -82,7 +82,7 @@ public class ExceptionFunctionsTests
     [Fact]
     public void UnderflowTest()
     {
-        int org = MpfrFloat.EMin;
+        nint org = MpfrFloat.EMin;
 
         using MpfrFloat a = MpfrFloat.Parse("0.00001111000011110101010101", @base: 2, precision: 24);
         MpfrFloat.EMin = -23;
@@ -96,7 +96,7 @@ public class ExceptionFunctionsTests
     [Fact]
     public void OverflowTest()
     {
-        int emax = MpfrFloat.EMax;
+        nint emax = MpfrFloat.EMax;
 
         MpfrFloat.EMax = 2000;
         using MpfrFloat a = MpfrFloat.From(double.MaxValue);
@@ -121,7 +121,7 @@ public class ExceptionFunctionsTests
     {
         MpfrFloat.ErrorFlags = 0;
         using MpfrFloat f = MpfrFloat.From(double.MinValue);
-        MpfrFloat.DivideInplace(f, f, 0);
+        MpfrFloat.DivideInplace(f, f, (nuint)0);
         Assert.True(MpfrFloat.ErrorFlags.HasFlag(MpfrErrorFlags.DivideByZero));
     }
 

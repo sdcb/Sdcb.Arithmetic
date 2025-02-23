@@ -1,4 +1,4 @@
-using Sdcb.Arithmetic.Gmp;
+锘縰sing Sdcb.Arithmetic.Gmp;
 using System.Runtime.InteropServices;
 using Xunit.Abstractions;
 
@@ -40,22 +40,22 @@ public class GlobalTest
     [Fact]
     public unsafe void CalcE()
     {
-#pragma warning disable CA1806 // 不要忽略方法结果
+#pragma warning disable CA1806 // 涓嶈蹇界暐鏂规硶缁撴灉
         // https://www.mpfr.org/sample.html
         byte[] s = new byte[MpfrFloat.RawSize], t = new byte[MpfrFloat.RawSize], u = new byte[MpfrFloat.RawSize];
         fixed (byte* ps = &s[0])
         fixed (byte* pt = &t[0])
         fixed (byte* pu = &u[0])
         {
-            MpfrLib.mpfr_init2((IntPtr)pt, 200);
+            MpfrLib.mpfr_init2((IntPtr)pt, new CLong(200));
             MpfrLib.mpfr_set_d((IntPtr)pt, 1.0, MpfrRounding.ToNegativeInfinity);
-            MpfrLib.mpfr_init2((IntPtr)ps, 200);
+            MpfrLib.mpfr_init2((IntPtr)ps, new CLong(200));
             MpfrLib.mpfr_set_d((IntPtr)ps, 1.0, MpfrRounding.ToNegativeInfinity);
-            MpfrLib.mpfr_init2((IntPtr)pu, 200);
+            MpfrLib.mpfr_init2((IntPtr)pu, new CLong(200));
 
             for (uint i = 1; i <= 100; ++i)
             {
-                MpfrLib.mpfr_mul_ui((IntPtr)pt, (IntPtr)pt, i, MpfrRounding.ToPositiveInfinity);
+                MpfrLib.mpfr_mul_ui((IntPtr)pt, (IntPtr)pt, new CULong(i), MpfrRounding.ToPositiveInfinity);
                 MpfrLib.mpfr_set_d((IntPtr)pu, 1.0, MpfrRounding.ToNegativeInfinity);
                 MpfrLib.mpfr_div((IntPtr)pu, (IntPtr)pu, (IntPtr)pt, MpfrRounding.ToNegativeInfinity);
                 MpfrLib.mpfr_add((IntPtr)ps, (IntPtr)ps, (IntPtr)pu, MpfrRounding.ToNegativeInfinity);
@@ -71,6 +71,6 @@ public class GlobalTest
             MpfrLib.mpfr_clear((IntPtr)pu);
             MpfrLib.mpfr_free_cache();
         }
-#pragma warning restore CA1806 // 不要忽略方法结果
+#pragma warning restore CA1806 // 涓嶈蹇界暐鏂规硶缁撴灉
     }
 }
