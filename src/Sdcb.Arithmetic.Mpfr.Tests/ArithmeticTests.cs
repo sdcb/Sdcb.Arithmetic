@@ -144,6 +144,21 @@ public class ArithmeticTests
     }
 
     [Fact]
+    public void ExplicitConvertToTest_GmpFloat2()
+    {
+        using GmpFloat f = -99;
+        Assert.Equal(-99, f.ToDouble());
+    }
+
+    [Fact]
+    public void ExplicitConvertToTest_GmpFloat3()
+    {
+        using GmpFloat f = -99;
+        using MpfrFloat fr = (MpfrFloat)f;
+        Assert.Equal(-99, fr.ToInt32());
+    }
+
+    [Fact]
     public void ExplicitConvertToTest_GmpFloat()
     {
         using GmpFloat f = -99;
