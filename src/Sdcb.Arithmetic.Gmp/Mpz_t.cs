@@ -33,7 +33,7 @@ public record struct Mpz_t
     /// <remarks>
     /// This method is unsafe because it returns a pointer to unmanaged memory.
     /// </remarks>
-    private readonly unsafe Span<nint> GetLimbData() => new((void*)Limbs, Allocated);
+    private readonly unsafe Span<ulong> GetLimbData() => new((void*)Limbs, Allocated);
 
     /// <inheritdoc/>
     public override readonly int GetHashCode()
@@ -41,7 +41,7 @@ public record struct Mpz_t
         HashCode c = new();
         c.Add(Allocated);
         c.Add(Size);
-        foreach (nint i in GetLimbData())
+        foreach (ulong i in GetLimbData())
         {
             c.Add(i);
         }

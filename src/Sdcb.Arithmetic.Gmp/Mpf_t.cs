@@ -20,7 +20,7 @@ public record struct Mpf_t
     /// <summary>
     /// The exponent of the number.
     /// </summary>
-    public int Exponent;
+    public CLong Exponent;
     /// <summary>
     /// A pointer to the data block of the number.
     /// </summary>
@@ -32,7 +32,7 @@ public record struct Mpf_t
     public static int RawSize => Marshal.SizeOf<Mpf_t>();
 
 
-    private readonly unsafe Span<int> GetLimbData() => new((void*)Limbs, Precision - 1);
+    private readonly unsafe Span<ulong> GetLimbData() => new((void*)Limbs, Precision - 1);
 
     /// <inheritdoc/>
     public override readonly int GetHashCode()
@@ -41,7 +41,7 @@ public record struct Mpf_t
         c.Add(Precision);
         c.Add(Size);
         c.Add(Exponent);
-        foreach (int i in GetLimbData())
+        foreach (ulong i in GetLimbData())
         {
             c.Add(i);
         }
