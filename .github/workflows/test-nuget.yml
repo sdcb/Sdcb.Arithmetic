@@ -51,8 +51,8 @@ jobs:
     - name: DotNet Build for MPFR
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
-        dotnet build -c Release --runtime ${{ matrix.os }}-${{ matrix.arch }}
+        dotnet build -c Debug --runtime ${{ matrix.os }}-${{ matrix.arch }}
     - name: Test MPFR
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
-        dotnet test -c Release --no-build --runtime ${{ matrix.os }}-${{ matrix.arch }}
+        dotnet test -c Debug --no-build --runtime ${{ matrix.os }}-${{ matrix.arch }}
