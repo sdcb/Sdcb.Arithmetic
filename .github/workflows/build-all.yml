@@ -1,9 +1,10 @@
-name: Build All
+﻿name: Build All
 
 on:
   push:
     branches:
       - master
+      - test-linux-x64
     paths:
       - .github/workflows/build-all.yml
       - .github/workflows/build.yml

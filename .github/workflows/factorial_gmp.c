@@ -1,36 +1,17 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <gmp.h>
-#include <time.h>
-
-void calculate_factorial(unsigned long n, mpz_t result) {
-    mpz_set_ui(result, 1);
-    for (unsigned long i = 1; i <= n; ++i) {
-        mpz_mul_ui(result, result, i);
-    }
-}
 
 int main() {
-    unsigned long n = 100000;
-    mpz_t result;
-    mpf_t fresult;
-    mpz_init(result);
+    mpf_t a;
+    mpf_init(a);         // 初始化高精度浮点数
+    mpf_set_si(a, -99);  // 设置为 -99
 
-    clock_t start, end;
-    double cpu_time_used;
+    double d = mpf_get_d(a);
+    long si = mpf_get_si(a);
 
-    for (int i = 0; i < 3; i++) {
-        start = clock();
-        calculate_factorial(n, result);
-        end = clock();
-        cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
-        printf("Round %d time taken to calculate %lu! is %f seconds.\n", i, n, cpu_time_used);
-    }
+    printf("mpf_get_d:  %f\n", d);
+    printf("mpf_get_si: %ld\n", si);
 
-    mpf_init2(fresult, 1000000);
-    mpf_set_z(fresult, result);
-    gmp_printf("The factorial of %lu is %.20Fe\n", n, fresult);
-
-    mpf_clear(fresult);
-    mpz_clear(result);
+    mpf_clear(a);        // 释放 mpf_t 占用的资源
     return 0;
 }
