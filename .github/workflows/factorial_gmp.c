@@ -12,6 +12,10 @@ int main() {
     printf("mpf_get_d:  %f\n", d);
     printf("mpf_get_si: %ld\n", si);
 
+    // print sizeof result of mpf_get_d and mpf_get_si
+	printf("sizeof(mpf_get_d):  %lu\n", mpf_get_d(a));
+	printf("sizeof(mpf_get_si): %lu\n", mpf_get_si(a));
+
     mpf_clear(a);        // 释放 mpf_t 占用的资源
     return 0;
 }
