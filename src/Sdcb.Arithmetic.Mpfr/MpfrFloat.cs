@@ -451,7 +451,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         fixed (Mpfr_t* pthis = &Raw)
         {
-            byte[] opBytes = Encoding.UTF8.GetBytes(s);
+            byte[] opBytes = CStringHelper.ToCString(s);
             fixed (byte* opPtr = opBytes)
             {
                 byte* endptr = default;
@@ -477,7 +477,7 @@ public unsafe class MpfrFloat : IDisposable, IFormattable, IEquatable<MpfrFloat>
     {
         fixed (Mpfr_t* pthis = &Raw)
         {
-            byte[] opBytes = Encoding.UTF8.GetBytes(s);
+            byte[] opBytes = CStringHelper.ToCString(s);
             fixed (byte* opPtr = opBytes)
             {
                 byte* endptr = default;

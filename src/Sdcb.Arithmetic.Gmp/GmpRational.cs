@@ -144,7 +144,7 @@ public class GmpRational : IDisposable, IComparable, IComparable<GmpInteger>, IE
     public static unsafe bool TryParse(string str, [MaybeNullWhen(returnValue: false)] out GmpRational rop, int @base = 0)
     {
         GmpRational r = new();
-        byte[] strData = Encoding.UTF8.GetBytes(str);
+        byte[] strData = CStringHelper.ToCString(str);
         fixed (Mpq_t* pthis = &r.Raw)
         fixed (byte* strPtr = strData)
         {
@@ -291,14 +291,14 @@ public class GmpRational : IDisposable, IComparable, IComparable<GmpInteger>, IE
     /// <exception cref="ArgumentException">Thrown when the string cannot be parsed as a rational number.</exception>
     public unsafe void Assign(string str, int @base = 0)
     {
-        byte[] strData = Encoding.UTF8.GetBytes(str);
+        byte[] strData = CStringHelper.ToCString(str);
         fixed (Mpq_t* pthis = &Raw)
         fixed (byte* strPtr = strData)
         {
             int ret = GmpLib.__gmpq_set_str((IntPtr)pthis, (IntPtr)strPtr, @base);
             if (ret != 0)
             {
-                throw new ArgumentException($"Failed to parse {str}, base={@base} to GmpRational, __gmpq_set_str returns {ret}");
+                throw new ArgumentException($"Failed to parse {str}, base={@base} to {nameof(GmpRational)}, {nameof(GmpLib.__gmpq_set_str)} returns {ret}");
             }
         }
     }

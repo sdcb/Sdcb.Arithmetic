@@ -232,14 +232,14 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         Mpf_t raw = new();
         Mpf_t* ptr = &raw;
-        byte[] valBytes = Encoding.UTF8.GetBytes(val);
+        byte[] valBytes = CStringHelper.ToCString(val);
         fixed (byte* pval = valBytes)
         {
             int ret = GmpLib.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, @base);
             if (ret != 0)
             {
                 GmpLib.__gmpf_clear((IntPtr)ptr);
-                throw new FormatException($"Failed to parse {val}, base={@base} to BigFloat, __gmpf_init_set_str returns {ret}");
+                throw new FormatException($"Failed to parse {val}, base={@base} to {nameof(GmpFloat)}, {nameof(GmpLib.__gmpf_init_set_str)} returns {ret}");
             }
         }
         return new GmpFloat(raw);
@@ -270,7 +270,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         Mpf_t raw = new();
         Mpf_t* ptr = &raw;
-        byte[] valBytes = Encoding.UTF8.GetBytes(val);
+        byte[] valBytes = CStringHelper.ToCString(val);
         fixed (byte* pval = valBytes)
         {
             int rt = GmpLib.__gmpf_init_set_str((IntPtr)ptr, (IntPtr)pval, @base);
@@ -301,7 +301,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
         GmpFloat f = new(precision);
         fixed (Mpf_t* pf = &f.Raw)
         {
-            byte[] opBytes = Encoding.UTF8.GetBytes(val);
+            byte[] opBytes = CStringHelper.ToCString(val);
             fixed (byte* opBytesPtr = opBytes)
             {
                 int ret = GmpLib.__gmpf_set_str((IntPtr)pf, (IntPtr)opBytesPtr, @base);
@@ -448,7 +448,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
     {
         fixed (Mpf_t* pthis = &Raw)
         {
-            byte[] opBytes = Encoding.UTF8.GetBytes(op);
+            byte[] opBytes = CStringHelper.ToCString(op);
             fixed (byte* opBytesPtr = opBytes)
             {
                 int ret = GmpLib.__gmpf_set_str((IntPtr)pthis, (IntPtr)opBytesPtr, @base);

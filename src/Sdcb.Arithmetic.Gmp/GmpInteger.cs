@@ -212,7 +212,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         fixed (Mpz_t* ptr = &Raw)
         {
-            byte[] opBytes = Encoding.UTF8.GetBytes(op);
+            byte[] opBytes = CStringHelper.ToCString(op);
             fixed (byte* opPtr = opBytes)
             {
                 int ret = GmpLib.__gmpz_set_str((IntPtr)ptr, (IntPtr)opPtr, opBase);
@@ -337,14 +337,14 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     public unsafe static GmpInteger Parse(string val, int valBase = 0)
     {
         Mpz_t raw = new();
-        byte[] valBytes = Encoding.UTF8.GetBytes(val);
+        byte[] valBytes = CStringHelper.ToCString(val);
         fixed (byte* pval = valBytes)
         {
             int ret = GmpLib.__gmpz_init_set_str((IntPtr)(&raw), (IntPtr)pval, valBase);
             if (ret != 0)
             {
                 GmpLib.__gmpz_clear((IntPtr)(&raw));
-                throw new FormatException($"Failed to parse {val}, base={valBase} to {nameof(GmpInteger)}, __gmpf_init_set_str returns {ret}");
+                throw new FormatException($"Failed to parse {val}, base={valBase} to {nameof(GmpInteger)}, {nameof(GmpLib.__gmpz_init_set_str)} returns {ret}");
             }
         }
         return new GmpInteger(raw);
@@ -363,7 +363,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
     {
         Mpz_t raw = new();
         Mpz_t* ptr = &raw;
-        byte[] valBytes = Encoding.UTF8.GetBytes(val);
+        byte[] valBytes = CStringHelper.ToCString(val);
         fixed (byte* pval = valBytes)
         {
             int rt = GmpLib.__gmpz_init_set_str((IntPtr)ptr, (IntPtr)pval, valBase);
