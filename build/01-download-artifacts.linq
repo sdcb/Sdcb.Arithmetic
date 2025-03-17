@@ -35,7 +35,7 @@ IEnumerable<WindowsNugetSource> GetSources(string folder)
 			string mpfrPath = Directory.EnumerateFiles(binPath, "*mpfr*").First();
 			return new WindowsNugetSource[]
 			{
-				//new(rid, title, new LibNames(Path.GetFileName(gmpPath)), binPath, "Sdcb.Arithmetic.Gmp", []),
+				new(rid, title, new LibNames(Path.GetFileName(gmpPath)), binPath, "Sdcb.Arithmetic.Gmp", []),
 				new(rid, title, new LibNames(Path.GetFileName(mpfrPath)), binPath, "Sdcb.Arithmetic.Mpfr", ["Sdcb.Arithmetic.Gmp"]),
 			};
 		});

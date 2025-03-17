@@ -11,8 +11,8 @@ on:
 
 env:
   NUGET_REGISTRY: https://proget.starworks.cc:88/nuget/test/v3/index.json
-  GMP_NUGET_VERSION: 6.3.0-preview.1
-  MPFR_NUGET_VERSION: 4.2.1-preview.2
+  GMP_NUGET_VERSION: 6.3.0
+  MPFR_NUGET_VERSION: 4.2.1
   
 jobs:
   gmp:
@@ -45,7 +45,7 @@ jobs:
         cd src/Sdcb.Arithmetic.Gmp.Tests
         dotnet test -c Release --no-build --runtime ${{ matrix.os }}-${{ matrix.arch }}
 
-  mpfr:
+  mpfr-debug:
     strategy:
       matrix:
         include: 
@@ -73,3 +73,32 @@ jobs:
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
         dotnet test -c Debug --no-build --runtime ${{ matrix.os }}-${{ matrix.arch }}
+
+  mpfr-release:
+    strategy:
+      matrix:
+        include: 
+          - { os: win, arch: x64, runs-on: 'windows-latest' }
+          - { os: win, arch: x86, runs-on: 'windows-latest' }
+          - { os: linux, arch: x64, runs-on: 'ubuntu-latest' }
+          - { os: linux, arch: arm64, runs-on: 'ubuntu-24.04-arm' }
+          - { os: osx, arch: arm64, runs-on: 'macos-latest' }
+          - { os: osx, arch: x64, runs-on: 'macos-13' }
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Configure NuGet Source
+      run: dotnet nuget add source ${{ env.NUGET_REGISTRY }} --name ProGet
+    - name: Download MPFR Native NuGet
+      run: |
+        cd src/Sdcb.Arithmetic.Mpfr.Tests
+        dotnet add package Sdcb.Arithmetic.Mpfr.runtime.${{ matrix.os }}-${{ matrix.arch }} -v ${{ env.MPFR_NUGET_VERSION }} --no-restore
+        cat Sdcb.Arithmetic.Mpfr.Tests.csproj
+    - name: DotNet Build for MPFR
+      run: |
+        cd src/Sdcb.Arithmetic.Mpfr.Tests
+        dotnet build -c Release --runtime ${{ matrix.os }}-${{ matrix.arch }}
+    - name: Test MPFR
+      run: |
+        cd src/Sdcb.Arithmetic.Mpfr.Tests
+        dotnet test -c Release --no-build --runtime ${{ matrix.os }}-${{ matrix.arch }}
