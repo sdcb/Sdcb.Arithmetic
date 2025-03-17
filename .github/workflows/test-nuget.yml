@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - compare-speed
     paths:
       - .github/workflows/test-nuget.yml
       - src/**
@@ -21,8 +22,10 @@ jobs:
         include: 
           - { os: win, arch: x64 }
           - { os: win, arch: x86 }
+          - { os: win2019, arch: x64 }
+          - { os: win2019, arch: x86 }
           - { os: linux, arch: x64 }
-    runs-on: ${{ matrix.os == 'win' && 'windows-latest' || 'ubuntu-latest' }}
+    runs-on: ${{ matrix.os == 'win' && 'windows-latest' || matrix.os == 'win2019' && 'windows-2019' || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v4
     # GMP
