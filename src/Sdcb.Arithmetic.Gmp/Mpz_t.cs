@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Sdcb.Arithmetic.Gmp;
 
@@ -33,7 +34,7 @@ public record struct Mpz_t
     /// <remarks>
     /// This method is unsafe because it returns a pointer to unmanaged memory.
     /// </remarks>
-    private readonly unsafe Span<ulong> GetLimbData() => new((void*)Limbs, Allocated);
+    private readonly unsafe Span<CULong> GetLimbData() => new((void*)Limbs, Allocated);
 
     /// <inheritdoc/>
     public override readonly int GetHashCode()
@@ -41,7 +42,7 @@ public record struct Mpz_t
         HashCode c = new();
         c.Add(Allocated);
         c.Add(Size);
-        foreach (ulong i in GetLimbData())
+        foreach (CULong i in GetLimbData())
         {
             c.Add(i);
         }

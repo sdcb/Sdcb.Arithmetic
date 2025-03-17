@@ -32,7 +32,7 @@ public record struct Mpf_t
     public static int RawSize => Marshal.SizeOf<Mpf_t>();
 
 
-    private readonly unsafe Span<ulong> GetLimbData() => new((void*)Limbs, Precision - 1);
+    internal readonly unsafe Span<CULong> GetLimbData() => new((void*)Limbs, Precision - 1);
 
     /// <inheritdoc/>
     public override readonly int GetHashCode()
@@ -41,7 +41,7 @@ public record struct Mpf_t
         c.Add(Precision);
         c.Add(Size);
         c.Add(Exponent);
-        foreach (ulong i in GetLimbData())
+        foreach (CULong i in GetLimbData())
         {
             c.Add(i);
         }

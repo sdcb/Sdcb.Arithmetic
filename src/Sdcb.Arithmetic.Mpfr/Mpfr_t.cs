@@ -15,7 +15,7 @@ internal record struct Mpfr_t
 
     private readonly int LimbCount => (int)((Precision.Value - 1) / (IntPtr.Size * 8) + 1);
 
-    private readonly unsafe Span<ulong> GetLimbData() => new((ulong*)Limbs, LimbCount);
+    private readonly unsafe Span<CULong> GetLimbData() => new((ulong*)Limbs, LimbCount);
 
     public override readonly int GetHashCode()
     {
@@ -23,7 +23,7 @@ internal record struct Mpfr_t
         c.Add(Precision);
         c.Add(Sign);
         c.Add(Exponent);
-        foreach (ulong i in GetLimbData())
+        foreach (CULong i in GetLimbData())
         {
             c.Add(i);
         }
