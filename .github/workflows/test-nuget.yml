@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  CUSTOM_NUGET_REGISTRY: true
+  CUSTOM_NUGET_REGISTRY: false
   NUGET_REGISTRY: https://proget.starworks.cc:88/nuget/test/v3/index.json
   GMP_NUGET_VERSION: 6.3.0
   MPFR_NUGET_VERSION: 4.2.1
