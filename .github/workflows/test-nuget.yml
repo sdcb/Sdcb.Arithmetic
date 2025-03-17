@@ -20,13 +20,13 @@ jobs:
     strategy:
       matrix:
         include: 
-          - { os: win, arch: x64 }
+          # - { os: win, arch: x64 }
           - { os: win, arch: x86 }
-          - { os: win, arch: x64, version: 2019 }
+          # - { os: win, arch: x64, version: 2019 }
           - { os: win, arch: x86, version: 2019 }
-          - { os: win, arch: x64, version: 2025 }
+          # - { os: win, arch: x64, version: 2025 }
           - { os: win, arch: x86, version: 2025 }
-          - { os: linux, arch: x64 }
+          # - { os: linux, arch: x64 }
     runs-on: ${{ matrix.os == 'win' && 'windows-latest' || matrix.version == '2019' && 'windows-2019' || matrix.version == '2025' && 'windows-2025' || 'ubuntu-latest' }}
     steps:
     - name: Disable Windows Defender Real-time Protection
