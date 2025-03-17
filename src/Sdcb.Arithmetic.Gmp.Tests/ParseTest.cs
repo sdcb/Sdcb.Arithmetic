@@ -10,7 +10,7 @@ public class ParseTest
         var random = new Random();
         int maxLength = 10000;
         GmpFloat.DefaultPrecision = (uint)Math.Ceiling(Math.Log2(10) * maxLength);
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 1000; i++)
         {
             int length = random.Next(1, maxLength);
             var sb = new StringBuilder();
@@ -31,7 +31,7 @@ public class ParseTest
     public void Parse100RandomNumbers_GmpInteger()
     {
         var random = new Random();
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 1000; i++)
         {
             int length = random.Next(1, 10000);
             var sb = new StringBuilder();

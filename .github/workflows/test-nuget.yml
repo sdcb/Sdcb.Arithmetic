@@ -46,11 +46,11 @@ jobs:
     - name: DotNet Build for GMP
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
-        dotnet build -c Release --runtime ${{ matrix.os }}-${{ matrix.arch }}
+        dotnet build -c Debug --runtime ${{ matrix.os }}-${{ matrix.arch }}
     - name: Test GMP
       run: |
         cd src/Sdcb.Arithmetic.Gmp.Tests
-        dotnet test -c Release --no-build --runtime ${{ matrix.os }}-${{ matrix.arch }}
+        dotnet test -c Debug --no-build --runtime ${{ matrix.os }}-${{ matrix.arch }}
     # MPFR
     - name: Download MPFR Native NuGet
       run: |
