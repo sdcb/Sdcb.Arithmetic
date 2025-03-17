@@ -22,6 +22,7 @@ jobs:
           - { os: win, arch: x64 }
           - { os: win, arch: x86 }
           - { os: linux, arch: x64 }
+          - { os: linux, arch: x86 }
     runs-on: ${{ matrix.os == 'win' && 'windows-latest' || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v4
