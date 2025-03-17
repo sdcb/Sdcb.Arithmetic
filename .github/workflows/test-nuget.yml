@@ -27,6 +27,10 @@ jobs:
           - { os: linux, arch: x64 }
     runs-on: ${{ matrix.os == 'win' && 'windows-latest' || matrix.version == '2019' && 'windows-2019' || 'ubuntu-latest' }}
     steps:
+    - name: Disable Windows Defender Real-time Protection
+      if: matrix.os == 'win'
+      run: Set-MpPreference -DisableRealtimeMonitoring $true
+      shell: powershell
     - uses: actions/checkout@v4
     # GMP
     - name: Configure NuGet Source
