@@ -5,11 +5,11 @@ on:
     branches:
       - master
     paths:
-      - .github/workflows/test-nuget.yml
       - src/**
   workflow_dispatch:
 
 env:
+  CUSTOM_NUGET_REGISTRY: true
   NUGET_REGISTRY: https://proget.starworks.cc:88/nuget/test/v3/index.json
   GMP_NUGET_VERSION: 6.3.0
   MPFR_NUGET_VERSION: 4.2.1
@@ -29,6 +29,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Configure NuGet Source
+      if: ${{ env.CUSTOM_NUGET_REGISTRY }}
       run: dotnet nuget add source ${{ env.NUGET_REGISTRY }} --name ProGet
 
     - name: Download GMP Native NuGet
@@ -59,6 +60,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Configure NuGet Source
+      if: ${{ env.CUSTOM_NUGET_REGISTRY }}
       run: dotnet nuget add source ${{ env.NUGET_REGISTRY }} --name ProGet
     - name: Download MPFR Native NuGet
       run: |
@@ -88,6 +90,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Configure NuGet Source
+      if: ${{ env.CUSTOM_NUGET_REGISTRY }}
       run: dotnet nuget add source ${{ env.NUGET_REGISTRY }} --name ProGet
     - name: Download MPFR Native NuGet
       run: |
