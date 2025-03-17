@@ -22,8 +22,8 @@ jobs:
           - { os: win, arch: x64 }
           - { os: win, arch: x86 }
           - { os: linux, arch: x64 }
-          - { os: linux, arch: x86 }
-    runs-on: ${{ matrix.os == 'win' && 'windows-latest' || 'ubuntu-latest' }}
+          - { os: linux, arch: arm64 }
+    runs-on: ${{ matrix.os == 'win' && 'windows-latest' || matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v4
     # GMP
