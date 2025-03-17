@@ -344,7 +344,7 @@ public class GmpInteger : IDisposable, IComparable, IComparable<GmpInteger>, IEq
             if (ret != 0)
             {
                 GmpLib.__gmpz_clear((IntPtr)(&raw));
-                throw new FormatException($"Failed to parse {val}, base={valBase} to {nameof(GmpInteger)}, __gmpf_init_set_str returns {ret}");
+                throw new FormatException($"Failed to parse {val}, base={valBase} to {nameof(GmpInteger)}, {nameof(GmpLib.__gmpz_init_set_str)} returns {ret}");
             }
         }
         return new GmpInteger(raw);

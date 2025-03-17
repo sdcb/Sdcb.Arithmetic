@@ -239,7 +239,7 @@ public class GmpFloat : IDisposable, IFormattable, IEquatable<GmpFloat>, ICompar
             if (ret != 0)
             {
                 GmpLib.__gmpf_clear((IntPtr)ptr);
-                throw new FormatException($"Failed to parse {val}, base={@base} to BigFloat, __gmpf_init_set_str returns {ret}");
+                throw new FormatException($"Failed to parse {val}, base={@base} to {nameof(GmpFloat)}, {nameof(GmpLib.__gmpf_init_set_str)} returns {ret}");
             }
         }
         return new GmpFloat(raw);
