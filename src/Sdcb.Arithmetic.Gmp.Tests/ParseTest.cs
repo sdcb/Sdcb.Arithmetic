@@ -8,9 +8,11 @@ public class ParseTest
     public void Parse100RandomNumbers_GmpFloat()
     {
         var random = new Random();
+        int maxLength = 100;
+        GmpFloat.DefaultPrecision = (uint)Math.Ceiling(Math.Log2(10) * maxLength);
         for (int i = 0; i < 100; i++)
         {
-            int length = random.Next(1, 100);
+            int length = random.Next(1, maxLength);
             var sb = new StringBuilder();
             sb.Append(random.Next(1, 10));
             for (int j = 1; j < length; j++)
