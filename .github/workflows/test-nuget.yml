@@ -10,8 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  CUSTOM_NUGET_REGISTRY: false
-  NUGET_REGISTRY: https://proget.starworks.cc:88/nuget/test/v3/index.json
+  # NUGET_REGISTRY: https://proget.starworks.cc:88/nuget/test/v3/index.json
   GMP_NUGET_VERSION: 6.3.0
   MPFR_NUGET_VERSION: 4.2.1
   
@@ -29,9 +28,8 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     steps:
     - uses: actions/checkout@v4
-    - name: Configure NuGet Source
-      if: ${{ env.CUSTOM_NUGET_REGISTRY }}
-      run: dotnet nuget add source ${{ env.NUGET_REGISTRY }} --name ProGet
+    # - name: Configure NuGet Source
+    #   run: dotnet nuget add source ${{ env.NUGET_REGISTRY }} --name ProGet
 
     - name: Download GMP Native NuGet
       run: |
@@ -60,9 +58,8 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     steps:
     - uses: actions/checkout@v4
-    - name: Configure NuGet Source
-      if: ${{ env.CUSTOM_NUGET_REGISTRY }}
-      run: dotnet nuget add source ${{ env.NUGET_REGISTRY }} --name ProGet
+    # - name: Configure NuGet Source
+    #   run: dotnet nuget add source ${{ env.NUGET_REGISTRY }} --name ProGet
     - name: Download MPFR Native NuGet
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
@@ -90,9 +87,8 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     steps:
     - uses: actions/checkout@v4
-    - name: Configure NuGet Source
-      if: ${{ env.CUSTOM_NUGET_REGISTRY }}
-      run: dotnet nuget add source ${{ env.NUGET_REGISTRY }} --name ProGet
+    # - name: Configure NuGet Source
+    #   run: dotnet nuget add source ${{ env.NUGET_REGISTRY }} --name ProGet
     - name: Download MPFR Native NuGet
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
