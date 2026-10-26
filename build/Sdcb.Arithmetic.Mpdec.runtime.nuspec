@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Packed by .github/workflows/mpdec.yml:
+    nuget pack Sdcb.Arithmetic.Mpdec.runtime.nuspec -Version <version> -Properties "rid=<rid>;bin=<native dir>;license=<COPYRIGHT.txt>"
+-->
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>Sdcb.Arithmetic.Mpdec.runtime.$rid$</id>
+        <version>$version$</version>
+        <title>libmpdec native runtime for $rid$</title>
+        <authors>sdcb</authors>
+        <license type="expression">BSD-2-Clause</license>
+        <projectUrl>https://github.com/sdcb/Sdcb.Arithmetic</projectUrl>
+        <icon>images\icon.png</icon>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Native libmpdec and libmpdec++ (mpdecimal $version$, https://www.bytereef.org/mpdecimal/) shared libraries for $rid$. No managed bindings are included; use P/Invoke against the C API directly. Intended as a correctness oracle and performance reference for arbitrary-precision decimal arithmetic.</description>
+        <summary>Native libmpdec/libmpdec++ $version$ shared libraries for $rid$.</summary>
+        <releaseNotes></releaseNotes>
+        <copyright>libmpdec: Copyright (c) 2008-2025 Stefan Krah. Packaging: Copyright (c) sdcb</copyright>
+        <tags>mpdecimal;libmpdec;decimal;BigDecimal;General-Decimal-Arithmetic;arbitrary-precision;multi-precision;arithmetic;native</tags>
+        <repository type="git" url="https://github.com/sdcb/Sdcb.Arithmetic.git" />
+    </metadata>
+    <files>
+        <file src="$bin$\*" target="runtimes\$rid$\native" />
+        <file src="Sdcb.Arithmetic.Mpdec.runtime.props" target="build\net\Sdcb.Arithmetic.Mpdec.runtime.$rid$.props" />
+        <file src="Sdcb.Arithmetic.Mpdec.runtime.props" target="build\netstandard\Sdcb.Arithmetic.Mpdec.runtime.$rid$.props" />
+        <file src="Sdcb.Arithmetic.Mpdec.runtime.props" target="build\netcoreapp\Sdcb.Arithmetic.Mpdec.runtime.$rid$.props" />
+        <file src="Sdcb.Arithmetic.Mpdec.png" target="images\icon.png" />
+        <file src="$license$" target="LICENSE.txt" />
+    </files>
+</package>
