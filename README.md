@@ -67,7 +67,7 @@ Native-only runtime packages of [libmpdec/libmpdec++](https://www.bytereef.org/m
 | Package Id                                | Version                                                                                                    | License      | Notes                      |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------ | -------------------------- |
 | Sdcb.Arithmetic.Mpdec.runtime.win-x64     | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpdec.runtime.win-x64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpdec.runtime.win-x64) | BSD-2-Clause | native lib in Windows x64 (MSVC) |
-| Sdcb.Arithmetic.Mpdec.runtime.linux-x64   | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpdec.runtime.linux-x64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpdec.runtime.linux-x64) | BSD-2-Clause | native lib in Linux x64 (glibc 2.35+) |
+| Sdcb.Arithmetic.Mpdec.runtime.linux-x64   | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpdec.runtime.linux-x64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpdec.runtime.linux-x64) | BSD-2-Clause | native lib in Linux x64 (glibc 2.14+, libmpdec++ needs 2.32+) |
 
 | OS      | libmpdec           | libmpdec++           |
 | ------- | ------------------ | -------------------- |
