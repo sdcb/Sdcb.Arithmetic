@@ -23,6 +23,7 @@ static ProjectVersion[] Projects = new[]
 {
 	new ProjectVersion("Sdcb.Arithmetic.Gmp", "6.3.0"), 
 	new ProjectVersion("Sdcb.Arithmetic.Mpfr", "4.2.1"), 
+	new ProjectVersion("Sdcb.Arithmetic.Mpdec", "4.0.1"), 
 };
 
 static async Task DownloadFile(Uri uri, string localFile, CancellationToken cancellationToken = default)

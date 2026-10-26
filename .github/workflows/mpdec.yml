@@ -1,4 +1,4 @@
-name: Build libmpdec runtime NuGet
+name: Build libmpdec NuGet
 
 on:
   push:
@@ -6,8 +6,9 @@ on:
       - .github/workflows/mpdec.yml
       - .github/workflows/mpdec_smoke.c
       - .github/workflows/mpdec_smoke.cpp
-      - .github/mpdec-dotnet-test/**
       - build/Sdcb.Arithmetic.Mpdec.*
+      - src/Sdcb.Arithmetic.Mpdec/**
+      - src/Sdcb.Arithmetic.Mpdec.Tests/**
   workflow_dispatch:
     inputs:
       mpdec-version:
@@ -175,6 +176,8 @@ jobs:
               -OutputDirectory $out -NoDefaultExcludes
             if ($LASTEXITCODE -ne 0) { throw "nuget pack failed for $rid" }
           }
+          dotnet pack src/Sdcb.Arithmetic.Mpdec/Sdcb.Arithmetic.Mpdec.csproj -c Release -o $out
+          if ($LASTEXITCODE -ne 0) { throw "dotnet pack failed" }
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           Get-ChildItem $out/*.nupkg | ForEach-Object {
             Write-Host "== $($_.Name) ($([math]::Round($_.Length / 1KB)) KB)"
@@ -184,7 +187,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: nupkgs
-          path: nupkgs/*.nupkg
+          path: |
+            nupkgs/*.nupkg
+            nupkgs/*.snupkg
 
   test-nuget:
     needs: pack
@@ -203,15 +208,16 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
+          # Sdcb.Arithmetic.Mpdec.Tests picks up build/nupkgs as an extra restore source.
           name: nupkgs
-          path: nupkgs
+          path: build/nupkgs
 
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
-      - name: Run .NET P/Invoke smoke test
-        shell: pwsh
-        run: |
-          dotnet run --project .github/mpdec-dotnet-test -c Release `
-            -p:MpdecRid=${{ matrix.rid }} -p:MpdecVersion=$env:MPDEC_VERSION "-p:MpdecSource=$(Join-Path $PWD nupkgs)"
+      - name: Test Sdcb.Arithmetic.Mpdec against the freshly built runtime package
+        run: >
+          dotnet test src/Sdcb.Arithmetic.Mpdec.Tests -c Release
+          -p:MpdecRid=${{ matrix.rid }} -p:MpdecRuntimeVersion=${{ env.MPDEC_VERSION }}
+          --logger "console;verbosity=normal"

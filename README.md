@@ -62,10 +62,11 @@ Update: This library also tested and works good in Loongarch64(龙芯)
 
 ### libmpdec (mpdecimal)
 
-Native-only runtime packages of [libmpdec/libmpdec++](https://www.bytereef.org/mpdecimal/) (the engine behind CPython's `decimal`). There is **no** managed binding; they exist as a correctness oracle and performance reference for [sdcb/Arithmetic](https://github.com/sdcb/Arithmetic) — call the C API via P/Invoke directly. Built by [mpdec.yml](.github/workflows/mpdec.yml).
+[libmpdec/libmpdec++](https://www.bytereef.org/mpdecimal/) is the engine behind CPython's `decimal`. `Sdcb.Arithmetic.Mpdec` is a **raw, low-level** P/Invoke binding (names and signatures map 1:1 to `mpdecimal.h`, no high-level API), mainly used as a correctness oracle and performance reference for [sdcb/Arithmetic](https://github.com/sdcb/Arithmetic). Built by [mpdec.yml](.github/workflows/mpdec.yml).
 
 | Package Id                                | Version                                                                                                    | License      | Notes                      |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------ | -------------------------- |
+| Sdcb.Arithmetic.Mpdec                     | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpdec.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpdec) | MIT          | raw .NET binding for `libmpdec` |
 | Sdcb.Arithmetic.Mpdec.runtime.win-x64     | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpdec.runtime.win-x64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpdec.runtime.win-x64) | BSD-2-Clause | native lib in Windows x64 (MSVC) |
 | Sdcb.Arithmetic.Mpdec.runtime.linux-x64   | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpdec.runtime.linux-x64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpdec.runtime.linux-x64) | BSD-2-Clause | native lib in Linux x64 (glibc 2.14+, libmpdec++ needs 2.32+) |
 
@@ -74,7 +75,33 @@ Native-only runtime packages of [libmpdec/libmpdec++](https://www.bytereef.org/m
 | Windows | libmpdec-4.0.1.dll | libmpdec++-4.0.1.dll |
 | Linux   | libmpdec.so.4      | libmpdec++.so.4      |
 
-On Windows `libmpdec-4.0.1.dll` links the CRT statically (no VC++ redistributable needed); `libmpdec++-4.0.1.dll` uses the upstream `/MD` build and needs the VC++ 2015-2022 redistributable. A minimal P/Invoke example is in [.github/mpdec-dotnet-test/Program.cs](.github/mpdec-dotnet-test/Program.cs).
+On Windows `libmpdec-4.0.1.dll` links the CRT statically (no VC++ redistributable needed); `libmpdec++-4.0.1.dll` uses the upstream `/MD` build and needs the VC++ 2015-2022 redistributable.
+
+```csharp
+// Install NuGet packages: Sdcb.Arithmetic.Mpdec, Sdcb.Arithmetic.Mpdec.runtime.win-x64 (or linux-x64)
+using System.Runtime.InteropServices;
+using static Sdcb.Arithmetic.Mpdec.MpdecLib;
+
+unsafe
+{
+    mpd_context_t ctx;
+    mpd_maxcontext(&ctx);
+    ctx.prec = 50;
+
+    mpd_t* a = mpd_qnew(), b = mpd_qnew(), r = mpd_qnew();
+    uint status = 0;
+    mpd_qset_i64(a, 1, &ctx, &status);
+    mpd_qset_i64(b, 7, &ctx, &status);
+    mpd_qdiv(r, a, b, &ctx, &status);
+
+    byte* s = mpd_to_sci(r, 1);
+    Console.WriteLine(Marshal.PtrToStringUTF8((nint)s)); // 0.14285714285714285714285714285714285714285714285714
+    mpd_free(s);
+    mpd_del(a); mpd_del(b); mpd_del(r);
+}
+```
+
+Prefer the quiet `mpd_q*` functions: the signalling ones call `mpd_traphandler`, whose default raises `SIGFPE` and kills the process (replace it via `MpdecLib.mpd_traphandler` if needed).
 
 ### Native dynamic library name mapping
 

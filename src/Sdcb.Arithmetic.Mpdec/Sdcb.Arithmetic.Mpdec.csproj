@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6</TargetFrameworks>
+    <LangVersion>12</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <Version>4.0.1</Version>
+    <PackageIcon>Sdcb.Arithmetic.Mpdec.png</PackageIcon>
+    <Authors>sdcb</Authors>
+    <Description>Raw low-level P/Invoke binding for libmpdec (mpdecimal), the arbitrary-precision decimal arithmetic library behind CPython's decimal module. Names map 1:1 to mpdecimal.h; native libraries come from Sdcb.Arithmetic.Mpdec.runtime.* packages.</Description>
+    <PackageProjectUrl>https://github.com/sdcb/Sdcb.Arithmetic</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/sdcb/Sdcb.Arithmetic.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>mpdecimal;libmpdec;decimal;BigDecimal;General-Decimal-Arithmetic;arbitrary-precision;multi-precision;arithmetic;pinvoke</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\build\Sdcb.Arithmetic.Mpdec.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

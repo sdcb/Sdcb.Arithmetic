@@ -13,6 +13,7 @@ env:
   # NUGET_REGISTRY: https://proget.starworks.cc:88/nuget/test/v3/index.json
   GMP_NUGET_VERSION: 6.3.0
   MPFR_NUGET_VERSION: 4.2.1
+  MPDEC_NUGET_VERSION: 4.0.1
   
 jobs:
   gmp:
@@ -102,3 +103,17 @@ jobs:
       run: |
         cd src/Sdcb.Arithmetic.Mpfr.Tests
         dotnet test -c Release --no-build --runtime ${{ matrix.os }}-${{ matrix.arch }}
+
+  mpdec:
+    strategy:
+      matrix:
+        include: 
+          - { os: win, arch: x64, runs-on: 'windows-latest' }
+          - { os: linux, arch: x64, runs-on: 'ubuntu-latest' }
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Test Mpdec (Sdcb.Arithmetic.Mpdec.runtime.${{ matrix.os }}-${{ matrix.arch }} from NuGet)
+      run: |
+        cd src/Sdcb.Arithmetic.Mpdec.Tests
+        dotnet test -c Release -p:MpdecRid=${{ matrix.os }}-${{ matrix.arch }} -p:MpdecRuntimeVersion=${{ env.MPDEC_NUGET_VERSION }}
