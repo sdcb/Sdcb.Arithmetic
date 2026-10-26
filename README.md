@@ -60,6 +60,22 @@ Update: This library also tested and works good in Loongarch64(龙芯)
 | Sdcb.Arithmetic.Mpfr.runtime.android-x86     | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpfr.runtime.android-x86.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpfr.runtime.android-x86) | LGPL    | native lib in Android x86  |
 | Sdcb.Arithmetic.Mpfr.runtime.android-x64     | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpfr.runtime.android-x64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpfr.runtime.android-x64) | LGPL    | native lib in Android x64  |
 
+### libmpdec (mpdecimal)
+
+Native-only runtime packages of [libmpdec/libmpdec++](https://www.bytereef.org/mpdecimal/) (the engine behind CPython's `decimal`). There is **no** managed binding; they exist as a correctness oracle and performance reference for [sdcb/Arithmetic](https://github.com/sdcb/Arithmetic) — call the C API via P/Invoke directly. Built by [mpdec.yml](.github/workflows/mpdec.yml).
+
+| Package Id                                | Version                                                                                                    | License      | Notes                      |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------ | -------------------------- |
+| Sdcb.Arithmetic.Mpdec.runtime.win-x64     | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpdec.runtime.win-x64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpdec.runtime.win-x64) | BSD-2-Clause | native lib in Windows x64 (MSVC) |
+| Sdcb.Arithmetic.Mpdec.runtime.linux-x64   | [![NuGet](https://img.shields.io/nuget/v/Sdcb.Arithmetic.Mpdec.runtime.linux-x64.svg)](https://nuget.org/packages/Sdcb.Arithmetic.Mpdec.runtime.linux-x64) | BSD-2-Clause | native lib in Linux x64 (glibc 2.35+) |
+
+| OS      | libmpdec           | libmpdec++           |
+| ------- | ------------------ | -------------------- |
+| Windows | libmpdec-4.0.1.dll | libmpdec++-4.0.1.dll |
+| Linux   | libmpdec.so.4      | libmpdec++.so.4      |
+
+On Windows `libmpdec-4.0.1.dll` links the CRT statically (no VC++ redistributable needed); `libmpdec++-4.0.1.dll` uses the upstream `/MD` build and needs the VC++ 2015-2022 redistributable. A minimal P/Invoke example is in [.github/mpdec-dotnet-test/Program.cs](.github/mpdec-dotnet-test/Program.cs).
+
 ### Native dynamic library name mapping
 
 Defined in `GmpNativeLoader.cs` and `MpfrNativeLoader.cs`

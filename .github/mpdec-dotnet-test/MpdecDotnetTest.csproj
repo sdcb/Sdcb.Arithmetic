@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <SelfContained>false</SelfContained>
+    <!-- Usage: dotnet run -p:MpdecRid=linux-x64 -p:MpdecSource=<folder containing the .nupkg files> -->
+    <MpdecRid Condition="'$(MpdecRid)' == ''">win-x64</MpdecRid>
+    <MpdecVersion Condition="'$(MpdecVersion)' == ''">4.0.1</MpdecVersion>
+    <RuntimeIdentifier>$(MpdecRid)</RuntimeIdentifier>
+    <RestoreAdditionalProjectSources>$(MpdecSource)</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Sdcb.Arithmetic.Mpdec.runtime.$(MpdecRid)" Version="$(MpdecVersion)" />
+  </ItemGroup>
+
+</Project>

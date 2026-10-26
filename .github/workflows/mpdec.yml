@@ -1,0 +1,217 @@
+name: Build libmpdec runtime NuGet
+
+on:
+  push:
+    paths:
+      - .github/workflows/mpdec.yml
+      - .github/workflows/mpdec_smoke.c
+      - .github/workflows/mpdec_smoke.cpp
+      - .github/mpdec-dotnet-test/**
+      - build/Sdcb.Arithmetic.Mpdec.*
+  workflow_dispatch:
+    inputs:
+      mpdec-version:
+        description: 'mpdecimal version'
+        type: string
+        required: false
+        default: '4.0.1'
+      mpdec-sha256:
+        description: 'sha256 of mpdecimal-<version>.tar.gz'
+        type: string
+        required: false
+        default: '96d33abb4bb0070c7be0fed4246cd38416188325f820468214471938545b1ac8'
+
+env:
+  MPDEC_VERSION: ${{ github.event.inputs.mpdec-version || '4.0.1' }}
+  MPDEC_SHA256: ${{ github.event.inputs.mpdec-sha256 || '96d33abb4bb0070c7be0fed4246cd38416188325f820468214471938545b1ac8' }}
+
+jobs:
+  build-linux-x64:
+    # Oldest available runner image -> lowest glibc requirement for the produced .so files.
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Download mpdecimal source
+        run: |
+          wget -nv https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-${MPDEC_VERSION}.tar.gz
+          echo "${MPDEC_SHA256}  mpdecimal-${MPDEC_VERSION}.tar.gz" | sha256sum -c -
+          tar -xzf mpdecimal-${MPDEC_VERSION}.tar.gz
+
+      - name: Configure & build
+        run: |
+          cd mpdecimal-${MPDEC_VERSION}
+          ./configure
+          make -j"$(nproc)"
+
+      - name: Run upstream short tests
+        run: |
+          cd mpdecimal-${MPDEC_VERSION}
+          make check_local
+
+      - name: Collect & strip
+        run: |
+          mkdir -p artifacts/bin artifacts/include
+          cp -L mpdecimal-${MPDEC_VERSION}/libmpdec/libmpdec.so.4 artifacts/bin/
+          cp -L mpdecimal-${MPDEC_VERSION}/libmpdec++/libmpdec++.so.4 artifacts/bin/
+          cp mpdecimal-${MPDEC_VERSION}/libmpdec/mpdecimal.h artifacts/include/
+          cp mpdecimal-${MPDEC_VERSION}/libmpdec++/decimal.hh artifacts/include/
+          cp mpdecimal-${MPDEC_VERSION}/COPYRIGHT.txt artifacts/
+          strip --strip-unneeded artifacts/bin/*.so.4
+          # RUNPATH=$ORIGIN lets libmpdec++.so.4 find libmpdec.so.4 next to it (runtimes/linux-x64/native or the app folder).
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends patchelf
+          patchelf --set-rpath '$ORIGIN' artifacts/bin/libmpdec++.so.4
+          objdump -x artifacts/bin/libmpdec++.so.4 | grep -E 'R(UN)?PATH +\$ORIGIN$'
+          for f in artifacts/bin/*.so.4; do
+            file "$f"
+            objdump -x "$f" | grep -E 'NEEDED|SONAME|RUNPATH|RPATH'
+            echo "max GLIBC: $(objdump -T "$f" | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1)"
+          done
+          ls -l artifacts/bin
+
+      - name: Smoke test (C / C++)
+        run: |
+          gcc -O2 -o smoke_c .github/workflows/mpdec_smoke.c -Iartifacts/include -Lartifacts/bin -l:libmpdec.so.4
+          g++ -O2 -std=c++17 -o smoke_cpp .github/workflows/mpdec_smoke.cpp -Iartifacts/include -Lartifacts/bin -l:libmpdec++.so.4 -l:libmpdec.so.4
+          LD_LIBRARY_PATH=artifacts/bin ./smoke_c
+          LD_LIBRARY_PATH=artifacts/bin ./smoke_cpp
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mpdec-linux-x64
+          path: artifacts
+
+  build-win-x64:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Download mpdecimal source
+        shell: pwsh
+        run: |
+          $tgz = "mpdecimal-$env:MPDEC_VERSION.tar.gz"
+          Invoke-WebRequest "https://www.bytereef.org/software/mpdecimal/releases/$tgz" -OutFile $tgz
+          $hash = (Get-FileHash $tgz -Algorithm SHA256).Hash
+          if ($hash -ne $env:MPDEC_SHA256) { throw "sha256 mismatch: $hash" }
+          tar -xzf $tgz
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Build libmpdec (MSVC, static CRT)
+        shell: cmd
+        run: |
+          cd mpdecimal-%MPDEC_VERSION%\libmpdec
+          copy /y Makefile.vc Makefile
+          rem /MT: statically link the CRT so the C library has no VC++ redistributable dependency (only KERNEL32.dll).
+          nmake MACHINE=x64 "OPT_SHARED=/MT /O2 /GS /EHsc /DNDEBUG" libmpdec-%MPDEC_VERSION%.dll
+
+      - name: Build libmpdec++ (MSVC, /MD)
+        shell: cmd
+        run: |
+          cd mpdecimal-%MPDEC_VERSION%\libmpdec++
+          copy /y Makefile.vc Makefile
+          rem decimal.hh only exports getcontext() when _DLL (/MD) is defined, so libmpdec++ keeps the upstream /MD build.
+          nmake libmpdec++-%MPDEC_VERSION%.dll
+
+      - name: Collect
+        shell: pwsh
+        run: |
+          $src = "mpdecimal-$env:MPDEC_VERSION"
+          New-Item -ItemType Directory -Force artifacts/bin, artifacts/include, artifacts/lib | Out-Null
+          Copy-Item "$src/libmpdec/libmpdec-$env:MPDEC_VERSION.dll" artifacts/bin/
+          Copy-Item "$src/libmpdec++/libmpdec++-$env:MPDEC_VERSION.dll" artifacts/bin/
+          Copy-Item "$src/libmpdec/libmpdec-$env:MPDEC_VERSION.dll.lib" artifacts/lib/
+          Copy-Item "$src/libmpdec++/libmpdec++-$env:MPDEC_VERSION.dll.lib" artifacts/lib/
+          Copy-Item "$src/libmpdec/mpdecimal.h" artifacts/include/
+          Copy-Item "$src/libmpdec++/decimal.hh" artifacts/include/
+          Copy-Item "$src/COPYRIGHT.txt" artifacts/
+          dumpbin /nologo /dependents artifacts/bin/*.dll
+          Get-ChildItem artifacts/bin
+
+      - name: Smoke test (C / C++)
+        shell: cmd
+        run: |
+          mkdir smoke
+          cl /nologo /O2 /MD /Iartifacts\include .github\workflows\mpdec_smoke.c /Fesmoke\smoke_c.exe /Fosmoke\ artifacts\lib\libmpdec-%MPDEC_VERSION%.dll.lib || exit /b 1
+          cl /nologo /O2 /MD /EHsc /std:c++17 /Iartifacts\include .github\workflows\mpdec_smoke.cpp /Fesmoke\smoke_cpp.exe /Fosmoke\ artifacts\lib\libmpdec++-%MPDEC_VERSION%.dll.lib artifacts\lib\libmpdec-%MPDEC_VERSION%.dll.lib || exit /b 1
+          xcopy /y artifacts\bin\*.dll smoke\ || exit /b 1
+          smoke\smoke_c.exe || exit /b 1
+          smoke\smoke_cpp.exe || exit /b 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mpdec-win-x64
+          path: artifacts
+
+  pack:
+    needs: [build-linux-x64, build-win-x64]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: mpdec-*
+          path: native
+
+      - uses: NuGet/setup-nuget@v2
+
+      - name: Pack
+        shell: pwsh
+        run: |
+          $out = Join-Path $PWD nupkgs
+          foreach ($rid in 'win-x64', 'linux-x64') {
+            $dir = Join-Path $PWD "native/mpdec-$rid"
+            nuget pack build/Sdcb.Arithmetic.Mpdec.runtime.nuspec -Version $env:MPDEC_VERSION `
+              -Properties "rid=$rid;bin=$dir\bin;license=$dir\COPYRIGHT.txt" `
+              -OutputDirectory $out -NoDefaultExcludes
+            if ($LASTEXITCODE -ne 0) { throw "nuget pack failed for $rid" }
+          }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          Get-ChildItem $out/*.nupkg | ForEach-Object {
+            Write-Host "== $($_.Name) ($([math]::Round($_.Length / 1KB)) KB)"
+            [IO.Compression.ZipFile]::OpenRead($_.FullName).Entries | ForEach-Object { "   $($_.FullName)" }
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nupkgs
+          path: nupkgs/*.nupkg
+
+  test-nuget:
+    needs: pack
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { rid: win-x64,   runs-on: windows-latest }
+          - { rid: linux-x64, runs-on: ubuntu-22.04 }
+          - { rid: linux-x64, runs-on: ubuntu-latest }
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: nupkgs
+          path: nupkgs
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Run .NET P/Invoke smoke test
+        shell: pwsh
+        run: |
+          dotnet run --project .github/mpdec-dotnet-test -c Release `
+            -p:MpdecRid=${{ matrix.rid }} -p:MpdecVersion=$env:MPDEC_VERSION "-p:MpdecSource=$(Join-Path $PWD nupkgs)"
